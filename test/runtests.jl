@@ -1,10 +1,9 @@
-module TestStructure
+module TestBioStructures
 
 using Base.Test
-
-using Bio.Structure
-using TestFunctions.get_bio_fmt_specimens
-using Bio.Structure:
+using BioCore
+using BioStructures
+using BioStructures:
     fixlists!,
     parseserial,
     parseatomname,
@@ -23,12 +22,10 @@ using Bio.Structure:
     spacestring
 
 
-get_bio_fmt_specimens()
+fmtdir = BioCore.Testing.get_bio_fmt_specimens()
 
 # Access a PDB file in BioFmtSpecimens
-function pdbfilepath(filename::AbstractString)
-    return joinpath(dirname(@__FILE__), "..", "BioFmtSpecimens", "PDB", filename)
-end
+pdbfilepath(filename::AbstractString) = joinpath(fmtdir, "PDB", filename)
 
 @testset "PDB Handling" begin
     @test length(pdbentrylist()) > 100000
@@ -1597,4 +1594,4 @@ end
     ]
 end
 
-end # TestStructure
+end # TestBioStructures

@@ -19,13 +19,12 @@ export
     pdbline,
     writepdb
 
-using Libz
 
 "Protein Data Bank (PDB) file formats."
-immutable PDB <: Bio.IO.FileFormat end
-immutable PDBXML <: Bio.IO.FileFormat end
-immutable MMCIF <: Bio.IO.FileFormat end
-immutable MMTF <: Bio.IO.FileFormat end
+immutable PDB <: BioCore.IO.FileFormat end
+immutable PDBXML <: BioCore.IO.FileFormat end
+immutable MMCIF <: BioCore.IO.FileFormat end
+immutable MMTF <: BioCore.IO.FileFormat end
 
 # A Dict mapping the type to their file extensions
 const pdbextension = Dict{Type,String}( PDB => ".pdb", PDBXML => ".xml", MMCIF => ".cif", MMTF => ".mmtf")

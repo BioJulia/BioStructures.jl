@@ -1460,13 +1460,13 @@ end
 
 # Residues are ordered in a chain with all hetero residues at the end
 # For obtaining sequence we will re-order them numerically
-function Bio.Seq.AminoAcidSequence(ch::Chain, residue_selectors::Function...)
-    return Bio.Seq.AminoAcidSequence(
+function AminoAcidSequence(ch::Chain, residue_selectors::Function...)
+    return AminoAcidSequence(
         sort(collectresidues(ch, residue_selectors...), by=resnumber))
 end
 
-function Bio.Seq.AminoAcidSequence{T <: AbstractResidue}(res::Vector{T})
-    seq = Bio.Seq.AminoAcid[]
+function AminoAcidSequence{T <: AbstractResidue}(res::Vector{T})
+    seq = BioSymbols.AminoAcid[]
     for i in 1:length(res)
         if haskey(BioSymbols.threeletter_to_aa, resname(res[i]))
             push!(seq, BioSymbols.threeletter_to_aa[resname(res[i])])
@@ -1477,7 +1477,7 @@ function Bio.Seq.AminoAcidSequence{T <: AbstractResidue}(res::Vector{T})
             append!(seq, [BioSymbols.AA_Gap for _ in 1:(resnumber(res[i+1]) - resnumber(res[i]) - 1)])
         end
     end
-    return Bio.Seq.AminoAcidSequence(seq)
+    return AminoAcidSequence(seq)
 end
 
 
