@@ -1,0 +1,41 @@
+# Project information
+site_name: BioStructures.jl
+site_description: A julia package to read, write and manipulate macromolecular structures
+site_author: The BioJulia Organisation
+site_url: https://biojulia.github.io/BioStructures.jl/
+
+# Repository
+repo_url:  https://github.com/BioJulia/BioStructures.jl
+
+# Copyright
+copyright: Copyright (c) 2017 The BioJulia Organisation
+
+# Documentation and theme
+theme: material
+docs_dir: 'build'
+
+# Options
+extra:
+  author:
+    github: BioJulia
+
+extra_css:
+  - assets/Documenter.css
+
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML
+  - assets/mathjaxhelper.js
+
+# Extensions
+markdown_extensions:
+  - extra
+  - tables
+  - fenced_code
+  - codehilite
+  - def_list
+
+# Page tree
+pages:
+- Home: index.md
+- Documentation: documentation.md
+- Contributing: contributing.md
