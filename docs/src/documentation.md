@@ -273,14 +273,12 @@ Various options can be set through optional keyword arguments when parsing a PDB
 
 | Keyword Argument                             | Description                                                                     |
 | :------------------------------------------- | :------------------------------------------------------------------------------ |
-| `structure_name::AbstractString="$pdbid.pdb"`| The name of the PDB Structure read. Defaults to "< PDBID >.pdb"                 |
+| `structure_name::AbstractString`             | The name of the PDB Structure read. Defaults to the given filename              |
 | `remove_disorder::Bool=false`                | If set true, then disordered atoms wont be parsed                               |
 | `read_std_atoms::Bool=true`                  | If set false, then standard ATOM records wont be parsed                         |
 | `read_het_atoms::Bool=true`                  | If set false, then HETATOM records wont be parsed                               |
 
-To parse a PDB file by specifying the PDB ID and PDB directory into a Structure-Model-Chain-Residue-Atom framework (file name must be in upper case, e.g. "1EN2.pdb")
-
-The function `readpdb` provides an uniform way to download and read PDB files. For example:
+The function `readpdb` provides an uniform way to download and read PDB files. To parse a PDB file by specifying the PDB ID and PDB directory into a Structure-Model-Chain-Residue-Atom framework (file name must be in upper case, e.g. "1EN2.pdb"):
 
 ```julia
 struc = readpdb("1EN2", pdb_dir="/path/to/pdb/directory")
