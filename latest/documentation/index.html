@@ -1,0 +1,1317 @@
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="A julia package to read, write and manipulate macromolecular structures">
+      
+      
+        <link rel="canonical" href="https://biojulia.github.io/BioStructures.jl/documentation/">
+      
+      
+        <meta name="author" content="The BioJulia Organisation">
+      
+      
+        <link rel="shortcut icon" href="../assets/images/favicon.png">
+      
+      <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.8.1">
+    
+    
+      
+        <title>Documentation - BioStructures.jl</title>
+      
+    
+    
+      <script src="../assets/javascripts/modernizr-1df76c4e58.js"></script>
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application-bfecc7305d.css">
+      
+    
+    
+      
+        
+        
+        
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+      <link rel="stylesheet" href="../assets/Documenter.css">
+    
+    
+  </head>
+  
+  
+  
+  
+    <body>
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <a href="https://biojulia.github.io/BioStructures.jl/" title="BioStructures.jl" class="md-icon md-icon--home md-header-nav__button">
+          </a>
+        
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <span class="md-flex__ellipsis md-header-nav__title">
+          
+            
+              
+            
+            Documentation
+          
+        </span>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+          
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" required placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset">close</button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result" data-md-lang-search="" data-md-lang-tokenizer="[\s\-]+">
+          <div class="md-search-result__meta" data-md-lang-result-none="No matching documents" data-md-lang-result-one="1 matching document" data-md-lang-result-other="# matching documents">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/BioJulia/BioStructures.jl" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    
+      <i class="md-icon md-icon--home md-nav__button"></i>
+    
+    BioStructures.jl
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/BioJulia/BioStructures.jl" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Home" class="md-nav__link">
+      Home
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Documentation
+      </label>
+    
+    <a href="./" title="Documentation" class="md-nav__link md-nav__link--active">
+      Documentation
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#basics" title="Basics" class="md-nav__link">
+    Basics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manipulating-structures" title="Manipulating structures" class="md-nav__link">
+    Manipulating structures
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spatial-calculations" title="Spatial calculations" class="md-nav__link">
+    Spatial calculations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#downloading-pdb-files" title="Downloading PDB files" class="md-nav__link">
+    Downloading PDB files
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-pdb-files" title="Reading PDB files" class="md-nav__link">
+    Reading PDB files
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-pdb-files" title="Writing PDB files" class="md-nav__link">
+    Writing PDB files
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rcsb-pdb-utility-functions" title="RCSB PDB Utility Functions" class="md-nav__link">
+    RCSB PDB Utility Functions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" title="Examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../contributing/" title="Contributing" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#basics" title="Basics" class="md-nav__link">
+    Basics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manipulating-structures" title="Manipulating structures" class="md-nav__link">
+    Manipulating structures
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spatial-calculations" title="Spatial calculations" class="md-nav__link">
+    Spatial calculations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#downloading-pdb-files" title="Downloading PDB files" class="md-nav__link">
+    Downloading PDB files
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-pdb-files" title="Reading PDB files" class="md-nav__link">
+    Reading PDB files
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-pdb-files" title="Writing PDB files" class="md-nav__link">
+    Writing PDB files
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rcsb-pdb-utility-functions" title="RCSB PDB Utility Functions" class="md-nav__link">
+    RCSB PDB Utility Functions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" title="Examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/BioJulia/BioStructures.jl/edit/master/docs/documentation.md" title="Edit this page" class="md-icon md-content__icon">edit</a>
+                
+                
+                <p><a id='BioStructures-documentation-1'></a></p>
+<h1 id="biostructures-documentation">BioStructures documentation</h1>
+<p>The BioStructures.jl package provides functionality to manipulate macromolecular structures, and in particular to read and write <a href="http://www.rcsb.org/pdb/home/home.do">Protein Data Bank</a> (PDB) files. It is designed to be used for standard structural analysis tasks, as well as acting as a platform on which others can build to create more specific tools. It compares favourably in terms of performance to other PDB parsers - see some <a href="https://github.com/jgreener64/pdb-benchmarks">benchmarks</a>.</p>
+<p><a id='Basics-1'></a></p>
+<h2 id="basics">Basics</h2>
+<p>To download a PDB file:</p>
+<div class="codehilite"><pre><span></span><span class="c"># Stored in the current working directory by default</span>
+<span class="n">downloadpdb</span><span class="p">(</span><span class="s">&quot;1EN2&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>To parse a PDB file into a Structure-Model-Chain-Residue-Atom framework:</p>
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">struc</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s">&quot;/path/to/pdb/file.pdb&quot;</span><span class="p">,</span> <span class="n">PDB</span><span class="p">)</span>
+<span class="n">BioStructures</span><span class="o">.</span><span class="n">ProteinStructure</span>
+<span class="n">Name</span>                        <span class="o">-</span>  <span class="mi">1</span><span class="n">EN2</span><span class="o">.</span><span class="n">pdb</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">models</span>            <span class="o">-</span>  <span class="mi">1</span>
+<span class="n">Chain</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                    <span class="o">-</span>  <span class="n">A</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">residues</span>          <span class="o">-</span>  <span class="mi">85</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">point</span> <span class="n">mutations</span>   <span class="o">-</span>  <span class="mi">5</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">other</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">5</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">water</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">76</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">atoms</span>             <span class="o">-</span>  <span class="mi">614</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">hydrogens</span>         <span class="o">-</span>  <span class="mi">0</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">disordered</span> <span class="n">atoms</span>  <span class="o">-</span>  <span class="mi">27</span>
+</pre></div>
+
+
+<p><strong>Note</strong> : Refer to <a href="#downloading-pdb-files">Downloading PDB files</a> and <a href="#reading-pdb-files">Reading PDB files</a> sections for more options.</p>
+<p>The elements of <code>struc</code> can be accessed as follows:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Command</th>
+<th align="left">Returns</th>
+<th align="left">Return type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>struc[1]</code></td>
+<td align="left">Model 1</td>
+<td align="left"><code>Model</code></td>
+</tr>
+<tr>
+<td align="left"><code>struc[1]['A']</code></td>
+<td align="left">Model 1, chain A</td>
+<td align="left"><code>Chain</code></td>
+</tr>
+<tr>
+<td align="left"><code>struc['A']</code></td>
+<td align="left">The lowest model (model 1), chain A</td>
+<td align="left"><code>Chain</code></td>
+</tr>
+<tr>
+<td align="left"><code>struc['A']["50"]</code></td>
+<td align="left">Model 1, chain A, residue 50</td>
+<td align="left"><code>AbstractResidue</code></td>
+</tr>
+<tr>
+<td align="left"><code>struc['A'][50]</code></td>
+<td align="left">Shortcut to above if it is not a hetero residue and the insertion code is blank</td>
+<td align="left"><code>AbstractResidue</code></td>
+</tr>
+<tr>
+<td align="left"><code>struc['A']["H_90"]</code></td>
+<td align="left">Model 1, chain A, hetero residue 90</td>
+<td align="left"><code>AbstractResidue</code></td>
+</tr>
+<tr>
+<td align="left"><code>struc['A'][50]["CA"]</code></td>
+<td align="left">Model 1, chain A, residue 50, atom name CA</td>
+<td align="left"><code>AbstractAtom</code></td>
+</tr>
+<tr>
+<td align="left"><code>struc['A'][15]["CG"]['A']</code></td>
+<td align="left">For disordered atoms, access a specific location</td>
+<td align="left"><code>Atom</code></td>
+</tr>
+</tbody>
+</table>
+<p>Disordered atoms are stored in a <code>DisorderedAtom</code> container but calls fall back to the default atom, so disorder can be ignored if you are not interested in it.</p>
+<p>Disordered residues (i.e. point mutations with different residue names) are stored in a <code>DisorderedResidue</code> container.</p>
+<p>The idea is that disorder will only bother you if you want it to. See the <a href="http://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ#How_is_disorder_handled.3F">Biopython discussion</a> for more.</p>
+<p>Properties can be retrieved as follows:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Function</th>
+<th align="left">Returns</th>
+<th align="left">Return type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>serial</code></td>
+<td align="left">Serial number of an atom</td>
+<td align="left"><code>Int</code></td>
+</tr>
+<tr>
+<td align="left"><code>atomname</code></td>
+<td align="left">Name of an atom</td>
+<td align="left"><code>String</code></td>
+</tr>
+<tr>
+<td align="left"><code>altlocid</code></td>
+<td align="left">Alternative location ID of an atom</td>
+<td align="left"><code>Char</code></td>
+</tr>
+<tr>
+<td align="left"><code>x</code></td>
+<td align="left">x coordinate of an atom</td>
+<td align="left"><code>Float64</code></td>
+</tr>
+<tr>
+<td align="left"><code>y</code></td>
+<td align="left">y coordinate of an atom</td>
+<td align="left"><code>Float64</code></td>
+</tr>
+<tr>
+<td align="left"><code>z</code></td>
+<td align="left">z coordinate of an atom</td>
+<td align="left"><code>Float64</code></td>
+</tr>
+<tr>
+<td align="left"><code>coords</code></td>
+<td align="left">coordinates of an atom</td>
+<td align="left"><code>Array{Float64,1}</code></td>
+</tr>
+<tr>
+<td align="left"><code>occupancy</code></td>
+<td align="left">Occupancy of an atom (default is <code>1.0</code>)</td>
+<td align="left"><code>Float64</code></td>
+</tr>
+<tr>
+<td align="left"><code>tempfactor</code></td>
+<td align="left">Temperature factor of an atom (default is <code>0.0</code>)</td>
+<td align="left"><code>Float64</code></td>
+</tr>
+<tr>
+<td align="left"><code>element</code></td>
+<td align="left">Element of an atom (default is <code>"  "</code>)</td>
+<td align="left"><code>String</code></td>
+</tr>
+<tr>
+<td align="left"><code>charge</code></td>
+<td align="left">Charge of an atom (default is <code>"  "</code>)</td>
+<td align="left"><code>String</code></td>
+</tr>
+<tr>
+<td align="left"><code>residue</code></td>
+<td align="left">Residue an atom belongs to</td>
+<td align="left"><code>Residue</code></td>
+</tr>
+<tr>
+<td align="left"><code>ishetero</code></td>
+<td align="left"><code>true</code> if the residue or atom is a hetero residue/atom</td>
+<td align="left"><code>Bool</code></td>
+</tr>
+<tr>
+<td align="left"><code>isdisorderedatom</code></td>
+<td align="left"><code>true</code> if the atom is disordered</td>
+<td align="left"><code>Bool</code></td>
+</tr>
+<tr>
+<td align="left"><code>pdbline</code></td>
+<td align="left">PDB ATOM/HETATM record for an atom</td>
+<td align="left"><code>String</code></td>
+</tr>
+<tr>
+<td align="left"><code>resname</code></td>
+<td align="left">Residue name of a residue or atom</td>
+<td align="left"><code>String</code></td>
+</tr>
+<tr>
+<td align="left"><code>resnumber</code></td>
+<td align="left">Residue number of a residue or atom</td>
+<td align="left"><code>Int</code></td>
+</tr>
+<tr>
+<td align="left"><code>inscode</code></td>
+<td align="left">Insertion code of a residue or atom</td>
+<td align="left"><code>Char</code></td>
+</tr>
+<tr>
+<td align="left"><code>resid</code></td>
+<td align="left">Residue ID of an atom or residue (<code>full=true</code> includes chain)</td>
+<td align="left"><code>String</code></td>
+</tr>
+<tr>
+<td align="left"><code>atomnames</code></td>
+<td align="left">Atom names of the atoms in a residue, sorted by serial</td>
+<td align="left"><code>Array{String,1}</code></td>
+</tr>
+<tr>
+<td align="left"><code>atoms</code></td>
+<td align="left">Dictionary of atoms in a residue</td>
+<td align="left"><code>Dict{String, AbstractAtom}</code></td>
+</tr>
+<tr>
+<td align="left"><code>isdisorderedres</code></td>
+<td align="left"><code>true</code> if the residue has multiple residue names</td>
+<td align="left"><code>Bool</code></td>
+</tr>
+<tr>
+<td align="left"><code>disorderedres</code></td>
+<td align="left">Access a particular residue name in a <code>DisorderedResidue</code></td>
+<td align="left"><code>Residue</code></td>
+</tr>
+<tr>
+<td align="left"><code>chain</code></td>
+<td align="left">Chain a residue or atom belongs to</td>
+<td align="left"><code>Chain</code></td>
+</tr>
+<tr>
+<td align="left"><code>chainid</code></td>
+<td align="left">Chain ID of a chain, residue or atom</td>
+<td align="left"><code>Char</code></td>
+</tr>
+<tr>
+<td align="left"><code>resids</code></td>
+<td align="left">Sorted residue IDs in a chain</td>
+<td align="left"><code>Array{String,1}</code></td>
+</tr>
+<tr>
+<td align="left"><code>residues</code></td>
+<td align="left">Dictionary of residues in a chain</td>
+<td align="left"><code>Dict{String, AbstractResidue}</code></td>
+</tr>
+<tr>
+<td align="left"><code>model</code></td>
+<td align="left">Model a chain, residue or atom belongs to</td>
+<td align="left"><code>Model</code></td>
+</tr>
+<tr>
+<td align="left"><code>modelnumber</code></td>
+<td align="left">Model number of a model, chain, residue or atom</td>
+<td align="left"><code>Int</code></td>
+</tr>
+<tr>
+<td align="left"><code>chainids</code></td>
+<td align="left">Sorted chain IDs in a model or structure</td>
+<td align="left"><code>Array{Char,1}</code></td>
+</tr>
+<tr>
+<td align="left"><code>chains</code></td>
+<td align="left">Dictionary of chains in a model or structure</td>
+<td align="left"><code>Dict{Char, Chain}</code></td>
+</tr>
+<tr>
+<td align="left"><code>structure</code></td>
+<td align="left">Structure a model, chain, residue or atom belongs to</td>
+<td align="left"><code>ProteinStructure</code></td>
+</tr>
+<tr>
+<td align="left"><code>structurename</code></td>
+<td align="left">Name of the structure an element belongs to</td>
+<td align="left"><code>String</code></td>
+</tr>
+<tr>
+<td align="left"><code>modelnumbers</code></td>
+<td align="left">Sorted model numbers in a structure</td>
+<td align="left"><code>Array{Int,1}</code></td>
+</tr>
+<tr>
+<td align="left"><code>models</code></td>
+<td align="left">Dictionary of models in a structure</td>
+<td align="left"><code>Dict{Int, Model}</code></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>strip</code> keyword argument determines whether surrounding whitespace is stripped for <code>atomname</code>, <code>element</code>, <code>charge</code>, <code>resname</code> and <code>atomnames</code> (default <code>true</code>).</p>
+<p>The coordinates of an atom can be set using <code>x!</code>, <code>y!</code>, <code>z!</code> and <code>coords!</code>.</p>
+<p><a id='Manipulating-structures-1'></a></p>
+<h2 id="manipulating-structures">Manipulating structures</h2>
+<p>Elements can be looped over to reveal the sub-elements in the correct order:</p>
+<div class="codehilite"><pre><span></span><span class="k">for</span> <span class="n">mod</span> <span class="kp">in</span> <span class="n">struc</span>
+    <span class="k">for</span> <span class="n">ch</span> <span class="kp">in</span> <span class="n">mod</span>
+        <span class="k">for</span> <span class="n">res</span> <span class="kp">in</span> <span class="n">ch</span>
+            <span class="k">for</span> <span class="n">at</span> <span class="kp">in</span> <span class="n">res</span>
+                <span class="c"># Do something</span>
+            <span class="k">end</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+
+<p>Models are ordered numerically; chains are ordered by character, except the empty chain is last; residues are ordered by residue number and insertion code with hetero residues after standard residues; atoms are ordered by atom serial.</p>
+<p><code>collect</code> can be used to get arrays of sub-elements. <code>collectatoms</code>, <code>collectresidues</code>, <code>collectchains</code> and <code>collectmodels</code> return arrays of a particular type from a structural element or element array.</p>
+<p>Selectors are functions passed as additional arguments to these functions. Only elements that return <code>true</code> when passed to the selector are retained. For example:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Command</th>
+<th align="left">Action</th>
+<th align="left">Return type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>collect(struc['A'][50])</code></td>
+<td align="left">Collect the sub-elements of an element, e.g. atoms from a residue</td>
+<td align="left"><code>Array{AbstractAtom,1}</code></td>
+</tr>
+<tr>
+<td align="left"><code>collectresidues(struc)</code></td>
+<td align="left">Collect the residues of an element</td>
+<td align="left"><code>Array{AbstractResidue,1}</code></td>
+</tr>
+<tr>
+<td align="left"><code>collectatoms(struc)</code></td>
+<td align="left">Collect the atoms of an element</td>
+<td align="left"><code>Array{AbstractAtom,1}</code></td>
+</tr>
+<tr>
+<td align="left"><code>collectatoms(struc, calphaselector)</code></td>
+<td align="left">Collect the C-alpha atoms of an element</td>
+<td align="left"><code>Array{AbstractAtom,1}</code></td>
+</tr>
+<tr>
+<td align="left"><code>collectatoms(struc, calphaselector, disorderselector)</code></td>
+<td align="left">Collect the disordered C-alpha atoms of an element</td>
+<td align="left"><code>Array{AbstractAtom,1}</code></td>
+</tr>
+</tbody>
+</table>
+<p>The selectors available are:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Function</th>
+<th align="left">Acts on</th>
+<th align="left">Selects for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">standardselector</td>
+<td align="left"><code>AbstractAtom</code> or <code>AbstractResidue</code></td>
+<td align="left">Atoms/residues arising from standard (ATOM) records</td>
+</tr>
+<tr>
+<td align="left">heteroselector</td>
+<td align="left"><code>AbstractAtom</code> or <code>AbstractResidue</code></td>
+<td align="left">Atoms/residues arising from hetero (HETATM) records</td>
+</tr>
+<tr>
+<td align="left">atomnameselector</td>
+<td align="left"><code>AbstractAtom</code></td>
+<td align="left">Atoms with atom name in a given list</td>
+</tr>
+<tr>
+<td align="left">calphaselector</td>
+<td align="left"><code>AbstractAtom</code></td>
+<td align="left">C-alpha atoms</td>
+</tr>
+<tr>
+<td align="left">cbetaselector</td>
+<td align="left"><code>AbstractAtom</code></td>
+<td align="left">C-beta atoms, or C-alpha atoms for glycine residues</td>
+</tr>
+<tr>
+<td align="left">backboneselector</td>
+<td align="left"><code>AbstractAtom</code></td>
+<td align="left">Atoms in the protein backbone (CA, N and C)</td>
+</tr>
+<tr>
+<td align="left">heavyatomselector</td>
+<td align="left"><code>AbstractAtom</code></td>
+<td align="left">Non-hydrogen atoms</td>
+</tr>
+<tr>
+<td align="left">hydrogenselector</td>
+<td align="left"><code>AbstractAtom</code></td>
+<td align="left">Hydrogen atoms</td>
+</tr>
+<tr>
+<td align="left">resnameselector</td>
+<td align="left"><code>AbstractAtom</code> or <code>AbstractResidue</code></td>
+<td align="left">Atoms/residues with residue name in a given list</td>
+</tr>
+<tr>
+<td align="left">waterselector</td>
+<td align="left"><code>AbstractAtom</code> or <code>AbstractResidue</code></td>
+<td align="left">Atoms/residues with residue name HOH</td>
+</tr>
+<tr>
+<td align="left">notwaterselector</td>
+<td align="left"><code>AbstractAtom</code> or <code>AbstractResidue</code></td>
+<td align="left">Atoms/residues with residue name not HOH</td>
+</tr>
+<tr>
+<td align="left">disorderselector</td>
+<td align="left"><code>AbstractAtom</code> or <code>AbstractResidue</code></td>
+<td align="left">Atoms/residues with alternative locations</td>
+</tr>
+</tbody>
+</table>
+<p>It is easy to define your own atom, residue, chain or model selectors. The below will collect all atoms with x coordinate less than 0:</p>
+<div class="codehilite"><pre><span></span><span class="n">xselector</span><span class="p">(</span><span class="n">at</span><span class="o">::</span><span class="n">AbstractAtom</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="n">at</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span>
+<span class="n">collectatoms</span><span class="p">(</span><span class="n">struc</span><span class="p">,</span> <span class="n">xselector</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Alternatively, you can use an anonymous function:</p>
+<div class="codehilite"><pre><span></span><span class="n">collectatoms</span><span class="p">(</span><span class="n">struc</span><span class="p">,</span> <span class="n">at</span> <span class="o">-&gt;</span> <span class="n">x</span><span class="p">(</span><span class="n">at</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+
+<p><code>countatoms</code>, <code>countresidues</code>, <code>countchains</code> and <code>countmodels</code> can be used to count elements. For example:</p>
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">countatoms</span><span class="p">(</span><span class="n">struc</span><span class="p">)</span>
+<span class="mi">754</span>
+
+<span class="n">julia</span><span class="o">&gt;</span> <span class="n">countatoms</span><span class="p">(</span><span class="n">struc</span><span class="p">,</span> <span class="n">calphaselector</span><span class="p">)</span>
+<span class="mi">85</span>
+
+<span class="n">julia</span><span class="o">&gt;</span> <span class="n">countresidues</span><span class="p">(</span><span class="n">struc</span><span class="p">,</span> <span class="n">standardselector</span><span class="p">)</span>
+<span class="mi">85</span>
+</pre></div>
+
+
+<p>The sequence of a protein can be retrieved by passing a <code>Chain</code> or array of residues to <code>AminoAcidSequence</code>:</p>
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">AminoAcidSequence</span><span class="p">(</span><span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">],</span> <span class="n">standardselector</span><span class="p">)</span>
+<span class="mi">85</span><span class="n">aa</span> <span class="n">Amino</span> <span class="n">Acid</span> <span class="n">Sequence</span><span class="o">:</span>
+<span class="n">RCGSQGGGSTCPGLRCCSIWGWCGDSEPYCGRTCENKCWSGERSDHRCGAAVGNPPCGQDRCCSVHGWCGGGNDYCSGGNCQYRC</span>
+</pre></div>
+
+
+<p><a id='Spatial-calculations-1'></a></p>
+<h2 id="spatial-calculations">Spatial calculations</h2>
+<p>Various functions are provided to calculate spatial quantities for proteins:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Command</th>
+<th align="left">Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>distance</code></td>
+<td align="left">Minimum distance between two elements</td>
+</tr>
+<tr>
+<td align="left"><code>sqdistance</code></td>
+<td align="left">Minimum square distance between two elements</td>
+</tr>
+<tr>
+<td align="left"><code>bondangle</code></td>
+<td align="left">Angle between three atoms</td>
+</tr>
+<tr>
+<td align="left"><code>dihedralangle</code></td>
+<td align="left">Dihedral angle defined by four atoms</td>
+</tr>
+<tr>
+<td align="left"><code>omegaangle</code></td>
+<td align="left">Omega angle between a residue and the previous residue</td>
+</tr>
+<tr>
+<td align="left"><code>phiangle</code></td>
+<td align="left">Phi angle between a residue and the previous residue</td>
+</tr>
+<tr>
+<td align="left"><code>psiangle</code></td>
+<td align="left">Psi angle between a residue and the next residue</td>
+</tr>
+<tr>
+<td align="left"><code>ramachandranangles</code></td>
+<td align="left"><code>Vector</code>s of phi and psi angles of an element</td>
+</tr>
+<tr>
+<td align="left"><code>contactmap</code></td>
+<td align="left">Contact map of two elements, or one element with itself</td>
+</tr>
+<tr>
+<td align="left"><code>rmsd</code></td>
+<td align="left">RMSD between two elements of the same size - assumes they are superimposed</td>
+</tr>
+<tr>
+<td align="left"><code>displacements</code></td>
+<td align="left"><code>Vector</code> of displacements between two elements of the same size - assumes they are superimposed</td>
+</tr>
+</tbody>
+</table>
+<p>For example:</p>
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">distance</span><span class="p">(</span><span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">10</span><span class="p">],</span> <span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">20</span><span class="p">])</span>
+<span class="mf">10.782158874733762</span>
+
+<span class="n">julia</span><span class="o">&gt;</span> <span class="n">rad2deg</span><span class="p">(</span><span class="n">bondangle</span><span class="p">(</span><span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">50</span><span class="p">][</span><span class="s">&quot;N&quot;</span><span class="p">],</span> <span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">50</span><span class="p">][</span><span class="s">&quot;CA&quot;</span><span class="p">],</span> <span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">50</span><span class="p">][</span><span class="s">&quot;C&quot;</span><span class="p">]))</span>
+<span class="mf">110.77765846083398</span>
+
+<span class="n">julia</span><span class="o">&gt;</span> <span class="n">rad2deg</span><span class="p">(</span><span class="n">dihedralangle</span><span class="p">(</span><span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">50</span><span class="p">][</span><span class="s">&quot;N&quot;</span><span class="p">],</span> <span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">50</span><span class="p">][</span><span class="s">&quot;CA&quot;</span><span class="p">],</span> <span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">50</span><span class="p">][</span><span class="s">&quot;C&quot;</span><span class="p">],</span> <span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">51</span><span class="p">][</span><span class="s">&quot;N&quot;</span><span class="p">]))</span>
+<span class="o">-</span><span class="mf">177.38288114072924</span>
+
+<span class="n">julia</span><span class="o">&gt;</span> <span class="n">rad2deg</span><span class="p">(</span><span class="n">psiangle</span><span class="p">(</span><span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">50</span><span class="p">],</span> <span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">51</span><span class="p">]))</span>
+<span class="o">-</span><span class="mf">177.38288114072924</span>
+</pre></div>
+
+
+<p><a id='Downloading-PDB-files-1'></a></p>
+<h2 id="downloading-pdb-files">Downloading PDB files</h2>
+<p>To download a PDB file to a specify directory:</p>
+<div class="codehilite"><pre><span></span><span class="n">downloadpdb</span><span class="p">(</span><span class="s">&quot;1EN2&quot;</span><span class="p">,</span> <span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;path/to/pdb/directory/&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>To download multiple PDB files to a specify directory:</p>
+<div class="codehilite"><pre><span></span><span class="n">downloadpdb</span><span class="p">([</span><span class="s">&quot;1EN2&quot;</span><span class="p">,</span><span class="s">&quot;1ALW&quot;</span><span class="p">,</span><span class="s">&quot;1AKE&quot;</span><span class="p">],</span> <span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;path/to/pdb/directory/&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>To download a PDB file in PDB, XML, MMCIF or MMTF format:</p>
+<div class="codehilite"><pre><span></span><span class="c"># PDB file format</span>
+<span class="n">downloadpdb</span><span class="p">(</span><span class="s">&quot;1ALW&quot;</span><span class="p">,</span> <span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;path/to/pdb/directory/&quot;</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="n">PDB</span><span class="p">)</span>
+<span class="c"># XML file format</span>
+<span class="n">downloadpdb</span><span class="p">(</span><span class="s">&quot;1ALW&quot;</span><span class="p">,</span> <span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;path/to/pdb/directory/&quot;</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="n">PDBXML</span><span class="p">)</span>
+<span class="c"># MMCIF file format</span>
+<span class="n">downloadpdb</span><span class="p">(</span><span class="s">&quot;1ALW&quot;</span><span class="p">,</span> <span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;path/to/pdb/directory/&quot;</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="n">MMCIF</span><span class="p">)</span>
+<span class="c"># MMTF file format</span>
+<span class="n">downloadpdb</span><span class="p">(</span><span class="s">&quot;1ALW&quot;</span><span class="p">,</span> <span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;path/to/pdb/directory/&quot;</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="n">MMTF</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Various options can be set through optional keyword arguments when downloading PDB files as follows:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Keyword Argument</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>pdb_dir::AbstractString=pwd()</code></td>
+<td align="left">The directory to which the PDB file is downloaded</td>
+</tr>
+<tr>
+<td align="left"><code>file_format::Type=PDB</code></td>
+<td align="left">The format of the PDB file. Options are PDB, PDBXML, MMCIF or MMTF</td>
+</tr>
+<tr>
+<td align="left"><code>obsolete::Bool=false</code></td>
+<td align="left">If set <code>true</code>, the PDB file is downloaded into the auto-generated "obsolete" directory inside the specified <code>pdb_dir</code></td>
+</tr>
+<tr>
+<td align="left"><code>overwrite::Bool=false</code></td>
+<td align="left">If set <code>true</code>, overwrites the PDB file if exists in <code>pdb_dir</code>; by default skips downloading the PDB file</td>
+</tr>
+<tr>
+<td align="left"><code>ba_number::Integer=0</code></td>
+<td align="left">If set &gt; 0, downloads the respective biological assembly; by default downloads the PDB file</td>
+</tr>
+</tbody>
+</table>
+<p><a id='Reading-PDB-files-1'></a></p>
+<h2 id="reading-pdb-files">Reading PDB files</h2>
+<ul>
+<li>To parse a existing PDB file into a Structure-Model-Chain-Residue-Atom framework:</li>
+</ul>
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">struc</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s">&quot;/path/to/pdb/file.pdb&quot;</span><span class="p">,</span> <span class="n">PDB</span><span class="p">)</span>
+<span class="n">BioStructures</span><span class="o">.</span><span class="n">ProteinStructure</span>
+<span class="n">Name</span>                        <span class="o">-</span>  <span class="mi">1</span><span class="n">EN2</span><span class="o">.</span><span class="n">pdb</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">models</span>            <span class="o">-</span>  <span class="mi">1</span>
+<span class="n">Chain</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                    <span class="o">-</span>  <span class="n">A</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">residues</span>          <span class="o">-</span>  <span class="mi">85</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">point</span> <span class="n">mutations</span>   <span class="o">-</span>  <span class="mi">5</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">other</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">5</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">water</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">76</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">atoms</span>             <span class="o">-</span>  <span class="mi">614</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">hydrogens</span>         <span class="o">-</span>  <span class="mi">0</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">disordered</span> <span class="n">atoms</span>  <span class="o">-</span>  <span class="mi">27</span>
+</pre></div>
+
+
+<p>Various options can be set through optional keyword arguments when parsing a PDB file as follows:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Keyword Argument</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>structure_name::AbstractString="$pdbid.pdb"</code></td>
+<td align="left">The name of the PDB Structure read. Defaults to "&lt; PDBID &gt;.pdb"</td>
+</tr>
+<tr>
+<td align="left"><code>remove_disorder::Bool=false</code></td>
+<td align="left">If set true, then disordered atoms wont be parsed</td>
+</tr>
+<tr>
+<td align="left"><code>read_std_atoms::Bool=true</code></td>
+<td align="left">If set false, then standard ATOM records wont be parsed</td>
+</tr>
+<tr>
+<td align="left"><code>read_het_atoms::Bool=true</code></td>
+<td align="left">If set false, then HETATOM records wont be parsed</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>To parse a PDB file by specifying the PDB ID and PDB directory into a Structure-Model-Chain-Residue-Atom framework (file name must be in upper case, e.g. "1EN2.pdb")</li>
+</ul>
+<p>The function <code>readpdb</code> provides an uniform way to download and read PDB files. For example:</p>
+<div class="codehilite"><pre><span></span><span class="n">struc</span> <span class="o">=</span> <span class="n">readpdb</span><span class="p">(</span><span class="s">&quot;1EN2&quot;</span><span class="p">,</span> <span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;/path/to/pdb/directory&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The same keyword arguments are taken as <code>read</code> above, plus <code>pdb_dir</code> and <code>ba_number</code>.</p>
+<ul>
+<li>To download and parse a PDB file into a Structure-Model-Chain-Residue-Atom framework in a single line:</li>
+</ul>
+<div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">struc</span> <span class="o">=</span> <span class="n">retrievepdb</span><span class="p">(</span><span class="s">&quot;1ALW&quot;</span><span class="p">,</span> <span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;path/to/pdb/directory&quot;</span><span class="p">)</span>
+<span class="n">INFO</span><span class="o">:</span> <span class="n">Downloading</span> <span class="n">PDB</span> <span class="o">:</span> <span class="mi">1</span><span class="n">ALW</span>
+<span class="n">INFO</span><span class="o">:</span> <span class="n">Parsing</span> <span class="n">the</span> <span class="n">PDB</span> <span class="n">file</span><span class="o">...</span>
+<span class="n">BioStructures</span><span class="o">.</span><span class="n">ProteinStructure</span>
+<span class="n">Name</span>                        <span class="o">-</span>  <span class="mi">1</span><span class="n">ALW</span><span class="o">.</span><span class="n">pdb</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">models</span>            <span class="o">-</span>  <span class="mi">1</span>
+<span class="n">Chain</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                    <span class="o">-</span>  <span class="n">AB</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">residues</span>          <span class="o">-</span>  <span class="mi">346</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">point</span> <span class="n">mutations</span>   <span class="o">-</span>  <span class="mi">0</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">other</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">10</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">water</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">104</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">atoms</span>             <span class="o">-</span>  <span class="mi">2790</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">hydrogens</span>         <span class="o">-</span>  <span class="mi">0</span>
+<span class="kt">Number</span> <span class="n">of</span> <span class="n">disordered</span> <span class="n">atoms</span>  <span class="o">-</span>  <span class="mi">0</span>
+</pre></div>
+
+
+<p>Various options can be set through optional keyword arguments when downloading and parsing a PDB file as follows:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Keyword Argument</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>pdb_dir::AbstractString=pwd()</code></td>
+<td align="left">The directory from which the PDB file is read</td>
+</tr>
+<tr>
+<td align="left"><code>obsolete::Bool=false</code></td>
+<td align="left">If set <code>true</code>, PDB file is downloaded into the auto-generated "obsolete" directory inside the specified <code>pdb_dir</code></td>
+</tr>
+<tr>
+<td align="left"><code>overwrite::Bool=false</code></td>
+<td align="left">if set <code>true</code>, overwrites the PDB file if exists in <code>pdb_dir</code>; by default skips downloading PDB file if exists</td>
+</tr>
+<tr>
+<td align="left"><code>ba_number::Integer=0</code></td>
+<td align="left">If set &gt; 0 reads the respective biological assembly; by default reads PDB file</td>
+</tr>
+<tr>
+<td align="left"><code>structure_name::AbstractString="$pdbid.pdb"</code></td>
+<td align="left">The name of the PDB Structure read. Defaults to "&lt; PDBID &gt;.pdb"</td>
+</tr>
+<tr>
+<td align="left"><code>remove_disorder::Bool=false</code></td>
+<td align="left">If set true, then disordered atoms wont be parsed</td>
+</tr>
+<tr>
+<td align="left"><code>read_std_atoms::Bool=true</code></td>
+<td align="left">If set false, then standard ATOM records wont be parsed</td>
+</tr>
+<tr>
+<td align="left"><code>read_het_atoms::Bool=true</code></td>
+<td align="left">If set false, then HETATOM records wont be parsed</td>
+</tr>
+</tbody>
+</table>
+<p><a id='Writing-PDB-files-1'></a></p>
+<h2 id="writing-pdb-files">Writing PDB files</h2>
+<p>PDB format files can be written:</p>
+<div class="codehilite"><pre><span></span><span class="n">writepdb</span><span class="p">(</span><span class="s">&quot;1EN2_out.pdb&quot;</span><span class="p">,</span> <span class="n">struc</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Any element type can be given as input to <code>writepdb</code>. Atom selectors can also be given as additional arguments:</p>
+<div class="codehilite"><pre><span></span><span class="n">writepdb</span><span class="p">(</span><span class="s">&quot;1EN2_out.pdb&quot;</span><span class="p">,</span> <span class="n">struc</span><span class="p">,</span> <span class="n">backboneselector</span><span class="p">)</span>
+</pre></div>
+
+
+<p><a id='RCSB-PDB-Utility-Functions-1'></a></p>
+<h2 id="rcsb-pdb-utility-functions">RCSB PDB Utility Functions</h2>
+<ul>
+<li>To download the entire RCSB PDB database in your preferred file format:</li>
+</ul>
+<div class="codehilite"><pre><span></span><span class="n">downloadentirepdb</span><span class="p">(</span><span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;path/to/pdb/directory/&quot;</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="n">MMTF</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">false</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The keyword arguments are described below:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Keyword Argument</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>pdb_dir::AbstractString=pwd()</code></td>
+<td align="left">The directory to which the PDB files are downloaded</td>
+</tr>
+<tr>
+<td align="left"><code>file_format::Type=PDB</code></td>
+<td align="left">The format of the PDB file. Options are PDB, PDBXML, MMCIF or MMTF</td>
+</tr>
+<tr>
+<td align="left"><code>overwrite::Bool=false</code></td>
+<td align="left">If set <code>true</code>, overwrites the PDB file if exists in <code>pdb_dir</code>; by default skips downloading the PDB file</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>To update your local PDB directory based on the weekly status list of new, modified and obsolete PDB files from RCSB Server:</li>
+</ul>
+<div class="codehilite"><pre><span></span><span class="n">updatelocalpdb</span><span class="p">(</span><span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;path/to/pdb/directory/&quot;</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="n">MMTF</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The <code>file_format</code> specifies the format of the PDB files present in the local PDB directory. Obsolete PDB files are stored in the autogenerated <code>obsolete</code> directory inside the specified local PDB directory.</p>
+<ul>
+<li>To download all obsolete PDB files from RCSB Server:</li>
+</ul>
+<div class="codehilite"><pre><span></span><span class="n">downloadallobsoletepdb</span><span class="p">(;</span><span class="n">obsolete_dir</span><span class="o">=</span><span class="s">&quot;/path/to/obsolete/directory/&quot;</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="n">MMCIF</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">false</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The <code>file_format</code> specfies the format in which the PDB files are downloaded; Options are PDB, PDBXML, MMCIF or MMTF.</p>
+<p>If <code>overwrite=true</code>, the existing PDB files in obsolete directory will be overwritten by the newly downloaded ones.</p>
+<ul>
+<li>To maintain a local copy of the entire RCSB PDB Database</li>
+</ul>
+<p>Run the <code>downloadentirepdb</code> function once to download all PDB files and setup a CRON job or similar to run <code>updatelocalpdb</code> function once in every week to keep the local PDB directory up to date with the RCSB Server.</p>
+<p>There are a few more functions that may help.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Function</th>
+<th align="left">Returns</th>
+<th align="left">Return type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>pdbentrylist</code></td>
+<td align="left">List of all PDB entries from RCSB Server</td>
+<td align="left"><code>Array{String,1}</code></td>
+</tr>
+<tr>
+<td align="left"><code>pdbstatuslist</code></td>
+<td align="left">List of PDB entries from specified RCSB weekly status list URL</td>
+<td align="left"><code>Array{String,1}</code></td>
+</tr>
+<tr>
+<td align="left"><code>pdbrecentchanges</code></td>
+<td align="left">Added, modified and obsolete PDB lists from the recent RCSB weekly status files</td>
+<td align="left"><code>Tuple{Array{String,1},Array{String,1},Array{String,1}}</code></td>
+</tr>
+<tr>
+<td align="left"><code>pdbobsoletelist</code></td>
+<td align="left">List of all obsolete PDB entries in the RCSB server</td>
+<td align="left"><code>Array{String,1}</code></td>
+</tr>
+</tbody>
+</table>
+<p><a id='Examples-1'></a></p>
+<h2 id="examples">Examples</h2>
+<p>A few further examples of BioStructures usage are given below.</p>
+<p><strong>A)</strong> To plot the temperature factors of a protein, if you have Gadfly installed:</p>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">Gadfly</span>
+<span class="n">calphas</span> <span class="o">=</span> <span class="n">collectatoms</span><span class="p">(</span><span class="n">struc</span><span class="p">,</span> <span class="n">calphaselector</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">resnumber</span><span class="o">.</span><span class="p">(</span><span class="n">calphas</span><span class="p">),</span>
+     <span class="n">y</span><span class="o">=</span><span class="n">tempfactor</span><span class="o">.</span><span class="p">(</span><span class="n">calphas</span><span class="p">),</span>
+     <span class="n">Guide</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&quot;Residue number&quot;</span><span class="p">),</span>
+     <span class="n">Guide</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&quot;Temperature factor&quot;</span><span class="p">),</span>
+     <span class="n">Geom</span><span class="o">.</span><span class="n">line</span><span class="p">)</span>
+</pre></div>
+
+
+<p><strong>B)</strong> To print the PDB records for all C-alpha atoms within 5 Angstroms of residue 38:</p>
+<div class="codehilite"><pre><span></span><span class="k">for</span> <span class="n">at</span> <span class="kp">in</span> <span class="n">calphas</span>
+    <span class="k">if</span> <span class="n">distance</span><span class="p">(</span><span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">38</span><span class="p">],</span> <span class="n">at</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">5.0</span> <span class="o">&amp;&amp;</span> <span class="n">resnumber</span><span class="p">(</span><span class="n">at</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">38</span>
+        <span class="n">println</span><span class="p">(</span><span class="n">pdbline</span><span class="p">(</span><span class="n">at</span><span class="p">))</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+
+<p><strong>D)</strong> To view the contact map of a structure:</p>
+<div class="codehilite"><pre><span></span><span class="n">cbetas</span> <span class="o">=</span> <span class="n">collectatoms</span><span class="p">(</span><span class="n">struc</span><span class="p">,</span> <span class="n">cbetaselector</span><span class="p">)</span>
+<span class="n">contacts</span> <span class="o">=</span> <span class="n">contactmap</span><span class="p">(</span><span class="n">cbetas</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">length</span><span class="p">(</span><span class="n">cbetas</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="kp">in</span> <span class="mi">1</span><span class="o">:</span><span class="n">length</span><span class="p">(</span><span class="n">cbetas</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">contacts</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">print</span><span class="p">(</span><span class="s">&quot;█&quot;</span><span class="p">)</span>
+        <span class="k">else</span>
+            <span class="n">print</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+    <span class="n">println</span><span class="p">()</span>
+<span class="k">end</span>
+</pre></div>
+
+
+<p><code>contactmap</code> can also be given two structural elements as arguments, in which case a non-symmetrical 2D array is returned showing contacts between the elements.</p>
+<p><strong>E)</strong> To show the Ramachandran phi/psi angle plot of a structure, if you have Gadfly installed:</p>
+<div class="codehilite"><pre><span></span><span class="k">using</span> <span class="n">Gadfly</span>
+<span class="n">phi_angles</span><span class="p">,</span> <span class="n">psi_angles</span> <span class="o">=</span> <span class="n">ramachandranangles</span><span class="p">(</span><span class="n">struc</span><span class="p">,</span> <span class="n">standardselector</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">rad2deg</span><span class="o">.</span><span class="p">(</span><span class="n">phi_angles</span><span class="p">),</span>
+     <span class="n">y</span><span class="o">=</span><span class="n">rad2deg</span><span class="o">.</span><span class="p">(</span><span class="n">psi_angles</span><span class="p">),</span>
+     <span class="n">Guide</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&quot;Phi / degrees&quot;</span><span class="p">),</span>
+     <span class="n">Guide</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&quot;Psi / degrees&quot;</span><span class="p">),</span>
+     <span class="n">Guide</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">ticks</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">90</span><span class="p">,</span><span class="mi">180</span><span class="p">]),</span>
+     <span class="n">Guide</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">ticks</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">90</span><span class="p">,</span><span class="mi">180</span><span class="p">]))</span>
+</pre></div>
+
+
+<p><strong>F)</strong> To calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:</p>
+<div class="codehilite"><pre><span></span><span class="n">downloadpdb</span><span class="p">(</span><span class="s">&quot;1SSU&quot;</span><span class="p">)</span>
+<span class="n">struc_nmr</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s">&quot;1SSU.pdb&quot;</span><span class="p">,</span> <span class="n">PDB</span><span class="p">)</span>
+<span class="n">rmsd</span><span class="p">(</span><span class="n">struc_nmr</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">struc_nmr</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">heavyatomselector</span><span class="p">)</span>
+<span class="n">displacements</span><span class="p">(</span><span class="n">struc_nmr</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">struc_nmr</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">heavyatomselector</span><span class="p">)</span>
+</pre></div>
+                
+                  
+                
+              
+              
+                
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href=".." title="Home" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Home
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../contributing/" title="Contributing" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Contributing
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright (c) 2017 The BioJulia Organisation
+          </div>
+        
+        powered by
+        <a href="http://www.mkdocs.org" title="MkDocs">MkDocs</a>
+        and
+        <a href="http://squidfunk.github.io/mkdocs-material/" title="Material for MkDocs">
+          Material for MkDocs</a>
+      </div>
+      
+        
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application-6940329b9f.js"></script>
+      
+      
+      <script>app.initialize({url:{base:".."}})</script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+      
+        <script src="../assets/mathjaxhelper.js"></script>
+      
+    
+    
+      
+    
+  </body>
+</html>
