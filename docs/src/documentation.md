@@ -1,18 +1,6 @@
-# Bio.Structure: Macromolecular Structures
+# BioStructures documentation
 
-```@meta
-CurrentModule = Bio.Structure
-DocTestSetup = quote
-    using Bio.Structure
-    path = Pkg.dir("Bio", "test", "BioFmtSpecimens")
-    if !isdir(path)
-        run(`git clone --depth 1 https://github.com/BioJulia/BioFmtSpecimens.git $(path)`)
-    end
-    filepath_1EN2 = Pkg.dir("Bio", "test", "BioFmtSpecimens", "PDB", "1EN2.pdb")
-end
-```
-
-The `Bio.Structure` module provides functionality to manipulate macromolecular structures, and in particular to read and write [Protein Data Bank](http://www.rcsb.org/pdb/home/home.do) (PDB) files. It is designed to be used for standard structural analysis tasks, as well as acting as a platform on which others can build to create more specific tools. It compares favourably in terms of performance to other PDB parsers - see some [benchmarks](https://github.com/jgreener64/pdb-benchmarks).
+The BioStructures.jl package provides functionality to manipulate macromolecular structures, and in particular to read and write [Protein Data Bank](http://www.rcsb.org/pdb/home/home.do) (PDB) files. It is designed to be used for standard structural analysis tasks, as well as acting as a platform on which others can build to create more specific tools. It compares favourably in terms of performance to other PDB parsers - see some [benchmarks](https://github.com/jgreener64/pdb-benchmarks).
 
 
 ## Basics
@@ -28,7 +16,7 @@ To parse a PDB file into a Structure-Model-Chain-Residue-Atom framework:
 
 ```julia
 julia> struc = read("/path/to/pdb/file.pdb", PDB)
-Bio.Structure.ProteinStructure
+BioStructures.ProteinStructure
 Name                        -  1EN2.pdb
 Number of models            -  1
 Chain(s)                    -  A
@@ -169,14 +157,6 @@ collectatoms(struc, at -> x(at) < 0)
 
 `countatoms`, `countresidues`, `countchains` and `countmodels` can be used to count elements. For example:
 
-```@meta
-DocTestSetup = quote
-    using Bio.Structure
-    filepath_1EN2 = Pkg.dir("Bio", "test", "BioFmtSpecimens", "PDB", "1EN2.pdb")
-    struc = read(filepath_1EN2, PDB)
-end
-```
-
 ```julia
 julia> countatoms(struc)
 754
@@ -276,7 +256,7 @@ Various options can be set through optional keyword arguments when downloading P
 
 ```julia
 julia> struc = read("/path/to/pdb/file.pdb", PDB)
-Bio.Structure.ProteinStructure
+BioStructures.ProteinStructure
 Name                        -  1EN2.pdb
 Number of models            -  1
 Chain(s)                    -  A
@@ -314,7 +294,7 @@ The same keyword arguments are taken as `read` above, plus `pdb_dir` and `ba_num
 julia> struc = retrievepdb("1ALW", pdb_dir="path/to/pdb/directory")
 INFO: Downloading PDB : 1ALW
 INFO: Parsing the PDB file...
-Bio.Structure.ProteinStructure
+BioStructures.ProteinStructure
 Name                        -  1ALW.pdb
 Number of models            -  1
 Chain(s)                    -  AB
@@ -406,7 +386,7 @@ There are a few more functions that may help.
 
 ## Examples
 
-A few further examples of `Bio.Structure` usage are given below.
+A few further examples of BioStructures usage are given below.
 
 **A)** To plot the temperature factors of a protein, if you have Gadfly installed:
 
