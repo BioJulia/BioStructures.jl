@@ -981,8 +981,8 @@
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>structure_name::AbstractString="$pdbid.pdb"</code></td>
-<td align="left">The name of the PDB Structure read. Defaults to "&lt; PDBID &gt;.pdb"</td>
+<td align="left"><code>structure_name::AbstractString</code></td>
+<td align="left">The name of the PDB Structure read. Defaults to the given filename</td>
 </tr>
 <tr>
 <td align="left"><code>remove_disorder::Bool=false</code></td>
@@ -998,8 +998,7 @@
 </tr>
 </tbody>
 </table>
-<p>To parse a PDB file by specifying the PDB ID and PDB directory into a Structure-Model-Chain-Residue-Atom framework (file name must be in upper case, e.g. "1EN2.pdb")</p>
-<p>The function <code>readpdb</code> provides an uniform way to download and read PDB files. For example:</p>
+<p>The function <code>readpdb</code> provides an uniform way to download and read PDB files. To parse a PDB file by specifying the PDB ID and PDB directory into a Structure-Model-Chain-Residue-Atom framework (file name must be in upper case, e.g. "1EN2.pdb"):</p>
 <div class="codehilite"><pre><span></span><span class="n">struc</span> <span class="o">=</span> <span class="n">readpdb</span><span class="p">(</span><span class="s">&quot;1EN2&quot;</span><span class="p">,</span> <span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;/path/to/pdb/directory&quot;</span><span class="p">)</span>
 </pre></div>
 
