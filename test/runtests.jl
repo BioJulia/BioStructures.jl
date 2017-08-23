@@ -33,7 +33,6 @@ pdbfilepath(filename::AbstractString) = joinpath(fmtdir, "PDB", filename)
     # Invalid URL
     @test_throws ErrorException pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/dummy.pdb")
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
-    @test length(addedlist) > 0 && length(modifiedlist) > 0 && length(obsoletelist) > 0
     @test length(pdbobsoletelist()) > 3600
 
     pdb_dir = joinpath(tempdir(),"PDB")
