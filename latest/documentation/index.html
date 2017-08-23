@@ -855,15 +855,27 @@
 </tr>
 <tr>
 <td align="left"><code>omegaangle</code></td>
-<td align="left">Omega angle between a residue and the previous residue</td>
+<td align="left">Omega dihedral angle between a residue and the previous residue</td>
 </tr>
 <tr>
 <td align="left"><code>phiangle</code></td>
-<td align="left">Phi angle between a residue and the previous residue</td>
+<td align="left">Phi dihedral angle between a residue and the previous residue</td>
 </tr>
 <tr>
 <td align="left"><code>psiangle</code></td>
-<td align="left">Psi angle between a residue and the next residue</td>
+<td align="left">Psi dihedral angle between a residue and the next residue</td>
+</tr>
+<tr>
+<td align="left"><code>omegaangles</code></td>
+<td align="left"><code>Vector</code> of omega dihedral angles of an element</td>
+</tr>
+<tr>
+<td align="left"><code>phiangles</code></td>
+<td align="left"><code>Vector</code> of phi dihedral angles of an element</td>
+</tr>
+<tr>
+<td align="left"><code>psiangles</code></td>
+<td align="left"><code>Vector</code> of psi dihedral angles of an element</td>
 </tr>
 <tr>
 <td align="left"><code>ramachandranangles</code></td>
@@ -883,6 +895,7 @@
 </tr>
 </tbody>
 </table>
+<p>The <code>omegaangle</code>, <code>phiangle</code> and <code>psiangle</code> functions can take either a pair of residues or a chain and a position. The <code>omegaangle</code> and <code>phiangle</code> functions measure the angle between the residue at the given index and the one before. The <code>psiangle</code> function measures between the given index and the one after.</p>
 <p>For example:</p>
 <div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">distance</span><span class="p">(</span><span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">10</span><span class="p">],</span> <span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">20</span><span class="p">])</span>
 <span class="mf">10.782158874733762</span>
@@ -894,6 +907,9 @@
 <span class="o">-</span><span class="mf">177.38288114072924</span>
 
 <span class="n">julia</span><span class="o">&gt;</span> <span class="n">rad2deg</span><span class="p">(</span><span class="n">psiangle</span><span class="p">(</span><span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">50</span><span class="p">],</span> <span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">][</span><span class="mi">51</span><span class="p">]))</span>
+<span class="o">-</span><span class="mf">177.38288114072924</span>
+
+<span class="n">julia</span><span class="o">&gt;</span> <span class="n">rad2deg</span><span class="p">(</span><span class="n">psiangle</span><span class="p">(</span><span class="n">struc</span><span class="p">[</span><span class="sc">&#39;A&#39;</span><span class="p">],</span> <span class="mi">50</span><span class="p">))</span>
 <span class="o">-</span><span class="mf">177.38288114072924</span>
 </pre></div>
 
