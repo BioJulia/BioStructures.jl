@@ -2,22 +2,22 @@
     "docs": [
         {
             "location": "/", 
-            "text": "BioStructures.jl\n\n\n \n \n \n\n\n\n\nDescription\n\n\nBioStructures provides functionality to read, write and manipulate macromolecular structures, in particular proteins. \nProtein Data Bank\n (PDB) format files can be read in to a heirarchical data structure. Basic spatial calculations and functions to access the PDB are also provided.\n\n\n\n\nInstallation\n\n\nInstall BioStructures from the Julia REPL:\n\n\njulia\n \nPkg\n.\nclone\n(\nhttps://github.com/BioJulia/BioStructures.jl\n)\n\n\n\n\n\n\nIf you are interested in the cutting edge of the development, please check out the master branch to try new features before release.", 
+            "text": "BioStructures.jl\n\n\nLatest Release:\n\n\n \n \n \n \n\n\nDevelopment status:\n\n\n \n \n \n\n\n\n\nDescription\n\n\nBioStructures provides functionality to read, write and manipulate macromolecular structures, in particular proteins. \nProtein Data Bank\n (PDB) format files can be read in to a hierarchical data structure. Basic spatial calculations and functions to access the PDB are also provided.\n\n\n\n\nInstallation\n\n\nInstall BioStructures from the Julia REPL:\n\n\njulia\n \nPkg\n.\nadd\n(\nBioStructures\n)\n\n\n\n\n\n\nIf you are interested in the cutting edge of the development, please check out the master branch to try new features before release.", 
             "title": "Home"
         }, 
         {
             "location": "/#biostructuresjl", 
-            "text": "", 
+            "text": "Latest Release:           Development status:", 
             "title": "BioStructures.jl"
         }, 
         {
             "location": "/#description", 
-            "text": "BioStructures provides functionality to read, write and manipulate macromolecular structures, in particular proteins.  Protein Data Bank  (PDB) format files can be read in to a heirarchical data structure. Basic spatial calculations and functions to access the PDB are also provided.", 
+            "text": "BioStructures provides functionality to read, write and manipulate macromolecular structures, in particular proteins.  Protein Data Bank  (PDB) format files can be read in to a hierarchical data structure. Basic spatial calculations and functions to access the PDB are also provided.", 
             "title": "Description"
         }, 
         {
             "location": "/#installation", 
-            "text": "Install BioStructures from the Julia REPL:  julia   Pkg . clone ( https://github.com/BioJulia/BioStructures.jl )   If you are interested in the cutting edge of the development, please check out the master branch to try new features before release.", 
+            "text": "Install BioStructures from the Julia REPL:  julia   Pkg . add ( BioStructures )   If you are interested in the cutting edge of the development, please check out the master branch to try new features before release.", 
             "title": "Installation"
         }, 
         {
