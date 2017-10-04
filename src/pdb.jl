@@ -248,6 +248,8 @@ function downloadpdb(pdbid::AbstractString; pdb_dir::AbstractString=pwd(), file_
             rm(archivefilepath, force=true)
         end
     end
+
+    return pdbpath
 end
 
 
