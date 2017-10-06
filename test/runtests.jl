@@ -47,7 +47,7 @@ pdbfilepath(filename::AbstractString) = joinpath(fmtdir, "PDB", filename)
     # Invalid ba_number for PDB "1alw"
     @test_throws ErrorException downloadpdb("1alw",pdb_dir=pdb_dir, file_format=MMCIF,ba_number=10)
     # Tests if downloadpdb returns the correct path to the downloaded file
-    @test isfile(downloadpdb("1crn"))
+    @test isfile(downloadpdb("1crn", pdb_dir=pdb_dir))
 
     # PDB format
     downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDB)
