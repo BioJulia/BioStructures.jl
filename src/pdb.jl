@@ -163,7 +163,7 @@ end
 """
     downloadpdb(pdbid::AbstractString; <keyword arguments>)
 
-Download PDB or biological assembly file from the RCSB server.
+Download PDB or biological assembly file from the RCSB server and returns the path to the file.
 
 # Arguments
 - `pdbid::AbstractString`: the PDB to be downloaded.
@@ -248,6 +248,8 @@ function downloadpdb(pdbid::AbstractString; pdb_dir::AbstractString=pwd(), file_
             rm(archivefilepath, force=true)
         end
     end
+
+    return pdbpath
 end
 
 
