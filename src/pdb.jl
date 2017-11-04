@@ -778,9 +778,9 @@ function writepdb(output::IO, at::AbstractAtom, atom_selectors::Function...)
     end
 end
 
-function writepdb{T <: AbstractAtom}(output::IO,
-                    ats::Vector{T},
-                    atom_selectors::Function...)
+function writepdb(output::IO,
+                ats::Vector{T},
+                atom_selectors::Function...) where {T <: AbstractAtom}
     for at in collectatoms(ats, atom_selectors...)
         writepdb(output, at)
     end

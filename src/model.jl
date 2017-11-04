@@ -928,14 +928,14 @@ Base.eltype(::Type{DisorderedAtom}) = Atom
 Returns a copy of a `Vector` of `StructuralElement`s with all elements that do
 not return `true` from the selector functions removed.
 """
-function applyselectors{T <: StructuralElement}(els::Vector{T}, selectors::Function...)
+function applyselectors(els::Vector{T}, selectors::Function...) where {T <: StructuralElement}
     new_list = copy(els)
     applyselectors!(new_list, selectors...)
     return new_list
 end
 
 "Runs `applyselectors` in place."
-function applyselectors!{T <: StructuralElement}(els::Vector{T}, selectors::Function...)
+function applyselectors!(els::Vector{T}, selectors::Function...) where {T <: StructuralElement}
     for selector in selectors
         filter!(selector, els)
     end
@@ -956,7 +956,7 @@ collectmodels(el::Union{Chain, AbstractResidue, AbstractAtom}) = [model(el)]
 
 collectmodels(mods::Vector{Model}) = sort(mods)
 
-function collectmodels{T <: Union{Chain, AbstractResidue, AbstractAtom}}(els::Vector{T})
+function collectmodels(els::Vector{T}) where {T <: Union{Chain, AbstractResidue, AbstractAtom}}
     mod_list = Model[]
     for el in els
         if !(model(el) in mod_list)
@@ -1017,7 +1017,7 @@ end
 
 collectchains(chs::Vector{Chain}) = sort(chs)
 
-function collectchains{T <: Union{AbstractResidue, AbstractAtom}}(els::Vector{T})
+function collectchains(els::Vector{T}) where {T <: Union{AbstractResidue, AbstractAtom}}
     ch_list = Chain[]
     for el in els
         if !(chain(el) in ch_list)
@@ -1077,9 +1077,9 @@ collectresidues(at::AbstractAtom) = AbstractResidue[residue(at)]
 
 # Note output is always Vector{AbstractResidue} unless input was Vector{Residue}
 # or Vector{DisorderedResidue}, in which case output is same type as input type
-collectresidues{T <: AbstractResidue}(res_list::Vector{T}) = sort(res_list)
+collectresidues(res_list::Vector{T}) where {T <: AbstractResidue} = sort(res_list)
 
-function collectresidues{T <: AbstractAtom}(at_list::Vector{T})
+function collectresidues(at_list::Vector{T}) where {T <: AbstractAtom}
     res_list = AbstractResidue[]
     for at in at_list
         if !(residue(at) in res_list)
@@ -1141,7 +1141,7 @@ collectatoms(at::AbstractAtom) = AbstractAtom[at]
 
 # Note output is always Vector{AbstractAtom} unless input was Vector{Atom} or
 # Vector{DisorderedAtom}, in which case output is same type as input type
-collectatoms{T <: AbstractAtom}(at_list::Vector{T}) = sort(at_list)
+collectatoms(at_list::Vector{T}) where {T <: AbstractAtom} = sort(at_list)
 
 function collectatoms(el::StructuralElementOrList, atom_selector::Function, atom_selectors::Function...)
     return applyselectors(collectatoms(el), atom_selector, atom_selectors...)
@@ -1465,7 +1465,7 @@ function AminoAcidSequence(ch::Chain, residue_selectors::Function...)
         sort(collectresidues(ch, residue_selectors...), by=resnumber))
 end
 
-function AminoAcidSequence{T <: AbstractResidue}(res::Vector{T})
+function AminoAcidSequence(res::Vector{T}) where {T <: AbstractResidue}
     seq = BioSymbols.AminoAcid[]
     for i in 1:length(res)
         if haskey(BioSymbols.threeletter_to_aa, resname(res[i]))
