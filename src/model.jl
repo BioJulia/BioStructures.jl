@@ -99,7 +99,7 @@ An atom that is part of a macromolecule - either an `Atom` or a
 abstract type AbstractAtom <: StructuralElement end
 
 "An atom that is part of a macromolecule."
-immutable Atom <: AbstractAtom
+struct Atom <: AbstractAtom
     serial::Int
     name::String
     alt_loc_id::Char
@@ -112,7 +112,7 @@ immutable Atom <: AbstractAtom
 end
 
 "A container to hold different locations of the same atom."
-immutable DisorderedAtom <: AbstractAtom
+struct DisorderedAtom <: AbstractAtom
     alt_loc_ids::Dict{Char, Atom}
     default::Char
 end
@@ -125,7 +125,7 @@ A residue (amino acid) or other molecule - either a`Residue` or a
 abstract type AbstractResidue <: StructuralElement end
 
 "A residue (amino acid) or other molecule."
-immutable Residue <: AbstractResidue
+struct Residue <: AbstractResidue
     name::String
     number::Int
     ins_code::Char
@@ -136,14 +136,14 @@ immutable Residue <: AbstractResidue
 end
 
 "A container to hold different versions of the same residue (point mutations)."
-immutable DisorderedResidue <: AbstractResidue
+struct DisorderedResidue <: AbstractResidue
     names::Dict{String, Residue}
     default::String
 end
 
 
 "A chain (molecule) from a macromolecular structure."
-immutable Chain <: StructuralElement
+struct Chain <: StructuralElement
     id::Char
     res_list::Vector{String}
     residues::Dict{String, AbstractResidue}
@@ -152,7 +152,7 @@ end
 
 
 "A conformation of a macromolecular structure."
-immutable Model <: StructuralElement
+struct Model <: StructuralElement
     number::Int
     chains::Dict{Char, Chain}
     structure::StructuralElement
@@ -160,7 +160,7 @@ end
 
 
 "A container for multiple `Model`s."
-immutable ProteinStructure <: StructuralElement
+struct ProteinStructure <: StructuralElement
     name::String
     models::Dict{Int, Model}
 end
@@ -170,7 +170,7 @@ end
 A record for a single atom, e.g. as represented in a Protein Data Bank (PDB)
 file.
 """
-immutable AtomRecord
+struct AtomRecord
     het_atom::Bool
     serial::Int
     atom_name::String
