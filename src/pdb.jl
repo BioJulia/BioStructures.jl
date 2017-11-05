@@ -21,16 +21,16 @@ export
 
 
 "Protein Data Bank (PDB) file formats."
-immutable PDB <: BioCore.IO.FileFormat end
-immutable PDBXML <: BioCore.IO.FileFormat end
-immutable MMCIF <: BioCore.IO.FileFormat end
-immutable MMTF <: BioCore.IO.FileFormat end
+struct PDB <: BioCore.IO.FileFormat end
+struct PDBXML <: BioCore.IO.FileFormat end
+struct MMCIF <: BioCore.IO.FileFormat end
+struct MMTF <: BioCore.IO.FileFormat end
 
 # A Dict mapping the type to their file extensions
 const pdbextension = Dict{Type,String}( PDB => ".pdb", PDBXML => ".xml", MMCIF => ".cif", MMTF => ".mmtf")
 
 "Error arising from parsing a Protein Data Bank (PDB) file."
-type PDBParseError <: Exception
+struct PDBParseError <: Exception
     message::String
     line_number::Int
     line::String
@@ -778,9 +778,9 @@ function writepdb(output::IO, at::AbstractAtom, atom_selectors::Function...)
     end
 end
 
-function writepdb{T <: AbstractAtom}(output::IO,
-                    ats::Vector{T},
-                    atom_selectors::Function...)
+function writepdb(output::IO,
+                ats::Vector{T},
+                atom_selectors::Function...) where {T <: AbstractAtom}
     for at in collectatoms(ats, atom_selectors...)
         writepdb(output, at)
     end
