@@ -18,6 +18,7 @@ import BioSequences.AminoAcidSequence
 
 include("model.jl")
 include("pdb.jl")
+include("mmcif.jl")
 include("spatial.jl")
 
 end # BioStructures

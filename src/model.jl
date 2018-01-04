@@ -119,7 +119,7 @@ end
 
 
 """
-A residue (amino acid) or other molecule - either a`Residue` or a
+A residue (amino acid) or other molecule - either a `Residue` or a
 `DisorderedResidue`.
 """
 abstract type AbstractResidue <: StructuralElement end

@@ -480,11 +480,11 @@ function Base.read(input::IO,
 end
 
 function Base.read(filepath::AbstractString,
-            ::Type{PDB};
+            t::Type{T};
             structure_name::AbstractString=splitdir(filepath)[2],
-            kwargs...)
+            kwargs...) where {T <: Union{PDB, MMCIF}}
     open(filepath, "r") do input
-        read(input, PDB; structure_name=structure_name, kwargs...)
+        read(input, t; structure_name=structure_name, kwargs...)
     end
 end
 
