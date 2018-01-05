@@ -268,10 +268,10 @@ function requiresquote(val)
         startswith(lowercase(val), "save_") || val in specialwords
 end
 
-function entitylabel(entity_id::Integer)
-    # Convert a positive integer into a chain ID
-    # Goes A to Z, then AA to ZA, AB to ZB etc
-    # This is in line with existing mmCIF files
+# Convert a positive integer into a chain ID
+# Goes A to Z, then AA to ZA, AB to ZB etc
+# This is in line with existing mmCIF files
+function entitylabel(entity_id::Integer) # Not currently used
     div = entity_id
     out = ""
     while div > 0
@@ -407,29 +407,8 @@ function writemmcif(output::IO,
                 el::Union{Model, Chain, AbstractResidue, Vector{Chain},
                     Vector{AbstractResidue}, Vector{Residue}, Vector{DisorderedResidue}},
                 atom_selectors::Function...)
-    written_fields = [
-        "_atom_site.group_PDB",
-        "_atom_site.id",
-        "_atom_site.type_symbol",
-        "_atom_site.label_atom_id",
-        "_atom_site.label_alt_id",
-        "_atom_site.label_comp_id",
-        #"_atom_site.label_asym_id",
-        #"_atom_site.label_entity_id",
-        #"_atom_site.label_seq_id",
-        "_atom_site.pdbx_PDB_ins_code",
-        "_atom_site.Cartn_x",
-        "_atom_site.Cartn_y",
-        "_atom_site.Cartn_z",
-        "_atom_site.occupancy",
-        "_atom_site.B_iso_or_equiv",
-        #"_atom_site.auth_seq_id",
-        "_atom_site.auth_asym_id",
-        "_atom_site.pdbx_PDB_model_num",
-    ]
-    # differences to above are pdbx_formal_charge auth_comp_id auth_atom_id
-    # can this list be eliminated?
-    atom_dict = Dict([i=> String[] for i in written_fields])
+    # Create an empty dictionary and add atoms one at a time
+    atom_dict = Dict(["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
 
     # Collect residues then expand out disordered residues
     for res in collectresidues(el)
@@ -450,6 +429,8 @@ function writemmcif(output::IO,
             end
         end
     end
+
+    # Now the MMCIFDict has been generated, write it out to the file
     return writemmcif(output, MMCIFDict(atom_dict))
 end
 
@@ -460,23 +441,21 @@ function appendatom!(atom_dict, at, model_n, chain_id, res_n, res_name, het) # a
     push!(atom_dict["_atom_site.label_atom_id"], atomname(at))
     push!(atom_dict["_atom_site.label_alt_id"], altlocid(at) == ' ' ? "." : string(altlocid(at)))
     push!(atom_dict["_atom_site.label_comp_id"], res_name)
-
-    #push!(atom_dict["_atom_site.label_asym_id"], entitylabel(entity_id))
-
+    push!(atom_dict["_atom_site.label_asym_id"], "?") # change?
     # The entity ID should be the same for similar chains
     # However this is non-trivial to calculate so we write "?"
-    #atom_dict["_atom_site.label_entity_id"].append("?")
-
-    #push!(atom_dict["_atom_site.label_seq_id"], seq_id) # type
+    push!(atom_dict["_atom_site.label_entity_id"], "?")
+    push!(atom_dict["_atom_site.label_seq_id"], "?") # change?
     push!(atom_dict["_atom_site.pdbx_PDB_ins_code"], inscode(at) == ' ' ? "?" : string(inscode(at)))
     push!(atom_dict["_atom_site.Cartn_x"], fmt(coordspec, round(x(at), 3)))
     push!(atom_dict["_atom_site.Cartn_y"], fmt(coordspec, round(y(at), 3)))
     push!(atom_dict["_atom_site.Cartn_z"], fmt(coordspec, round(z(at), 3)))
     push!(atom_dict["_atom_site.occupancy"], fmt(floatspec, occupancy(at)))
     push!(atom_dict["_atom_site.B_iso_or_equiv"], fmt(floatspec, tempfactor(at)))
-
-    #atom_dict["_atom_site.auth_seq_id"].append(resseq)
-
+    push!(atom_dict["_atom_site.pdbx_formal_charge"], length(charge(at)) == 0 ? "?" : charge(at))
+    push!(atom_dict["_atom_site.auth_seq_id"], res_n)
+    push!(atom_dict["_atom_site.auth_comp_id"], res_name)
     push!(atom_dict["_atom_site.auth_asym_id"], chain_id)
+    push!(atom_dict["_atom_site.auth_atom_id"], atomname(at))
     push!(atom_dict["_atom_site.pdbx_PDB_model_num"], model_n)
 end
