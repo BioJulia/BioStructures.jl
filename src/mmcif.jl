@@ -33,13 +33,13 @@ Base.values(mmcif_dict::MMCIFDict) = values(mmcif_dict.dict)
 Base.haskey(mmcif_dict::MMCIFDict, key) = haskey(mmcif_dict.dict, key)
 
 function Base.show(io::IO, mmcif_dict::MMCIFDict)
-    print("mmCIF dictionary with $(length(keys(mmcif_dict))) fields")
+    print(io, "mmCIF dictionary with $(length(keys(mmcif_dict))) fields")
 end
 
 
+# Split a mmCIF line into tokens
+# See https://www.iucr.org/resources/cif/spec/version1.1/cifsyntax for syntax
 function splitline(s::AbstractString)
-    # See https://www.iucr.org/resources/cif/spec/version1.1/cifsyntax
-    #   for the syntax
     tokens = String[]
     in_token = false
     # Quote character of the currently open quote, or ' ' if no quote open
@@ -80,6 +80,7 @@ function splitline(s::AbstractString)
     return tokens
 end
 
+# Get tokens from a mmCIF file
 function tokenizecif(f::IOStream)
     tokens = String[]
     for line in eachline(f)
@@ -187,6 +188,7 @@ function Base.read(input::IO,
     return struc
 end
 
+# Constructor from mmCIF ATOM/HETATM line
 AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
     d["_atom_site.group_PDB"][i] == "HETATM",
     parse(Int, d["_atom_site.id"][i]),
@@ -234,11 +236,10 @@ mmciforder = Dict(
     ]
 )
 
+# Format a mmCIF data value by enclosing with quotes or semicolon lines where
+#   appropriate. See
+#   https://www.iucr.org/resources/cif/spec/version1.1/cifsyntax for syntax.
 function formatmmcifcol(val::AbstractString, col_width::Integer=length(val))
-    # Format a mmCIF data value by enclosing with quotes or semicolon lines
-    #   where appropriate. See
-    #   https://www.iucr.org/resources/cif/spec/version1.1/cifsyntax for syntax.
-
     # If there is a newline or quotes cannot be contained, use semicolon
     #   and newline construct
     if requiresnewline(val)
@@ -281,6 +282,11 @@ function entitylabel(entity_id::Integer)
     return out
 end
 
+"""
+Write a `StructuralElementOrList` or a `MMCIFDict` to a mmCIF format file.
+Additional arguments are atom selector functions - only atoms that return
+`true` from the functions are retained.
+"""
 function writemmcif(filepath::AbstractString, mmcif_dict::MMCIFDict)
     open(filepath, "w") do output
         writemmcif(output, mmcif_dict)
