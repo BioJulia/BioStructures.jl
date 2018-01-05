@@ -673,6 +673,10 @@ function spaceatomname(at::Atom)
 end
 
 
+# Decimal places to format output to
+const coordspec = FormatSpec(".3f")
+const floatspec = FormatSpec(".2f")
+
 """
 Form a Protein Data Bank (PDB) format ATOM or HETATM record from an `Atom` or
 `AtomRecord`.
@@ -690,12 +694,12 @@ function pdbline(at::Atom)
             string(inscode(at)) *
             "   " *
             # This will throw an error for large coordinate values, e.g. -1000.123
-            spacestring(round(x(at), 3), 8) *
-            spacestring(round(y(at), 3), 8) *
-            spacestring(round(z(at), 3), 8) *
-            spacestring(round(occupancy(at), 2), 6) *
+            spacestring(fmt(coordspec, round(x(at), 3)), 8) *
+            spacestring(fmt(coordspec, round(y(at), 3)), 8) *
+            spacestring(fmt(coordspec, round(z(at), 3)), 8) *
+            spacestring(fmt(floatspec, round(occupancy(at), 2)), 6) *
             # This will throw an error for large temp facs, e.g. 1000.12
-            spacestring(round(tempfactor(at), 2), 6) *
+            spacestring(fmt(floatspec, round(tempfactor(at), 2)), 6) *
             "          " *
             spacestring(element(at), 2) *
             spacestring(charge(at), 2)
@@ -714,12 +718,12 @@ function pdbline(at_rec::AtomRecord)
             string(at_rec.ins_code) *
             "   " *
             # This will throw an error for large coordinate values, e.g. -1000.123
-            spacestring(round(at_rec.coords[1], 3), 8) *
-            spacestring(round(at_rec.coords[2], 3), 8) *
-            spacestring(round(at_rec.coords[3], 3), 8) *
-            spacestring(round(at_rec.occupancy, 2), 6) *
+            spacestring(fmt(coordspec, round(at_rec.coords[1], 3)), 8) *
+            spacestring(fmt(coordspec, round(at_rec.coords[2], 3)), 8) *
+            spacestring(fmt(coordspec, round(at_rec.coords[3], 3)), 8) *
+            spacestring(fmt(floatspec, round(at_rec.occupancy, 2)), 6) *
             # This will throw an error for large temp facs, e.g. 1000.12
-            spacestring(round(at_rec.temp_factor, 2), 6) *
+            spacestring(fmt(floatspec, round(at_rec.temp_factor, 2)), 6) *
             "          " *
             spacestring(at_rec.element, 2) *
             spacestring(at_rec.charge, 2)

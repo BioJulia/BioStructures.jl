@@ -9,7 +9,10 @@ const missingvals = Set([".", "?"])
 const specialchars = Set(['_', '#', '\$', '[', ']', ';'])
 const specialwords = Set(["loop_", "stop_", "global_"])
 
-"A mmCIF dictionary."
+"""
+A mmCIF dictionary.
+Keys are field names and values are `String` or `Vector{String}`.
+"""
 struct MMCIFDict
     dict::Dict{String, Union{String, Vector{String}}}
 end
@@ -460,11 +463,11 @@ function appendatom!(atom_dict, at, model_n, chain_id, res_n, res_name, het) # a
 
     #push!(atom_dict["_atom_site.label_seq_id"], seq_id) # type
     push!(atom_dict["_atom_site.pdbx_PDB_ins_code"], inscode(at) == ' ' ? "?" : string(inscode(at)))
-    push!(atom_dict["_atom_site.Cartn_x"], string(round(x(at), 3)))
-    push!(atom_dict["_atom_site.Cartn_y"], string(round(y(at), 3)))
-    push!(atom_dict["_atom_site.Cartn_z"], string(round(z(at), 3)))
-    push!(atom_dict["_atom_site.occupancy"], string(occupancy(at)))
-    push!(atom_dict["_atom_site.B_iso_or_equiv"], string(tempfactor(at)))
+    push!(atom_dict["_atom_site.Cartn_x"], fmt(coordspec, round(x(at), 3)))
+    push!(atom_dict["_atom_site.Cartn_y"], fmt(coordspec, round(y(at), 3)))
+    push!(atom_dict["_atom_site.Cartn_z"], fmt(coordspec, round(z(at), 3)))
+    push!(atom_dict["_atom_site.occupancy"], fmt(floatspec, occupancy(at)))
+    push!(atom_dict["_atom_site.B_iso_or_equiv"], fmt(floatspec, tempfactor(at)))
 
     #atom_dict["_atom_site.auth_seq_id"].append(resseq)
 

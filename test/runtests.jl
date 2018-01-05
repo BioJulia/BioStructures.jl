@@ -1,6 +1,7 @@
 module TestBioStructures
 
 using Base.Test
+using Formatting
 using BioCore
 using BioStructures
 using BioStructures:
@@ -19,7 +20,9 @@ using BioStructures:
     parsetempfac,
     parseelement,
     parsecharge,
-    spacestring
+    spacestring,
+    coordspec,
+    floatspec
 
 
 fmtdir = BioCore.Testing.get_bio_fmt_specimens()
@@ -1246,26 +1249,31 @@ end
     @test_throws ArgumentError spaceatomname(Atom(1, "1MG",   ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "MG", "  ", res))
 
 
+    # Test output formatting
+    @test fmt(coordspec, 5.0) == "5.000"
+    @test fmt(floatspec, -10.0) == "-10.00"
+
+
     # Test pdbline
     ch_a = Chain('A')
     ch_a["1"] = Residue("ALA", 1, ' ', false, ch_a)
     ch_a["1"][" N  "] = Atom(10, " N  ", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " N", "  ", ch_a["1"])
     line = pdbline(ch_a["1"][" N  "])
-    @test line == "ATOM     10  N   ALA A   1         0.0     0.0     0.0   1.0   0.0           N  "
+    @test line == "ATOM     10  N   ALA A   1       0.000   0.000   0.000  1.00  0.00           N  "
     ch_b = Chain('B')
     ch_b["H_20"] = Residue("X", 20, ' ', true, ch_b)
     ch_b["H_20"]["C"] = Atom(101, "C", 'A', [10.5, 20.12345, -5.1227], 0.50, 50.126, "C", "1+", ch_b["H_20"])
     line = pdbline(ch_b["H_20"]["C"])
-    @test line == "HETATM  101  C  A  X B  20        10.5  20.123  -5.123   0.5 50.13           C1+"
+    @test line == "HETATM  101  C  A  X B  20      10.500  20.123  -5.123  0.50 50.13           C1+"
     ch_b["H_20"]["11H11"] = Atom(1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", ch_b["H_20"])
     @test_throws ArgumentError pdbline(ch_b["H_20"]["11H11"])
 
     line_a = "ATOM    669  CA  ILE A  90      31.743  33.110  31.221  1.00 25.76           C  "
     line_b = "HETATM 3474  O  B XX A 334A      8.802  62.000   8.672  1.00 39.15           O1-"
     at_rec = AtomRecord(line_a)
-    @test pdbline(at_rec) == "ATOM    669  CA  ILE A  90      31.743   33.11  31.221   1.0 25.76           C  "
+    @test pdbline(at_rec) == "ATOM    669  CA  ILE A  90      31.743  33.110  31.221  1.00 25.76           C  "
     at_rec = AtomRecord(line_b)
-    @test pdbline(at_rec) == "HETATM 3474  O  B XX A 334A      8.802    62.0   8.672   1.0 39.15           O1-"
+    @test pdbline(at_rec) == "HETATM 3474  O  B XX A 334A      8.802  62.000   8.672  1.00 39.15           O1-"
 
 
     # Test writepdb
