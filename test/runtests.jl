@@ -1512,8 +1512,14 @@ end
         ?
         """
     dic = MMCIFDict(IOBuffer(quote_str))
-    @test dic["_struct_conf.pdbx_PDB_helix_id"] == ["A", "A'", "B", "C", "B'", "D", "E", "C'", "F", "G", "H", "D'", "E'", "A'\"", "BC", "CD", "DE"]
-    @test dic["_struct_conf.details"] == ["?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "TYPE I'", "TYPE I", "TYPE I (H-BOND O65-N69)", "TYPE II'"]
+    @test dic["_struct_conf.pdbx_PDB_helix_id"] == [
+        "A", "A'", "B", "C", "B'", "D", "E", "C'",
+        "F", "G", "H", "D'", "E'", "A'\"", "BC", "CD", "DE"
+    ]
+    @test dic["_struct_conf.details"] == [
+        "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?",
+        "TYPE I'", "TYPE I", "TYPE I (H-BOND O65-N69)", "TYPE II'"
+    ]
 
     underscore_str = """
         data_4Q9R
@@ -1529,7 +1535,11 @@ end
         """
     dic = MMCIFDict(IOBuffer(underscore_str))
     @test length(keys(dic)) == 5
-    @test dic["_pdbx_audit_revision_item.item"] == ["_atom_site.B_iso_or_equiv", "_atom_site.Cartn_x", "_atom_site.Cartn_y", "_atom_site.Cartn_z"]
+    @test dic["_pdbx_audit_revision_item.item"] == [
+        "_atom_site.B_iso_or_equiv", "_atom_site.Cartn_x",
+        "_atom_site.Cartn_y", "_atom_site.Cartn_z"
+    ]
+
 
     # Test splitline
     @test splitline("foo bar") == ["foo", "bar"]
@@ -1545,12 +1555,14 @@ end
     @test_throws ArgumentError splitline("foo \"bar'")
     @test_throws ArgumentError splitline("foo b'ar'")
 
+
     # Test tokenizecif
     open(testfilepath("mmCIF", "1AKE.cif")) do f
         tokens = tokenizecif(f)
         @test length(tokens) == 93983
         @test tokens[90000] == "HOH"
     end
+
 
     # Test AtomRecord
     at_rec = AtomRecord(MMCIFDict(testfilepath("mmCIF", "1AKE.cif")), 5)
@@ -1568,6 +1580,7 @@ end
     @test at_rec.temp_factor == 38.06
     @test at_rec.element == "C"
     @test at_rec.charge == "  "
+
 
     # Test parsing 1AKE
     struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF)
@@ -1598,6 +1611,7 @@ end
     @test length(ats) == 8
     @test atomname.(ats) == ["N", "CA", "C", "O", "CB", "CG1", "CG2", "CD1"]
 
+
     # Test parsing options
     struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, structure_name="New name")
     @test structurename(struc) == "New name"
@@ -1626,12 +1640,14 @@ end
     @test sum(isdisorderedatom.(collectatoms(struc))) == 0
     @test tempfactor(struc['A'][167]["NE"]) == 23.32
 
+
     # Test parsing from stream
     open(testfilepath("mmCIF", "1AKE.cif"), "r") do file
         struc = read(file, MMCIF)
         @test countatoms(struc) == 3804
         @test countresidues(struc) == 808
     end
+
 
     # Test parsing 1EN2
     struc = read(testfilepath("mmCIF", "1EN2.cif"), MMCIF)
@@ -1665,6 +1681,7 @@ end
     @test isa(res, Vector{DisorderedResidue})
     @test resnumber(res[1]) == 10
     @test countresidues(DisorderedResidue[struc['A'][16], struc['A'][10]]) == 2
+
 
     # Test parsing 1SSU
     struc = read(testfilepath("mmCIF", "1SSU.cif"), MMCIF)
@@ -1756,11 +1773,13 @@ end
     @test atomnames(struc_written[15]['A']["39"]) == [
         "N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
 
+
     # Test writing to stream
     open(temp_filename, "w") do file
         writemmcif(file, struc)
     end
     @test countlines(temp_filename) == 15145
+
 
     # Test selectors
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)

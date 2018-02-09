@@ -9,6 +9,34 @@ const missingvals = Set([".", "?"])
 const specialchars = Set(['_', '#', '\$', '[', ']', ';'])
 const specialwords = Set(["loop_", "stop_", "global_"])
 
+# If certain entries should have a certain order of keys, that is specified here
+const mmciforder = Dict(
+    "_atom_site"=> [
+        "group_PDB",
+        "id",
+        "type_symbol",
+        "label_atom_id",
+        "label_alt_id",
+        "label_comp_id",
+        "label_asym_id",
+        "label_entity_id",
+        "label_seq_id",
+        "pdbx_PDB_ins_code",
+        "Cartn_x",
+        "Cartn_y",
+        "Cartn_z",
+        "occupancy",
+        "B_iso_or_equiv",
+        "pdbx_formal_charge",
+        "auth_seq_id",
+        "auth_comp_id",
+        "auth_asym_id",
+        "auth_atom_id",
+        "pdbx_PDB_model_num",
+    ]
+)
+
+
 """
 A mmCIF dictionary.
 Keys are field names as a `String` and values are `String` or `Vector{String}`.
@@ -80,6 +108,7 @@ function splitline(s::AbstractString)
     return tokens
 end
 
+
 # Get tokens from a mmCIF file
 function tokenizecif(f::IO)
     tokens = String[]
@@ -110,6 +139,7 @@ function MMCIFDict(mmcif_filepath::AbstractString)
     end
 end
 
+# Read a mmCIF file into a MMCIFDict
 function MMCIFDict(f::IO)
     mmcif_dict = MMCIFDict()
     tokens = tokenizecif(f)
@@ -188,6 +218,7 @@ function Base.read(input::IO,
     return struc
 end
 
+
 # Constructor from mmCIF ATOM/HETATM line
 AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
     d["_atom_site.group_PDB"][i] == "HETATM",
@@ -209,32 +240,6 @@ AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
     d["_atom_site.pdbx_formal_charge"][i] in missingvals ? "  " : d["_atom_site.pdbx_formal_charge"][i],
 )
 
-# If certain entries should have a certain order of keys, that is specified here
-mmciforder = Dict(
-    "_atom_site"=> [
-        "group_PDB",
-        "id",
-        "type_symbol",
-        "label_atom_id",
-        "label_alt_id",
-        "label_comp_id",
-        "label_asym_id",
-        "label_entity_id",
-        "label_seq_id",
-        "pdbx_PDB_ins_code",
-        "Cartn_x",
-        "Cartn_y",
-        "Cartn_z",
-        "occupancy",
-        "B_iso_or_equiv",
-        "pdbx_formal_charge",
-        "auth_seq_id",
-        "auth_comp_id",
-        "auth_asym_id",
-        "auth_atom_id",
-        "pdbx_PDB_model_num",
-    ]
-)
 
 # Format a mmCIF data value by enclosing with quotes or semicolon lines where
 #   appropriate. See
@@ -333,7 +338,8 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
         # Check the mmCIF dictionary has consistent list sizes
         for i in key_list
             val = mmcif_dict["$key.$i"]
-            if (isa(sample_val, Array) && (isa(val, String) || length(val) != n_vals)) || (isa(sample_val, String) && isa(val, Array))
+            if (isa(sample_val, Array) && (isa(val, String) || length(val) != n_vals)) ||
+                    (isa(sample_val, String) && isa(val, Array))
                 throw(ArgumentError("Inconsistent list sizes in mmCIF dictionary: $key.$i"))
             end
         end
@@ -354,6 +360,7 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
             println(output, "loop_")
             col_widths = Dict{String, Int}()
             # Write keys and find max widths for each set of values
+            # Technically the max of the sum of the column widths is 2048
             for i in key_list
                 println(output, "$key.$i")
                 col_widths[i] = 0
@@ -368,7 +375,6 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
                     end
                 end
             end
-            # Technically the max of the sum of the column widths is 2048
 
             # Write the values as rows
             for i in 1:n_vals
@@ -402,8 +408,8 @@ function writemmcif(output::IO,
             ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
     atom_dict["data_"] = structurename(first(el))
 
-    loop_el = el
     # Ensure multiple models get written out correctly
+    loop_el = el
     if isa(el, ProteinStructure)
         loop_el = collectmodels(el)
     end
@@ -418,14 +424,16 @@ function writemmcif(output::IO,
             res_name = resname(res)
             for at in collectatoms(res, atom_selectors...)
                 for atom_record in at
-                    appendatom!(atom_dict, atom_record, model_n, chain_id, res_n, res_name, het)
+                    appendatom!(atom_dict, atom_record, model_n, chain_id,
+                        res_n, res_name, het)
                 end
             end
         else
             for res_name in resnames(res)
                 for at in collectatoms(disorderedres(res, res_name), atom_selectors...)
                     for atom_record in at
-                        appendatom!(atom_dict, atom_record, model_n, chain_id, res_n, res_name, het)
+                        appendatom!(atom_dict, atom_record, model_n, chain_id,
+                            res_n, res_name, het)
                     end
                 end
             end
@@ -466,6 +474,8 @@ function writemmcif(output::IO,
     return writemmcif(output, MMCIFDict(atom_dict))
 end
 
+
+# Add an atom record to a growing atom dictionary
 function appendatom!(atom_dict, at, model_n, chain_id, res_n, res_name, het)
     push!(atom_dict["_atom_site.group_PDB"], het)
     push!(atom_dict["_atom_site.id"], string(serial(at)))
