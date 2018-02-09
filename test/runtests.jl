@@ -27,13 +27,17 @@ using BioStructures:
     tokenizecif,
     formatmmcifcol,
     requiresnewline,
-    requiresquote
+    requiresquote,
+    entitylabel
 
 
 fmtdir = BioCore.Testing.get_bio_fmt_specimens()
 
 # Access files in BioFmtSpecimens to test against
 testfilepath(path::AbstractString...) = joinpath(fmtdir, path...)
+
+# All writing is done to one temporary file which is removed at the end
+temp_filename = tempname()
 
 
 @testset "PDB Handling" begin
@@ -1296,8 +1300,6 @@ end
     end
 
     struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)
-    # All writing is done to one temporary file which is removed at the end
-    temp_filename = tempname()
     writepdb(temp_filename, struc)
     @test countlines(temp_filename) == 15160
     struc_written = read(temp_filename, PDB)
@@ -1429,15 +1431,13 @@ end
 
     @test_throws ArgumentError writepdb(temp_filename, Atom(
         1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res))
-
-    # Delete temporary file
-    rm(temp_filename)
 end
 
 
 @testset "mmCIF" begin
     # Test mmCIF dictionary
     dic = MMCIFDict()
+    dic = MMCIFDict(Dict())
     dic = MMCIFDict(testfilepath("mmCIF", "1AKE.cif"))
     @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == "1991-11-08"
     @test dic["_audit_author.name"] == ["Mueller, C.W.", "Schulz, G.E."]
@@ -1450,16 +1450,98 @@ end
     @test !haskey(dic, "nokey")
     show(DevNull, dic)
 
-    multiline_str = """\
-        data_verbatim_test
+    multiline_str = """
+        data_test
         _test_value
-        ;First line
-            Second line
-        Third line
+        ;first line
+            second line
+        third line
         ;
         """
-    #dic = MMCIFDict(multiline_str)
-    #@test dic["_test_value"] == "First line\n    Second line\nThird line"
+    dic = MMCIFDict(IOBuffer(multiline_str))
+    @test dic["data_"] == "test"
+    @test dic["_test_value"] == "first line\n    second line\nthird line"
+
+    comment_str = """
+        data_test
+        _test_single foo # Ignore this comment
+        loop_
+        _test_loop_1
+        _test_loop_2
+        a b # Ignore this comment
+        c d
+        """
+    dic = MMCIFDict(IOBuffer(comment_str))
+    @test dic["_test_single"] == "foo"
+    @test dic["_test_loop_1"] == ["a", "c"]
+    @test dic["_test_loop_2"] == ["b", "d"]
+
+    quote_str = """
+        data_1MOM
+        loop_
+        _struct_conf.conf_type_id
+        _struct_conf.id
+        _struct_conf.pdbx_PDB_helix_id
+        _struct_conf.beg_label_comp_id
+        _struct_conf.beg_label_asym_id
+        _struct_conf.beg_label_seq_id
+        _struct_conf.pdbx_beg_PDB_ins_code
+        _struct_conf.end_label_comp_id
+        _struct_conf.end_label_asym_id
+        _struct_conf.end_label_seq_id
+        _struct_conf.pdbx_end_PDB_ins_code
+        _struct_conf.beg_auth_comp_id
+        _struct_conf.beg_auth_asym_id
+        _struct_conf.beg_auth_seq_id
+        _struct_conf.end_auth_comp_id
+        _struct_conf.end_auth_asym_id
+        _struct_conf.end_auth_seq_id
+        _struct_conf.pdbx_PDB_helix_class
+        _struct_conf.details
+        _struct_conf.pdbx_PDB_helix_length
+        HELX_P HELX_P1  A     PRO A 11  ? ASN A 23  ? PRO A 11  ASN A 23  1 ?                         13
+        HELX_P HELX_P2  "A'"  ALA A 44  ? ARG A 46  ? ALA A 44  ARG A 46  5 ?                         3
+        HELX_P HELX_P3  B     PRO A 86  ? SER A 92  ? PRO A 86  SER A 92  1 ?                         7
+        HELX_P HELX_P4  C     TYR A 111 ? ALA A 118 ? TYR A 111 ALA A 118 1 ?                         8
+        HELX_P HELX_P5  "B'"  ARG A 122 ? LYS A 124 ? ARG A 122 LYS A 124 5 ?                         3
+        HELX_P HELX_P6  D     LEU A 129 ? LEU A 139 ? LEU A 129 LEU A 139 1 ?                         11
+        HELX_P HELX_P7  E     SER A 144 ? ILE A 155 ? SER A 144 ILE A 155 1 ?                         12
+        HELX_P HELX_P8  "C'"  THR A 158 ? ARG A 163 ? THR A 158 ARG A 163 1 ?                         6
+        HELX_P HELX_P9  F     LYS A 165 ? GLU A 173 ? LYS A 165 GLU A 173 1 ?                         9
+        HELX_P HELX_P10 G     LEU A 183 ? SER A 191 ? LEU A 183 SER A 191 1 ?                         9
+        HELX_P HELX_P11 H     TRP A 192 ? LEU A 201 ? TRP A 192 LEU A 201 1 ?                         10
+        HELX_P HELX_P12 "D'"  LYS A 231 ? ASN A 236 ? LYS A 231 ASN A 236 3 ?                         6
+        HELX_P HELX_P13 "E'"  THR A 243 ? ILE A 246 ? THR A 243 ILE A 246 5 ?                         4
+        TURN_P TURN_P1  'A'"' ASP A 1   ? ILE A 34  ? ASP A 1   ILE A 34  5
+        ;TYPE I'
+        ;
+        ?
+        TURN_P TURN_P2  BC    ASP A 1   ? GLY A 57  ? ASP A 1   GLY A 57  5 'TYPE I'                  ?
+        TURN_P TURN_P3  CD    ASP A 1   ? ASN A 68  ? ASP A 1   ASN A 68  5 'TYPE I (H-BOND O65-N69)' ?
+        TURN_P TURN_P4  DE    ASP A 1   ? THR A 79  ? ASP A 1   THR A 79  5
+        ;TYPE II'
+        ;
+        ?
+        """
+    dic = MMCIFDict(IOBuffer(quote_str))
+    @test dic["_struct_conf.pdbx_PDB_helix_id"] == ["A", "A'", "B", "C", "B'", "D", "E", "C'", "F", "G", "H", "D'", "E'", "A'\"", "BC", "CD", "DE"]
+    @test dic["_struct_conf.details"] == ["?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "TYPE I'", "TYPE I", "TYPE I (H-BOND O65-N69)", "TYPE II'"]
+
+    underscore_str = """
+        data_4Q9R
+        loop_
+        _pdbx_audit_revision_item.ordinal
+        _pdbx_audit_revision_item.revision_ordinal
+        _pdbx_audit_revision_item.data_content_type
+        _pdbx_audit_revision_item.item
+        1  5 'Structure model' '_atom_site.B_iso_or_equiv'
+        2  5 'Structure model' '_atom_site.Cartn_x'
+        3  5 'Structure model' '_atom_site.Cartn_y'
+        4 5 'Structure model' '_atom_site.Cartn_z'
+        """
+    dic = MMCIFDict(IOBuffer(underscore_str))
+    @test length(keys(dic)) == 5
+    @test dic["_pdbx_audit_revision_item.item"] == ["_atom_site.B_iso_or_equiv", "_atom_site.Cartn_x", "_atom_site.Cartn_y", "_atom_site.Cartn_z"]
 
     # Test splitline
     @test splitline("foo bar") == ["foo", "bar"]
@@ -1499,14 +1581,136 @@ end
     @test at_rec.element == "C"
     @test at_rec.charge == "  "
 
-    # read
+    # Test parsing 1AKE
+    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF)
+    @test structurename(struc) == "1AKE.cif"
+    @test countmodels(struc) == 1
+    @test modelnumbers(struc) == [1]
+    @test countchains(struc) == 2
+    @test countchains(struc[1]) == 2
+    @test chainids(struc) == ['A', 'B']
+    @test chainids(struc[1]) == ['A', 'B']
+    @test resname(struc['A'][10]) == "GLY"
+    @test !isdisorderedres(struc['A'][10])
+    @test serial(struc['A'][200]["NZ"]) == 1555
+    @test !isdisorderedatom(struc['A'][200]["NZ"])
+    @test isdisorderedatom(struc['A'][167]["CD"])
+    @test altlocids(struc['A'][167]["CD"]) == ['A', 'B']
+    @test x(struc['A'][167]["CD"]) == 24.502
+    @test x(struc['A'][167]["CD"]['A']) == 24.502
+    @test x(struc['A'][167]["CD"]['B']) == 24.69
+    mods = collect(struc)
+    @test modelnumber(mods[1]) == 1
+    chs = collect(mods[1])
+    @test chainid.(chs) == ['A', 'B']
+    res = collect(chs[1])
+    @test length(res) == 456
+    @test resid(res[20]) == "20"
+    ats = collect(res[20])
+    @test length(ats) == 8
+    @test atomname.(ats) == ["N", "CA", "C", "O", "CB", "CG1", "CG2", "CD1"]
+
+    # Test parsing 1EN2
+    struc = read(testfilepath("mmCIF", "1EN2.cif"), MMCIF)
+    @test modelnumbers(struc) == [1]
+    @test chainids(struc[1]) == ['A']
+    @test serial(struc['A'][48]["CA"]) == 394
+    @test isdisorderedres(struc['A'][10])
+    @test defaultresname(struc['A'][10]) == "SER"
+    @test resname(disorderedres(struc['A'][10], "SER")) == "SER"
+    @test resname(disorderedres(struc['A'][10], "GLY")) == "GLY"
+    @test !isdisorderedatom(struc['A'][10]["CA"])
+    @test altlocid(struc['A'][10]["CA"]) == 'A'
+    @test isdisorderedres(struc['A'][16])
+    @test defaultresname(struc['A'][16]) == "ARG"
+    @test resname(disorderedres(struc['A'][16], "ARG")) == "ARG"
+    @test resname(disorderedres(struc['A'][16], "TRP")) == "TRP"
+    @test !isdisorderedatom(disorderedres(struc['A'][16], "TRP")["CA"])
+    @test altlocid(disorderedres(struc['A'][16], "TRP")["CA"]) == 'C'
+    @test isdisorderedatom(struc['A'][16]["CA"])
+    @test altlocids(struc['A'][16]["CA"]) == ['A', 'B']
+    @test defaultaltlocid(struc['A'][16]["CA"]) == 'A'
+    @test occupancy(struc['A'][16]["CA"]) == 0.22
+    ats = collectatoms(DisorderedResidue[struc['A'][10], struc['A'][16]])
+    @test length(ats) == 17
+    @test isa(ats, Vector{AbstractAtom})
+    @test serial(ats[10]) == 113
+    @test isa(ats[10], DisorderedAtom)
+    @test countatoms(DisorderedResidue[struc['A'][10], struc['A'][16]]) == 17
+    res = collectresidues(DisorderedResidue[struc['A'][16], struc['A'][10]])
+    @test length(res) == 2
+    @test isa(res, Vector{DisorderedResidue})
+    @test resnumber(res[1]) == 10
+    @test countresidues(DisorderedResidue[struc['A'][16], struc['A'][10]]) == 2
+
+    # Test parsing 1SSU
+    struc = read(testfilepath("mmCIF", "1SSU.cif"), MMCIF)
+    @test countmodels(struc) == 20
+    @test modelnumbers(struc) == collect(1:20)
+    @test countchains(struc) == 1
+    @test countchains(struc[5]) == 1
+    @test chainids(struc) == ['A']
+    @test chainids(struc[5]) == ['A']
+    # This is different to the PDB file as in the mmCIF file the atom serial
+    #   does not reset for new models
+    @test serial(struc[10]['A'][40]["HB2"]) == 7378
+    @test countatoms(struc) == 756
+    @test countatoms.([struc[i] for i in modelnumbers(struc)]) == 756 * ones(Int, 20)
+    @test countatoms(struc, hydrogenselector) == 357
+    ats = collectatoms(Model[struc[5], struc[10]])
+    @test length(ats) == 1512
+    # Due to the changes in atom serial this is also different to the PDB file
+    @test z(ats[20]) == -14.782
+    @test z(ats[1000]) == -3.367
+    @test countatoms(Model[struc[5], struc[10]]) == 1512
+    res = collectresidues(Model[struc[5], struc[10]])
+    @test length(res) == 102
+    @test y(res[10]["O"]) == -6.421
+    @test y(res[100]["O"]) == -15.66
+    @test countresidues(Model[struc[5], struc[10]]) == 102
+    chs = collectchains(Model[struc[5], struc[10]])
+    @test length(chs) == 2
+    @test chainid.(chs) == ['A', 'A']
+    @test z(chs[2][5]["CA"]) == -5.667
+    @test countchains(Model[struc[5], struc[10]]) == 2
+    mods = collectmodels(Model[struc[10], struc[5]])
+    @test length(mods) == 2
+    @test modelnumber.(mods) == [5, 10]
+    @test z(mods[2]['A'][5]["CA"]) == -5.667
+    @test countmodels(Model[struc[10], struc[5]]) == 2
 
 
-    # formatmmcifcol, requiresnewline, requiredquote
+    # Test formatting
+    @test !requiresnewline("foobar")
+    @test requiresnewline("foo\nbar")
+    @test !requiresnewline("foo' bar")
+    @test requiresnewline("foo' b\" ar")
 
+    @test !requiresquote("foobar")
+    @test requiresquote("foo bar")
+    @test requiresquote("_foobar")
+    @test requiresquote("data_foobar")
+    @test requiresquote("global_")
 
-    # writemmcif
+    @test formatmmcifcol("foo") == "foo"
+    @test formatmmcifcol("foo\nbar", 5) == "\n;foo\nbar\n;\n"
+    @test formatmmcifcol("_foobar", 10) == "'_foobar' "
+    @test formatmmcifcol("foo' bar", 12) == "\"foo' bar\"  "
 
+    @test entitylabel(4) == "D"
+    @test entitylabel(55) == "CB"
+
+    # Test writemmcif
+    dic_one = MMCIFDict(testfilepath("mmCIF", "1AKE.cif"))
+    writemmcif(temp_filename, dic_one)
+    dic_two = MMCIFDict(temp_filename)
+    @test length(keys(dic_one)) == length(keys(dic_two))
+    for k in keys(dic_one)
+        @test haskey(dic_two, k)
+        @test dic_one[k] == dic_two[k]
+    end
+
+    # Check the 3 ArgumentError throws
 end
 
 
@@ -1700,5 +1904,8 @@ end
         true  true  true  false false
     ]
 end
+
+# Delete temporary file
+rm(temp_filename)
 
 end # TestBioStructures
