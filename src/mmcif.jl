@@ -11,7 +11,7 @@ const specialwords = Set(["loop_", "stop_", "global_"])
 
 """
 A mmCIF dictionary.
-Keys are field names and values are `String` or `Vector{String}`.
+Keys are field names as a `String` and values are `String` or `Vector{String}`.
 """
 struct MMCIFDict
     dict::Dict{String, Union{String, Vector{String}}}
@@ -81,7 +81,7 @@ function splitline(s::AbstractString)
 end
 
 # Get tokens from a mmCIF file
-function tokenizecif(f::IOStream)
+function tokenizecif(f::IO)
     tokens = String[]
     for line in eachline(f)
         if startswith(line, "#")
@@ -268,19 +268,6 @@ function requiresquote(val)
         startswith(lowercase(val), "save_") || val in specialwords
 end
 
-# Convert a positive integer into a chain ID
-# Goes A to Z, then AA to ZA, AB to ZB etc
-# This is in line with existing mmCIF files
-function entitylabel(entity_id::Integer) # Not currently used
-    div = entity_id
-    out = ""
-    while div > 0
-        mod = (div - 1) % 26
-        out = "$out$(Char(65+mod))"
-        div = Int(floor((div - mod) / 26))
-    end
-    return out
-end
 
 """
 Write a `StructuralElementOrList` or a `MMCIFDict` to a mmCIF format file.
@@ -293,7 +280,7 @@ function writemmcif(filepath::AbstractString, mmcif_dict::MMCIFDict)
     end
 end
 
-function writemmcif(output::IOStream, mmcif_dict::MMCIFDict)
+function writemmcif(output::IO, mmcif_dict::MMCIFDict)
     # Form dictionary where key is first part of mmCIF key and value is list
     #   of corresponding second parts
     key_lists = Dict{String, Vector{String}}()
@@ -335,6 +322,8 @@ function writemmcif(output::IOStream, mmcif_dict::MMCIFDict)
     # Write out top data_ line
     if data_val != ""
         println(output, "data_$data_val\n#")
+    else
+        println(output, "data_unknown\n#")
     end
 
     for (key, key_list) in key_lists
@@ -404,27 +393,40 @@ function writemmcif(filepath::AbstractString,
 end
 
 function writemmcif(output::IO,
-                el::Union{Model, Chain, AbstractResidue, Vector{Chain},
-                    Vector{AbstractResidue}, Vector{Residue}, Vector{DisorderedResidue}},
+                el::Union{ProteinStructure, Model, Chain, AbstractResidue,
+                    Vector{Model}, Vector{Chain}, Vector{AbstractResidue},
+                    Vector{Residue}, Vector{DisorderedResidue}},
                 atom_selectors::Function...)
     # Create an empty dictionary and add atoms one at a time
-    atom_dict = Dict(["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
+    atom_dict = Dict{String, Union{String, Vector{String}}}(
+            ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
+    atom_dict["data_"] = structurename(first(el))
+
+    loop_el = el
+    # Ensure multiple models get written out correctly
+    if isa(el, ProteinStructure)
+        loop_el = collectmodels(el)
+    end
 
     # Collect residues then expand out disordered residues
-    for res in collectresidues(el)
+    for res in collectresidues(loop_el)
         model_n = string(modelnumber(res))
-        chain_id = string(chainid(res))
+        chain_id = chainid(res) == ' ' ? "." : string(chainid(res))
         res_n = string(resnumber(res))
         het = ishetero(res) ? "HETATM" : "ATOM"
         if isa(res, Residue)
             res_name = resname(res)
             for at in collectatoms(res, atom_selectors...)
-                appendatom!(atom_dict, at, model_n, chain_id, res_n, res_name, het)
+                for atom_record in at
+                    appendatom!(atom_dict, atom_record, model_n, chain_id, res_n, res_name, het)
+                end
             end
         else
             for res_name in resnames(res)
                 for at in collectatoms(disorderedres(res, res_name), atom_selectors...)
-                    appendatom!(atom_dict, at, model_n, chain_id, res_n, res_name, het)
+                    for atom_record in at
+                        appendatom!(atom_dict, atom_record, model_n, chain_id, res_n, res_name, het)
+                    end
                 end
             end
         end
@@ -434,18 +436,46 @@ function writemmcif(output::IO,
     return writemmcif(output, MMCIFDict(atom_dict))
 end
 
-function appendatom!(atom_dict, at, model_n, chain_id, res_n, res_name, het) # add entity_id? and seq_id
+function writemmcif(output::IO, at::AbstractAtom, atom_selectors::Function...)
+    atom_dict = Dict{String, Union{String, Vector{String}}}(
+            ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
+    atom_dict["data_"] = structurename(at)
+    for atom_record in at
+        appendatom!(atom_dict, atom_record, string(modelnumber(at)),
+            chainid(at) == ' ' ? "." : string(chainid(at)),
+            string(resnumber(at)), resname(at),
+            ishetero(at) ? "HETATM" : "ATOM")
+    end
+    return writemmcif(output, MMCIFDict(atom_dict))
+end
+
+function writemmcif(output::IO,
+                ats::Vector{T},
+                atom_selectors::Function...) where {T <: AbstractAtom}
+    atom_dict = Dict{String, Union{String, Vector{String}}}(
+            ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
+    atom_dict["data_"] = structurename(ats[1])
+    for at in collectatoms(ats, atom_selectors...)
+        for atom_record in at
+            appendatom!(atom_dict, atom_record, string(modelnumber(at)),
+                chainid(at) == ' ' ? "." : string(chainid(at)),
+                string(resnumber(at)), resname(at),
+                ishetero(at) ? "HETATM" : "ATOM")
+        end
+    end
+    return writemmcif(output, MMCIFDict(atom_dict))
+end
+
+function appendatom!(atom_dict, at, model_n, chain_id, res_n, res_name, het)
     push!(atom_dict["_atom_site.group_PDB"], het)
     push!(atom_dict["_atom_site.id"], string(serial(at)))
     push!(atom_dict["_atom_site.type_symbol"], length(element(at)) == 0 ? "?" : element(at))
     push!(atom_dict["_atom_site.label_atom_id"], atomname(at))
     push!(atom_dict["_atom_site.label_alt_id"], altlocid(at) == ' ' ? "." : string(altlocid(at)))
     push!(atom_dict["_atom_site.label_comp_id"], res_name)
-    push!(atom_dict["_atom_site.label_asym_id"], "?") # change?
-    # The entity ID should be the same for similar chains
-    # However this is non-trivial to calculate so we write "?"
+    push!(atom_dict["_atom_site.label_asym_id"], "?")
     push!(atom_dict["_atom_site.label_entity_id"], "?")
-    push!(atom_dict["_atom_site.label_seq_id"], "?") # change?
+    push!(atom_dict["_atom_site.label_seq_id"], "?")
     push!(atom_dict["_atom_site.pdbx_PDB_ins_code"], inscode(at) == ' ' ? "?" : string(inscode(at)))
     push!(atom_dict["_atom_site.Cartn_x"], fmt(coordspec, round(x(at), 3)))
     push!(atom_dict["_atom_site.Cartn_y"], fmt(coordspec, round(y(at), 3)))

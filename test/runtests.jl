@@ -27,8 +27,7 @@ using BioStructures:
     tokenizecif,
     formatmmcifcol,
     requiresnewline,
-    requiresquote,
-    entitylabel
+    requiresquote
 
 
 fmtdir = BioCore.Testing.get_bio_fmt_specimens()
@@ -1288,17 +1287,6 @@ end
 
 
     # Test writepdb
-    # Counts lines in a file
-    function countlines(filename::AbstractString)
-        counter = 0
-        open(filename, "r") do file
-            for line in eachline(file)
-                counter += 1
-            end
-        end
-        return counter
-    end
-
     struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)
     writepdb(temp_filename, struc)
     @test countlines(temp_filename) == 15160
@@ -1610,6 +1598,41 @@ end
     @test length(ats) == 8
     @test atomname.(ats) == ["N", "CA", "C", "O", "CB", "CG1", "CG2", "CD1"]
 
+    # Test parsing options
+    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, structure_name="New name")
+    @test structurename(struc) == "New name"
+    @test countatoms(struc) == 3804
+
+    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, read_het_atoms=false)
+    @test countatoms(struc) == 3312
+    # Different to the PDB file due to the lack of TER label serial
+    @test serial(collectatoms(struc)[2000]) == 2005
+    @test sum(ishetero.(collectatoms(struc))) == 0
+
+    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, read_std_atoms=false)
+    @test countatoms(struc) == 492
+    @test serial(collectatoms(struc)[400]) == 3724
+    @test sum(ishetero.(collectatoms(struc))) == 492
+
+    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, read_het_atoms=false,
+                read_std_atoms=false)
+    @test countatoms(struc) == 0
+    @test countresidues(struc) == 0
+    @test countchains(struc) == 0
+    @test countmodels(struc) == 0
+
+    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, remove_disorder=true)
+    @test countatoms(struc) == 3804
+    @test sum(isdisorderedatom.(collectatoms(struc))) == 0
+    @test tempfactor(struc['A'][167]["NE"]) == 23.32
+
+    # Test parsing from stream
+    open(testfilepath("mmCIF", "1AKE.cif"), "r") do file
+        struc = read(file, MMCIF)
+        @test countatoms(struc) == 3804
+        @test countresidues(struc) == 808
+    end
+
     # Test parsing 1EN2
     struc = read(testfilepath("mmCIF", "1EN2.cif"), MMCIF)
     @test modelnumbers(struc) == [1]
@@ -1697,9 +1720,6 @@ end
     @test formatmmcifcol("_foobar", 10) == "'_foobar' "
     @test formatmmcifcol("foo' bar", 12) == "\"foo' bar\"  "
 
-    @test entitylabel(4) == "D"
-    @test entitylabel(55) == "CB"
-
     # Test writemmcif
     dic_one = MMCIFDict(testfilepath("mmCIF", "1AKE.cif"))
     writemmcif(temp_filename, dic_one)
@@ -1710,7 +1730,142 @@ end
         @test dic_one[k] == dic_two[k]
     end
 
-    # Check the 3 ArgumentError throws
+    writemmcif(temp_filename, MMCIFDict(Dict("key.key"=> "value")))
+    @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict("key"=> "value")))
+    @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict("key.key.key"=> "value")))
+    @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict(
+        "key.one"=> "value",
+        "key.two"=> ["value1", "value2"],
+    )))
+    @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict(
+        "key.one"=> ["value"],
+        "key.two"=> ["value1", "value2"],
+    )))
+
+    struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)
+    writemmcif(temp_filename, struc)
+    @test countlines(temp_filename) == 15145
+    dic_written = MMCIFDict(temp_filename)
+    @test length(keys(dic_written)) == 22
+    @test length(dic_written["_atom_site.group_PDB"]) == 15120
+    struc_written = read(temp_filename, MMCIF)
+    @test isa(struc_written, ProteinStructure)
+    @test modelnumbers(struc_written) == collect(1:20)
+    @test countatoms(struc_written) == 756
+    @test z(struc_written[4]['A']["30"]["OG"]) == -2.177
+    @test atomnames(struc_written[15]['A']["39"]) == [
+        "N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
+
+    # Test writing to stream
+    open(temp_filename, "w") do file
+        writemmcif(file, struc)
+    end
+    @test countlines(temp_filename) == 15145
+
+    # Test selectors
+    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
+    writemmcif(temp_filename, struc, heteroselector)
+    @test countlines(temp_filename) == 524
+    struc_written = read(temp_filename, MMCIF)
+    @test modelnumbers(struc_written) == [1]
+    @test countatoms(struc_written) == 492
+    @test chainids(struc_written) == ['A', 'B']
+    @test tempfactor(struc_written['B']["H_705"]["O"]) == 64.17
+    writemmcif(temp_filename, struc, standardselector, disorderselector)
+    @test countlines(temp_filename) == 35
+    struc_written = read(temp_filename, MMCIF)
+    @test countatoms(struc_written) == 5
+    @test sum(isdisorderedatom.(collectatoms(struc_written))) == 5
+    @test defaultaltlocid(struc_written['A'][167]["NH1"]) == 'A'
+
+
+    # Test writing different element types
+    writemmcif(temp_filename, struc[1])
+    @test countlines(temp_filename) == 3841
+    struc_written = read(temp_filename, MMCIF)
+    @test modelnumbers(struc_written) == [1]
+    @test countatoms(struc_written) == 3804
+    writemmcif(temp_filename, struc['A'])
+    @test countlines(temp_filename) == 1991
+    struc_written = read(temp_filename, MMCIF)
+    @test chainids(struc_written) == ['A']
+    writemmcif(temp_filename, struc['A'][50])
+    @test countlines(temp_filename) == 34
+    struc_written = read(temp_filename, MMCIF)
+    @test chainids(struc_written) == ['A']
+    @test countresidues(struc_written) == 1
+    @test atomnames(struc_written['A'][50]) == [
+        "N", "CA", "C", "O", "CB", "CG", "CD", "CE", "NZ"]
+    writemmcif(temp_filename, struc['A'][50]["CA"])
+    @test countlines(temp_filename) == 26
+    struc_written = read(temp_filename, MMCIF)
+    @test countatoms(struc_written) == 1
+    @test !isdisorderedatom(collectatoms(struc_written)[1])
+    @test serial(collectatoms(struc_written)[1]) == 356
+    writemmcif(temp_filename, struc['A'][167]["CZ"])
+    @test countlines(temp_filename) == 27
+    struc_written = read(temp_filename, MMCIF)
+    @test countatoms(struc_written) == 1
+    @test isdisorderedatom(collectatoms(struc_written)[1])
+    @test length(collectatoms(struc_written)[1]) == 2
+    @test tempfactor(collectatoms(struc_written)[1]) == 16.77
+    writemmcif(temp_filename, Chain[struc['A'], struc['B']])
+    @test countlines(temp_filename) == 3841
+    struc_written = read(temp_filename, MMCIF)
+    @test chainids(struc_written) == ['A', 'B']
+    @test countatoms(struc_written['A']) == 1954
+    @test countatoms(struc_written['B']) == 1850
+    @test altlocids(struc_written['A']["H_215"]["O1G"]) == ['A', 'B']
+    writemmcif(temp_filename, AbstractResidue[struc['A'][51], struc['A'][50]])
+    @test countlines(temp_filename) == 42
+    struc_written = read(temp_filename, MMCIF)
+    @test countresidues(struc_written) == 2
+    @test resid.(collectresidues(struc_written)) == ["50", "51"]
+    @test countatoms(struc_written) == 17
+    writemmcif(temp_filename, AbstractAtom[struc['A'][51]["CA"], struc['A'][50]["CA"]])
+    @test countlines(temp_filename) == 27
+    struc_written = read(temp_filename, MMCIF)
+    @test countatoms(struc_written) == 2
+    @test !ishetero(struc_written['A'][51]["CA"])
+
+
+    # Test multiple model writing
+    struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)
+    writemmcif(temp_filename, Model[struc[10], struc[5]])
+    @test countlines(temp_filename) == 1537
+    struc_written = read(temp_filename, MMCIF)
+    @test modelnumbers(struc_written) == [5, 10]
+    @test modelnumber(defaultmodel(struc_written)) == 5
+    @test countatoms(struc_written[5]) == 756
+    @test countatoms(struc_written[10]) == 756
+    @test_throws KeyError struc_written[1]
+
+
+    # Test disordered residue writing
+    struc = read(testfilepath("PDB", "1EN2.pdb"), PDB)
+    writemmcif(temp_filename, struc)
+    @test countlines(temp_filename) == 844
+    struc_written = read(temp_filename, MMCIF)
+    @test countatoms(struc_written) == 754
+    @test isa(struc_written['A'][15], Residue)
+    @test isa(struc_written['A'][16], DisorderedResidue)
+    @test defaultresname(struc_written['A'][16]) == "ARG"
+    @test isa(struc_written['A'][16]["N"], DisorderedAtom)
+    @test defaultaltlocid(struc_written['A'][16]["N"]) == 'A'
+    @test isa(disorderedres(struc_written['A'][16], "TRP")["N"], Atom)
+    @test countatoms(struc_written['A'][16]) == 11
+    @test countatoms(disorderedres(struc_written['A'][16], "TRP")) == 14
+    writemmcif(temp_filename, AbstractResidue[struc['A'][16], struc['A'][10]])
+    @test countlines(temp_filename) == 71
+    struc_written = read(temp_filename, MMCIF)
+    @test countresidues(struc_written) == 2
+    @test isa(struc_written['A'][10], DisorderedResidue)
+    @test isa(struc_written['A'][16], DisorderedResidue)
+    @test defaultresname(struc_written['A'][10]) == "SER"
+    @test isa(disorderedres(struc_written['A'][10], "GLY")["O"], Atom)
+    @test altlocid(disorderedres(struc_written['A'][10], "GLY")["O"]) == 'B'
+    @test countatoms(struc_written['A'][10]) == 6
+    @test countatoms(struc_written['A'][16]) == 11
 end
 
 
