@@ -172,7 +172,16 @@ function MMCIFDict(f::IO)
                     continue
                 end
             else
-                push!(mmcif_dict[keys[i % n + 1]], token)
+                try
+                    push!(mmcif_dict[keys[i % n + 1]], token)
+                catch ex
+                    # A zero division error means we have not found any keys
+                    if isa(ex, DivideError)
+                        throw(ArgumentError("Loop keys not found, token: \"$token\""))
+                    else
+                        rethrow()
+                    end
+                end
                 i += 1
                 continue
             end

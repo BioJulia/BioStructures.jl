@@ -1540,6 +1540,16 @@ end
         "_atom_site.Cartn_y", "_atom_site.Cartn_z"
     ]
 
+    keyerr_str = """
+        data_test
+        loop_
+        bad.key
+        bad.key2
+        1 2
+        3 4
+        """
+    @test_throws ArgumentError MMCIFDict(IOBuffer(keyerr_str))
+
 
     # Test splitline
     @test splitline("foo bar") == ["foo", "bar"]
@@ -1718,6 +1728,11 @@ end
     @test modelnumber.(mods) == [5, 10]
     @test z(mods[2]['A'][5]["CA"]) == -5.667
     @test countmodels(Model[struc[10], struc[5]]) == 2
+
+
+    # Test files that should not parse
+    @test_throws Exception read(testfilepath("mmCIF", "1AKE_err.cif"), MMCIF)
+    @test_throws ErrorException read(testfilepath("mmCIF", "1EN2_err.cif"), MMCIF)
 
 
     # Test formatting
