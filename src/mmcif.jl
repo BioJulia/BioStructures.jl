@@ -148,8 +148,8 @@ function MMCIFDict(f::IO)
     key = ""
     keys = String[]
     loop_flag = false
-    i = 0
-    n = 0
+    i = 0 # Value counter
+    n = 0 # Key counter
     for token in tokens[2:end]
         if lowercase(token) == "loop_"
             loop_flag = true
@@ -235,7 +235,7 @@ AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
     d["_atom_site.auth_atom_id"][i],
     d["_atom_site.label_alt_id"][i] in missingvals ? ' ' : d["_atom_site.label_alt_id"][i][1],
     d["_atom_site.auth_comp_id"][i],
-    d["_atom_site.auth_asym_id"][i][1],
+    d["_atom_site.auth_asym_id"][i],
     parse(Int, d["_atom_site.auth_seq_id"][i]),
     d["_atom_site.pdbx_PDB_ins_code"][i] in missingvals ? ' ' : d["_atom_site.pdbx_PDB_ins_code"][i][1],
     [
@@ -426,7 +426,7 @@ function writemmcif(output::IO,
     # Collect residues then expand out disordered residues
     for res in collectresidues(loop_el)
         model_n = string(modelnumber(res))
-        chain_id = chainid(res) == ' ' ? "." : string(chainid(res))
+        chain_id = strip(chainid(res)) == "" ? "." : chainid(res)
         res_n = string(resnumber(res))
         het = ishetero(res) ? "HETATM" : "ATOM"
         if isa(res, Residue)
@@ -459,7 +459,7 @@ function writemmcif(output::IO, at::AbstractAtom, atom_selectors::Function...)
     atom_dict["data_"] = structurename(at)
     for atom_record in at
         appendatom!(atom_dict, atom_record, string(modelnumber(at)),
-            chainid(at) == ' ' ? "." : string(chainid(at)),
+            strip(chainid(at)) == "" ? "." : chainid(at),
             string(resnumber(at)), resname(at),
             ishetero(at) ? "HETATM" : "ATOM")
     end
@@ -475,7 +475,7 @@ function writemmcif(output::IO,
     for at in collectatoms(ats, atom_selectors...)
         for atom_record in at
             appendatom!(atom_dict, atom_record, string(modelnumber(at)),
-                chainid(at) == ' ' ? "." : string(chainid(at)),
+                strip(chainid(at)) == "" ? "." : chainid(at),
                 string(resnumber(at)), resname(at),
                 ishetero(at) ? "HETATM" : "ATOM")
         end

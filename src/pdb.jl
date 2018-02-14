@@ -545,7 +545,7 @@ end
 
 function parsechainid(line::String, line_n::Integer=1)
     try
-        return line[22]
+        return string(line[22])
     catch
         throw(PDBParseError("Could not read chain ID", line_n, line))
     end
@@ -689,7 +689,7 @@ function pdbline(at::Atom)
             string(altlocid(at)) *
             spacestring(resname(at), 3) *
             " " *
-            string(chainid(at)) *
+            chainid(at) * # This is checked during writing for being one character
             spacestring(resnumber(at), 4) *
             string(inscode(at)) *
             "   " *
@@ -713,7 +713,7 @@ function pdbline(at_rec::AtomRecord)
             string(at_rec.alt_loc_id) *
             spacestring(at_rec.res_name, 3) *
             " " *
-            string(at_rec.chain_id) *
+            at_rec.chain_id * # This is checked during writing for being one character
             spacestring(at_rec.res_number, 4) *
             string(at_rec.ins_code) *
             "   " *
@@ -729,6 +729,11 @@ function pdbline(at_rec::AtomRecord)
             spacestring(at_rec.charge, 2)
 end
 
+function checkchainerror(el::Union{Chain, AbstractResidue, AbstractAtom})
+    if length(chainid(el)) != 1
+        throw(ArgumentError("Cannot write valid PDB file with non-single character chain ID: \"$(chainid(el))\""))
+    end
+end
 
 """
 Write a `StructuralElementOrList` to a Protein Data Bank (PDB) format file. Only
@@ -762,6 +767,7 @@ function writepdb(output::IO,
                 atom_selectors::Function...)
     # Collect residues then expand out disordered residues
     for res in collectresidues(el)
+        checkchainerror(res)
         if isa(res, Residue)
             for at in collectatoms(res, atom_selectors...)
                 writepdb(output, at)
@@ -777,6 +783,7 @@ function writepdb(output::IO,
 end
 
 function writepdb(output::IO, at::AbstractAtom, atom_selectors::Function...)
+    checkchainerror(at)
     for atom_record in at
         println(output, pdbline(atom_record))
     end

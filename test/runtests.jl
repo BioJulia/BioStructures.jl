@@ -23,6 +23,7 @@ using BioStructures:
     spacestring,
     coordspec,
     floatspec,
+    checkchainerror,
     splitline,
     tokenizecif,
     formatmmcifcol,
@@ -166,13 +167,15 @@ end
     ProteinStructure("struc", Dict(1=> Model()))
     ProteinStructure()
 
-    Model(1, Dict('A'=> Chain('A')), ProteinStructure())
+    Model(1, Dict("A"=> Chain('A')), ProteinStructure())
     Model(1, ProteinStructure())
     Model(1)
     Model()
 
-    Chain('A', ["1"], Dict("1"=> Residue("ALA", 1, ' ', false, Chain('A'))), Model())
+    Chain("A", ["1"], Dict("1"=> Residue("ALA", 1, ' ', false, Chain('A'))), Model())
+    Chain("A", Model())
     Chain('A', Model())
+    Chain("A")
     Chain('A')
 
     Residue("ALA", 1, ' ', false, ["CA"], Dict("CA"=>
@@ -351,11 +354,11 @@ end
     @test chain(dis_res) == ch
     @test chain(ch) == ch
 
-    @test chainid(at) == 'A'
-    @test chainid(dis_at) == 'A'
-    @test chainid(res) == 'A'
-    @test chainid(dis_res) == 'A'
-    @test chainid(ch) == 'A'
+    @test chainid(at) == "A"
+    @test chainid(dis_at) == "A"
+    @test chainid(res) == "A"
+    @test chainid(dis_res) == "A"
+    @test chainid(ch) == "A"
 
     @test resids(ch) == ["10", "H_20A"]
 
@@ -377,12 +380,12 @@ end
     @test modelnumber(ch) == 1
     @test modelnumber(mod) == 1
 
-    @test chainids(mod) == ['A', 'B']
-    @test chainids(struc) == ['A', 'B']
+    @test chainids(mod) == ["A", "B"]
+    @test chainids(struc) == ["A", "B"]
 
-    @test isa(chains(mod), Dict{Char, Chain})
+    @test isa(chains(mod), Dict{String, Chain})
     @test length(chains(mod)) == 2
-    @test resname(chains(mod)['A']["H_20A"]) == "VA"
+    @test resname(chains(mod)["A"]["H_20A"]) == "VA"
     @test length(chains(struc)) == 2
 
     @test structure(at) == struc
@@ -440,7 +443,7 @@ end
     mod_col = collect(mod)
     @test isa(mod_col, Vector{Chain})
     @test length(mod_col) == 2
-    @test chainid(mod_col[2]) == 'B'
+    @test chainid(mod_col[2]) == "B"
 
     struc_col = collect(struc)
     @test isa(struc_col, Vector{Model})
@@ -473,17 +476,17 @@ end
     @test_throws KeyError ch["11"]
     @test_throws KeyError ch[11]
 
+    @test isa(mod["A"], Chain)
     @test isa(mod['A'], Chain)
     @test resname(mod['A']["H_20A"]) == "VA"
     @test_throws KeyError mod['C']
-    @test_throws MethodError mod["A"]
 
     @test isa(struc[1], Model)
     @test isa(struc[3], Model)
+    @test isa(struc["A"], Chain)
     @test isa(struc['A'], Chain)
     @test_throws KeyError struc[2]
     @test_throws KeyError struc['C']
-    @test_throws MethodError struc["A"]
     @test ishetero(struc[1]['A']["H_20A"])
 
 
@@ -628,13 +631,17 @@ end
 
     # Order when sorting chain IDs is character ordering with the empty chain ID at the end
     mod_ord = Model(1, Dict(
-        'A' => Chain('A'),
-        ' ' => Chain(' '),
-        '1' => Chain('1'),
-        'a' => Chain('a'),
-        'X' => Chain('X'),
+        "AB" => Chain("AB"),
+        "A" => Chain("A"),
+        " " => Chain(" "),
+        "1" => Chain("1"),
+        "AAA" => Chain("AAA"),
+        "BC" => Chain("BC"),
+        "a" => Chain("a"),
+        "X" => Chain("X"),
+        "AC" => Chain("AC"),
     ), ProteinStructure())
-    @test chainids(mod_ord) == ['1', 'A', 'X', 'a', ' ']
+    @test chainids(mod_ord) == ["1", "A", "X", "a", "AB", "AC", "BC", "AAA", " "]
 
 
     # Test sequence extraction
@@ -673,7 +680,7 @@ end
     @test parseatomname(line) == " C  "
     @test parsealtloc(line) == ' '
     @test parseresname(line) == "GLY"
-    @test parsechainid(line) == 'A'
+    @test parsechainid(line) == "A"
     @test parseresnumber(line) == 80
     @test parseinscode(line) == ' '
     @test parsecoordx(line) == 29.876
@@ -714,7 +721,7 @@ end
     @test at_rec.atom_name == " CA "
     @test at_rec.alt_loc_id == ' '
     @test at_rec.res_name == "ILE"
-    @test at_rec.chain_id == 'A'
+    @test at_rec.chain_id == "A"
     @test at_rec.res_number == 90
     @test at_rec.ins_code == ' '
     @test at_rec.coords == [31.743, 33.110, 31.221]
@@ -728,7 +735,7 @@ end
     @test at_rec.atom_name == " O  "
     @test at_rec.alt_loc_id == 'B'
     @test at_rec.res_name == " XX"
-    @test at_rec.chain_id == 'A'
+    @test at_rec.chain_id == "A"
     @test at_rec.res_number == 334
     @test at_rec.ins_code == 'A'
     @test at_rec.coords == [8.802, 62.0, 8.672]
@@ -747,8 +754,8 @@ end
     @test modelnumbers(struc) == [1]
     @test countchains(struc) == 2
     @test countchains(struc[1]) == 2
-    @test chainids(struc) == ['A', 'B']
-    @test chainids(struc[1]) == ['A', 'B']
+    @test chainids(struc) == ["A", "B"]
+    @test chainids(struc[1]) == ["A", "B"]
     @test resname(struc['A'][10]) == "GLY"
     @test !isdisorderedres(struc['A'][10])
     @test serial(struc['A'][200]["NZ"]) == 1555
@@ -761,7 +768,7 @@ end
     mods = collect(struc)
     @test modelnumber(mods[1]) == 1
     chs = collect(mods[1])
-    @test map(chainid, chs) == ['A', 'B']
+    @test map(chainid, chs) == ["A", "B"]
     res = collect(chs[1])
     @test length(res) == 456
     @test resid(res[20]) == "20"
@@ -820,10 +827,10 @@ end
     @test resid(res[300], full=true) == "H_657:B"
     res = collectresidues(struc)
     # Test anonymous selector function
-    res_min = applyselectors(res, standardselector, res -> chainid(res) == 'A')
+    res_min = applyselectors(res, standardselector, res -> chainid(res) == "A")
     @test length(res_min) == 214
     @test resid(res_min[200], full=true) == "200:A"
-    applyselectors!(res, standardselector, res -> chainid(res) == 'A')
+    applyselectors!(res, standardselector, res -> chainid(res) == "A")
     @test length(res) == 214
     @test resid(res[200], full=true) == "200:A"
 
@@ -865,7 +872,7 @@ end
     # Test parsing 1EN2 (disordered residue)
     struc = read(testfilepath("PDB", "1EN2.pdb"), PDB)
     @test modelnumbers(struc) == [1]
-    @test chainids(struc[1]) == ['A']
+    @test chainids(struc[1]) == ["A"]
     @test serial(struc['A'][48]["CA"]) == 394
     @test isdisorderedres(struc['A'][10])
     @test defaultresname(struc['A'][10]) == "SER"
@@ -904,8 +911,8 @@ end
     @test modelnumbers(struc) == collect(1:20)
     @test countchains(struc) == 1
     @test countchains(struc[5]) == 1
-    @test chainids(struc) == ['A']
-    @test chainids(struc[5]) == ['A']
+    @test chainids(struc) == ["A"]
+    @test chainids(struc[5]) == ["A"]
     @test serial(struc[10]['A'][40]["HB2"]) == 574
     @test countatoms(struc) == 756
     @test map(countatoms, [struc[i] for i in modelnumbers(struc)]) == 756 * ones(Int, 20)
@@ -922,7 +929,7 @@ end
     @test countresidues(Model[struc[5], struc[10]]) == 102
     chs = collectchains(Model[struc[5], struc[10]])
     @test length(chs) == 2
-    @test map(chainid, chs) == ['A', 'A']
+    @test map(chainid, chs) == ["A", "A"]
     @test z(chs[2][5]["CA"]) == -5.667
     @test countchains(Model[struc[5], struc[10]]) == 2
     mods = collectmodels(Model[struc[10], struc[5]])
@@ -1022,7 +1029,7 @@ end
     res = collectresidues(struc, heteroselector)
     @test length(res) == 380
     @test resnumber(res[370]) == 725
-    res = collectresidues(struc, standardselector, res -> chainid(res) == 'A')
+    res = collectresidues(struc, standardselector, res -> chainid(res) == "A")
     @test length(res) == 214
     @test resnumber(res[200]) == 200
     res = collectresidues(struc[1])
@@ -1085,7 +1092,7 @@ end
 
     @test countresidues(struc['A'], standardselector) == 214
     @test countresidues(struc['A'], heteroselector) == 242
-    @test countresidues(struc, standardselector, res -> chainid(res) == 'A') == 214
+    @test countresidues(struc, standardselector, res -> chainid(res) == "A") == 214
 
     @test countresidues(ProteinStructure()) == 0
     @test countresidues(Model()) == 0
@@ -1097,40 +1104,40 @@ end
     chs = collectchains(struc)
     @test length(chs) == 2
     @test isa(chs, Vector{Chain})
-    @test chainid(chs[2]) == 'B'
-    chs = collectchains(struc, ch -> chainid(ch) == 'B')
+    @test chainid(chs[2]) == "B"
+    chs = collectchains(struc, ch -> chainid(ch) == "B")
     @test length(chs) == 1
-    @test chainid(chs[1]) == 'B'
+    @test chainid(chs[1]) == "B"
     chs = collectchains(struc[1])
     @test length(chs) == 2
-    @test chainid(chs[2]) == 'B'
+    @test chainid(chs[2]) == "B"
     chs = collectchains(struc['A'])
     @test length(chs) == 1
-    @test chainid(chs[1]) == 'A'
+    @test chainid(chs[1]) == "A"
     chs = collectchains(struc['A'][50])
     @test length(chs) == 1
-    @test chainid(chs[1]) == 'A'
+    @test chainid(chs[1]) == "A"
     chs = collectchains(struc['A'][50]["CA"])
     @test length(chs) == 1
-    @test chainid(chs[1]) == 'A'
+    @test chainid(chs[1]) == "A"
     chs = collectchains(Chain[struc['B'], struc['A']])
     @test length(chs) == 2
-    @test chainid(chs[2]) == 'B'
+    @test chainid(chs[2]) == "B"
     chs = collectchains(Residue[struc['A'][51], struc['B'][50]])
     @test length(chs) == 2
-    @test chainid(chs[2]) == 'B'
+    @test chainid(chs[2]) == "B"
     chs = collectchains(AbstractResidue[struc['A'][51], struc['B'][50]])
     @test length(chs) == 2
-    @test chainid(chs[2]) == 'B'
+    @test chainid(chs[2]) == "B"
     chs = collectchains(Atom[struc['B'][51]["CA"], struc['A'][50]["CA"]])
     @test length(chs) == 2
-    @test chainid(chs[2]) == 'B'
+    @test chainid(chs[2]) == "B"
     chs = collectchains(DisorderedAtom[struc['A'][167]["CZ"], struc['A'][167]["CD"]])
     @test length(chs) == 1
-    @test chainid(chs[1]) == 'A'
+    @test chainid(chs[1]) == "A"
     chs = collectchains(AbstractAtom[struc['A'][50]["CA"], struc['A'][167]["CZ"]])
     @test length(chs) == 1
-    @test chainid(chs[1]) == 'A'
+    @test chainid(chs[1]) == "A"
 
 
     # Test countchains
@@ -1146,7 +1153,7 @@ end
     @test countchains(DisorderedAtom[struc['A'][167]["CZ"], struc['A'][167]["CD"]]) == 1
     @test countchains(Atom[struc['A'][51]["CA"], struc['B'][50]["CA"]]) == 2
 
-    @test countchains(struc, ch -> chainid(ch) == 'B') == 1
+    @test countchains(struc, ch -> chainid(ch) == "B") == 1
 
     @test countchains(ProteinStructure()) == 0
     @test countchains(Model()) == 0
@@ -1319,7 +1326,7 @@ end
     struc_written = read(temp_filename, PDB)
     @test modelnumbers(struc_written) == [1]
     @test countatoms(struc_written) == 492
-    @test chainids(struc_written) == ['A', 'B']
+    @test chainids(struc_written) == ["A", "B"]
     @test tempfactor(struc_written['B']["H_705"]["O"]) == 64.17
     writepdb(temp_filename, struc, standardselector, disorderselector)
     @test countlines(temp_filename) == 10
@@ -1338,11 +1345,11 @@ end
     writepdb(temp_filename, struc['A'])
     @test countlines(temp_filename) == 1966
     struc_written = read(temp_filename, PDB)
-    @test chainids(struc_written) == ['A']
+    @test chainids(struc_written) == ["A"]
     writepdb(temp_filename, struc['A'][50])
     @test countlines(temp_filename) == 9
     struc_written = read(temp_filename, PDB)
-    @test chainids(struc_written) == ['A']
+    @test chainids(struc_written) == ["A"]
     @test countresidues(struc_written) == 1
     @test atomnames(struc_written['A'][50]) == [
         "N", "CA", "C", "O", "CB", "CG", "CD", "CE", "NZ"]
@@ -1362,7 +1369,7 @@ end
     writepdb(temp_filename, Chain[struc['A'], struc['B']])
     @test countlines(temp_filename) == 3816
     struc_written = read(temp_filename, PDB)
-    @test chainids(struc_written) == ['A', 'B']
+    @test chainids(struc_written) == ["A", "B"]
     @test countatoms(struc_written['A']) == 1954
     @test countatoms(struc_written['B']) == 1850
     @test altlocids(struc_written['A']["H_215"]["O1G"]) == ['A', 'B']
@@ -1419,6 +1426,11 @@ end
 
     @test_throws ArgumentError writepdb(temp_filename, Atom(
         1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res))
+
+    checkchainerror(Chain("A"))
+    @test_throws ArgumentError checkchainerror(Chain("AA"))
+    @test_throws ArgumentError writepdb(temp_filename,
+        Residue("ALA", 10, ' ', false, [], Dict(), Chain("AA")))
 end
 
 
@@ -1582,7 +1594,7 @@ end
     @test at_rec.atom_name == "CB"
     @test at_rec.alt_loc_id == ' '
     @test at_rec.res_name == "MET"
-    @test at_rec.chain_id == 'A'
+    @test at_rec.chain_id == "A"
     @test at_rec.res_number == 1
     @test at_rec.ins_code == ' '
     @test at_rec.coords == [24.677, 53.310, 39.580]
@@ -1599,8 +1611,8 @@ end
     @test modelnumbers(struc) == [1]
     @test countchains(struc) == 2
     @test countchains(struc[1]) == 2
-    @test chainids(struc) == ['A', 'B']
-    @test chainids(struc[1]) == ['A', 'B']
+    @test chainids(struc) == ["A", "B"]
+    @test chainids(struc[1]) == ["A", "B"]
     @test resname(struc['A'][10]) == "GLY"
     @test !isdisorderedres(struc['A'][10])
     @test serial(struc['A'][200]["NZ"]) == 1555
@@ -1613,7 +1625,7 @@ end
     mods = collect(struc)
     @test modelnumber(mods[1]) == 1
     chs = collect(mods[1])
-    @test chainid.(chs) == ['A', 'B']
+    @test chainid.(chs) == ["A", "B"]
     res = collect(chs[1])
     @test length(res) == 456
     @test resid(res[20]) == "20"
@@ -1662,7 +1674,7 @@ end
     # Test parsing 1EN2
     struc = read(testfilepath("mmCIF", "1EN2.cif"), MMCIF)
     @test modelnumbers(struc) == [1]
-    @test chainids(struc[1]) == ['A']
+    @test chainids(struc[1]) == ["A"]
     @test serial(struc['A'][48]["CA"]) == 394
     @test isdisorderedres(struc['A'][10])
     @test defaultresname(struc['A'][10]) == "SER"
@@ -1699,8 +1711,8 @@ end
     @test modelnumbers(struc) == collect(1:20)
     @test countchains(struc) == 1
     @test countchains(struc[5]) == 1
-    @test chainids(struc) == ['A']
-    @test chainids(struc[5]) == ['A']
+    @test chainids(struc) == ["A"]
+    @test chainids(struc[5]) == ["A"]
     # This is different to the PDB file as in the mmCIF file the atom serial
     #   does not reset for new models
     @test serial(struc[10]['A'][40]["HB2"]) == 7378
@@ -1720,7 +1732,7 @@ end
     @test countresidues(Model[struc[5], struc[10]]) == 102
     chs = collectchains(Model[struc[5], struc[10]])
     @test length(chs) == 2
-    @test chainid.(chs) == ['A', 'A']
+    @test chainid.(chs) == ["A", "A"]
     @test z(chs[2][5]["CA"]) == -5.667
     @test countchains(Model[struc[5], struc[10]]) == 2
     mods = collectmodels(Model[struc[10], struc[5]])
@@ -1728,6 +1740,40 @@ end
     @test modelnumber.(mods) == [5, 10]
     @test z(mods[2]['A'][5]["CA"]) == -5.667
     @test countmodels(Model[struc[10], struc[5]]) == 2
+
+
+    # Test parsing multi-character chain IDs
+    multichar_str = """
+        data_test
+        loop_
+        _atom_site.group_PDB
+        _atom_site.id
+        _atom_site.type_symbol
+        _atom_site.label_atom_id
+        _atom_site.label_alt_id
+        _atom_site.label_comp_id
+        _atom_site.label_asym_id
+        _atom_site.label_entity_id
+        _atom_site.label_seq_id
+        _atom_site.pdbx_PDB_ins_code
+        _atom_site.Cartn_x
+        _atom_site.Cartn_y
+        _atom_site.Cartn_z
+        _atom_site.occupancy
+        _atom_site.B_iso_or_equiv
+        _atom_site.pdbx_formal_charge
+        _atom_site.auth_seq_id
+        _atom_site.auth_comp_id
+        _atom_site.auth_asym_id
+        _atom_site.auth_atom_id
+        _atom_site.pdbx_PDB_model_num
+        ATOM   1    N N   . MET A 1 1   ? 26.981 53.977  40.085 1.00 40.83  ? 1   MET A1 N   1
+        ATOM   2    C CA  . MET A 1 1   ? 26.091 52.849  39.889 1.00 37.14  ? 1   MET A1 CA  1
+        ATOM   3    C C   . MET A 1 1   ? 26.679 52.163  38.675 1.00 30.15  ? 1   MET A2 C   1
+        ATOM   4    O O   . MET A 1 1   ? 27.020 52.865  37.715 1.00 27.59  ? 1   MET A2 O   1
+        """
+    struc = read(IOBuffer(multichar_str), MMCIF)
+    @test chainids(struc) == ["A1", "A2"]
 
 
     # Test files that should not parse
@@ -1803,7 +1849,7 @@ end
     struc_written = read(temp_filename, MMCIF)
     @test modelnumbers(struc_written) == [1]
     @test countatoms(struc_written) == 492
-    @test chainids(struc_written) == ['A', 'B']
+    @test chainids(struc_written) == ["A", "B"]
     @test tempfactor(struc_written['B']["H_705"]["O"]) == 64.17
     writemmcif(temp_filename, struc, standardselector, disorderselector)
     @test countlines(temp_filename) == 35
@@ -1822,11 +1868,11 @@ end
     writemmcif(temp_filename, struc['A'])
     @test countlines(temp_filename) == 1991
     struc_written = read(temp_filename, MMCIF)
-    @test chainids(struc_written) == ['A']
+    @test chainids(struc_written) == ["A"]
     writemmcif(temp_filename, struc['A'][50])
     @test countlines(temp_filename) == 34
     struc_written = read(temp_filename, MMCIF)
-    @test chainids(struc_written) == ['A']
+    @test chainids(struc_written) == ["A"]
     @test countresidues(struc_written) == 1
     @test atomnames(struc_written['A'][50]) == [
         "N", "CA", "C", "O", "CB", "CG", "CD", "CE", "NZ"]
@@ -1846,7 +1892,7 @@ end
     writemmcif(temp_filename, Chain[struc['A'], struc['B']])
     @test countlines(temp_filename) == 3841
     struc_written = read(temp_filename, MMCIF)
-    @test chainids(struc_written) == ['A', 'B']
+    @test chainids(struc_written) == ["A", "B"]
     @test countatoms(struc_written['A']) == 1954
     @test countatoms(struc_written['B']) == 1850
     @test altlocids(struc_written['A']["H_215"]["O1G"]) == ['A', 'B']

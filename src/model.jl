@@ -144,7 +144,7 @@ end
 
 "A chain (molecule) from a macromolecular structure."
 struct Chain <: StructuralElement
-    id::Char
+    id::String # mmCIF files can have multi-character chain IDs
     res_list::Vector{String}
     residues::Dict{String, AbstractResidue}
     model::StructuralElement
@@ -154,7 +154,7 @@ end
 "A conformation of a macromolecular structure."
 struct Model <: StructuralElement
     number::Int
-    chains::Dict{Char, Chain}
+    chains::Dict{String, Chain}
     structure::StructuralElement
 end
 
@@ -176,7 +176,7 @@ struct AtomRecord
     atom_name::String
     alt_loc_id::Char
     res_name::String
-    chain_id::Char
+    chain_id::String
     res_number::Int
     ins_code::Char
     coords::Vector{Float64}
@@ -201,9 +201,10 @@ Model(number::Integer) = Model(number, ProteinStructure())
 Model() = Model(1)
 
 
-Chain(id::Char, mod::Model) = Chain(id, [], Dict(), mod)
+Chain(id::AbstractString, mod::Model) = Chain(id, [], Dict(), mod)
+Chain(id::Char, mod::Model) = Chain(string(id), [], Dict(), mod)
 
-Chain(id::Char) = Chain(id, Model())
+Chain(id::Union{AbstractString, Char}) = Chain(id, Model())
 
 
 function Residue(name::AbstractString,
@@ -283,12 +284,18 @@ function Base.setindex!(ch::Chain, res::AbstractResidue, res_n::Integer)
     return ch
 end
 
-# Accessing a Model with a Char returns the Chain with that chain ID
-Base.getindex(mod::Model, ch_id::Char) = mod.chains[ch_id]
+# Accessing a Model with a Char or AbstractString returns the Chain with that
+#   chain ID
+Base.getindex(mod::Model, ch_id::AbstractString) = mod.chains[ch_id]
+Base.getindex(mod::Model, ch_id::Char) = mod.chains[string(ch_id)]
 
-function Base.setindex!(mod::Model, ch::Chain, ch_id::Char)
+function Base.setindex!(mod::Model, ch::Chain, ch_id::AbstractString)
     mod.chains[ch_id] = ch
     return mod
+end
+
+function Base.setindex!(mod::Model, ch::Chain, ch_id::Char)
+    return Base.setindex!(mod, ch, string(ch_id))
 end
 
 # Accessing a ProteinStructure with an Integer returns the Model with that model
@@ -302,11 +309,16 @@ end
 
 # Accessing a ProteinStructure with a Char returns the Chain with that chain ID
 #   on the default model
-Base.getindex(struc::ProteinStructure, ch_id::Char) = defaultmodel(struc)[ch_id]
+Base.getindex(struc::ProteinStructure, ch_id::AbstractString) = defaultmodel(struc)[ch_id]
+Base.getindex(struc::ProteinStructure, ch_id::Char) = defaultmodel(struc)[string(ch_id)]
 
-function Base.setindex!(struc::ProteinStructure, ch::Chain, ch_id::Char)
+function Base.setindex!(struc::ProteinStructure, ch::Chain, ch_id::AbstractString)
     defaultmodel(struc)[ch_id] = ch
     return struc
+end
+
+function Base.setindex!(struc::ProteinStructure, ch::Chain, ch_id::Char)
+    return Base.setindex!(struc, ch, string(ch_id))
 end
 
 # Check if an atom name exists in a residue as a whitespace-padded version
@@ -747,7 +759,7 @@ function chainids(struc::ProteinStructure)
     if countmodels(struc) > 0
         return chainids(defaultmodel(struc))
     else
-        return Char[]
+        return String[]
     end
 end
 
@@ -762,7 +774,7 @@ function chains(struc::ProteinStructure)
     if countmodels(struc) > 0
         return chains(defaultmodel(struc))
     else
-        return Dict{Char, Chain}()
+        return Dict{String, Chain}()
     end
 end
 
@@ -830,15 +842,31 @@ function Base.isless(res_one::AbstractResidue, res_two::AbstractResidue)
 end
 
 # Sort chains by chain ID
-# Ordering is character sorting except the empty chain ID comes last
+# Ordering is character sorting of subsequent letters except the empty chain ID
+#   comes last
 function Base.isless(ch_one::Chain, ch_two::Chain)
-    if Int(chainid(ch_one)) < Int(chainid(ch_two)) && chainid(ch_one) != ' ' && chainid(ch_two) != ' '
-        return true
-    elseif chainid(ch_two) == ' ' && chainid(ch_one) != ' '
-        return true
-    else
-        return false
+    # Deal with usual case of single letter comparison quickly
+    if length(chainid(ch_one)) == 1 && length(chainid(ch_two)) == 1 &&
+            chainid(ch_one) != " " && chainid(ch_two) != " "
+        return Int(chainid(ch_one)[1]) < Int(chainid(ch_two)[1])
     end
+    chid_one = strip(chainid(ch_one))
+    chid_two = strip(chainid(ch_two))
+    if length(chid_two) == 0
+        return length(chid_one) > 0
+    elseif length(chid_one) == 0
+        return false
+    elseif length(chid_one) != length(chid_two)
+        return length(chid_one) < length(chid_two)
+    end
+    for (i, c) in enumerate(chid_one)
+        if c == chid_two[i]
+            continue
+        else
+            return Int(c) < Int(chid_two[i])
+        end
+    end
+    return false
 end
 
 # Sort models by model number
@@ -1489,7 +1517,7 @@ function Base.show(io::IO, struc::ProteinStructure)
         mod = defaultmodel(struc)
         println(io, "Name                        -  ", structurename(struc))
         println(io, "Number of models            -  ", countmodels(struc))
-        println(io, "Chain(s)                    -  ", join(chainids(mod)))
+        println(io, "Chain(s)                    -  ", join(chainids(mod), ","))
         println(io, "Number of residues          -  ", countresidues(mod, standardselector))
         println(io, "Number of point mutations   -  ", countresidues(mod, standardselector, disorderselector))
         println(io, "Number of other molecules   -  ", countresidues(mod, heteroselector) - countresidues(mod, heteroselector, waterselector))
@@ -1506,7 +1534,7 @@ end
 function Base.show(io::IO, mod::Model)
     println(io, summary(mod))
     println(io, "Model number                -  ", modelnumber(mod))
-    println(io, "Chain(s)                    -  ", join(chainids(mod)))
+    println(io, "Chain(s)                    -  ", join(chainids(mod), ","))
     println(io, "Number of residues          -  ", countresidues(mod, standardselector))
     println(io, "Number of point mutations   -  ", countresidues(mod, standardselector, disorderselector))
     println(io, "Number of other molecules   -  ", countresidues(mod, heteroselector) - countresidues(mod, heteroselector, waterselector))

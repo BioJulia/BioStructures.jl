@@ -46,13 +46,14 @@ The elements of `struc` can be accessed as follows:
 | Command                     | Returns                                                                         | Return type       |
 | :-------------------------- | :------------------------------------------------------------------------------ | :---------------- |
 | `struc[1]`                  | Model 1                                                                         | `Model`           |
-| `struc[1]['A']`             | Model 1, chain A                                                                | `Chain`           |
-| `struc['A']`                | The lowest model (model 1), chain A                                             | `Chain`           |
-| `struc['A']["50"]`          | Model 1, chain A, residue 50                                                    | `AbstractResidue` |
-| `struc['A'][50]`            | Shortcut to above if it is not a hetero residue and the insertion code is blank | `AbstractResidue` |
-| `struc['A']["H_90"]`        | Model 1, chain A, hetero residue 90                                             | `AbstractResidue` |
-| `struc['A'][50]["CA"]`      | Model 1, chain A, residue 50, atom name CA                                      | `AbstractAtom`    |
-| `struc['A'][15]["CG"]['A']` | For disordered atoms, access a specific location                                | `Atom`            |
+| `struc[1]["A"]`             | Model 1, chain A                                                                | `Chain`           |
+| `struc[1]['A']`             | Shortcut to above if the chain ID is a single character                         | `Chain`           |
+| `struc["A"]`                | The lowest model (model 1), chain A                                             | `Chain`           |
+| `struc["A"]["50"]`          | Model 1, chain A, residue 50                                                    | `AbstractResidue` |
+| `struc["A"][50]`            | Shortcut to above if it is not a hetero residue and the insertion code is blank | `AbstractResidue` |
+| `struc["A"]["H_90"]`        | Model 1, chain A, hetero residue 90                                             | `AbstractResidue` |
+| `struc["A"][50]["CA"]`      | Model 1, chain A, residue 50, atom name CA                                      | `AbstractAtom`    |
+| `struc["A"][15]["CG"]['A']` | For disordered atoms, access a specific location                                | `Atom`            |
 
 Disordered atoms are stored in a `DisorderedAtom` container but calls fall back to the default atom, so disorder can be ignored if you are not interested in it.
 
@@ -88,13 +89,13 @@ Properties can be retrieved as follows:
 | `isdisorderedres`  | `true` if the residue has multiple residue names              | `Bool`                          |
 | `disorderedres`    | Access a particular residue name in a `DisorderedResidue`     | `Residue`                       |
 | `chain`            | Chain a residue or atom belongs to                            | `Chain`                         |
-| `chainid`          | Chain ID of a chain, residue or atom                          | `Char`                          |
+| `chainid`          | Chain ID of a chain, residue or atom                          | `String`                        |
 | `resids`           | Sorted residue IDs in a chain                                 | `Array{String,1}`               |
 | `residues`         | Dictionary of residues in a chain                             | `Dict{String, AbstractResidue}` |
 | `model`            | Model a chain, residue or atom belongs to                     | `Model`                         |
 | `modelnumber`      | Model number of a model, chain, residue or atom               | `Int`                           |
-| `chainids`         | Sorted chain IDs in a model or structure                      | `Array{Char,1}`                 |
-| `chains`           | Dictionary of chains in a model or structure                  | `Dict{Char, Chain}`             |
+| `chainids`         | Sorted chain IDs in a model or structure                      | `Array{String,1}`               |
+| `chains`           | Dictionary of chains in a model or structure                  | `Dict{String, Chain}`           |
 | `structure`        | Structure a model, chain, residue or atom belongs to          | `ProteinStructure`              |
 | `structurename`    | Name of the structure an element belongs to                   | `String`                        |
 | `modelnumbers`     | Sorted model numbers in a structure                           | `Array{Int,1}`                  |
@@ -121,7 +122,7 @@ for mod in struc
 end
 ```
 
-Models are ordered numerically; chains are ordered by character, except the empty chain is last; residues are ordered by residue number and insertion code with hetero residues after standard residues; atoms are ordered by atom serial.
+Models are ordered numerically; chains are ordered by chain ID character ordering, except the empty chain is last; residues are ordered by residue number and insertion code with hetero residues after standard residues; atoms are ordered by atom serial.
 
 `collect` can be used to get arrays of sub-elements. `collectatoms`, `collectresidues`, `collectchains` and `collectmodels` return arrays of a particular type from a structural element or element array.
 
@@ -315,7 +316,7 @@ INFO: Parsing the PDB file...
 BioStructures.ProteinStructure
 Name                        -  1ALW.pdb
 Number of models            -  1
-Chain(s)                    -  AB
+Chain(s)                    -  A,B
 Number of residues          -  346
 Number of point mutations   -  0
 Number of other molecules   -  10
@@ -358,6 +359,8 @@ To write mmCIF format files, use the `writemmcif` function with similar argument
 ```julia
 writemmcif("1EN2_out.dic", mmcif_dict)
 ```
+
+Multi-character chain IDs can be written to mmCIF files but will throw an error when written to a PDB file.
 
 
 ## RCSB PDB Utility Functions
