@@ -26,6 +26,7 @@ using BioStructures:
     checkchainerror,
     splitline,
     tokenizecif,
+    tokenizecifstructure,
     formatmmcifcol,
     requiresnewline,
     requiresquote
@@ -862,7 +863,7 @@ end
     @test tempfactor(struc['A'][167]["NE"]) == 23.32
 
     # Test parsing from stream
-    open(testfilepath("PDB", "1AKE.pdb"), "r") do file
+    open(testfilepath("PDB", "1AKE.pdb")) do file
         struc = read(file, PDB)
         @test countatoms(struc) == 3804
         @test countresidues(struc) == 808
@@ -1578,11 +1579,19 @@ end
     @test_throws ArgumentError splitline("foo b'ar'")
 
 
-    # Test tokenizecif
+    # Test tokenizecif and tokenizecifstructure
     open(testfilepath("mmCIF", "1AKE.cif")) do f
         tokens = tokenizecif(f)
         @test length(tokens) == 93983
         @test tokens[90000] == "HOH"
+    end
+
+    open(testfilepath("mmCIF", "1AKE.cif")) do f
+        tokens = tokenizecifstructure(f)
+        @test length(tokens) == 80158
+        @test tokens[1] == "loop_"
+        @test tokens[10] == "_atom_site.label_seq_id"
+        @test tokens[80089] == "77.69"
     end
 
 
@@ -1664,7 +1673,7 @@ end
 
 
     # Test parsing from stream
-    open(testfilepath("mmCIF", "1AKE.cif"), "r") do file
+    open(testfilepath("mmCIF", "1AKE.cif")) do file
         struc = read(file, MMCIF)
         @test countatoms(struc) == 3804
         @test countresidues(struc) == 808
@@ -1946,6 +1955,13 @@ end
     @test altlocid(disorderedres(struc_written['A'][10], "GLY")["O"]) == 'B'
     @test countatoms(struc_written['A'][10]) == 6
     @test countatoms(struc_written['A'][16]) == 11
+
+
+    # Test writing multi-character chain IDs
+    struc = read(IOBuffer(multichar_str), MMCIF)
+    writemmcif(temp_filename, struc)
+    struc_back = read(temp_filename, MMCIF)
+    @test chainids(struc_back) == ["A1", "A2"]
 end
 
 

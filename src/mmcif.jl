@@ -132,6 +132,39 @@ function tokenizecif(f::IO)
     return tokens
 end
 
+# Get tokens from a mmCIF file corresponding to atom site records only
+function tokenizecifstructure(f::IO)
+    tokens = String[]
+    reading = false
+    in_keys = true
+    for line in eachline(f)
+        if (!reading && !startswith(line, "_atom_site.")) || startswith(line, "#")
+            continue
+        elseif startswith(line, "_atom_site.")
+            reading = true
+            push!(tokens, rstrip(line))
+        elseif startswith(line, ";")
+            in_keys = false
+            token_buffer = [rstrip(line[2:end])]
+            for inner_line in eachline(f)
+                inner_strip = rstrip(inner_line)
+                if inner_strip == ";"
+                    break
+                end
+                push!(token_buffer, inner_strip)
+            end
+            push!(tokens, join(token_buffer, "\n"))
+        elseif (!in_keys && startswith(line, "_")) || startswith(line, "loop_")
+            break
+        else
+            in_keys = false
+            append!(tokens, splitline(line))
+        end
+    end
+    length(tokens) > 0 ? unshift!(tokens, "loop_") : nothing
+    return tokens
+end
+
 
 function MMCIFDict(mmcif_filepath::AbstractString)
     open(mmcif_filepath) do f
@@ -143,14 +176,21 @@ end
 function MMCIFDict(f::IO)
     mmcif_dict = MMCIFDict()
     tokens = tokenizecif(f)
-    token = first(tokens)
-    mmcif_dict[token[1:5]] = token[6:end]
+    # Data label token is read first
+    data_token = first(tokens)
+    mmcif_dict[data_token[1:5]] = data_token[6:end]
+    return populatedict!(mmcif_dict, tokens[2:end])
+end
+
+
+# Add tokens to a mmCIF dictionary
+function populatedict!(mmcif_dict::MMCIFDict, tokens::Vector{String})
     key = ""
     keys = String[]
     loop_flag = false
     i = 0 # Value counter
     n = 0 # Key counter
-    for token in tokens[2:end]
+    for token in tokens
         if lowercase(token) == "loop_"
             loop_flag = true
             keys = String[]
@@ -203,7 +243,8 @@ function Base.read(input::IO,
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
             read_het_atoms::Bool=true)
-    mmcif_dict = MMCIFDict(input)
+    mmcif_dict = MMCIFDict()
+    populatedict!(mmcif_dict, tokenizecifstructure(input))
     # Define ProteinStructure and add to it incrementally
     struc = ProteinStructure(structure_name)
     if haskey(mmcif_dict, "_atom_site.id")
