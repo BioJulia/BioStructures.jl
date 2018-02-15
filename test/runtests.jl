@@ -1238,6 +1238,12 @@ end
     @test_throws ErrorException read(testfilepath("PDB", "1AKE_err_c.pdb"), PDB)
     # Non-existent file
     @test_throws SystemError read(testfilepath("PDB", "non_existent_file.pdb"), PDB)
+
+
+    # Test parsing empty file
+    struc = read(IOBuffer(""), PDB)
+    @test isa(struc, ProteinStructure)
+    @test countmodels(struc) == 0
 end
 
 
@@ -1595,6 +1601,13 @@ end
     end
 
 
+    # Test parsing empty file
+    dic = MMCIFDict(IOBuffer(""))
+    @test isa(dic, MMCIFDict)
+    @test length(keys(dic)) == 0
+    @test length(values(dic)) == 0
+
+
     # Test AtomRecord
     at_rec = AtomRecord(MMCIFDict(testfilepath("mmCIF", "1AKE.cif")), 5)
     show(DevNull, at_rec)
@@ -1788,6 +1801,12 @@ end
     # Test files that should not parse
     @test_throws Exception read(testfilepath("mmCIF", "1AKE_err.cif"), MMCIF)
     @test_throws ErrorException read(testfilepath("mmCIF", "1EN2_err.cif"), MMCIF)
+
+
+    # Test parsing empty file
+    struc = read(IOBuffer(""), MMCIF)
+    @test isa(struc, ProteinStructure)
+    @test countmodels(struc) == 0
 
 
     # Test formatting

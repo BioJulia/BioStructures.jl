@@ -177,6 +177,9 @@ function MMCIFDict(f::IO)
     mmcif_dict = MMCIFDict()
     tokens = tokenizecif(f)
     # Data label token is read first
+    if length(tokens) == 0
+        return mmcif_dict
+    end
     data_token = first(tokens)
     mmcif_dict[data_token[1:5]] = data_token[6:end]
     return populatedict!(mmcif_dict, tokens[2:end])
