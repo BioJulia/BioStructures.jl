@@ -646,7 +646,7 @@ Get the sorted list of `AbstractAtom`s in an `AbstractResidue`.
 """
 function atomnames(res::Residue; strip::Bool=true)
     if strip
-        return map(Base.strip, res.atom_list)
+        return Base.strip.(res.atom_list)
     else
         return res.atom_list
     end
@@ -753,7 +753,7 @@ modelnumber(el::Union{Chain, AbstractResidue, AbstractAtom}) = modelnumber(model
 Get the sorted chain IDs of the chains in a `Model`, or the default `Model` of a
 `ProteinStructure`.
 """
-chainids(mod::Model) = map(chainid, sort(collect(values(chains(mod)))))
+chainids(mod::Model) = chainid.(sort(collect(values(chains(mod)))))
 
 function chainids(struc::ProteinStructure)
     if countmodels(struc) > 0
@@ -799,7 +799,7 @@ structurename(struc::ProteinStructure) = struc.name
 
 "Get the sorted model numbers from a `ProteinStructure`."
 function modelnumbers(struc::ProteinStructure)
-    return map(modelnumber, sort(collect(values(models(struc)))))
+    return modelnumber.(sort(collect(values(models(struc)))))
 end
 
 
@@ -1301,7 +1301,7 @@ fullresname(res::Residue) = res.name
 function fixlists!(struc::ProteinStructure)
     for mod in struc
         for ch in mod
-            append!(ch.res_list, map(resid, sort(collect(values(residues(ch))))))
+            append!(ch.res_list, resid.(sort(collect(values(residues(ch))))))
             for res in ch
                 if isa(res, Residue)
                     fixlists!(res)
@@ -1316,7 +1316,7 @@ function fixlists!(struc::ProteinStructure)
 end
 
 function fixlists!(res::Residue)
-    append!(res.atom_list, map(fullatomname, sort(collect(values(atoms(res))))))
+    append!(res.atom_list, fullatomname.(sort(collect(values(atoms(res))))))
 end
 
 fullatomname(at::Atom) = at.name

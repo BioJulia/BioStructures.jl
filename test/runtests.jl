@@ -107,7 +107,7 @@ temp_filename = tempname()
     struc = retrievepdb("1AKE", pdb_dir=pdb_dir, obsolete=true, read_het_atoms=false)
     @test countatoms(struc) == 3312
     @test serial(collectatoms(struc)[2000]) == 2006
-    @test sum(map(ishetero, collectatoms(struc))) == 0
+    @test sum(ishetero, collectatoms(struc)) == 0
 
     struc = retrievepdb("1AKE", pdb_dir=pdb_dir, ba_number=1, read_het_atoms=false, read_std_atoms=false)
     @test countatoms(struc) == 0
@@ -118,11 +118,11 @@ temp_filename = tempname()
     struc = readpdb("1AKE", pdb_dir=pdb_dir, read_std_atoms=false)
     @test countatoms(struc) == 492
     @test serial(collectatoms(struc)[400]) == 3726
-    @test sum(map(ishetero, collectatoms(struc))) == 492
+    @test sum(ishetero, collectatoms(struc)) == 492
 
     struc = readpdb("1AKE", pdb_dir=pdb_dir, ba_number=1, remove_disorder=true)
     @test countatoms(struc) == 1954
-    @test sum(map(isdisorderedatom, collectatoms(struc))) == 0
+    @test sum(isdisorderedatom, collectatoms(struc)) == 0
     @test tempfactor(struc['A'][167]["NE"]) == 23.32
 end
 
@@ -579,9 +579,9 @@ end
         Atom(102, "CB", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "C", "", res),
         Atom(103, "CG", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "C", "", res)
     ]
-    @test map(atomname, sort(at_list_ord)) == ["CB", "CG", "CA"]
+    @test atomname.(sort(at_list_ord)) == ["CB", "CG", "CA"]
     sort!(at_list_ord)
-    @test map(atomname, at_list_ord) == ["CB", "CG", "CA"]
+    @test atomname.(at_list_ord) == ["CB", "CG", "CA"]
 
     # Order when sorting a residue list is chain ID, then stdres/hetres,
     # then residue number, then insertion code
@@ -605,7 +605,7 @@ end
     @test !sequentialresidues(res_ord[7], res_ord[3])
     @test sequentialresidues(res_ord[7], res_ord[9])
 
-    @test map(resid, res_ord) == [
+    @test resid.(res_ord) == [
         "201A", "203", "H_200", "201B", "202", "300", "H_201", "201", "H_201A",
         "100", "H_203", "200"]
     @test map(res -> resid(res, full=true), res_ord) == [
@@ -769,13 +769,13 @@ end
     mods = collect(struc)
     @test modelnumber(mods[1]) == 1
     chs = collect(mods[1])
-    @test map(chainid, chs) == ["A", "B"]
+    @test chainid.(chs) == ["A", "B"]
     res = collect(chs[1])
     @test length(res) == 456
     @test resid(res[20]) == "20"
     ats = collect(res[20])
     @test length(ats) == 8
-    @test map(atomname, ats) == ["N", "CA", "C", "O", "CB", "CG1", "CG2", "CD1"]
+    @test atomname.(ats) == ["N", "CA", "C", "O", "CB", "CG1", "CG2", "CD1"]
 
 
     # Test choosedefaultaltlocid
@@ -795,10 +795,10 @@ end
     # Not providing any selector functions just returns the input list
     ats_min = applyselectors(ats)
     @test length(ats_min) == length(ats)
-    @test map(serial, ats_min) == map(serial, ats)
+    @test serial.(ats_min) == serial.(ats)
     applyselectors!(ats_min)
     @test length(ats_min) == length(ats)
-    @test map(serial, ats_min) == map(serial, ats)
+    @test serial.(ats_min) == serial.(ats)
     ats_min = applyselectors(ats, standardselector)
     @test length(ats_min) == 3312
     @test serial(ats_min[2000]) == 2006
@@ -844,12 +844,12 @@ end
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, read_het_atoms=false)
     @test countatoms(struc) == 3312
     @test serial(collectatoms(struc)[2000]) == 2006
-    @test sum(map(ishetero, collectatoms(struc))) == 0
+    @test sum(ishetero, collectatoms(struc)) == 0
 
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, read_std_atoms=false)
     @test countatoms(struc) == 492
     @test serial(collectatoms(struc)[400]) == 3726
-    @test sum(map(ishetero, collectatoms(struc))) == 492
+    @test sum(ishetero, collectatoms(struc)) == 492
 
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, read_het_atoms=false, read_std_atoms=false)
     @test countatoms(struc) == 0
@@ -859,7 +859,7 @@ end
 
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, remove_disorder=true)
     @test countatoms(struc) == 3804
-    @test sum(map(isdisorderedatom, collectatoms(struc))) == 0
+    @test sum(isdisorderedatom, collectatoms(struc)) == 0
     @test tempfactor(struc['A'][167]["NE"]) == 23.32
 
     # Test parsing from stream
@@ -916,7 +916,7 @@ end
     @test chainids(struc[5]) == ["A"]
     @test serial(struc[10]['A'][40]["HB2"]) == 574
     @test countatoms(struc) == 756
-    @test map(countatoms, [struc[i] for i in modelnumbers(struc)]) == 756 * ones(Int, 20)
+    @test countatoms.([struc[i] for i in modelnumbers(struc)]) == 756 * ones(Int, 20)
     @test countatoms(struc, hydrogenselector) == 357
     ats = collectatoms(Model[struc[5], struc[10]])
     @test length(ats) == 1512
@@ -930,12 +930,12 @@ end
     @test countresidues(Model[struc[5], struc[10]]) == 102
     chs = collectchains(Model[struc[5], struc[10]])
     @test length(chs) == 2
-    @test map(chainid, chs) == ["A", "A"]
+    @test chainid.(chs) == ["A", "A"]
     @test z(chs[2][5]["CA"]) == -5.667
     @test countchains(Model[struc[5], struc[10]]) == 2
     mods = collectmodels(Model[struc[10], struc[5]])
     @test length(mods) == 2
-    @test map(modelnumber, mods) == [5, 10]
+    @test modelnumber.(mods) == [5, 10]
     @test z(mods[2]['A'][5]["CA"]) == -5.667
     @test countmodels(Model[struc[10], struc[5]]) == 2
 
@@ -1167,7 +1167,7 @@ end
     mods = collectmodels(struc_1SSU)
     @test length(mods) == 20
     @test isa(mods, Vector{Model})
-    @test map(modelnumber, mods) == collect(1:20)
+    @test modelnumber.(mods) == collect(1:20)
     mods = collectmodels(struc_1SSU, mod -> modelnumber(mod) < 4)
     @test length(mods) == 3
     @test modelnumber(mods[2]) == 2
@@ -1339,7 +1339,7 @@ end
     @test countlines(temp_filename) == 10
     struc_written = read(temp_filename, PDB)
     @test countatoms(struc_written) == 5
-    @test sum(map(isdisorderedatom, collectatoms(struc_written))) == 5
+    @test sum(isdisorderedatom, collectatoms(struc_written)) == 5
     @test defaultaltlocid(struc_written['A'][167]["NH1"]) == 'A'
 
 
@@ -1384,7 +1384,7 @@ end
     @test countlines(temp_filename) == 17
     struc_written = read(temp_filename, PDB)
     @test countresidues(struc_written) == 2
-    @test map(resid, collectresidues(struc_written)) == ["50", "51"]
+    @test resid.(collectresidues(struc_written)) == ["50", "51"]
     @test countatoms(struc_written) == 17
     writepdb(temp_filename, AbstractAtom[struc['A'][51]["CA"], struc['A'][50]["CA"]])
     @test countlines(temp_filename) == 2
@@ -1665,12 +1665,12 @@ end
     @test countatoms(struc) == 3312
     # Different to the PDB file due to the lack of TER label serial
     @test serial(collectatoms(struc)[2000]) == 2005
-    @test sum(ishetero.(collectatoms(struc))) == 0
+    @test sum(ishetero, collectatoms(struc)) == 0
 
     struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, read_std_atoms=false)
     @test countatoms(struc) == 492
     @test serial(collectatoms(struc)[400]) == 3724
-    @test sum(ishetero.(collectatoms(struc))) == 492
+    @test sum(ishetero, collectatoms(struc)) == 492
 
     struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, read_het_atoms=false,
                 read_std_atoms=false)
@@ -1681,7 +1681,7 @@ end
 
     struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, remove_disorder=true)
     @test countatoms(struc) == 3804
-    @test sum(isdisorderedatom.(collectatoms(struc))) == 0
+    @test sum(isdisorderedatom, collectatoms(struc)) == 0
     @test tempfactor(struc['A'][167]["NE"]) == 23.32
 
 
@@ -1883,7 +1883,7 @@ end
     @test countlines(temp_filename) == 35
     struc_written = read(temp_filename, MMCIF)
     @test countatoms(struc_written) == 5
-    @test sum(isdisorderedatom.(collectatoms(struc_written))) == 5
+    @test sum(isdisorderedatom, collectatoms(struc_written)) == 5
     @test defaultaltlocid(struc_written['A'][167]["NH1"]) == 'A'
 
 
@@ -2129,8 +2129,8 @@ end
     @test isapprox(psis[10], 0.4425094841355222, atol=1e-5)
     @test isnan(phis[1])
     @test isnan(psis[214])
-    @test sum(map(x -> Int(isnan(x)), phis)) == 243
-    @test sum(map(x -> Int(isnan(x)), psis)) == 243
+    @test sum(isnan, phis) == 243
+    @test sum(isnan, phis) == 243
     @test_throws ArgumentError ramachandranangles(struc_1AKE['A'][10]["CA"])
 
     phis = phiangles(struc_1AKE['A'], standardselector)
