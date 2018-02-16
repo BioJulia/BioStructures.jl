@@ -1,6 +1,6 @@
 # BioStructures documentation
 
-The BioStructures.jl package provides functionality to manipulate macromolecular structures, and in particular to read and write [Protein Data Bank](http://www.rcsb.org/pdb/home/home.do) (PDB) files. It is designed to be used for standard structural analysis tasks, as well as acting as a platform on which others can build to create more specific tools. It compares favourably in terms of performance to other PDB parsers - see some [benchmarks](https://github.com/jgreener64/pdb-benchmarks).
+The BioStructures.jl package provides functionality to manipulate macromolecular structures, and in particular to read and write [Protein Data Bank](http://www.rcsb.org/pdb/home/home.do) (PDB) and mmCIF files. It is designed to be used for standard structural analysis tasks, as well as acting as a platform on which others can build to create more specific tools. It compares favourably in terms of performance to other PDB parsers - see some [benchmarks](https://github.com/jgreener64/pdb-benchmarks).
 
 
 ## Basics
@@ -29,20 +29,31 @@ Number of hydrogens         -  0
 Number of disordered atoms  -  27
 ```
 
-**Note** : Refer to [Downloading PDB files](#downloading-pdb-files) and [Reading PDB files](#reading-pdb-files) sections for more options.
+mmCIF files can be read into the same data structure with `read("/path/to/cif/file.cif", MMCIF)`. If you want to read an mmCIF file into a dictionary to query yourself (e.g. to access metadata fields), use `MMCIFDict`:
+
+```julia
+julia> mmcif_dict = MMCIFDict("/path/to/cif/file.cif")
+mmCIF dictionary with 716 fields
+
+julia> mmcif_dict["_entity_src_nat.common_name"]
+"great nettle"
+```
+
+Refer to [Downloading PDB files](#downloading-pdb-files) and [Reading PDB files](#reading-pdb-files) sections for more options.
 
 The elements of `struc` can be accessed as follows:
 
 | Command                     | Returns                                                                         | Return type       |
 | :-------------------------- | :------------------------------------------------------------------------------ | :---------------- |
 | `struc[1]`                  | Model 1                                                                         | `Model`           |
-| `struc[1]['A']`             | Model 1, chain A                                                                | `Chain`           |
-| `struc['A']`                | The lowest model (model 1), chain A                                             | `Chain`           |
-| `struc['A']["50"]`          | Model 1, chain A, residue 50                                                    | `AbstractResidue` |
-| `struc['A'][50]`            | Shortcut to above if it is not a hetero residue and the insertion code is blank | `AbstractResidue` |
-| `struc['A']["H_90"]`        | Model 1, chain A, hetero residue 90                                             | `AbstractResidue` |
-| `struc['A'][50]["CA"]`      | Model 1, chain A, residue 50, atom name CA                                      | `AbstractAtom`    |
-| `struc['A'][15]["CG"]['A']` | For disordered atoms, access a specific location                                | `Atom`            |
+| `struc[1]["A"]`             | Model 1, chain A                                                                | `Chain`           |
+| `struc[1]['A']`             | Shortcut to above if the chain ID is a single character                         | `Chain`           |
+| `struc["A"]`                | The lowest model (model 1), chain A                                             | `Chain`           |
+| `struc["A"]["50"]`          | Model 1, chain A, residue 50                                                    | `AbstractResidue` |
+| `struc["A"][50]`            | Shortcut to above if it is not a hetero residue and the insertion code is blank | `AbstractResidue` |
+| `struc["A"]["H_90"]`        | Model 1, chain A, hetero residue 90                                             | `AbstractResidue` |
+| `struc["A"][50]["CA"]`      | Model 1, chain A, residue 50, atom name CA                                      | `AbstractAtom`    |
+| `struc["A"][15]["CG"]['A']` | For disordered atoms, access a specific location                                | `Atom`            |
 
 Disordered atoms are stored in a `DisorderedAtom` container but calls fall back to the default atom, so disorder can be ignored if you are not interested in it.
 
@@ -78,13 +89,13 @@ Properties can be retrieved as follows:
 | `isdisorderedres`  | `true` if the residue has multiple residue names              | `Bool`                          |
 | `disorderedres`    | Access a particular residue name in a `DisorderedResidue`     | `Residue`                       |
 | `chain`            | Chain a residue or atom belongs to                            | `Chain`                         |
-| `chainid`          | Chain ID of a chain, residue or atom                          | `Char`                          |
+| `chainid`          | Chain ID of a chain, residue or atom                          | `String`                        |
 | `resids`           | Sorted residue IDs in a chain                                 | `Array{String,1}`               |
 | `residues`         | Dictionary of residues in a chain                             | `Dict{String, AbstractResidue}` |
 | `model`            | Model a chain, residue or atom belongs to                     | `Model`                         |
 | `modelnumber`      | Model number of a model, chain, residue or atom               | `Int`                           |
-| `chainids`         | Sorted chain IDs in a model or structure                      | `Array{Char,1}`                 |
-| `chains`           | Dictionary of chains in a model or structure                  | `Dict{Char, Chain}`             |
+| `chainids`         | Sorted chain IDs in a model or structure                      | `Array{String,1}`               |
+| `chains`           | Dictionary of chains in a model or structure                  | `Dict{String, Chain}`           |
 | `structure`        | Structure a model, chain, residue or atom belongs to          | `ProteinStructure`              |
 | `structurename`    | Name of the structure an element belongs to                   | `String`                        |
 | `modelnumbers`     | Sorted model numbers in a structure                           | `Array{Int,1}`                  |
@@ -111,7 +122,7 @@ for mod in struc
 end
 ```
 
-Models are ordered numerically; chains are ordered by character, except the empty chain is last; residues are ordered by residue number and insertion code with hetero residues after standard residues; atoms are ordered by atom serial.
+Models are ordered numerically; chains are ordered by chain ID character ordering, except the empty chain is last; residues are ordered by residue number and insertion code with hetero residues after standard residues; atoms are ordered by atom serial.
 
 `collect` can be used to get arrays of sub-elements. `collectatoms`, `collectresidues`, `collectchains` and `collectmodels` return arrays of a particular type from a structural element or element array.
 
@@ -224,13 +235,13 @@ julia> rad2deg(psiangle(struc['A'], 50))
 
 ## Downloading PDB files
 
-To download a PDB file to a specify directory:
+To download a PDB file to a specified directory:
 
 ```julia
 downloadpdb("1EN2", pdb_dir="path/to/pdb/directory/")
 ```
 
-To download multiple PDB files to a specify directory:
+To download multiple PDB files to a specified directory:
 
 ```julia
 downloadpdb(["1EN2","1ALW","1AKE"], pdb_dir="path/to/pdb/directory/")
@@ -249,20 +260,20 @@ downloadpdb("1ALW", pdb_dir="path/to/pdb/directory/", file_format=MMCIF)
 downloadpdb("1ALW", pdb_dir="path/to/pdb/directory/", file_format=MMTF)
 ```
 
-Various options can be set through optional keyword arguments when downloading PDB files as follows:
+Various options can be set through optional keyword arguments when downloading PDB files:
 
-| Keyword Argument               | Description                                                                                                           |
-| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
-| `pdb_dir::AbstractString=pwd()`| The directory to which the PDB file is downloaded                                                                     |
-| `file_format::Type=PDB`        | The format of the PDB file. Options are PDB, PDBXML, MMCIF or MMTF                                                    |
-| `obsolete::Bool=false`         | If set `true`, the PDB file is downloaded into the auto-generated "obsolete" directory inside the specified `pdb_dir` |
-| `overwrite::Bool=false`        | If set `true`, overwrites the PDB file if exists in `pdb_dir`; by default skips downloading the PDB file              |
-| `ba_number::Integer=0`         | If set > 0, downloads the respective biological assembly; by default downloads the PDB file                           |
+| Keyword Argument                | Description                                                                                                           |
+| :------------------------------ | :-------------------------------------------------------------------------------------------------------------------- |
+| `pdb_dir::AbstractString=pwd()` | The directory to which the PDB file is downloaded                                                                     |
+| `file_format::Type=PDB`         | The format of the PDB file. Options are PDB, PDBXML, MMCIF or MMTF                                                    |
+| `obsolete::Bool=false`          | If set `true`, the PDB file is downloaded into the auto-generated "obsolete" directory inside the specified `pdb_dir` |
+| `overwrite::Bool=false`         | If set `true`, overwrites the PDB file if exists in `pdb_dir`; by default skips downloading the PDB file              |
+| `ba_number::Integer=0`          | If set > 0, downloads the respective biological assembly; by default downloads the PDB file                           |
 
 
 ## Reading PDB files
 
-To parse a existing PDB file into a Structure-Model-Chain-Residue-Atom framework:
+To parse an existing PDB file into a Structure-Model-Chain-Residue-Atom framework:
 
 ```julia
 julia> struc = read("/path/to/pdb/file.pdb", PDB)
@@ -279,16 +290,16 @@ Number of hydrogens         -  0
 Number of disordered atoms  -  27
 ```
 
-Various options can be set through optional keyword arguments when parsing a PDB file as follows:
+Read a mmCIF file instead by replacing `PDB` with `MMCIF`. Various options can be set through optional keyword arguments when parsing PDB/mmCIF files:
 
-| Keyword Argument                             | Description                                                                     |
-| :------------------------------------------- | :------------------------------------------------------------------------------ |
-| `structure_name::AbstractString`             | The name of the PDB Structure read. Defaults to the given filename              |
-| `remove_disorder::Bool=false`                | If set true, then disordered atoms wont be parsed                               |
-| `read_std_atoms::Bool=true`                  | If set false, then standard ATOM records wont be parsed                         |
-| `read_het_atoms::Bool=true`                  | If set false, then HETATOM records wont be parsed                               |
+| Keyword Argument                             | Description                                                                        |
+| :------------------------------------------- | :--------------------------------------------------------------------------------- |
+| `structure_name::AbstractString`             | The name to give the resulting `ProteinStructure` - defaults to the given filename |
+| `remove_disorder::Bool=false`                | If set to `true`, only one location for disordered atoms will be parsed            |
+| `read_std_atoms::Bool=true`                  | If set to `false`, standard ATOM records wont be parsed                            |
+| `read_het_atoms::Bool=true`                  | If set to `false`, HETATOM records wont be parsed                                  |
 
-The function `readpdb` provides an uniform way to download and read PDB files. To parse a PDB file by specifying the PDB ID and PDB directory into a Structure-Model-Chain-Residue-Atom framework (file name must be in upper case, e.g. "1EN2.pdb"):
+The function `readpdb` provides a different way to download and read PDB files in line with `downloadpdb`. To parse a PDB file by specifying the PDB ID and PDB directory (file name must be in upper case, e.g. "1EN2.pdb"):
 
 ```julia
 struc = readpdb("1EN2", pdb_dir="/path/to/pdb/directory")
@@ -305,7 +316,7 @@ INFO: Parsing the PDB file...
 BioStructures.ProteinStructure
 Name                        -  1ALW.pdb
 Number of models            -  1
-Chain(s)                    -  AB
+Chain(s)                    -  A,B
 Number of residues          -  346
 Number of point mutations   -  0
 Number of other molecules   -  10
@@ -315,18 +326,18 @@ Number of hydrogens         -  0
 Number of disordered atoms  -  0
 ```
 
-Various options can be set through optional keyword arguments when downloading and parsing a PDB file as follows:
+Various options can be set when using `retrievepdb`:
 
-| Keyword Argument                             | Description                                                                                                      |
-| :--------------------------------------------| :--------------------------------------------------------------------------------------------------------------- |
-| `pdb_dir::AbstractString=pwd()`              | The directory from which the PDB file is read                                                                    |
-| `obsolete::Bool=false`                       | If set `true`, PDB file is downloaded into the auto-generated "obsolete" directory inside the specified `pdb_dir`|
-| `overwrite::Bool=false`                      | if set `true`, overwrites the PDB file if exists in `pdb_dir`; by default skips downloading PDB file if exists   |
-| `ba_number::Integer=0`                       | If set > 0 reads the respective biological assembly; by default reads PDB file                                   |
-| `structure_name::AbstractString="$pdbid.pdb"`| The name of the PDB Structure read. Defaults to "< PDBID >.pdb"                                                  |
-| `remove_disorder::Bool=false`                | If set true, then disordered atoms wont be parsed                                                                |
-| `read_std_atoms::Bool=true`                  | If set false, then standard ATOM records wont be parsed                                                          |
-| `read_het_atoms::Bool=true`                  | If set false, then HETATOM records wont be parsed                                                                |
+| Keyword Argument                              | Description                                                                                                          |
+| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
+| `pdb_dir::AbstractString=pwd()`               | The directory to which the PDB file is downloaded                                                                    |
+| `obsolete::Bool=false`                        | If set to `true`, PDB file is downloaded into the auto-generated "obsolete" directory inside the specified `pdb_dir` |
+| `overwrite::Bool=false`                       | if set to `true`, overwrites the PDB file if exists in `pdb_dir`; by default skips downloading PDB file if exists    |
+| `ba_number::Integer=0`                        | If set to > 0 reads the respective biological assembly; by default reads PDB file                                    |
+| `structure_name::AbstractString="$pdbid.pdb"` | The name to give the resulting `ProteinStructure` - defaults to "$pdbid.pdb"                                         |
+| `remove_disorder::Bool=false`                 | If set to `true`, only one location for disordered atoms will be parsed                                              |
+| `read_std_atoms::Bool=true`                   | If set to `false`, standard ATOM records wont be parsed                                                              |
+| `read_het_atoms::Bool=true`                   | If set to `false`, HETATOM records wont be parsed                                                                    |
 
 
 ## Writing PDB files
@@ -343,13 +354,21 @@ Any element type can be given as input to `writepdb`. Atom selectors can also be
 writepdb("1EN2_out.pdb", struc, backboneselector)
 ```
 
+To write mmCIF format files, use the `writemmcif` function with similar arguments. A `MMCIFDict` can also be written using `writemmcif`:
+
+```julia
+writemmcif("1EN2_out.dic", mmcif_dict)
+```
+
+Multi-character chain IDs can be written to mmCIF files but will throw an error when written to a PDB file.
+
 
 ## RCSB PDB Utility Functions
 
 To download the entire RCSB PDB database in your preferred file format:
 
 ```julia
-downloadentirepdb(pdb_dir="path/to/pdb/directory/", file_format=MMTF, overwrite=false)
+downloadentirepdb(pdb_dir="path/to/pdb/directory/", file_format=MMTF)
 ```
 
 The keyword arguments are described below:
@@ -378,11 +397,9 @@ The `file_format` specfies the format in which the PDB files are downloaded; Opt
 
 If `overwrite=true`, the existing PDB files in obsolete directory will be overwritten by the newly downloaded ones.
 
-To maintain a local copy of the entire RCSB PDB Database
+To maintain a local copy of the entire RCSB PDB Database: run the `downloadentirepdb` function once to download all PDB files and set up a CRON job or similar to run `updatelocalpdb` function once a week to keep the local PDB directory up to date with the RCSB Server.
 
-Run the `downloadentirepdb` function once to download all PDB files and setup a CRON job or similar to run `updatelocalpdb` function once in every week to keep the local PDB directory up to date with the RCSB Server.
-
-There are a few more functions that may help.
+There are a few more functions that may help:
 
 | Function           | Returns                                                                         | Return type                                              |
 | :----------------- | :------------------------------------------------------------------------------ | :------------------------------------------------------- |
@@ -396,16 +413,16 @@ There are a few more functions that may help.
 
 A few further examples of BioStructures usage are given below.
 
-**A)** To plot the temperature factors of a protein, if you have Gadfly installed:
+**A)** To plot the temperature factors of a protein, if you have Plots installed:
 
 ```julia
-using Gadfly
+using Plots
 calphas = collectatoms(struc, calphaselector)
-plot(x=resnumber.(calphas),
-     y=tempfactor.(calphas),
-     Guide.xlabel("Residue number"),
-     Guide.ylabel("Temperature factor"),
-     Geom.line)
+plot(resnumber.(calphas),
+     tempfactor.(calphas),
+     xlabel="Residue number",
+     ylabel="Temperature factor",
+     label="")
 ```
 
 **B)** To print the PDB records for all C-alpha atoms within 5 Angstroms of residue 38:
@@ -437,17 +454,21 @@ end
 
 `contactmap` can also be given two structural elements as arguments, in which case a non-symmetrical 2D array is returned showing contacts between the elements.
 
-**E)** To show the Ramachandran phi/psi angle plot of a structure, if you have Gadfly installed:
+**E)** To show the Ramachandran phi/psi angle plot of a structure, if you have Plots installed:
 
 ```julia
-using Gadfly
+using Plots
 phi_angles, psi_angles = ramachandranangles(struc, standardselector)
-plot(x=rad2deg.(phi_angles),
-     y=rad2deg.(psi_angles),
-     Guide.xlabel("Phi / degrees"),
-     Guide.ylabel("Psi / degrees"),
-     Guide.xticks(ticks=[-180,-90,0,90,180]),
-     Guide.yticks(ticks=[-180,-90,0,90,180]))
+scatter(rad2deg.(phi_angles),
+     rad2deg.(psi_angles),
+     title="Ramachandran plot",
+     xlabel="Phi / degrees",
+     ylabel="Psi / degrees",
+     label="",
+     xticks=[-180,-90,0,90,180],
+     yticks=[-180,-90,0,90,180],
+     xlims=(-180,180),
+     ylims=(-180,180))
 ```
 
 **F)** To calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:

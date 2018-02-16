@@ -19,9 +19,9 @@
 
 BioStructures provides functionality to read, write and manipulate
 macromolecular structures, in particular proteins.
-[Protein Data Bank](https://www.rcsb.org/pdb/home/home.do) (PDB) format files
-can be read in to a hierarchical data structure. Basic spatial calculations and
-functions to access the PDB are also provided.
+[Protein Data Bank](https://www.rcsb.org/pdb/home/home.do) (PDB) and mmCIF
+format files can be read in to a hierarchical data structure. Basic spatial
+calculations and functions to access the PDB are also provided.
 
 ## Installation
 

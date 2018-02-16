@@ -11,6 +11,7 @@ __precompile__()
 module BioStructures
 
 using Libz
+using Formatting
 import BioCore
 import BioCore.distance
 import BioSymbols
@@ -18,6 +19,7 @@ import BioSequences.AminoAcidSequence
 
 include("model.jl")
 include("pdb.jl")
+include("mmcif.jl")
 include("spatial.jl")
 
 end # BioStructures
