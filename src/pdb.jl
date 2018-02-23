@@ -234,7 +234,7 @@ function downloadpdb(pdbid::AbstractString; pdb_dir::AbstractString=pwd(), file_
                 input = open(archivefilepath) |> ZlibInflateInputStream
                 open(pdbpath,"w") do output
                     for line in eachline(input)
-                        println(output, chomp(line))
+                        println(output, line)
                     end
                 end
                 close(input)

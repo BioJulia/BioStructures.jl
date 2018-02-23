@@ -2130,7 +2130,7 @@ end
     @test isnan(phis[1])
     @test isnan(psis[214])
     @test sum(isnan, phis) == 243
-    @test sum(isnan, phis) == 243
+    @test sum(isnan, psis) == 243
     @test_throws ArgumentError ramachandranangles(struc_1AKE['A'][10]["CA"])
 
     phis = phiangles(struc_1AKE['A'], standardselector)
