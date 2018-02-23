@@ -17,8 +17,8 @@ export
 
 
 """
-Get the atomic coordinates of a `StructuralElementOrList` as a 2D `Array` with
-each column corresponding to one atom.
+Get the atomic coordinates in Å of a `StructuralElementOrList` as a 2D `Array`
+with each column corresponding to one atom.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
@@ -38,9 +38,9 @@ coordarray(coords_in::Array{Float64}, atom_selectors::Function...) = coords_in
 
 
 """
-Get the root-mean-square deviation (RMSD) between two `StructuralElementOrList`s
-or two coordinate `Array`s of the same size. Assumes they are already
-superimposed.
+Get the root-mean-square deviation (RMSD) in Å between two
+`StructuralElementOrList`s or two coordinate `Array`s of the same size. Assumes
+they are already superimposed.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
@@ -62,7 +62,7 @@ end
 
 
 """
-Get the displacements between atomic coordinates from two
+Get the displacements in Å between atomic coordinates from two
 `StructuralElementOrList`s or two coordinate `Array`s of the same size. Assumes
 they are already superimposed.
 Additional arguments are atom selector functions - only atoms that return
@@ -86,7 +86,7 @@ end
 
 
 """
-Get the minimum square distance between two `StructuralElementOrList`s.
+Get the minimum square distance in Å between two `StructuralElementOrList`s.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
@@ -115,7 +115,7 @@ end
 
 
 """
-Get the minimum distance between two `StructuralElementOrList`s.
+Get the minimum distance in Å between two `StructuralElementOrList`s.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
@@ -131,8 +131,8 @@ end
 
 
 """
-Calculate the bond angle in radians between three `AbstractAtom`s, where A-B and
-B-C are assumed to be bonded.
+Calculate the bond angle in radians between three `AbstractAtom`s. The angle
+between A-B and B-C is returned in the range 0 to π.
 """
 function bondangle(at_a::AbstractAtom,
                 at_b::AbstractAtom,
@@ -149,8 +149,9 @@ end
 
 
 """
-Calculate the dihedral angle in radians defined by four `AbstractAtom`s. This is
-the angle between the planes defined by atoms (A,B,C) and (B,C,D).
+Calculate the dihedral angle in radians defined by four `AbstractAtom`s. The
+angle between the planes defined by atoms (A,B,C) and (B,C,D) is returned in the
+range -π to π.
 """
 function dihedralangle(at_a::AbstractAtom,
             at_b::AbstractAtom,
@@ -174,7 +175,8 @@ end
 Calculate the omega angle in radians for an `AbstractResidue`. Arguments can
 either be a residue and the previous residue or a chain and the position as
 a residue ID. The first residue (or one at the given index) requires the
-atoms "N" and "CA" and the previous residue requires the atoms "CA" and "C".
+atoms "N" and "CA" and the previous residue requires the atoms "CA" and "C". The
+angle is in the range -π to π.
 """
 function omegaangle(res::AbstractResidue, res_prev::AbstractResidue)
     if !("CA" in atomnames(res_prev))
@@ -205,7 +207,8 @@ end
 Calculate the phi angle in radians for an `AbstractResidue`. Arguments can
 either be a residue and the previous residue or a chain and the position as
 a residue ID. The first residue (or one at the given index) requires the
-atoms "N", "CA" and "C" and the previous residue requires the atom "C".
+atoms "N", "CA" and "C" and the previous residue requires the atom "C". The
+angle is in the range -π to π.
 """
 function phiangle(res::AbstractResidue, res_prev::AbstractResidue)
     if !("C"  in atomnames(res_prev))
@@ -236,7 +239,8 @@ end
 Calculate the psi angle in radians for an `AbstractResidue`. Arguments can
 either be a residue and the previous residue or a chain and the position as
 a residue ID. The first residue (or one at the given index) requires the
-atoms "N", "CA" and "C" and the next residue requires the atom "N".
+atoms "N", "CA" and "C" and the next residue requires the atom "N". The angle is
+in the range -π to π.
 """
 function psiangle(res::AbstractResidue, res_next::AbstractResidue)
     if !("N"  in atomnames(res))
@@ -266,7 +270,8 @@ end
 """
 Calculate the `Vector` of omega angles of a `StructuralElementOrList`.
 The vectors have `NaN` for residues where an angle cannot be calculated,
-e.g. due to missing atoms or lack of an adjacent residue.
+e.g. due to missing atoms or lack of an adjacent residue. The angle is in the
+range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
@@ -301,7 +306,8 @@ end
 """
 Calculate the `Vector` of phi angles of a `StructuralElementOrList`.
 The vectors have `NaN` for residues where an angle cannot be calculated,
-e.g. due to missing atoms or lack of an adjacent residue.
+e.g. due to missing atoms or lack of an adjacent residue. The angle is in the
+range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
@@ -336,7 +342,8 @@ end
 """
 Calculate the `Vector` of psi angles of a `StructuralElementOrList`.
 The vectors have `NaN` for residues where an angle cannot be calculated,
-e.g. due to missing atoms or lack of an adjacent residue.
+e.g. due to missing atoms or lack of an adjacent residue. The angle is in the
+range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
@@ -374,7 +381,8 @@ end
 """
 Calculate the `Vector`s of phi and psi angles of a `StructuralElementOrList`.
 The vectors have `NaN` for residues where an angle cannot be calculated,
-e.g. due to missing atoms or lack of an adjacent residue.
+e.g. due to missing atoms or lack of an adjacent residue. The angles are in the
+range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
