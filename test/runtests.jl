@@ -193,6 +193,8 @@ end
     show(DevNull, ch)
     show(DevNull, mod)
     show(DevNull, struc)
+    show(DevNull, Model())
+    show(DevNull, ProteinStructure())
 
 
     # Test getters/setters
@@ -383,11 +385,16 @@ end
 
     @test chainids(mod) == ["A", "B"]
     @test chainids(struc) == ["A", "B"]
+    @test chainids(ProteinStructure()) == String[]
+    @test chainids(Model()) == String[]
 
     @test isa(chains(mod), Dict{String, Chain})
     @test length(chains(mod)) == 2
     @test resname(chains(mod)["A"]["H_20A"]) == "VA"
+    @test isa(chains(Model()), Dict{String, Chain})
+    @test isa(chains(struc), Dict{String, Chain})
     @test length(chains(struc)) == 2
+    @test isa(chains(ProteinStructure()), Dict{String, Chain})
 
     @test structure(at) == struc
     @test structure(dis_at) == struc
@@ -1798,6 +1805,44 @@ end
     @test chainids(struc) == ["A1", "A2"]
 
 
+    # Test parsing multi-line construct to structure
+    multlinestruc_str = """
+        data_test
+        loop_
+        _atom_site.group_PDB
+        _atom_site.id
+        _atom_site.type_symbol
+        _atom_site.label_atom_id
+        _atom_site.label_alt_id
+        _atom_site.label_comp_id
+        _atom_site.label_asym_id
+        _atom_site.label_entity_id
+        _atom_site.label_seq_id
+        _atom_site.pdbx_PDB_ins_code
+        _atom_site.Cartn_x
+        _atom_site.Cartn_y
+        _atom_site.Cartn_z
+        _atom_site.occupancy
+        _atom_site.B_iso_or_equiv
+        _atom_site.pdbx_formal_charge
+        _atom_site.auth_seq_id
+        _atom_site.auth_comp_id
+        _atom_site.auth_asym_id
+        _atom_site.auth_atom_id
+        _atom_site.pdbx_PDB_model_num
+        ATOM   1    N N   . MET A 1 1   ? 26.981 53.977  40.085 1.00 40.83  ? 1   MET A N   1
+        ATOM   2    C CA  . MET A 1 1   ? 26.091
+        ;52.849
+        ;
+        39.889 1.00 37.14  ? 1   MET A CA  1
+        ATOM   3    C C   . MET A 1 1   ? 26.679 52.163  38.675 1.00 30.15  ? 1   MET A C   1
+        ATOM   4    O O   . MET A 1 1   ? 27.020 52.865  37.715 1.00 27.59  ? 1   MET A O   1
+        """
+    struc = read(IOBuffer(multlinestruc_str), MMCIF)
+    @test coords(struc['A'][1]["CA"]) == [26.091, 52.849, 39.889]
+    @test serial(struc['A'][1]["O"]) == 4
+
+
     # Test files that should not parse
     @test_throws Exception read(testfilepath("mmCIF", "1AKE_err.cif"), MMCIF)
     @test_throws ErrorException read(testfilepath("mmCIF", "1EN2_err.cif"), MMCIF)
@@ -2121,6 +2166,9 @@ end
     @test_throws ArgumentError omegaangle(struc_1AKE['A'], -1 )
     @test_throws ArgumentError phiangle(struc_1AKE['A'], -1 )
     @test_throws ArgumentError psiangle(struc_1AKE['A'], -1 )
+    @test_throws ArgumentError omegaangle(struc_1AKE['A'], 1)
+    @test_throws ArgumentError phiangle(struc_1AKE['A'], 1)
+    @test_throws ArgumentError psiangle(struc_1AKE['A'], 214)
 
     phis, psis = ramachandranangles(struc_1AKE['A'])
     @test size(phis) == (456,)
