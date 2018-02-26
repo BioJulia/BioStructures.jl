@@ -131,8 +131,8 @@ end
 
 
 """
-Calculate the bond angle in radians between three `AbstractAtom`s. The angle
-between A-B and B-C is returned in the range 0 to π.
+Calculate the bond or pseudo-bond angle in radians between three
+`AbstractAtom`s. The angle between B→A and B→C is returned in the range 0 to π.
 """
 function bondangle(at_a::AbstractAtom,
                 at_b::AbstractAtom,
@@ -194,11 +194,11 @@ end
 function omegaangle(chain::Chain, res_id::Union{Integer, AbstractString})
     inds = find(r -> r == string(res_id), resids(chain))
     if length(inds) != 1
-        throw(ArgumentError("$res_id is an invalid residue ID"))
+        throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end
     i = inds[1]
     if i == 1 || !sequentialresidues(chain[resids(chain)[i-1]], chain[resids(chain)[i]])
-        throw(ArgumentError("$res_id is an invalid residue ID"))
+        throw(ArgumentError("Cannot calculate omega angle for residue \"$res_id\" due to a lack of connected residues"))
     end
     return omegaangle(chain[resids(chain)[i]], chain[resids(chain)[i-1]])
 end
@@ -226,18 +226,18 @@ end
 function phiangle(chain::Chain, res_id::Union{Integer, AbstractString})
     inds = find(r -> r == string(res_id), resids(chain))
     if length(inds) != 1
-        throw(ArgumentError("$res_id is an invalid residue ID"))
+        throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end
     i = inds[1]
     if i == 1 || !sequentialresidues(chain[resids(chain)[i-1]], chain[resids(chain)[i]])
-        throw(ArgumentError("$res_id is an invalid residue ID"))
+        throw(ArgumentError("Cannot calculate phi angle for residue \"$res_id\" due to a lack of connected residues"))
     end
     return phiangle(chain[resids(chain)[i]], chain[resids(chain)[i-1]])
 end
 
 """
 Calculate the psi angle in radians for an `AbstractResidue`. Arguments can
-either be a residue and the previous residue or a chain and the position as
+either be a residue and the next residue or a chain and the position as
 a residue ID. The first residue (or one at the given index) requires the
 atoms "N", "CA" and "C" and the next residue requires the atom "N". The angle is
 in the range -π to π.
@@ -258,11 +258,11 @@ end
 function psiangle(chain::Chain, res_id::Union{Integer, AbstractString})
     inds = find(r -> r == string(res_id), resids(chain))
     if length(inds) != 1
-        throw(ArgumentError("$res_id is an invalid residue ID"))
+        throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end
     i = inds[1]
-    if i == 1 || !sequentialresidues(chain[resids(chain)[i]], chain[resids(chain)[i+1]])
-        throw(ArgumentError("$res_id is an invalid residue ID"))
+    if i == length(chain) || !sequentialresidues(chain[resids(chain)[i]], chain[resids(chain)[i+1]])
+        throw(ArgumentError("Cannot calculate psi angle for residue \"$res_id\" due to a lack of connected residues"))
     end
     return psiangle(chain[resids(chain)[i]], chain[resids(chain)[i+1]])
 end
