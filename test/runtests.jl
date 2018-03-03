@@ -38,7 +38,7 @@ fmtdir = BioCore.Testing.get_bio_fmt_specimens()
 testfilepath(path::AbstractString...) = joinpath(fmtdir, path...)
 
 # All writing is done to one temporary file which is removed at the end
-temp_filename = tempname()
+temp_filename, io = mktemp()
 
 
 @testset "PDB Handling" begin
