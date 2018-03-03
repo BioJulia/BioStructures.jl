@@ -38,7 +38,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-0.17.2, mkdocs-material-2.6.2">
+      <meta name="generator" content="mkdocs-0.17.2, mkdocs-material-2.6.6">
     
     
       
@@ -46,13 +46,14 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.9b572555.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application.78aab2dc.css">
       
     
     
       <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
     
     
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
       
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
         <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
@@ -464,17 +465,7 @@
 
 <p>To parse a PDB file into a Structure-Model-Chain-Residue-Atom framework:</p>
 <div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">struc</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s">&quot;/path/to/pdb/file.pdb&quot;</span><span class="p">,</span> <span class="n">PDB</span><span class="p">)</span>
-<span class="n">BioStructures</span><span class="o">.</span><span class="n">ProteinStructure</span>
-<span class="n">Name</span>                        <span class="o">-</span>  <span class="mi">1</span><span class="n">EN2</span><span class="o">.</span><span class="n">pdb</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">models</span>            <span class="o">-</span>  <span class="mi">1</span>
-<span class="n">Chain</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                    <span class="o">-</span>  <span class="n">A</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">residues</span>          <span class="o">-</span>  <span class="mi">85</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">point</span> <span class="n">mutations</span>   <span class="o">-</span>  <span class="mi">5</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">other</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">5</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">water</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">76</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">atoms</span>             <span class="o">-</span>  <span class="mi">614</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">hydrogens</span>         <span class="o">-</span>  <span class="mi">0</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">disordered</span> <span class="n">atoms</span>  <span class="o">-</span>  <span class="mi">27</span>
+<span class="n">ProteinStructure</span> <span class="mi">1</span><span class="n">EN2</span><span class="o">.</span><span class="n">pdb</span> <span class="n">with</span> <span class="mi">1</span> <span class="n">models</span><span class="p">,</span> <span class="mi">1</span> <span class="n">chains</span> <span class="p">(</span><span class="n">A</span><span class="p">),</span> <span class="mi">85</span> <span class="n">residues</span><span class="p">,</span> <span class="mi">754</span> <span class="n">atoms</span>
 </pre></div>
 
 
@@ -1040,17 +1031,7 @@
 <h2 id="reading-pdb-files">Reading PDB files</h2>
 <p>To parse an existing PDB file into a Structure-Model-Chain-Residue-Atom framework:</p>
 <div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">struc</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="s">&quot;/path/to/pdb/file.pdb&quot;</span><span class="p">,</span> <span class="n">PDB</span><span class="p">)</span>
-<span class="n">BioStructures</span><span class="o">.</span><span class="n">ProteinStructure</span>
-<span class="n">Name</span>                        <span class="o">-</span>  <span class="mi">1</span><span class="n">EN2</span><span class="o">.</span><span class="n">pdb</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">models</span>            <span class="o">-</span>  <span class="mi">1</span>
-<span class="n">Chain</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                    <span class="o">-</span>  <span class="n">A</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">residues</span>          <span class="o">-</span>  <span class="mi">85</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">point</span> <span class="n">mutations</span>   <span class="o">-</span>  <span class="mi">5</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">other</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">5</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">water</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">76</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">atoms</span>             <span class="o">-</span>  <span class="mi">614</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">hydrogens</span>         <span class="o">-</span>  <span class="mi">0</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">disordered</span> <span class="n">atoms</span>  <span class="o">-</span>  <span class="mi">27</span>
+<span class="n">ProteinStructure</span> <span class="mi">1</span><span class="n">EN2</span><span class="o">.</span><span class="n">pdb</span> <span class="n">with</span> <span class="mi">1</span> <span class="n">models</span><span class="p">,</span> <span class="mi">1</span> <span class="n">chains</span> <span class="p">(</span><span class="n">A</span><span class="p">),</span> <span class="mi">85</span> <span class="n">residues</span><span class="p">,</span> <span class="mi">754</span> <span class="n">atoms</span>
 </pre></div>
 
 
@@ -1091,17 +1072,7 @@
 <div class="codehilite"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span> <span class="n">struc</span> <span class="o">=</span> <span class="n">retrievepdb</span><span class="p">(</span><span class="s">&quot;1ALW&quot;</span><span class="p">,</span> <span class="n">pdb_dir</span><span class="o">=</span><span class="s">&quot;path/to/pdb/directory&quot;</span><span class="p">)</span>
 <span class="n">INFO</span><span class="o">:</span> <span class="n">Downloading</span> <span class="n">PDB</span> <span class="o">:</span> <span class="mi">1</span><span class="n">ALW</span>
 <span class="n">INFO</span><span class="o">:</span> <span class="n">Parsing</span> <span class="n">the</span> <span class="n">PDB</span> <span class="n">file</span><span class="o">...</span>
-<span class="n">BioStructures</span><span class="o">.</span><span class="n">ProteinStructure</span>
-<span class="n">Name</span>                        <span class="o">-</span>  <span class="mi">1</span><span class="n">ALW</span><span class="o">.</span><span class="n">pdb</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">models</span>            <span class="o">-</span>  <span class="mi">1</span>
-<span class="n">Chain</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>                    <span class="o">-</span>  <span class="n">A</span><span class="p">,</span><span class="n">B</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">residues</span>          <span class="o">-</span>  <span class="mi">346</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">point</span> <span class="n">mutations</span>   <span class="o">-</span>  <span class="mi">0</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">other</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">10</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">water</span> <span class="n">molecules</span>   <span class="o">-</span>  <span class="mi">104</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">atoms</span>             <span class="o">-</span>  <span class="mi">2790</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">hydrogens</span>         <span class="o">-</span>  <span class="mi">0</span>
-<span class="kt">Number</span> <span class="n">of</span> <span class="n">disordered</span> <span class="n">atoms</span>  <span class="o">-</span>  <span class="mi">0</span>
+<span class="n">ProteinStructure</span> <span class="mi">1</span><span class="n">ALW</span><span class="o">.</span><span class="n">pdb</span> <span class="n">with</span> <span class="mi">1</span> <span class="n">models</span><span class="p">,</span> <span class="mi">2</span> <span class="n">chains</span> <span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">),</span> <span class="mi">346</span> <span class="n">residues</span><span class="p">,</span> <span class="mi">2928</span> <span class="n">atoms</span>
 </pre></div>
 
 
@@ -1377,7 +1348,7 @@
       
     </div>
     
-      <script src="../assets/javascripts/application.abd7b172.js"></script>
+      <script src="../assets/javascripts/application.02434462.js"></script>
       
       <script>app.initialize({version:"0.17.2",url:{base:".."}})</script>
       
