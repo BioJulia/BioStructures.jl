@@ -511,8 +511,8 @@ function writemmcif(output::IO, at::AbstractAtom, atom_selectors::Function...)
 end
 
 function writemmcif(output::IO,
-                ats::Vector{T},
-                atom_selectors::Function...) where {T <: AbstractAtom}
+                ats::Vector{<:AbstractAtom},
+                atom_selectors::Function...)
     atom_dict = Dict{String, Union{String, Vector{String}}}(
             ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
     atom_dict["data_"] = structurename(ats[1])

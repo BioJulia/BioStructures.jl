@@ -646,7 +646,7 @@ Get the sorted list of `AbstractAtom`s in an `AbstractResidue`.
 """
 function atomnames(res::Residue; strip::Bool=true)
     if strip
-        return map(Base.strip, res.atom_list)
+        return Base.strip.(res.atom_list)
     else
         return res.atom_list
     end
@@ -753,7 +753,7 @@ modelnumber(el::Union{Chain, AbstractResidue, AbstractAtom}) = modelnumber(model
 Get the sorted chain IDs of the chains in a `Model`, or the default `Model` of a
 `ProteinStructure`.
 """
-chainids(mod::Model) = map(chainid, sort(collect(values(chains(mod)))))
+chainids(mod::Model) = chainid.(sort(collect(values(chains(mod)))))
 
 function chainids(struc::ProteinStructure)
     if countmodels(struc) > 0
@@ -799,7 +799,7 @@ structurename(struc::ProteinStructure) = struc.name
 
 "Get the sorted model numbers from a `ProteinStructure`."
 function modelnumbers(struc::ProteinStructure)
-    return map(modelnumber, sort(collect(values(models(struc)))))
+    return modelnumber.(sort(collect(values(models(struc)))))
 end
 
 
@@ -956,14 +956,14 @@ Base.eltype(::Type{DisorderedAtom}) = Atom
 Returns a copy of a `Vector` of `StructuralElement`s with all elements that do
 not return `true` from the selector functions removed.
 """
-function applyselectors(els::Vector{T}, selectors::Function...) where {T <: StructuralElement}
+function applyselectors(els::Vector{<:StructuralElement}, selectors::Function...)
     new_list = copy(els)
     applyselectors!(new_list, selectors...)
     return new_list
 end
 
 "Runs `applyselectors` in place."
-function applyselectors!(els::Vector{T}, selectors::Function...) where {T <: StructuralElement}
+function applyselectors!(els::Vector{<:StructuralElement}, selectors::Function...)
     for selector in selectors
         filter!(selector, els)
     end
@@ -984,7 +984,7 @@ collectmodels(el::Union{Chain, AbstractResidue, AbstractAtom}) = [model(el)]
 
 collectmodels(mods::Vector{Model}) = sort(mods)
 
-function collectmodels(els::Vector{T}) where {T <: Union{Chain, AbstractResidue, AbstractAtom}}
+function collectmodels(els::Vector{<:Union{Chain, AbstractResidue, AbstractAtom}})
     mod_list = Model[]
     for el in els
         if !(model(el) in mod_list)
@@ -1045,7 +1045,7 @@ end
 
 collectchains(chs::Vector{Chain}) = sort(chs)
 
-function collectchains(els::Vector{T}) where {T <: Union{AbstractResidue, AbstractAtom}}
+function collectchains(els::Vector{<:Union{AbstractResidue, AbstractAtom}})
     ch_list = Chain[]
     for el in els
         if !(chain(el) in ch_list)
@@ -1105,9 +1105,9 @@ collectresidues(at::AbstractAtom) = AbstractResidue[residue(at)]
 
 # Note output is always Vector{AbstractResidue} unless input was Vector{Residue}
 # or Vector{DisorderedResidue}, in which case output is same type as input type
-collectresidues(res_list::Vector{T}) where {T <: AbstractResidue} = sort(res_list)
+collectresidues(res_list::Vector{<:AbstractResidue}) = sort(res_list)
 
-function collectresidues(at_list::Vector{T}) where {T <: AbstractAtom}
+function collectresidues(at_list::Vector{<:AbstractAtom})
     res_list = AbstractResidue[]
     for at in at_list
         if !(residue(at) in res_list)
@@ -1169,7 +1169,7 @@ collectatoms(at::AbstractAtom) = AbstractAtom[at]
 
 # Note output is always Vector{AbstractAtom} unless input was Vector{Atom} or
 # Vector{DisorderedAtom}, in which case output is same type as input type
-collectatoms(at_list::Vector{T}) where {T <: AbstractAtom} = sort(at_list)
+collectatoms(at_list::Vector{<:AbstractAtom}) = sort(at_list)
 
 function collectatoms(el::StructuralElementOrList, atom_selector::Function, atom_selectors::Function...)
     return applyselectors(collectatoms(el), atom_selector, atom_selectors...)
@@ -1301,7 +1301,7 @@ fullresname(res::Residue) = res.name
 function fixlists!(struc::ProteinStructure)
     for mod in struc
         for ch in mod
-            append!(ch.res_list, map(resid, sort(collect(values(residues(ch))))))
+            append!(ch.res_list, resid.(sort(collect(values(residues(ch))))))
             for res in ch
                 if isa(res, Residue)
                     fixlists!(res)
@@ -1316,7 +1316,7 @@ function fixlists!(struc::ProteinStructure)
 end
 
 function fixlists!(res::Residue)
-    append!(res.atom_list, map(fullatomname, sort(collect(values(atoms(res))))))
+    append!(res.atom_list, fullatomname.(sort(collect(values(atoms(res))))))
 end
 
 fullatomname(at::Atom) = at.name
@@ -1493,7 +1493,7 @@ function AminoAcidSequence(ch::Chain, residue_selectors::Function...)
         sort(collectresidues(ch, residue_selectors...), by=resnumber))
 end
 
-function AminoAcidSequence(res::Vector{T}) where {T <: AbstractResidue}
+function AminoAcidSequence(res::Vector{<:AbstractResidue})
     seq = BioSymbols.AminoAcid[]
     for i in 1:length(res)
         if haskey(BioSymbols.threeletter_to_aa, resname(res[i]))
@@ -1509,127 +1509,57 @@ function AminoAcidSequence(res::Vector{T}) where {T <: AbstractResidue}
 end
 
 
-# Descriptive showing of elements
+# Descriptive showing of elements on a single line
 
-function Base.show(io::IO, struc::ProteinStructure)
-    println(io, summary(struc))
-    if countmodels(struc) > 0
-        mod = defaultmodel(struc)
-        println(io, "Name                        -  ", structurename(struc))
-        println(io, "Number of models            -  ", countmodels(struc))
-        println(io, "Chain(s)                    -  ", join(chainids(mod), ","))
-        println(io, "Number of residues          -  ", countresidues(mod, standardselector))
-        println(io, "Number of point mutations   -  ", countresidues(mod, standardselector, disorderselector))
-        println(io, "Number of other molecules   -  ", countresidues(mod, heteroselector) - countresidues(mod, heteroselector, waterselector))
-        println(io, "Number of water molecules   -  ", countresidues(mod, heteroselector, waterselector))
-        println(io, "Number of atoms             -  ", countatoms(mod, standardselector))
-        println(io, "Number of hydrogens         -  ", countatoms(mod, standardselector, hydrogenselector))
-          print(io, "Number of disordered atoms  -  ", countatoms(mod, standardselector, disorderselector))
-    else
-        println(io, "Name                        -  ", structurename(struc))
-          print(io, "Number of models            -  0")
-    end
-end
+Base.show(io::IO, struc::ProteinStructure) = print(io,
+    "ProteinStructure ",
+    structurename(struc) != "" ? "$(structurename(struc)) " : "",
+    "with $(countmodels(struc)) models, ",
+    countchains(struc) != 0 ? "$(countchains(struc)) chains ($(join(chainids(struc), ","))), " : "0 chains, ",
+    "$(countresidues(struc, standardselector)) residues, ",
+    "$(countatoms(struc)) atoms"
+)
 
-function Base.show(io::IO, mod::Model)
-    println(io, summary(mod))
-    println(io, "Model number                -  ", modelnumber(mod))
-    println(io, "Chain(s)                    -  ", join(chainids(mod), ","))
-    println(io, "Number of residues          -  ", countresidues(mod, standardselector))
-    println(io, "Number of point mutations   -  ", countresidues(mod, standardselector, disorderselector))
-    println(io, "Number of other molecules   -  ", countresidues(mod, heteroselector) - countresidues(mod, heteroselector, waterselector))
-    println(io, "Number of water molecules   -  ", countresidues(mod, heteroselector, waterselector))
-    println(io, "Number of atoms             -  ", countatoms(mod, standardselector))
-    println(io, "Number of hydrogens         -  ", countatoms(mod, standardselector, hydrogenselector))
-      print(io, "Number of disordered atoms  -  ", countatoms(mod, standardselector, disorderselector))
-end
+Base.show(io::IO, mod::Model) = print(io,
+    "Model $(modelnumber(mod)) with ",
+    countchains(mod) != 0 ? "$(countchains(mod)) chains ($(join(chainids(mod), ","))), " : "0 chains, ",
+    "$(countresidues(mod, standardselector)) residues, ",
+    "$(countatoms(mod)) atoms"
+)
 
-function Base.show(io::IO, ch::Chain)
-    println(io, summary(ch))
-    println(io, "Chain ID                    -  ", chainid(ch))
-    println(io, "Number of residues          -  ", countresidues(ch, standardselector))
-    println(io, "Number of point mutations   -  ", countresidues(ch, standardselector, disorderselector))
-    println(io, "Number of other molecules   -  ", countresidues(ch, heteroselector) - countresidues(ch, heteroselector, waterselector))
-    println(io, "Number of water molecules   -  ", countresidues(ch, heteroselector, waterselector))
-    println(io, "Number of atoms             -  ", countatoms(ch, standardselector))
-    println(io, "Number of hydrogens         -  ", countatoms(ch, standardselector, hydrogenselector))
-      print(io, "Number of disordered atoms  -  ", countatoms(ch, standardselector, disorderselector))
-end
+Base.show(io::IO, ch::Chain) = print(io,
+    "Chain $(chainid(ch)) with ",
+    "$(countresidues(ch, standardselector)) residues, ",
+    "$(countresidues(ch, heteroselector)) other molecules, ",
+    "$(countatoms(ch)) atoms"
+)
 
-function Base.show(io::IO, res::Residue)
-    println(io, summary(res))
-    println(io, "Residue ID                  -  ", resid(res, full=true))
-    println(io, "Residue name                -  ", resname(res))
-    println(io, "Number of atoms             -  ", countatoms(res))
-    println(io, "Number of hydrogens         -  ", countatoms(res, hydrogenselector))
-      print(io, "Number of disordered atoms  -  ", countatoms(res, disorderselector))
-end
+Base.show(io::IO, res::Residue) = print(io,
+    "Residue $(resid(res, full=true)) with ",
+    "name $(resname(res)), ",
+    "$(countatoms(res)) atoms"
+)
 
-function Base.show(io::IO, dis_res::DisorderedResidue)
-    println(io, summary(dis_res))
-    println(io, "Residue ID                  -  ", resid(dis_res, full=true))
-    for res_name in resnames(dis_res)[1:end-1]
-        println(io, "Residue name                -  ", res_name)
-        println(io, "Number of atoms             -  ", countatoms(disorderedres(dis_res, res_name)))
-        println(io, "Number of hydrogens         -  ", countatoms(disorderedres(dis_res, res_name), hydrogenselector))
-        println(io, "Number of disordered atoms  -  ", countatoms(disorderedres(dis_res, res_name), disorderselector))
-    end
-    res_name = resnames(dis_res)[end]
-    println(io, "Residue name                -  ", res_name)
-    println(io, "Number of atoms             -  ", countatoms(disorderedres(dis_res, res_name)))
-    println(io, "Number of hydrogens         -  ", countatoms(disorderedres(dis_res, res_name), hydrogenselector))
-      print(io, "Number of disordered atoms  -  ", countatoms(disorderedres(dis_res, res_name), disorderselector))
-end
+Base.show(io::IO, dis_res::DisorderedResidue) = print(io,
+    "DisorderedResidue $(resid(dis_res, full=true)) with ",
+    "names $(join(resnames(dis_res), ","))"
+)
 
-function Base.show(io::IO, at::Atom)
-    println(io, summary(at))
-    println(io, "Serial                   -  ", serial(at))
-    println(io, "Atom name                -  ", atomname(at))
-    println(io, "Residue ID               -  ", resid(at, full=true))
-    println(io, "Alternative location ID  -  ", altlocid(at))
-    println(io, "Coordinates              -  ", coords(at))
-    println(io, "Occupancy                -  ", occupancy(at))
-    println(io, "Temperature factor       -  ", tempfactor(at))
-    println(io, "Element                  -  ", element(at))
-      print(io, "Charge                   -  ", charge(at))
-end
+Base.show(io::IO, at::Atom) = print(io,
+    "Atom $(atomname(at)) with ",
+    "serial $(serial(at)), ",
+    "coordinates $(coords(at))",
+    altlocid(at) != ' ' ? ", alt loc ID $(altlocid(at))" : ""
+)
 
-function Base.show(io::IO, dis_at::DisorderedAtom)
-    println(io, summary(dis_at))
-    println(io, "Atom name                -  ", atomname(dis_at))
-    println(io, "Residue ID               -  ", resid(dis_at, full=true))
-    for at in collect(dis_at)[1:end-1]
-        println(io, "Alternative location ID  -  ", altlocid(at))
-        println(io, "Serial                   -  ", serial(at))
-        println(io, "Coordinates              -  ", coords(at))
-        println(io, "Occupancy                -  ", occupancy(at))
-        println(io, "Temperature factor       -  ", tempfactor(at))
-        println(io, "Element                  -  ", element(at))
-        println(io, "Charge                   -  ", charge(at))
-    end
-    at = collect(dis_at)[end]
-    println(io, "Alternative location ID  -  ", altlocid(at))
-    println(io, "Serial                   -  ", serial(at))
-    println(io, "Coordinates              -  ", coords(at))
-    println(io, "Occupancy                -  ", occupancy(at))
-    println(io, "Temperature factor       -  ", tempfactor(at))
-    println(io, "Element                  -  ", element(at))
-      print(io, "Charge                   -  ", charge(at))
-end
+Base.show(io::IO, dis_at::DisorderedAtom) = print(io,
+    "DisorderedAtom $(atomname(dis_at)) with ",
+    "alt loc IDs $(join(altlocids(dis_at), ","))"
+)
 
-function Base.show(io::IO, at_rec::AtomRecord)
-    println(io, summary(at_rec))
-    println(io, "Hetero atom              -  ", at_rec.het_atom)
-    println(io, "Serial                   -  ", at_rec.serial)
-    println(io, "Atom name                -  ", strip(at_rec.atom_name))
-    println(io, "Alternative location ID  -  ", at_rec.alt_loc_id)
-    println(io, "Residue name             -  ", strip(at_rec.res_name))
-    println(io, "Chain ID                 -  ", at_rec.chain_id)
-    println(io, "Residue number           -  ", at_rec.res_number)
-    println(io, "Insertion code           -  ", at_rec.ins_code)
-    println(io, "Coordinates              -  ", at_rec.coords)
-    println(io, "Occupancy                -  ", at_rec.occupancy)
-    println(io, "Temperature factor       -  ", at_rec.temp_factor)
-    println(io, "Element                  -  ", strip(at_rec.element))
-      print(io, "Charge                   -  ", strip(at_rec.charge))
-end
+Base.show(io::IO, at_rec::AtomRecord) = print(io,
+    "AtomRecord $(strip(at_rec.atom_name)) with ",
+    "serial $(at_rec.serial), ",
+    "coordinates $(at_rec.coords)",
+    at_rec.alt_loc_id != ' ' ? ", alt loc ID $(at_rec.alt_loc_id)" : ""
+)

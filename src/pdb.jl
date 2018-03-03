@@ -234,7 +234,7 @@ function downloadpdb(pdbid::AbstractString; pdb_dir::AbstractString=pwd(), file_
                 input = open(archivefilepath) |> ZlibInflateInputStream
                 open(pdbpath,"w") do output
                     for line in eachline(input)
-                        println(output, chomp(line))
+                        println(output, line)
                     end
                 end
                 close(input)
@@ -480,9 +480,9 @@ function Base.read(input::IO,
 end
 
 function Base.read(filepath::AbstractString,
-            t::Type{T};
+            t::Type{<:Union{PDB, MMCIF}};
             structure_name::AbstractString=splitdir(filepath)[2],
-            kwargs...) where {T <: Union{PDB, MMCIF}}
+            kwargs...)
     open(filepath) do input
         read(input, t; structure_name=structure_name, kwargs...)
     end
@@ -790,8 +790,8 @@ function writepdb(output::IO, at::AbstractAtom, atom_selectors::Function...)
 end
 
 function writepdb(output::IO,
-                ats::Vector{T},
-                atom_selectors::Function...) where {T <: AbstractAtom}
+                ats::Vector{<:AbstractAtom},
+                atom_selectors::Function...)
     for at in collectatoms(ats, atom_selectors...)
         writepdb(output, at)
     end

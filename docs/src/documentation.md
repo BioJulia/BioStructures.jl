@@ -16,17 +16,7 @@ To parse a PDB file into a Structure-Model-Chain-Residue-Atom framework:
 
 ```julia
 julia> struc = read("/path/to/pdb/file.pdb", PDB)
-BioStructures.ProteinStructure
-Name                        -  1EN2.pdb
-Number of models            -  1
-Chain(s)                    -  A
-Number of residues          -  85
-Number of point mutations   -  5
-Number of other molecules   -  5
-Number of water molecules   -  76
-Number of atoms             -  614
-Number of hydrogens         -  0
-Number of disordered atoms  -  27
+ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 ```
 
 mmCIF files can be read into the same data structure with `read("/path/to/cif/file.cif", MMCIF)`. If you want to read an mmCIF file into a dictionary to query yourself (e.g. to access metadata fields), use `MMCIFDict`:
@@ -277,17 +267,7 @@ To parse an existing PDB file into a Structure-Model-Chain-Residue-Atom framewor
 
 ```julia
 julia> struc = read("/path/to/pdb/file.pdb", PDB)
-BioStructures.ProteinStructure
-Name                        -  1EN2.pdb
-Number of models            -  1
-Chain(s)                    -  A
-Number of residues          -  85
-Number of point mutations   -  5
-Number of other molecules   -  5
-Number of water molecules   -  76
-Number of atoms             -  614
-Number of hydrogens         -  0
-Number of disordered atoms  -  27
+ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 ```
 
 Read a mmCIF file instead by replacing `PDB` with `MMCIF`. Various options can be set through optional keyword arguments when parsing PDB/mmCIF files:
@@ -313,17 +293,7 @@ To download and parse a PDB file into a Structure-Model-Chain-Residue-Atom frame
 julia> struc = retrievepdb("1ALW", pdb_dir="path/to/pdb/directory")
 INFO: Downloading PDB : 1ALW
 INFO: Parsing the PDB file...
-BioStructures.ProteinStructure
-Name                        -  1ALW.pdb
-Number of models            -  1
-Chain(s)                    -  A,B
-Number of residues          -  346
-Number of point mutations   -  0
-Number of other molecules   -  10
-Number of water molecules   -  104
-Number of atoms             -  2790
-Number of hydrogens         -  0
-Number of disordered atoms  -  0
+ProteinStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atoms
 ```
 
 Various options can be set when using `retrievepdb`:
