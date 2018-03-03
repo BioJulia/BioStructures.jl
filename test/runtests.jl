@@ -39,6 +39,7 @@ testfilepath(path::AbstractString...) = joinpath(fmtdir, path...)
 
 # All writing is done to one temporary file which is removed at the end
 temp_filename, io = mktemp()
+close(io)
 
 
 @testset "PDB Handling" begin
