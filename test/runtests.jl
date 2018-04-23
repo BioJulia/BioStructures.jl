@@ -100,6 +100,21 @@ close(io)
         @test isfile(pdbpath) && filesize(pdbpath) > 0
     end
 
+    # Test function as first argument to downloadpdb
+    @test downloadpdb(countlines, "1alw") == 3600
+    @test downloadpdb("1alw") do fp
+        s = read(fp, PDB)
+        return countresidues(s, standardselector)
+    end == 346
+    @test downloadpdb(["169l", "2lzm"]) do fps
+        n_chains = Int[]
+        for fp in fps
+            s = read(fp, PDB)
+            push!(n_chains, countchains(s))
+        end
+        return n_chains
+    end == [5, 1]
+
     # Test Retrieving and reading options
     struc = retrievepdb("1AKE", pdb_dir=pdb_dir, structure_name="New name")
     @test structurename(struc) == "New name"

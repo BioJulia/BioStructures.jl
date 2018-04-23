@@ -1,3 +1,9 @@
+Changes on master branch
+========================
+
+* `downloadpdb` can now be given a function as the first argument, in which case the function is run with the downloaded filepath(s) as an argument and the file(s) are deleted afterwards.
+
+
 BioStructures.jl v0.2.0 Release Notes
 =====================================
 

@@ -54,7 +54,7 @@ Fetch list of all PDB entries from RCSB server.
 """
 function pdbentrylist()
     pdbidlist = String[]
-    info("Fetching list of all PDB Entries from RCSB Server...")
+    info("Fetching list of all PDB Entries from the RCSB server")
     tempfilepath = tempname()
     try
         download("ftp://ftp.wwpdb.org/pub/pdb/derived_data/index/entries.idx",tempfilepath)
@@ -89,7 +89,7 @@ Fetch list of PDB entries from RCSB weekly status file by specifying its URL.
 function pdbstatuslist(url::AbstractString)
     statuslist = String[]
     filename = split(url,"/")[end]
-    info("Fetching weekly status file $filename from RCSB Server...")
+    info("Fetching weekly status file $filename from the RCSB server")
     tempfilepath = tempname()
     try
         download(url, tempfilepath)
@@ -135,7 +135,7 @@ Fetch list of all obsolete PDB entries in the RCSB server.
 """
 function pdbobsoletelist()
     obsoletelist = String[]
-    info("Fetching list of all obsolete PDB Entries from RCSB Server...")
+    info("Fetching list of all obsolete PDB entries from the RCSB server")
     tempfilepath = tempname()
     try
         download("ftp://ftp.wwpdb.org/pub/pdb/data/status/obsolete.dat", tempfilepath)
@@ -162,11 +162,18 @@ end
 
 """
     downloadpdb(pdbid::AbstractString; <keyword arguments>)
+    downloadpdb(pdbid::Array{String,1}; <keyword arguments>)
+    downloadpdb(f::Function, args...)
 
-Download PDB or biological assembly file from the RCSB server and returns the path to the file.
+Download files from the Protein Data Bank (PDB) via RCSB.
+When given an `AbstractString`, e.g. `"1AKE"`, downloads the file and returns the path
+to the file.
+When given an `Array{String,1}`, downloads the files in the array and returns an array
+of the paths to the files.
+When given a function as the first argument, runs the function with the downloaded
+filepath(s) as an argument then removes the file(s).
 
 # Arguments
-- `pdbid::AbstractString`: the PDB to be downloaded.
 - `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is downloaded;
 defaults to current working directory.
 - `file_format::Type=PDB`: the format of the PDB file. Options <PDB, PDBXML, MMCIF, MMTF>;
@@ -178,7 +185,12 @@ by default skips downloading PDB file if it exists in `pdb_dir`.
 - `ba_number::Integer=0`: if set > 0 downloads the respective biological assembly;
 by default downloads the PDB file.
 """
-function downloadpdb(pdbid::AbstractString; pdb_dir::AbstractString=pwd(), file_format::Type=PDB, obsolete::Bool=false, overwrite::Bool=false, ba_number::Integer=0)
+function downloadpdb(pdbid::AbstractString;
+                pdb_dir::AbstractString=pwd(),
+                file_format::Type=PDB,
+                obsolete::Bool=false,
+                overwrite::Bool=false,
+                ba_number::Integer=0)
     pdbid = uppercase(pdbid)
     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
     if !ismatch(r"^[a-zA-Z0-9]{4}$", pdbid)
@@ -195,7 +207,7 @@ function downloadpdb(pdbid::AbstractString; pdb_dir::AbstractString=pwd(), file_
     end
     # Check and create directory if it does not exists in filesystem
     if !isdir(pdb_dir)
-        info("Creating directory : $pdb_dir")
+        info("Creating directory: $pdb_dir")
         mkpath(pdb_dir)
     end
     # Standard file name format for PDB and biological assembly
@@ -206,13 +218,13 @@ function downloadpdb(pdbid::AbstractString; pdb_dir::AbstractString=pwd(), file_
     end
     # Download the PDB file only if it does not exist in the "pdb_dir" and when "overwrite" is true
     if isfile(pdbpath) && !overwrite
-        info("PDB Exists : $pdbid")
+        info("PDB exists: $pdbid")
     else
         # Temporary location to download compressed PDB file.
         archivefilepath = tempname()
         try
             # Download the compressed PDB file to the temporary location
-            info("Downloading PDB : $pdbid")
+            info("Downloading PDB: $pdbid")
             if ba_number == 0
                 if file_format == PDB || file_format == PDBXML || file_format == MMCIF
                     download("http://files.rcsb.org/download/$pdbid$(pdbextension[file_format]).gz", archivefilepath)
@@ -241,7 +253,7 @@ function downloadpdb(pdbid::AbstractString; pdb_dir::AbstractString=pwd(), file_
             end
             # Verify if the PDB file is downloaded and extracted without any error
             if !isfile(pdbpath) || filesize(pdbpath)==0
-                throw(ErrorException("Error downloading PDB : $pdbid"))
+                throw(ErrorException("Error downloading PDB: $pdbid"))
             end
         finally
             # Remove the temporary compressd PDB file downloaded to clear up space
@@ -252,37 +264,30 @@ function downloadpdb(pdbid::AbstractString; pdb_dir::AbstractString=pwd(), file_
     return pdbpath
 end
 
-
-"""
-    downloadpdb(pdbid::Array{String,1}; <keyword arguments>)
-
-Download PDB or biological assembly file from the RCSB server.
-
-# Arguments
-- `pdbid::Array{String,1}`: the list of PDB files to be downloaded.
-- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is downloaded;
-defaults to current working directory.
-- `file_format::Type=PDB`: the format of the PDB file. Options <PDB, PDBXML, MMCIF, MMTF>;
-defaults to PDB format.
-- `obsolete::Bool=false`: if set `true`, the PDB file is downloaded in the auto-generated
-"obsolete" directory inside the specified `pdb_dir`.
-- `overwrite::Bool=false`: if set `true`, overwrites the PDB file if exists in `pdb_dir`;
-by default skips downloading PDB file if it exists in `pdb_dir`.
-- `ba_number::Integer=0`: if set > 0 downloads the respective biological assembly;
-by default downloads the PDB file.
-"""
 function downloadpdb(pdbidlist::Array{String,1}; kwargs...)
+    pdbpaths = String[]
     failedlist = String[]
     for pdbid in pdbidlist
         try
-            downloadpdb(pdbid; kwargs...)
+            pdbpath = downloadpdb(pdbid; kwargs...)
+            push!(pdbpaths, pdbpath)
         catch
-            warn("Error downloading PDB : $pdbid")
+            warn("Error downloading PDB: $pdbid")
             push!(failedlist,pdbid)
         end
     end
     if length(failedlist) > 0
-        warn(length(failedlist)," PDB files failed to download : ", failedlist)
+        warn(length(failedlist), " PDB file(s) failed to download: ", failedlist)
+    end
+    return pdbpaths
+end
+
+function downloadpdb(f::Function, args...; kwargs...)
+    pdbpath = downloadpdb(args...; kwargs...)
+    try
+        f(pdbpath)
+    finally
+        isa(pdbpath, Array) ? rm.(pdbpath) : rm(pdbpath)
     end
 end
 
@@ -303,7 +308,7 @@ by default skips downloading PDB file if it exists in `pdb_dir`.
 function downloadentirepdb(;pdb_dir::AbstractString=pwd(), file_format::Type=PDB, overwrite::Bool=false)
     # Get the list of all pdb entries from RCSB Server using getallpdbentries() and downloads them
     pdblist = pdbentrylist()
-    info("About to download $(length(pdblist)) PDB files. Make sure to have enough disk space and time!")
+    info("About to download $(length(pdblist)) PDB files. Make sure you have enough disk space and time!")
     info("You can stop it anytime and call the function again to resume downloading")
     downloadpdb(pdblist, pdb_dir=pdb_dir, overwrite=overwrite, file_format=file_format)
 end
@@ -391,7 +396,6 @@ function retrievepdb(pdbid::AbstractString;
             structure_name::AbstractString="$(uppercase(pdbid)).pdb",
             kwargs...)
     downloadpdb(pdbid, pdb_dir=pdb_dir, obsolete=obsolete, overwrite=overwrite, ba_number=ba_number)
-    info("Parsing the PDB file...")
     if obsolete
         # if obsolete is set true, the PDB file is present in the obsolete directory inside "pdb_dir"
         pdb_dir = joinpath(pdb_dir,"obsolete")

@@ -250,6 +250,21 @@ downloadpdb("1ALW", pdb_dir="path/to/pdb/directory/", file_format=MMCIF)
 downloadpdb("1ALW", pdb_dir="path/to/pdb/directory/", file_format=MMTF)
 ```
 
+To apply a function to a downloaded file and delete the file afterwards:
+
+```julia
+downloadpdb(f, "1ALW")
+```
+
+Or, using Julia's `do` syntax:
+
+```julia
+downloadpdb("1ALW") do fp
+    s = read(fp, PDB)
+    # Do something
+end
+```
+
 Various options can be set through optional keyword arguments when downloading PDB files:
 
 | Keyword Argument                | Description                                                                                                           |
@@ -448,4 +463,20 @@ downloadpdb("1SSU")
 struc_nmr = read("1SSU.pdb", PDB)
 rmsd(struc_nmr[5], struc_nmr[10], heavyatomselector)
 displacements(struc_nmr[5], struc_nmr[10], heavyatomselector)
+```
+
+**G)** To calculate the cysteine fraction of every structure in the PDB:
+
+```julia
+l = pdbentrylist()
+for p in l
+    downloadpdb(p, file_format=MMCIF) do fp
+        s = read(fp, MMCIF)
+        nres = countresidues(s, standardselector)
+        if nres > 0
+            frac = countresidues(s, standardselector, x -> resname(x) == "CYS") / nres
+            println(p, "  ", round(frac, 2))
+        end
+    end
+end
 ```
