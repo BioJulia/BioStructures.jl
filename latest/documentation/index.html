@@ -38,7 +38,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-0.17.3, mkdocs-material-2.7.0">
+      <meta name="generator" content="mkdocs-0.17.3, mkdocs-material-2.7.2">
     
     
       
@@ -46,7 +46,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/application.78aab2dc.css">
+      <link rel="stylesheet" href="../assets/stylesheets/application.8d40d89b.css">
       
     
     
@@ -93,8 +93,8 @@
         
       </defs>
     </svg>
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search">
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
     
       <a href="#biostructures-documentation" tabindex="1" class="md-skip">
@@ -996,6 +996,19 @@
 </pre></div>
 
 
+<p>To apply a function to a downloaded file and delete the file afterwards:</p>
+<div class="codehilite"><pre><span></span><span class="n">downloadpdb</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s">&quot;1ALW&quot;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Or, using Julia's <code>do</code> syntax:</p>
+<div class="codehilite"><pre><span></span><span class="n">downloadpdb</span><span class="p">(</span><span class="s">&quot;1ALW&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="n">fp</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">PDB</span><span class="p">)</span>
+    <span class="c"># Do something</span>
+<span class="k">end</span>
+</pre></div>
+
+
 <p>Various options can be set through optional keyword arguments when downloading PDB files:</p>
 <table>
 <thead>
@@ -1275,12 +1288,29 @@
 <span class="n">rmsd</span><span class="p">(</span><span class="n">struc_nmr</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">struc_nmr</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">heavyatomselector</span><span class="p">)</span>
 <span class="n">displacements</span><span class="p">(</span><span class="n">struc_nmr</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">struc_nmr</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">heavyatomselector</span><span class="p">)</span>
 </pre></div>
+
+
+<p><strong>G)</strong> To calculate the cysteine fraction of every structure in the PDB:</p>
+<div class="codehilite"><pre><span></span><span class="n">l</span> <span class="o">=</span> <span class="n">pdbentrylist</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">p</span> <span class="kp">in</span> <span class="n">l</span>
+    <span class="n">downloadpdb</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="n">MMCIF</span><span class="p">)</span> <span class="k">do</span> <span class="n">fp</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">MMCIF</span><span class="p">)</span>
+        <span class="n">nres</span> <span class="o">=</span> <span class="n">countresidues</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">standardselector</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nres</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="n">frac</span> <span class="o">=</span> <span class="n">countresidues</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">standardselector</span><span class="p">,</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">resname</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="s">&quot;CYS&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="n">nres</span>
+            <span class="n">println</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s">&quot;  &quot;</span><span class="p">,</span> <span class="n">round</span><span class="p">(</span><span class="n">frac</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
                 
                   
                 
               
               
                 
+
+
               
             </article>
           </div>
@@ -1348,7 +1378,7 @@
       
     </div>
     
-      <script src="../assets/javascripts/application.8eb9be28.js"></script>
+      <script src="../assets/javascripts/application.b438e6c5.js"></script>
       
       <script>app.initialize({version:"0.17.3",url:{base:".."}})</script>
       
