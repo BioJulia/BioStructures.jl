@@ -72,12 +72,12 @@
         }, 
         {
             "location": "/contributing/", 
-            "text": "Contributing\n\n\nWe appreciate contributions from users including reporting bugs, fixing issues, improving performance and adding new features.\n\n\nIf you have a question about contributing or using this package, you are encouraged to use the \nBio category of the Julia discourse site\n.\n\n\nDetailed guidance for contributing to all BioJulia packages is provided at the \nBioJulia Contribution Documentation\n.\n\n\nHere we list specific details about contributing and maintainership pertaining specifically to the BioStructures.jl package.", 
+            "text": "Contributing\n\n\nWe appreciate contributions from users including reporting bugs, fixing issues, improving performance and adding new features.\n\n\nDetailed guidance for contributing to all BioJulia packages is provided at the \nBioJulia Contribution Documentation\n.\n\n\nIf you have a question about contributing or using this package, you are encouraged to use the \nBio category of the Julia discourse site\n.", 
             "title": "Contributing"
         }, 
         {
             "location": "/contributing/#contributing", 
-            "text": "We appreciate contributions from users including reporting bugs, fixing issues, improving performance and adding new features.  If you have a question about contributing or using this package, you are encouraged to use the  Bio category of the Julia discourse site .  Detailed guidance for contributing to all BioJulia packages is provided at the  BioJulia Contribution Documentation .  Here we list specific details about contributing and maintainership pertaining specifically to the BioStructures.jl package.", 
+            "text": "We appreciate contributions from users including reporting bugs, fixing issues, improving performance and adding new features.  Detailed guidance for contributing to all BioJulia packages is provided at the  BioJulia Contribution Documentation .  If you have a question about contributing or using this package, you are encouraged to use the  Bio category of the Julia discourse site .", 
             "title": "Contributing"
         }
     ]
