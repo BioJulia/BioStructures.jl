@@ -458,7 +458,7 @@ function Base.read(input::IO,
         # Read MODEL record
         elseif startswith(line, "MODEL ")
             try
-                curr_model = Meta.parse(Int, line[11:14])
+                curr_model = parse(Int, line[11:14])
             catch
                 throw(PDBParseError(
                     "Could not read model serial number", line_n, line))
@@ -517,7 +517,7 @@ AtomRecord(pdb_line::String, line_n::Integer=1) = AtomRecord(
 
 function parseserial(line::String, line_n::Integer=1)
     try
-        return Meta.parse(Int, line[7:11])
+        return parse(Int, line[7:11])
     catch
         throw(PDBParseError("Could not read atom serial number", line_n, line))
     end
@@ -557,7 +557,7 @@ end
 
 function parseresnumber(line::String, line_n::Integer=1)
     try
-        return Meta.parse(Int, line[23:26])
+        return parse(Int, line[23:26])
     catch
         throw(PDBParseError("Could not read residue number", line_n, line))
     end
@@ -573,7 +573,7 @@ end
 
 function parsecoordx(line::String, line_n::Integer=1)
     try
-        return Meta.parse(Float64, line[31:38])
+        return parse(Float64, line[31:38])
     catch
         throw(PDBParseError("Could not read x coordinate", line_n, line))
     end
@@ -581,7 +581,7 @@ end
 
 function parsecoordy(line::String, line_n::Integer=1)
     try
-        return Meta.parse(Float64, line[39:46])
+        return parse(Float64, line[39:46])
     catch
         throw(PDBParseError("Could not read y coordinate", line_n, line))
     end
@@ -589,7 +589,7 @@ end
 
 function parsecoordz(line::String, line_n::Integer=1)
     try
-        return Meta.parse(Float64, line[47:54])
+        return parse(Float64, line[47:54])
     catch
         throw(PDBParseError("Could not read z coordinate", line_n, line))
     end
@@ -597,7 +597,7 @@ end
 
 function parseoccupancy(line::String)
     try
-        return Meta.parse(Float64, line[55:60])
+        return parse(Float64, line[55:60])
     catch
         return 1.0
     end
@@ -605,7 +605,7 @@ end
 
 function parsetempfac(line::String)
     try
-        return Meta.parse(Float64, line[61:66])
+        return parse(Float64, line[61:66])
     catch
         return 0.0
     end
