@@ -1,6 +1,6 @@
 module TestBioStructures
 
-using Base.Test
+using Test
 using Formatting
 using BioCore
 using BioStructures

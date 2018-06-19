@@ -161,7 +161,7 @@ function tokenizecifstructure(f::IO)
             append!(tokens, splitline(line))
         end
     end
-    length(tokens) > 0 ? unshift!(tokens, "loop_") : nothing
+    length(tokens) > 0 ? pushfirst!(tokens, "loop_") : nothing
     return tokens
 end
 
@@ -254,7 +254,7 @@ function Base.read(input::IO,
         for i in 1:length(mmcif_dict["_atom_site.id"])
             if (read_std_atoms && mmcif_dict["_atom_site.group_PDB"][i] == "ATOM") ||
                     (read_het_atoms && mmcif_dict["_atom_site.group_PDB"][i] == "HETATM")
-                model_n = parse(Int, mmcif_dict["_atom_site.pdbx_PDB_model_num"][i])
+                model_n = Meta.parse(Int, mmcif_dict["_atom_site.pdbx_PDB_model_num"][i])
                 # Create model if required
                 if !haskey(models(struc), model_n)
                     struc[model_n] = Model(model_n, struc)
@@ -275,20 +275,20 @@ end
 # Constructor from mmCIF ATOM/HETATM line
 AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
     d["_atom_site.group_PDB"][i] == "HETATM",
-    parse(Int, d["_atom_site.id"][i]),
+    Meta.parse(Int, d["_atom_site.id"][i]),
     d["_atom_site.auth_atom_id"][i],
     d["_atom_site.label_alt_id"][i] in missingvals ? ' ' : d["_atom_site.label_alt_id"][i][1],
     d["_atom_site.auth_comp_id"][i],
     d["_atom_site.auth_asym_id"][i],
-    parse(Int, d["_atom_site.auth_seq_id"][i]),
+    Meta.parse(Int, d["_atom_site.auth_seq_id"][i]),
     d["_atom_site.pdbx_PDB_ins_code"][i] in missingvals ? ' ' : d["_atom_site.pdbx_PDB_ins_code"][i][1],
     [
-        parse(Float64, d["_atom_site.Cartn_x"][i]),
-        parse(Float64, d["_atom_site.Cartn_y"][i]),
-        parse(Float64, d["_atom_site.Cartn_z"][i])
+        Meta.parse(Float64, d["_atom_site.Cartn_x"][i]),
+        Meta.parse(Float64, d["_atom_site.Cartn_y"][i]),
+        Meta.parse(Float64, d["_atom_site.Cartn_z"][i])
     ],
-    d["_atom_site.occupancy"][i] in missingvals ? 1.0 : parse(Float64, d["_atom_site.occupancy"][i]),
-    d["_atom_site.B_iso_or_equiv"][i] in missingvals ? 0.0 : parse(Float64, d["_atom_site.B_iso_or_equiv"][i]),
+    d["_atom_site.occupancy"][i] in missingvals ? 1.0 : Meta.parse(Float64, d["_atom_site.occupancy"][i]),
+    d["_atom_site.B_iso_or_equiv"][i] in missingvals ? 0.0 : Meta.parse(Float64, d["_atom_site.B_iso_or_equiv"][i]),
     d["_atom_site.type_symbol"][i] in missingvals ? "  " : d["_atom_site.type_symbol"][i],
     d["_atom_site.pdbx_formal_charge"][i] in missingvals ? "  " : d["_atom_site.pdbx_formal_charge"][i],
 )
@@ -540,9 +540,9 @@ function appendatom!(atom_dict, at, model_n, chain_id, res_n, res_name, het)
     push!(atom_dict["_atom_site.label_entity_id"], "?")
     push!(atom_dict["_atom_site.label_seq_id"], "?")
     push!(atom_dict["_atom_site.pdbx_PDB_ins_code"], inscode(at) == ' ' ? "?" : string(inscode(at)))
-    push!(atom_dict["_atom_site.Cartn_x"], fmt(coordspec, round(x(at), 3)))
-    push!(atom_dict["_atom_site.Cartn_y"], fmt(coordspec, round(y(at), 3)))
-    push!(atom_dict["_atom_site.Cartn_z"], fmt(coordspec, round(z(at), 3)))
+    push!(atom_dict["_atom_site.Cartn_x"], fmt(coordspec, round(x(at), digits=3)))
+    push!(atom_dict["_atom_site.Cartn_y"], fmt(coordspec, round(y(at), digits=3)))
+    push!(atom_dict["_atom_site.Cartn_z"], fmt(coordspec, round(z(at), digits=3)))
     push!(atom_dict["_atom_site.occupancy"], fmt(floatspec, occupancy(at)))
     push!(atom_dict["_atom_site.B_iso_or_equiv"], fmt(floatspec, tempfactor(at)))
     push!(atom_dict["_atom_site.pdbx_formal_charge"], length(charge(at)) == 0 ? "?" : charge(at))

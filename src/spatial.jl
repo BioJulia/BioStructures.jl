@@ -192,7 +192,7 @@ function omegaangle(res::AbstractResidue, res_prev::AbstractResidue)
 end
 
 function omegaangle(chain::Chain, res_id::Union{Integer, AbstractString})
-    inds = find(r -> r == string(res_id), resids(chain))
+    inds = findall(r -> r == string(res_id), resids(chain))
     if length(inds) != 1
         throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end
@@ -224,7 +224,7 @@ function phiangle(res::AbstractResidue, res_prev::AbstractResidue)
 end
 
 function phiangle(chain::Chain, res_id::Union{Integer, AbstractString})
-    inds = find(r -> r == string(res_id), resids(chain))
+    inds = findall(r -> r == string(res_id), resids(chain))
     if length(inds) != 1
         throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end
@@ -256,7 +256,7 @@ function psiangle(res::AbstractResidue, res_next::AbstractResidue)
 end
 
 function psiangle(chain::Chain, res_id::Union{Integer, AbstractString})
-    inds = find(r -> r == string(res_id), resids(chain))
+    inds = findall(r -> r == string(res_id), resids(chain))
     if length(inds) != 1
         throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end

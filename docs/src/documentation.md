@@ -475,7 +475,7 @@ for p in l
         nres = countresidues(s, standardselector)
         if nres > 0
             frac = countresidues(s, standardselector, x -> resname(x) == "CYS") / nres
-            println(p, "  ", round(frac, 2))
+            println(p, "  ", round(frac, digits=2))
         end
     end
 end

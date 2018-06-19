@@ -66,7 +66,7 @@ function pdbentrylist()
                     # The first 4 characters in the line is the PDB ID
                     pdbid = uppercase(line[1:4])
                     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-                    if !ismatch(r"^[a-zA-Z0-9]{4}$", pdbid)
+                    if !occursin(pdbid, r"^[a-zA-Z0-9]{4}$")
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
                     push!(pdbidlist,pdbid)
@@ -100,7 +100,7 @@ function pdbstatuslist(url::AbstractString)
                     # The first 4 characters in the line is the PDB ID
                     pdbid = uppercase(line[1:4])
                     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-                    if !ismatch(r"^[a-zA-Z0-9]{4}$", pdbid)
+                    if !occursin(pdbid, r"^[a-zA-Z0-9]{4}$")
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
                     push!(statuslist,pdbid)
@@ -146,7 +146,7 @@ function pdbobsoletelist()
                     # The 21st to 24th characters in obsolete pdb entry has the pdb id
                     pdbid = uppercase(line[21:24])
                     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-                    if !ismatch(r"^[a-zA-Z0-9]{4}$", pdbid)
+                    if !occursin(pdbid, r"^[a-zA-Z0-9]{4}$")
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
                     push!(obsoletelist,pdbid)
@@ -193,7 +193,7 @@ function downloadpdb(pdbid::AbstractString;
                 ba_number::Integer=0)
     pdbid = uppercase(pdbid)
     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-    if !ismatch(r"^[a-zA-Z0-9]{4}$", pdbid)
+    if !occursin(pdbid, r"^[a-zA-Z0-9]{4}$")
         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
     end
     # check if PDB file format is valid
@@ -458,7 +458,7 @@ function Base.read(input::IO,
         # Read MODEL record
         elseif startswith(line, "MODEL ")
             try
-                curr_model = parse(Int, line[11:14])
+                curr_model = Meta.parse(Int, line[11:14])
             catch
                 throw(PDBParseError(
                     "Could not read model serial number", line_n, line))
@@ -517,7 +517,7 @@ AtomRecord(pdb_line::String, line_n::Integer=1) = AtomRecord(
 
 function parseserial(line::String, line_n::Integer=1)
     try
-        return parse(Int, line[7:11])
+        return Meta.parse(Int, line[7:11])
     catch
         throw(PDBParseError("Could not read atom serial number", line_n, line))
     end
@@ -557,7 +557,7 @@ end
 
 function parseresnumber(line::String, line_n::Integer=1)
     try
-        return parse(Int, line[23:26])
+        return Meta.parse(Int, line[23:26])
     catch
         throw(PDBParseError("Could not read residue number", line_n, line))
     end
@@ -573,7 +573,7 @@ end
 
 function parsecoordx(line::String, line_n::Integer=1)
     try
-        return parse(Float64, line[31:38])
+        return Meta.parse(Float64, line[31:38])
     catch
         throw(PDBParseError("Could not read x coordinate", line_n, line))
     end
@@ -581,7 +581,7 @@ end
 
 function parsecoordy(line::String, line_n::Integer=1)
     try
-        return parse(Float64, line[39:46])
+        return Meta.parse(Float64, line[39:46])
     catch
         throw(PDBParseError("Could not read y coordinate", line_n, line))
     end
@@ -589,7 +589,7 @@ end
 
 function parsecoordz(line::String, line_n::Integer=1)
     try
-        return parse(Float64, line[47:54])
+        return Meta.parse(Float64, line[47:54])
     catch
         throw(PDBParseError("Could not read z coordinate", line_n, line))
     end
@@ -597,7 +597,7 @@ end
 
 function parseoccupancy(line::String)
     try
-        return parse(Float64, line[55:60])
+        return Meta.parse(Float64, line[55:60])
     catch
         return 1.0
     end
@@ -605,7 +605,7 @@ end
 
 function parsetempfac(line::String)
     try
-        return parse(Float64, line[61:66])
+        return Meta.parse(Float64, line[61:66])
     catch
         return 0.0
     end
@@ -698,12 +698,12 @@ function pdbline(at::Atom)
             string(inscode(at)) *
             "   " *
             # This will throw an error for large coordinate values, e.g. -1000.123
-            spacestring(fmt(coordspec, round(x(at), 3)), 8) *
-            spacestring(fmt(coordspec, round(y(at), 3)), 8) *
-            spacestring(fmt(coordspec, round(z(at), 3)), 8) *
-            spacestring(fmt(floatspec, round(occupancy(at), 2)), 6) *
+            spacestring(fmt(coordspec, round(x(at), digits=3)), 8) *
+            spacestring(fmt(coordspec, round(y(at), digits=3)), 8) *
+            spacestring(fmt(coordspec, round(z(at), digits=3)), 8) *
+            spacestring(fmt(floatspec, round(occupancy(at), digits=2)), 6) *
             # This will throw an error for large temp facs, e.g. 1000.12
-            spacestring(fmt(floatspec, round(tempfactor(at), 2)), 6) *
+            spacestring(fmt(floatspec, round(tempfactor(at), digits=2)), 6) *
             "          " *
             spacestring(element(at), 2) *
             spacestring(charge(at), 2)
@@ -722,12 +722,12 @@ function pdbline(at_rec::AtomRecord)
             string(at_rec.ins_code) *
             "   " *
             # This will throw an error for large coordinate values, e.g. -1000.123
-            spacestring(fmt(coordspec, round(at_rec.coords[1], 3)), 8) *
-            spacestring(fmt(coordspec, round(at_rec.coords[2], 3)), 8) *
-            spacestring(fmt(coordspec, round(at_rec.coords[3], 3)), 8) *
-            spacestring(fmt(floatspec, round(at_rec.occupancy, 2)), 6) *
+            spacestring(fmt(coordspec, round(at_rec.coords[1], digits=3)), 8) *
+            spacestring(fmt(coordspec, round(at_rec.coords[2], digits=3)), 8) *
+            spacestring(fmt(coordspec, round(at_rec.coords[3], digits=3)), 8) *
+            spacestring(fmt(floatspec, round(at_rec.occupancy, digits=2)), 6) *
             # This will throw an error for large temp facs, e.g. 1000.12
-            spacestring(fmt(floatspec, round(at_rec.temp_factor, 2)), 6) *
+            spacestring(fmt(floatspec, round(at_rec.temp_factor, digits=2)), 6) *
             "          " *
             spacestring(at_rec.element, 2) *
             spacestring(at_rec.charge, 2)
