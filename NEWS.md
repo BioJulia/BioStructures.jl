@@ -1,6 +1,7 @@
 Changes on master branch
 ========================
 
+* Code now compatible with Julia v0.7. Support for earlier versions is dropped.
 * `downloadpdb` can now be given a function as the first argument, in which case the function is run with the downloaded filepath(s) as an argument and the file(s) are deleted afterwards.
 
 
