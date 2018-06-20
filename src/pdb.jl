@@ -27,7 +27,8 @@ struct MMCIF <: BioCore.IO.FileFormat end
 struct MMTF <: BioCore.IO.FileFormat end
 
 # A Dict mapping the type to their file extensions
-const pdbextension = Dict{Type,String}( PDB => ".pdb", PDBXML => ".xml", MMCIF => ".cif", MMTF => ".mmtf")
+const pdbextension = Dict{Type, String}(PDB=> ".pdb", PDBXML=> ".xml",
+                                        MMCIF=> ".cif", MMTF=> ".mmtf")
 
 "Error arising from parsing a Protein Data Bank (PDB) file."
 struct PDBParseError <: Exception
@@ -57,7 +58,7 @@ function pdbentrylist()
     info("Fetching list of all PDB Entries from the RCSB server")
     tempfilepath = tempname()
     try
-        download("ftp://ftp.wwpdb.org/pub/pdb/derived_data/index/entries.idx",tempfilepath)
+        download("ftp://ftp.wwpdb.org/pub/pdb/derived_data/index/entries.idx", tempfilepath)
         open(tempfilepath) do input
             # Skips the first two lines as it contains headers
             linecount = 1
@@ -69,7 +70,7 @@ function pdbentrylist()
                     if !occursin(pdbid, r"^[a-zA-Z0-9]{4}$")
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
-                    push!(pdbidlist,pdbid)
+                    push!(pdbidlist, pdbid)
                 end
                 linecount +=1
             end
@@ -88,7 +89,7 @@ Fetch list of PDB entries from RCSB weekly status file by specifying its URL.
 """
 function pdbstatuslist(url::AbstractString)
     statuslist = String[]
-    filename = split(url,"/")[end]
+    filename = split(url, "/")[end]
     info("Fetching weekly status file $filename from the RCSB server")
     tempfilepath = tempname()
     try
@@ -103,7 +104,7 @@ function pdbstatuslist(url::AbstractString)
                     if !occursin(pdbid, r"^[a-zA-Z0-9]{4}$")
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
-                    push!(statuslist,pdbid)
+                    push!(statuslist, pdbid)
                 end
             end
         end
@@ -149,7 +150,7 @@ function pdbobsoletelist()
                     if !occursin(pdbid, r"^[a-zA-Z0-9]{4}$")
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
-                    push!(obsoletelist,pdbid)
+                    push!(obsoletelist, pdbid)
                 end
             end
         end
@@ -162,13 +163,13 @@ end
 
 """
     downloadpdb(pdbid::AbstractString; <keyword arguments>)
-    downloadpdb(pdbid::Array{String,1}; <keyword arguments>)
+    downloadpdb(pdbid::Array{String, 1}; <keyword arguments>)
     downloadpdb(f::Function, args...)
 
 Download files from the Protein Data Bank (PDB) via RCSB.
 When given an `AbstractString`, e.g. `"1AKE"`, downloads the file and returns the path
 to the file.
-When given an `Array{String,1}`, downloads the files in the array and returns an array
+When given an `Array{String, 1}`, downloads the files in the array and returns an array
 of the paths to the files.
 When given a function as the first argument, runs the function with the downloaded
 filepath(s) as an argument then removes the file(s).
@@ -203,7 +204,7 @@ function downloadpdb(pdbid::AbstractString;
     # Check if the PDB file is marked as obsolete
     if obsolete
         # Set the download path to obsolete directory inside the "pdb_dir"
-        pdb_dir = joinpath(pdb_dir,"obsolete")
+        pdb_dir = joinpath(pdb_dir, "obsolete")
     end
     # Check and create directory if it does not exists in filesystem
     if !isdir(pdb_dir)
@@ -212,9 +213,9 @@ function downloadpdb(pdbid::AbstractString;
     end
     # Standard file name format for PDB and biological assembly
     if ba_number==0
-        pdbpath = joinpath(pdb_dir,"$pdbid$(pdbextension[file_format])")
+        pdbpath = joinpath(pdb_dir, "$pdbid$(pdbextension[file_format])")
     else
-        pdbpath = joinpath(pdb_dir,"$(pdbid)_ba$ba_number$(pdbextension[file_format])")
+        pdbpath = joinpath(pdb_dir, "$(pdbid)_ba$ba_number$(pdbextension[file_format])")
     end
     # Download the PDB file only if it does not exist in the "pdb_dir" and when "overwrite" is true
     if isfile(pdbpath) && !overwrite
@@ -234,7 +235,7 @@ function downloadpdb(pdbid::AbstractString;
                 end
             else
                 if file_format == PDB
-                    download("http://files.rcsb.org/download/$pdbid$(pdbextension[file_format])$ba_number.gz",archivefilepath)
+                    download("http://files.rcsb.org/download/$pdbid$(pdbextension[file_format])$ba_number.gz", archivefilepath)
                 elseif file_format == MMCIF
                     download("http://files.rcsb.org/download/$pdbid-assembly$ba_number$(pdbextension[file_format]).gz", archivefilepath)
                 else
@@ -264,7 +265,7 @@ function downloadpdb(pdbid::AbstractString;
     return pdbpath
 end
 
-function downloadpdb(pdbidlist::Array{String,1}; kwargs...)
+function downloadpdb(pdbidlist::Array{String, 1}; kwargs...)
     pdbpaths = String[]
     failedlist = String[]
     for pdbid in pdbidlist
@@ -273,7 +274,7 @@ function downloadpdb(pdbidlist::Array{String,1}; kwargs...)
             push!(pdbpaths, pdbpath)
         catch
             warn("Error downloading PDB: $pdbid")
-            push!(failedlist,pdbid)
+            push!(failedlist, pdbid)
         end
     end
     if length(failedlist) > 0
@@ -324,18 +325,18 @@ inside the local `pdb_dir` directory.
 function updatelocalpdb(;pdb_dir::AbstractString=pwd(), file_format::Type=PDB)
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
     # download the newly added and modified pdb files
-    downloadpdb(vcat(addedlist,modifiedlist), pdb_dir=pdb_dir, overwrite=true, file_format=file_format)
+    downloadpdb(vcat(addedlist, modifiedlist), pdb_dir=pdb_dir, overwrite=true, file_format=file_format)
     # set the obsolete directory to be inside pdb_dir
-    obsolete_dir=joinpath(pdb_dir,"obsolete")
+    obsolete_dir=joinpath(pdb_dir, "obsolete")
     for pdbid in obsoletelist
-        oldfile = joinpath(pdb_dir,"$pdbid$(pdbextension[file_format])")
+        oldfile = joinpath(pdb_dir, "$pdbid$(pdbextension[file_format])")
         newfile = joinpath(obsolete_dir, "$pdbid$(pdbextension[file_format])")
         # if obsolete pdb is in the "pdb_dir", move it to "obsolete" directory inside "pdb_dir"
         if isfile(oldfile)
             if !isdir(obsolete_dir)
                 mkpath(obsolete_dir)
             end
-            mv(oldfile,newfile)
+            mv(oldfile, newfile)
         # if obsolete pdb is already in the obsolete directory, inform the user and skip
         elseif isfile(newfile)
             info("PDB $pdbid is already moved to the obsolete directory")
@@ -398,7 +399,7 @@ function retrievepdb(pdbid::AbstractString;
     downloadpdb(pdbid, pdb_dir=pdb_dir, obsolete=obsolete, overwrite=overwrite, ba_number=ba_number)
     if obsolete
         # if obsolete is set true, the PDB file is present in the obsolete directory inside "pdb_dir"
-        pdb_dir = joinpath(pdb_dir,"obsolete")
+        pdb_dir = joinpath(pdb_dir, "obsolete")
     end
     readpdb(pdbid; pdb_dir=pdb_dir, ba_number=ba_number, structure_name=structure_name, kwargs...)
 end
@@ -428,9 +429,9 @@ function readpdb(pdbid::AbstractString;
     pdbid = uppercase(pdbid)
     # Standard file name format for PDB and biological assembly
     if ba_number==0
-        pdbpath = joinpath(pdb_dir,"$pdbid.pdb")
+        pdbpath = joinpath(pdb_dir, "$pdbid.pdb")
     else
-        pdbpath = joinpath(pdb_dir,"$(pdbid)_ba$ba_number.pdb")
+        pdbpath = joinpath(pdb_dir, "$(pdbid)_ba$ba_number.pdb")
     end
     read(pdbpath, PDB; structure_name=structure_name, kwargs...)
 end
