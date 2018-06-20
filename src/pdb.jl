@@ -243,13 +243,13 @@ function downloadpdb(pdbid::AbstractString;
             end
             # Verify if the compressed PDB file is downloaded properly and extract it. For MMTF no extraction is needed
             if isfile(archivefilepath) && filesize(archivefilepath) > 0 && file_format != MMTF
-                input = open(archivefilepath) |> ZlibInflateInputStream
-                open(pdbpath,"w") do output
-                    for line in eachline(input)
+                stream = GzipDecompressorStream(open(archivefilepath))
+                open(pdbpath, "w") do output
+                    for line in eachline(stream)
                         println(output, line)
                     end
                 end
-                close(input)
+                close(stream)
             end
             # Verify if the PDB file is downloaded and extracted without any error
             if !isfile(pdbpath) || filesize(pdbpath)==0

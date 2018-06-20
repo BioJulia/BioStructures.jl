@@ -10,7 +10,7 @@ __precompile__()
 
 module BioStructures
 
-using Libz
+using CodecZlib
 using Formatting
 import BioCore
 import BioCore.distance
