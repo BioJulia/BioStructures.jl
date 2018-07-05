@@ -55,7 +55,7 @@ Fetch list of all PDB entries from RCSB server.
 """
 function pdbentrylist()
     pdbidlist = String[]
-    info("Fetching list of all PDB Entries from the RCSB server")
+    @info "Fetching list of all PDB Entries from the RCSB server"
     tempfilepath = tempname()
     try
         download("ftp://ftp.wwpdb.org/pub/pdb/derived_data/index/entries.idx", tempfilepath)
@@ -90,7 +90,7 @@ Fetch list of PDB entries from RCSB weekly status file by specifying its URL.
 function pdbstatuslist(url::AbstractString)
     statuslist = String[]
     filename = split(url, "/")[end]
-    info("Fetching weekly status file $filename from the RCSB server")
+    @info "Fetching weekly status file $filename from the RCSB server"
     tempfilepath = tempname()
     try
         download(url, tempfilepath)
@@ -136,7 +136,7 @@ Fetch list of all obsolete PDB entries in the RCSB server.
 """
 function pdbobsoletelist()
     obsoletelist = String[]
-    info("Fetching list of all obsolete PDB entries from the RCSB server")
+    @info "Fetching list of all obsolete PDB entries from the RCSB server"
     tempfilepath = tempname()
     try
         download("ftp://ftp.wwpdb.org/pub/pdb/data/status/obsolete.dat", tempfilepath)
@@ -208,7 +208,7 @@ function downloadpdb(pdbid::AbstractString;
     end
     # Check and create directory if it does not exists in filesystem
     if !isdir(pdb_dir)
-        info("Creating directory: $pdb_dir")
+        @info "Creating directory: $pdb_dir"
         mkpath(pdb_dir)
     end
     # Standard file name format for PDB and biological assembly
@@ -219,13 +219,13 @@ function downloadpdb(pdbid::AbstractString;
     end
     # Download the PDB file only if it does not exist in the "pdb_dir" and when "overwrite" is true
     if isfile(pdbpath) && !overwrite
-        info("PDB exists: $pdbid")
+        @info "PDB exists: $pdbid"
     else
         # Temporary location to download compressed PDB file.
         archivefilepath = tempname()
         try
             # Download the compressed PDB file to the temporary location
-            info("Downloading PDB: $pdbid")
+            @info "Downloading PDB: $pdbid"
             if ba_number == 0
                 if file_format == PDB || file_format == PDBXML || file_format == MMCIF
                     download("http://files.rcsb.org/download/$pdbid$(pdbextension[file_format]).gz", archivefilepath)
@@ -273,12 +273,12 @@ function downloadpdb(pdbidlist::Array{String, 1}; kwargs...)
             pdbpath = downloadpdb(pdbid; kwargs...)
             push!(pdbpaths, pdbpath)
         catch
-            warn("Error downloading PDB: $pdbid")
+            @warn "Error downloading PDB: $pdbid"
             push!(failedlist, pdbid)
         end
     end
     if length(failedlist) > 0
-        warn(length(failedlist), " PDB file(s) failed to download: ", failedlist)
+        @warn "$(length(failedlist)) PDB file(s) failed to download: $failedlist"
     end
     return pdbpaths
 end
@@ -309,8 +309,8 @@ by default skips downloading PDB file if it exists in `pdb_dir`.
 function downloadentirepdb(;pdb_dir::AbstractString=pwd(), file_format::Type=PDB, overwrite::Bool=false)
     # Get the list of all pdb entries from RCSB Server using getallpdbentries() and downloads them
     pdblist = pdbentrylist()
-    info("About to download $(length(pdblist)) PDB files. Make sure you have enough disk space and time!")
-    info("You can stop it anytime and call the function again to resume downloading")
+    @info "About to download $(length(pdblist)) PDB files. Make sure you have enough disk space and time!"
+    @info "You can stop it anytime and call the function again to resume downloading"
     downloadpdb(pdblist, pdb_dir=pdb_dir, overwrite=overwrite, file_format=file_format)
 end
 
@@ -339,10 +339,10 @@ function updatelocalpdb(;pdb_dir::AbstractString=pwd(), file_format::Type=PDB)
             mv(oldfile, newfile)
         # if obsolete pdb is already in the obsolete directory, inform the user and skip
         elseif isfile(newfile)
-            info("PDB $pdbid is already moved to the obsolete directory")
+            @info "PDB $pdbid is already moved to the obsolete directory"
         # if obsolete pdb not available in both pdb_dir and obsolete, inform the user and skip
         else
-            info("Obsolete PDB $pdbid is missing")
+            @info "Obsolete PDB $pdbid is missing"
         end
     end
 end
