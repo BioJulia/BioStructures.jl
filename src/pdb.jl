@@ -307,10 +307,9 @@ defaults to PDB format.
 by default skips downloading PDB file if it exists in `pdb_dir`.
 """
 function downloadentirepdb(;pdb_dir::AbstractString=pwd(), file_format::Type=PDB, overwrite::Bool=false)
-    # Get the list of all pdb entries from RCSB Server using getallpdbentries() and downloads them
-    pdblist = pdbentrylist()
     @info "About to download $(length(pdblist)) PDB files. Make sure you have enough disk space and time!"
     @info "You can stop it anytime and call the function again to resume downloading"
+    pdblist = pdbentrylist()
     downloadpdb(pdblist, pdb_dir=pdb_dir, overwrite=overwrite, file_format=file_format)
 end
 
