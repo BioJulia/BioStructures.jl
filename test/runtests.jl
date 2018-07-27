@@ -202,15 +202,15 @@ end
 
 
     # Test show
-    show(DevNull, at)
-    show(DevNull, dis_at)
-    show(DevNull, res)
-    show(DevNull, dis_res)
-    show(DevNull, ch)
-    show(DevNull, mod)
-    show(DevNull, struc)
-    show(DevNull, Model())
-    show(DevNull, ProteinStructure())
+    show(devnull, at)
+    show(devnull, dis_at)
+    show(devnull, res)
+    show(devnull, dis_res)
+    show(devnull, ch)
+    show(devnull, mod)
+    show(devnull, struc)
+    show(devnull, Model())
+    show(devnull, ProteinStructure())
 
 
     # Test getters/setters
@@ -739,7 +739,7 @@ end
     line_d = "ATOM    669  CA  ILE A  90      31.743   "
     line_e = "REMARK   1 REFERENCE 1                                                          "
     at_rec = AtomRecord(line_a, 10)
-    show(DevNull, at_rec)
+    show(devnull, at_rec)
     @test !at_rec.het_atom
     @test at_rec.serial == 669
     @test at_rec.atom_name == " CA "
@@ -1250,7 +1250,7 @@ end
 
     # Test parser error handling
     error = PDBParseError("message", 10, "line")
-    showerror(DevNull, error)
+    showerror(devnull, error)
     # Missing coordinate (blank string)
     @test_throws PDBParseError read(testfilepath("PDB", "1AKE_err_a.pdb"), PDB)
     # Missing chain ID (line ends early)
@@ -1478,7 +1478,7 @@ end
     @test length(values(dic)) == 610
     @test haskey(dic, "_cell.entry_id")
     @test !haskey(dic, "nokey")
-    show(DevNull, dic)
+    show(devnull, dic)
 
     multiline_str = """
         data_test
@@ -1633,7 +1633,7 @@ end
 
     # Test AtomRecord
     at_rec = AtomRecord(MMCIFDict(testfilepath("mmCIF", "1AKE.cif")), 5)
-    show(DevNull, at_rec)
+    show(devnull, at_rec)
     @test !at_rec.het_atom
     @test at_rec.serial == 5
     @test at_rec.atom_name == "CB"
