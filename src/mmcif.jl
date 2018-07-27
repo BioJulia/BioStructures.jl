@@ -366,7 +366,7 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
         if key in keys(mmciforder)
             inds = Int[]
             for i in key_list
-                f = findfirst(mmciforder[key], i)
+                f = something(findfirst(isequal(i), mmciforder[key]), 0)
                 if f == 0
                     # Unrecognised key - add at end
                     f = length(mmciforder[key]) + 1

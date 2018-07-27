@@ -659,11 +659,11 @@ function spaceatomname(at::Atom)
         throw(ArgumentError("Atom name is greater than four characters: \"$at_name\""))
     end
     # In the absence of the element, the first index goes in column two
-    if strip_el == "" || findfirst(at_name, strip_el[1]) == 0
+    if strip_el == "" || findfirst(isequal(strip_el[1]), at_name) == nothing
         cent_ind = 1
     # The last letter of the element goes in column two where possible
     else
-        cent_ind = findfirst(at_name, strip_el[1]) + length(strip_el) - 1
+        cent_ind = something(findfirst(isequal(strip_el[1]), at_name), 0) + length(strip_el) - 1
     end
     if cent_ind > 2
         throw(ArgumentError("Atom name is too long to space correctly: \"$at_name\""))
