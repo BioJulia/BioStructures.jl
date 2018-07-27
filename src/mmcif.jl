@@ -347,7 +347,7 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
         if lowercase(key) == "data_"
             data_val = mmcif_dict[key]
         else
-            s = split(key, "\.")
+            s = split(key, ".")
             if length(s) == 2
                 if s[1] in keys(key_lists)
                     push!(key_lists[s[1]], s[2])
