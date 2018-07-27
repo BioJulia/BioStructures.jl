@@ -304,7 +304,7 @@ function formatmmcifcol(val::AbstractString, col_width::Integer=length(val))
         return "\n;$val\n;\n"
     elseif requiresquote(val)
         # Choose quote character
-        if contains(val, "' ")
+        if occursin("' ", val)
             return rpad("\"$val\"", col_width)
         else
             return rpad("'$val'", col_width)
@@ -317,11 +317,11 @@ function formatmmcifcol(val::AbstractString, col_width::Integer=length(val))
 end
 
 function requiresnewline(val)
-    return contains(val, "\n") || (contains(val, "' ") && contains(val, "\" "))
+    return occursin("\n", val) || (occursin("' ", val) && occursin("\" ", val))
 end
 
 function requiresquote(val)
-    return contains(val, " ") || contains(val, "'") || contains(val, "\"") ||
+    return occursin(" ", val) || occursin("'", val) || occursin("\"", val) ||
         val[1] in specialchars || startswith(lowercase(val), "data_") ||
         startswith(lowercase(val), "save_") || val in specialwords
 end
