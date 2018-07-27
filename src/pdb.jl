@@ -67,7 +67,7 @@ function pdbentrylist()
                     # The first 4 characters in the line is the PDB ID
                     pdbid = uppercase(line[1:4])
                     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-                    if !occursin(pdbid, r"^[a-zA-Z0-9]{4}$")
+                    if !occursin(r"^[a-zA-Z0-9]{4}$", pdbid)
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
                     push!(pdbidlist, pdbid)
@@ -101,7 +101,7 @@ function pdbstatuslist(url::AbstractString)
                     # The first 4 characters in the line is the PDB ID
                     pdbid = uppercase(line[1:4])
                     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-                    if !occursin(pdbid, r"^[a-zA-Z0-9]{4}$")
+                    if !occursin(r"^[a-zA-Z0-9]{4}$", pdbid)
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
                     push!(statuslist, pdbid)
@@ -147,7 +147,7 @@ function pdbobsoletelist()
                     # The 21st to 24th characters in obsolete pdb entry has the pdb id
                     pdbid = uppercase(line[21:24])
                     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-                    if !occursin(pdbid, r"^[a-zA-Z0-9]{4}$")
+                    if !occursin(r"^[a-zA-Z0-9]{4}$", pdbid)
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
                     push!(obsoletelist, pdbid)
@@ -194,7 +194,7 @@ function downloadpdb(pdbid::AbstractString;
                 ba_number::Integer=0)
     pdbid = uppercase(pdbid)
     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-    if !occursin(pdbid, r"^[a-zA-Z0-9]{4}$")
+    if !occursin(r"^[a-zA-Z0-9]{4}$", pdbid)
         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
     end
     # check if PDB file format is valid

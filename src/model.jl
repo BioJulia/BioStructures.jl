@@ -1482,7 +1482,7 @@ function hydrogenselector(at::AbstractAtom)
     return element(at, strip=true) == "H" ||
         (element(at, strip=true) == "" &&
         'H' in atomname(at) &&
-        !occursin(atomname(at)[1:findfirst(atomname(at), 'H')-1], r"[a-zA-Z]"))
+        !occursin(r"[a-zA-Z]", atomname(at)[1:findfirst(atomname(at), 'H')-1]))
 end
 
 
