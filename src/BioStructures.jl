@@ -10,6 +10,8 @@ __precompile__()
 
 module BioStructures
 
+using LinearAlgebra: dot, cross, norm
+
 using CodecZlib
 using Formatting
 import BioCore
