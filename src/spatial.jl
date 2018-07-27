@@ -73,7 +73,7 @@ function displacements(coords_one::Array{Float64}, coords_two::Array{Float64})
         throw(ArgumentError("Sizes of coordinate arrays are different - cannot calculate displacements"))
     end
     diff = coords_one - coords_two
-    return sqrt.(sum(diff .* diff, 1))[:]
+    return sqrt.(sum(diff .* diff, dims=1))[:]
 end
 
 function displacements(el_one::StructuralElementOrList,
