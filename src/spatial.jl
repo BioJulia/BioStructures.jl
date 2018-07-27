@@ -166,7 +166,7 @@ end
 function dihedralangle(vec_a::Vector{Float64},
                     vec_b::Vector{Float64},
                     vec_c::Vector{Float64})
-    return atan2(
+    return atan(
         dot(cross(cross(vec_a, vec_b), cross(vec_b, vec_c)), vec_b / norm(vec_b)),
         dot(cross(vec_a, vec_b), cross(vec_b, vec_c)))
 end
