@@ -900,57 +900,60 @@ end
 
 # Iterating over a ProteinStructure yields Models
 Base.length(struc::ProteinStructure) = length(modelnumbers(struc))
-Base.start(::ProteinStructure) = 1
-Base.next(struc::ProteinStructure, state) = (struc[modelnumbers(struc)[state]], state + 1)
-Base.done(struc::ProteinStructure, state) = state > length(struc)
 Base.eltype(::Type{ProteinStructure}) = Model
+function Base.iterate(struc::ProteinStructure, state=1)
+    state <= length(struc) ? (struc[modelnumbers(struc)[state]], state + 1) : nothing
+end
 
 # Iterating over a Model yields Chains
 Base.length(mod::Model) = length(chainids(mod))
-Base.start(::Model) = 1
-Base.next(mod::Model, state) = (mod[chainids(mod)[state]], state + 1)
-Base.done(mod::Model, state) = state > length(mod)
 Base.eltype(::Type{Model}) = Chain
+function Base.iterate(mod::Model, state=1)
+    state <= length(mod) ? (mod[chainids(mod)[state]], state + 1) : nothing
+end
 
 # Iterating over a Chain yields AbstractResidues
 Base.length(ch::Chain) = length(resids(ch))
-Base.start(::Chain) = 1
-Base.next(ch::Chain, state) = (ch[resids(ch)[state]], state + 1)
-Base.done(ch::Chain, state) = state > length(ch)
 Base.eltype(::Type{Chain}) = AbstractResidue
+function Base.iterate(ch::Chain, state=1)
+    state <= length(ch) ? (ch[resids(ch)[state]], state + 1) : nothing
+end
 
 # Iterating over a Residue yields AbstractAtoms
 Base.length(res::Residue) = length(atomnames(res))
-Base.start(::Residue) = 1
-Base.next(res::Residue, state) = (res[atomnames(res)[state]], state + 1)
-Base.done(res::Residue, state) = state > length(res)
 Base.eltype(::Type{Residue}) = AbstractAtom
+function Base.iterate(res::Residue, state=1)
+    state <= length(res) ? (res[atomnames(res)[state]], state + 1) : nothing
+end
 
 # Iterating over a DisorderedResidue yields AbstractAtoms
 # This is not necessarily intuitive, it may be expected to yield Residues
 # However this way iterating over an AbstractResidue always yields AbstractAtoms
 Base.length(dis_res::DisorderedResidue) = length(atomnames(dis_res))
-Base.start(::DisorderedResidue) = 1
-Base.next(dis_res::DisorderedResidue, state) = (defaultresidue(dis_res)[atomnames(dis_res)[state]], state + 1)
-Base.done(dis_res::DisorderedResidue, state) = state > length(dis_res)
 Base.eltype(::Type{DisorderedResidue}) = AbstractAtom
+function Base.iterate(dis_res::DisorderedResidue, state=1)
+    if state <= length(dis_res)
+        (defaultresidue(dis_res)[atomnames(dis_res)[state]], state + 1)
+    else
+        nothing
+    end
+end
 
 # Iterating over an Atom returns itself
 # This is not necessarily intuitive, it may be expected to not be an iterator
 # However this way iterating over an AbstractAtom always yields Atoms
 Base.length(::Atom) = 1
-Base.start(::Atom) = 1
-Base.next(at::Atom, state) = (at, state + 1)
-Base.done(::Atom, state) = state > 1
 Base.eltype(::Type{Atom}) = Atom
+function Base.iterate(at::Atom, state=1)
+    state <= 1 ? (at, state + 1) : nothing
+end
 
 # Iterating over a DisorderedAtom yields Atoms
 Base.length(dis_at::DisorderedAtom) = length(altlocids(dis_at))
-Base.start(::DisorderedAtom) = 1
-Base.next(dis_at::DisorderedAtom, state) = (dis_at[altlocids(dis_at)[state]], state + 1)
-Base.done(dis_at::DisorderedAtom, state) = state > length(dis_at)
 Base.eltype(::Type{DisorderedAtom}) = Atom
-
+function Base.iterate(dis_at::DisorderedAtom, state=1)
+    state <= length(dis_at) ? (dis_at[altlocids(dis_at)[state]], state + 1) : nothing
+end
 
 """
 Returns a copy of a `Vector` of `StructuralElement`s with all elements that do
