@@ -670,7 +670,7 @@ end
 
     # Test sequence extraction
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
-    #=seq = AminoAcidSequence(struc['B'])
+    seq = AminoAcidSequence(struc['B'])
     @test seq == AminoAcidSequence(
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
@@ -693,7 +693,7 @@ end
         Residue("VAL", 20, 'B', true, Chain('B')),
         Residue("ALA", 10, 'A', false, Chain('A')),
     ])
-    @test seq == AminoAcidSequence("VA")=#
+    @test seq == AminoAcidSequence("VA")
 end
 
 

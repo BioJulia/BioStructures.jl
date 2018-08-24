@@ -17,7 +17,7 @@ using Formatting
 import BioCore
 import BioCore.distance
 import BioSymbols
-#import BioSequences.AminoAcidSequence
+import BioSequences.AminoAcidSequence
 
 include("model.jl")
 include("pdb.jl")

@@ -84,8 +84,8 @@ export
     waterselector,
     notwaterselector,
     disorderselector,
-    hydrogenselector
-    #AminoAcidSequence
+    hydrogenselector,
+    AminoAcidSequence
 
 
 "A macromolecular structural element."
@@ -1491,7 +1491,7 @@ end
 
 # Residues are ordered in a chain with all hetero residues at the end
 # For obtaining sequence we will re-order them numerically
-#=function AminoAcidSequence(ch::Chain, residue_selectors::Function...)
+function AminoAcidSequence(ch::Chain, residue_selectors::Function...)
     return AminoAcidSequence(
         sort(collectresidues(ch, residue_selectors...), by=resnumber))
 end
@@ -1509,7 +1509,7 @@ function AminoAcidSequence(res::Vector{<:AbstractResidue})
         end
     end
     return AminoAcidSequence(seq)
-end=#
+end
 
 
 # Descriptive showing of elements on a single line
