@@ -38,8 +38,13 @@ const mmciforder = Dict(
 
 
 """
-A mmCIF dictionary.
+A macromolecular Crystallographic Information File (mmCIF) dictionary.
+
+Can be accessed using similar functions to a standard `Dict`.
 Keys are field names as a `String` and values are `String` or `Vector{String}`.
+To directly access the underlying dictionary of `MMCIFDict` `d`, use `d.dict`.
+Call `MMCIFDict` with a filepath or stream to read the dictionary from that
+source.
 """
 struct MMCIFDict
     dict::Dict{String, Union{String, Vector{String}}}
@@ -328,9 +333,14 @@ end
 
 
 """
-Write a `StructuralElementOrList` or a `MMCIFDict` to a mmCIF format file.
-Additional arguments are atom selector functions - only atoms that return
-`true` from the functions are retained.
+    writemmcif(output, element, atom_selectors...)
+    writemmcif(output, mmcif_dict)
+
+Write a `StructuralElementOrList` or a `MMCIFDict` to a mmCIF format file or
+output stream.
+
+Atom selector functions can be given as additional arguments - only atoms that
+return `true` from all the functions are retained.
 """
 function writemmcif(filepath::AbstractString, mmcif_dict::MMCIFDict)
     open(filepath, "w") do output

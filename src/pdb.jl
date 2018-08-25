@@ -788,7 +788,7 @@ output stream.
 
 Only ATOM, HETATM, MODEL and ENDMDL records are written - there is no header and
 there are no TER records.
-Atom selector functions can be given an additional arguments - only atoms that
+Atom selector functions can be given as additional arguments - only atoms that
 return `true` from all the functions are retained.
 """
 function writepdb(output::IO,
