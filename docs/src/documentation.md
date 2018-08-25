@@ -386,13 +386,7 @@ Obsolete PDB files are stored in the auto-generated `obsolete` directory inside 
 
 To maintain a local copy of the entire RCSB PDB database, run the `downloadentirepdb` function once to download all PDB files and set up a CRON job or similar to run `updatelocalpdb` function once a week to keep the local PDB directory up to date with the RCSB server.
 
-To download :
-
-```julia
-downloadallobsoletepdb(; obsolete_dir="/path/to/obsolete/directory", file_format=MMCIF, overwrite=false)
-```
-
-There are a few more functions that may help:
+There are a few more functions that may be useful:
 
 | Function                 | Returns                                                                         | Return type                                              |
 | :----------------------- | :------------------------------------------------------------------------------ | :------------------------------------------------------- |
