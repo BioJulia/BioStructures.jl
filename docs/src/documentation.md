@@ -426,7 +426,7 @@ end
 
 ```julia
 cbetas = collectatoms(struc, cbetaselector)
-contacts = contactmap(cbetas, 7.0)
+contacts = contactmap(cbetas, 8.0)
 for i in 1:length(cbetas)
     for j in 1:length(cbetas)
         if contacts[i,j]

@@ -17,8 +17,11 @@ export
 
 
 """
+    coordarray(element, atom_selectors...)
+
 Get the atomic coordinates in Å of a `StructuralElementOrList` as a 2D `Array`
 with each column corresponding to one atom.
+
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
@@ -38,9 +41,12 @@ coordarray(coords_in::Array{Float64}, atom_selectors::Function...) = coords_in
 
 
 """
+    rmsd(coords_one, coords_two)
+
 Get the root-mean-square deviation (RMSD) in Å between two
-`StructuralElementOrList`s or two coordinate `Array`s of the same size. Assumes
-they are already superimposed.
+`StructuralElementOrList`s or two coordinate `Array`s of the same size.
+
+Assumes they are already superimposed.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
@@ -62,9 +68,12 @@ end
 
 
 """
+    displacements(coords_one, coords_two)
+
 Get the displacements in Å between atomic coordinates from two
-`StructuralElementOrList`s or two coordinate `Array`s of the same size. Assumes
-they are already superimposed.
+`StructuralElementOrList`s or two coordinate `Array`s of the same size.
+
+Assumes they are already superimposed.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
@@ -86,7 +95,10 @@ end
 
 
 """
+    sqdistance(element_one, element_two, atom_selectors...)
+
 Get the minimum square distance in Å between two `StructuralElementOrList`s.
+
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
@@ -115,7 +127,10 @@ end
 
 
 """
+    distance(element_one, element_two, atom_selectors...)
+
 Get the minimum distance in Å between two `StructuralElementOrList`s.
+
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
@@ -131,8 +146,12 @@ end
 
 
 """
+    bondangle(atom_a, atom_b, atom_c)
+
 Calculate the bond or pseudo-bond angle in radians between three
-`AbstractAtom`s. The angle between B→A and B→C is returned in the range 0 to π.
+`AbstractAtom`s.
+
+The angle between B→A and B→C is returned in the range 0 to π.
 """
 function bondangle(at_a::AbstractAtom,
                 at_b::AbstractAtom,
@@ -149,9 +168,12 @@ end
 
 
 """
-Calculate the dihedral angle in radians defined by four `AbstractAtom`s. The
-angle between the planes defined by atoms (A,B,C) and (B,C,D) is returned in the
-range -π to π.
+    dihedralangle(atom_a, atom_b, atom_c, atom_d)
+
+Calculate the dihedral angle in radians defined by four `AbstractAtom`s.
+
+The angle between the planes defined by atoms (A,B,C) and (B,C,D) is returned in
+the range -π to π.
 """
 function dihedralangle(at_a::AbstractAtom,
             at_b::AbstractAtom,
@@ -172,11 +194,16 @@ function dihedralangle(vec_a::Vector{Float64},
 end
 
 """
-Calculate the omega angle in radians for an `AbstractResidue`. Arguments can
-either be a residue and the previous residue or a chain and the position as
-a residue ID. The first residue (or one at the given index) requires the
-atoms "N" and "CA" and the previous residue requires the atoms "CA" and "C". The
-angle is in the range -π to π.
+    omegaangle(res, res_previous)
+    omegaangle(chain, res_id)
+
+Calculate the omega angle in radians for an `AbstractResidue`.
+
+Arguments can either be a residue and the previous residue or a chain and the
+position as a residue ID.
+The first residue (or one at the given index) requires the atoms "N" and "CA"
+and the previous residue requires the atoms "CA" and "C".
+The angle is in the range -π to π.
 """
 function omegaangle(res::AbstractResidue, res_prev::AbstractResidue)
     if !("CA" in atomnames(res_prev))
@@ -204,11 +231,16 @@ function omegaangle(chain::Chain, res_id::Union{Integer, AbstractString})
 end
 
 """
-Calculate the phi angle in radians for an `AbstractResidue`. Arguments can
-either be a residue and the previous residue or a chain and the position as
-a residue ID. The first residue (or one at the given index) requires the
-atoms "N", "CA" and "C" and the previous residue requires the atom "C". The
-angle is in the range -π to π.
+    phiangle(res, res_previous)
+    phiangle(chain, res_id)
+
+Calculate the phi angle in radians for an `AbstractResidue`.
+
+Arguments can either be a residue and the previous residue or a chain and the
+position as a residue ID.
+The first residue (or one at the given index) requires the atoms "N", "CA" and
+"C" and the previous residue requires the atom "C".
+The angle is in the range -π to π.
 """
 function phiangle(res::AbstractResidue, res_prev::AbstractResidue)
     if !("C"  in atomnames(res_prev))
@@ -236,11 +268,16 @@ function phiangle(chain::Chain, res_id::Union{Integer, AbstractString})
 end
 
 """
-Calculate the psi angle in radians for an `AbstractResidue`. Arguments can
-either be a residue and the next residue or a chain and the position as
-a residue ID. The first residue (or one at the given index) requires the
-atoms "N", "CA" and "C" and the next residue requires the atom "N". The angle is
-in the range -π to π.
+    psiangle(res, res_next)
+    psiangle(chain, res_id)
+
+Calculate the psi angle in radians for an `AbstractResidue`.
+
+Arguments can either be a residue and the next residue or a chain and the
+position as a residue ID.
+The first residue (or one at the given index) requires the atoms "N", "CA" and
+"C" and the next residue requires the atom "N".
+The angle is in the range -π to π.
 """
 function psiangle(res::AbstractResidue, res_next::AbstractResidue)
     if !("N"  in atomnames(res))
@@ -268,10 +305,13 @@ function psiangle(chain::Chain, res_id::Union{Integer, AbstractString})
 end
 
 """
+    omegaangles(element, residue_selectors...)
+
 Calculate the `Vector` of omega angles of a `StructuralElementOrList`.
-The vectors have `NaN` for residues where an angle cannot be calculated,
-e.g. due to missing atoms or lack of an adjacent residue. The angle is in the
-range -π to π.
+
+The vectors have `NaN` for residues where an angle cannot be calculated, e.g.
+due to missing atoms or lack of an adjacent residue.
+The angle is in the range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
@@ -304,10 +344,13 @@ function omegaangles(el::StructuralElementOrList,
 end
 
 """
+    phiangles(element, residue_selectors...)
+
 Calculate the `Vector` of phi angles of a `StructuralElementOrList`.
-The vectors have `NaN` for residues where an angle cannot be calculated,
-e.g. due to missing atoms or lack of an adjacent residue. The angle is in the
-range -π to π.
+
+The vectors have `NaN` for residues where an angle cannot be calculated, e.g.
+due to missing atoms or lack of an adjacent residue.
+The angle is in the range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
@@ -340,10 +383,13 @@ function phiangles(el::StructuralElementOrList,
 end
 
 """
+    psiangles(element, residue_selectors...)
+
 Calculate the `Vector` of psi angles of a `StructuralElementOrList`.
-The vectors have `NaN` for residues where an angle cannot be calculated,
-e.g. due to missing atoms or lack of an adjacent residue. The angle is in the
-range -π to π.
+
+The vectors have `NaN` for residues where an angle cannot be calculated, e.g.
+due to missing atoms or lack of an adjacent residue.
+The angle is in the range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
@@ -379,10 +425,13 @@ function psiangles(el::StructuralElementOrList,
 end
 
 """
+    ramachandranangles(element, residue_selectors...)
+
 Calculate the `Vector`s of phi and psi angles of a `StructuralElementOrList`.
-The vectors have `NaN` for residues where an angle cannot be calculated,
-e.g. due to missing atoms or lack of an adjacent residue. The angles are in the
-range -π to π.
+
+The vectors have `NaN` for residues where an angle cannot be calculated, e.g.
+due to missing atoms or lack of an adjacent residue.
+The angles are in the range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
@@ -393,9 +442,27 @@ end
 
 
 """
+    contactmap(element, contact_distance)
+    contactmap(element_one, element_two, contact_distance)
+
 Calculate the contact map for a `StructuralElementOrList`, or between two
-`StructuralElementOrList`s. This is a `BitArray{2}` with `true` where the
-sub-elements are no further than the contact distance and `false` otherwise.
+`StructuralElementOrList`s.
+
+This is a `BitArray{2}` with `true` where the sub-elements are no further than
+the contact distance and `false` otherwise.
+When one element is given as input this returns a symmetric square matrix.
+
+# Examples
+```julia
+cbetas_A = collectatoms(struc["A"], cbetaselector)
+cbetas_B = collectatoms(struc["B"], cbetaselector)
+
+# Contact map of chain A
+contactmap(cbetas_A, 8.0)
+
+# Rectangular contact map of chains A and B
+contactmap(cbetas_A, cbetas_B, 8.0)
+```
 """
 function contactmap(el_one::StructuralElementOrList,
                 el_two::StructuralElementOrList,

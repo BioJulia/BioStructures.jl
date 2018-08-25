@@ -1,6 +1,6 @@
 julia 0.7
 CodecZlib
 Formatting
-BioCore 1.3.0
+BioCore
 BioSymbols
 BioSequences
