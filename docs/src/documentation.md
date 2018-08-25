@@ -1,6 +1,10 @@
 # BioStructures documentation
 
-The BioStructures.jl package provides functionality to manipulate macromolecular structures, and in particular to read and write [Protein Data Bank](http://www.rcsb.org/pdb/home/home.do) (PDB) and mmCIF files. It is designed to be used for standard structural analysis tasks, as well as acting as a platform on which others can build to create more specific tools. It compares favourably in terms of performance to other PDB parsers - see some [benchmarks](https://github.com/jgreener64/pdb-benchmarks).
+The BioStructures.jl package provides functionality to manipulate macromolecular structures, and in particular to read and write [Protein Data Bank](http://www.rcsb.org/pdb/home/home.do) (PDB) and mmCIF files.
+It is designed to be used for standard structural analysis tasks, as well as acting as a platform on which others can build to create more specific tools.
+
+It compares favourably in terms of performance to other PDB parsers - see some [benchmarks](https://github.com/jgreener64/pdb-benchmarks).
+The PDB and mmCIF parsers currently read in the whole PDB without explicit errors (with one exception).
 Help can be found on individual functions using `?function_name`.
 
 
