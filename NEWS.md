@@ -5,6 +5,7 @@ BioStructures.jl release notes
 
 * Code is now compatible with Julia v0.7 and v1.0. Support for earlier Julia versions is dropped.
 * `downloadpdb` can now be given a function as the first argument, in which case the function is run with the downloaded filepath(s) as an argument and the file(s) are deleted afterwards.
+* Improved function docstrings.
 
 ## v0.2.0 - March 2018
 
