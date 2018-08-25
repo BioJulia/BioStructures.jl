@@ -59,7 +59,8 @@ end
 """
     pdbentrylist()
 
-Download the list of all Protein Data Bank (PDB) entries from the RCSB server.
+Obtain the list of all Protein Data Bank (PDB) entries from the RCSB server.
+
 Requires an internet connection.
 """
 function pdbentrylist()
@@ -93,8 +94,10 @@ end
 """
     pdbstatuslist(url::AbstractString)
 
-Download the list of Protein Data Bank (PDB) entries from a RCSB weekly status
+Obtain the list of Protein Data Bank (PDB) entries from a RCSB weekly status
 file by specifying its URL.
+
+An example URL is ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb.
 Requires an internet connection.
 """
 function pdbstatuslist(url::AbstractString)
@@ -127,8 +130,9 @@ end
 """
     pdbrecentchanges()
 
-Download three lists giving the added, modified and obsolete Protein Data Bank
+Obtain three lists giving the added, modified and obsolete Protein Data Bank
 (PDB) entries from the recent RCSB weekly status files.
+
 Requires an internet connection.
 """
 function pdbrecentchanges()
@@ -141,8 +145,9 @@ end
 """
     pdbobsoletelist()
 
-Download the list of all obsolete Protein Data Bank (PDB) entries from the RCSB
+Obtain the list of all obsolete Protein Data Bank (PDB) entries from the RCSB
 server.
+
 Requires an internet connection.
 """
 function pdbobsoletelist()
@@ -311,6 +316,7 @@ end
 
 Download the entire Protein Data Bank (PDB) from the RCSB server.
 
+Returns the list of PDB IDs downloaded.
 Ensure you have enough disk space and time before running.
 The function can be stopped any time and called again to resume downloading.
 Requires an internet connection.
@@ -335,7 +341,7 @@ end
 
 Update a local copy of the Protein Data Bank (PDB).
 
-Downloads the recent weekly lists of new, modified and obsolete PDB entries and
+Obtains the recent weekly lists of new, modified and obsolete PDB entries and
 automatically updates the PDB files of the given `file_format` inside the local
 `pdb_dir` directory.
 Requires an internet connection.
@@ -369,6 +375,8 @@ end
     downloadallobsoletepdb(; <keyword arguments>)
 
 Download all obsolete Protein Data Bank (PDB) files from the RCSB server.
+
+Returns the list of PDB IDs downloaded.
 Requires an internet connection.
 
 # Arguments
@@ -390,6 +398,7 @@ end
 
 Download and read a Protein Data Bank (PDB) file or biological assembly from the
 RCSB server, returning a `ProteinStructure`.
+
 Requires an internet connection.
 
 # Arguments
@@ -427,8 +436,10 @@ end
 """
     readpdb(pdbid::AbstractString; <keyword arguments>)
 
-Read a Protein Data Bank (PDB) file and return a `ProteinStructure`. This is an
-alternative to `read("\$pdb_dir/\$pdbid.pdb", PDB)` but is effectively the same.
+Read a Protein Data Bank (PDB) file and return a `ProteinStructure`.
+
+This is an alternative to `read("\$pdb_dir/\$pdbid.pdb", PDB)` but is
+effectively the same.
 
 # Arguments
 - `pdbid::AbstractString`: the PDB ID to be read.

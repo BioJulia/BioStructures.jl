@@ -396,6 +396,7 @@ There are a few more functions that may be useful:
 | `pdbobsoletelist`        | List of all obsolete PDB entries                                                | `Array{String,1}`                                        |
 | `downloadallobsoletepdb` | Downloads all obsolete PDB files from the RCSB PDB server                       | `Array{String,1}`                                        |
 
+
 ## Examples
 
 A few further examples of BioStructures usage are given below.

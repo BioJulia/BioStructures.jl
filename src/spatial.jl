@@ -41,6 +41,7 @@ coordarray(coords_in::Array{Float64}, atom_selectors::Function...) = coords_in
 
 
 """
+    rmsd(element_one, element_two, atom_selectors...)
     rmsd(coords_one, coords_two)
 
 Get the root-mean-square deviation (RMSD) in Å between two
@@ -68,6 +69,7 @@ end
 
 
 """
+    displacements(element_one, element_two, atom_selectors...)
     displacements(coords_one, coords_two)
 
 Get the displacements in Å between atomic coordinates from two
@@ -147,9 +149,10 @@ end
 
 """
     bondangle(atom_a, atom_b, atom_c)
+    bondangle(vec_ba, vec_bc)
 
 Calculate the bond or pseudo-bond angle in radians between three
-`AbstractAtom`s.
+`AbstractAtom`s or two vectors.
 
 The angle between B→A and B→C is returned in the range 0 to π.
 """
@@ -169,8 +172,10 @@ end
 
 """
     dihedralangle(atom_a, atom_b, atom_c, atom_d)
+    dihedralangle(vec_ab, vec_bc, vec_cd)
 
-Calculate the dihedral angle in radians defined by four `AbstractAtom`s.
+Calculate the dihedral angle in radians defined by four `AbstractAtom`s or three
+vectors.
 
 The angle between the planes defined by atoms (A,B,C) and (B,C,D) is returned in
 the range -π to π.
