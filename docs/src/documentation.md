@@ -1,6 +1,7 @@
 # BioStructures documentation
 
 The BioStructures.jl package provides functionality to manipulate macromolecular structures, and in particular to read and write [Protein Data Bank](http://www.rcsb.org/pdb/home/home.do) (PDB) and mmCIF files. It is designed to be used for standard structural analysis tasks, as well as acting as a platform on which others can build to create more specific tools. It compares favourably in terms of performance to other PDB parsers - see some [benchmarks](https://github.com/jgreener64/pdb-benchmarks).
+Help can be found on individual functions using `?function_name`.
 
 
 ## Basics
@@ -8,6 +9,8 @@ The BioStructures.jl package provides functionality to manipulate macromolecular
 To download a PDB file:
 
 ```julia
+using BioStructures
+
 # Stored in the current working directory by default
 downloadpdb("1EN2")
 ```
@@ -156,7 +159,7 @@ Alternatively, you can use an anonymous function:
 collectatoms(struc, at -> x(at) < 0)
 ```
 
-`countatoms`, `countresidues`, `countchains` and `countmodels` can be used to count elements. For example:
+`countatoms`, `countresidues`, `countchains` and `countmodels` can be used to count elements wth the same selector API. For example:
 
 ```julia
 julia> countatoms(struc)
@@ -176,6 +179,8 @@ julia> AminoAcidSequence(struc['A'], standardselector)
 85aa Amino Acid Sequence:
 RCGSQGGGSTCPGLRCCSIWGWCGDSEPYCGRTCENKCWSGERSDHRCGAAVGNPPCGQDRCCSVHGWCGGGNDYCSGGNCQYRC
 ```
+
+See [BioSequences.jl](https://github.com/BioJulia/BioSequences.jl) for more on how to deal with sequences.
 
 
 ## Spatial calculations
@@ -228,26 +233,22 @@ julia> rad2deg(psiangle(struc['A'], 50))
 To download a PDB file to a specified directory:
 
 ```julia
-downloadpdb("1EN2", pdb_dir="path/to/pdb/directory/")
+downloadpdb("1EN2", pdb_dir="path/to/pdb/directory")
 ```
 
 To download multiple PDB files to a specified directory:
 
 ```julia
-downloadpdb(["1EN2","1ALW","1AKE"], pdb_dir="path/to/pdb/directory/")
+downloadpdb(["1EN2", "1ALW", "1AKE"], pdb_dir="path/to/pdb/directory")
 ```
 
-To download a PDB file in PDB, XML, MMCIF or MMTF format:
+To download a PDB file in PDB, XML, MMCIF or MMTF format use the `file_format` argument:
 
 ```julia
-# PDB file format
-downloadpdb("1ALW", pdb_dir="path/to/pdb/directory/", file_format=PDB)
-# XML file format
-downloadpdb("1ALW", pdb_dir="path/to/pdb/directory/", file_format=PDBXML)
-# MMCIF file format
-downloadpdb("1ALW", pdb_dir="path/to/pdb/directory/", file_format=MMCIF)
-# MMTF file format
-downloadpdb("1ALW", pdb_dir="path/to/pdb/directory/", file_format=MMTF)
+downloadpdb("1ALW", pdb_dir="path/to/pdb/directory", file_format=MMTF)
+
+# To get XML
+downloadpdb("1ALW", pdb_dir="path/to/pdb/directory", file_format=PDBXML)
 ```
 
 To apply a function to a downloaded file and delete the file afterwards:
@@ -287,12 +288,12 @@ ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 
 Read a mmCIF file instead by replacing `PDB` with `MMCIF`. Various options can be set through optional keyword arguments when parsing PDB/mmCIF files:
 
-| Keyword Argument                             | Description                                                                        |
-| :------------------------------------------- | :--------------------------------------------------------------------------------- |
-| `structure_name::AbstractString`             | The name to give the resulting `ProteinStructure` - defaults to the given filename |
-| `remove_disorder::Bool=false`                | If set to `true`, only one location for disordered atoms will be parsed            |
-| `read_std_atoms::Bool=true`                  | If set to `false`, standard ATOM records wont be parsed                            |
-| `read_het_atoms::Bool=true`                  | If set to `false`, HETATOM records wont be parsed                                  |
+| Keyword Argument                 | Description                                                                        |
+| :------------------------------- | :--------------------------------------------------------------------------------- |
+| `structure_name::AbstractString` | The name to give the resulting `ProteinStructure` - defaults to the given filename |
+| `remove_disorder::Bool=false`    | If set to `true`, only one location for disordered atoms will be parsed            |
+| `read_std_atoms::Bool=true`      | If set to `false`, standard ATOM records wont be parsed                            |
+| `read_het_atoms::Bool=true`      | If set to `false`, HETATOM records wont be parsed                                  |
 
 The function `readpdb` provides a different way to download and read PDB files in line with `downloadpdb`. To parse a PDB file by specifying the PDB ID and PDB directory (file name must be in upper case, e.g. "1EN2.pdb"):
 
@@ -306,8 +307,7 @@ To download and parse a PDB file into a Structure-Model-Chain-Residue-Atom frame
 
 ```julia
 julia> struc = retrievepdb("1ALW", pdb_dir="path/to/pdb/directory")
-INFO: Downloading PDB : 1ALW
-INFO: Parsing the PDB file...
+INFO: Downloading PDB: 1ALW
 ProteinStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atoms
 ```
 
@@ -336,6 +336,7 @@ writepdb("1EN2_out.pdb", struc)
 Any element type can be given as input to `writepdb`. Atom selectors can also be given as additional arguments:
 
 ```julia
+# Only backbone atoms are written out
 writepdb("1EN2_out.pdb", struc, backboneselector)
 ```
 
@@ -345,54 +346,57 @@ To write mmCIF format files, use the `writemmcif` function with similar argument
 writemmcif("1EN2_out.dic", mmcif_dict)
 ```
 
-Multi-character chain IDs can be written to mmCIF files but will throw an error when written to a PDB file.
+Multi-character chain IDs can be written to mmCIF files but will throw an error when written to a PDB file as the PDB format only has one character allocated to the chain ID.
 
 
 ## RCSB PDB Utility Functions
 
+To get the list of all PDB entries:
+
+```julia
+l = pdbentrylist()
+```
+
 To download the entire RCSB PDB database in your preferred file format:
 
 ```julia
-downloadentirepdb(pdb_dir="path/to/pdb/directory/", file_format=MMTF)
+downloadentirepdb(pdb_dir="path/to/pdb/directory", file_format=MMTF)
 ```
 
+This operation takes a lot of disk space and time to complete (depending on internet connection).
 The keyword arguments are described below:
 
-| Keyword Argument                 | Description                                                                                              |
-| :------------------------------- | :------------------------------------------------------------------------------------------------------- |
-| `pdb_dir::AbstractString=pwd()`  | The directory to which the PDB files are downloaded                                                      |
-| `file_format::Type=PDB`          | The format of the PDB file. Options are PDB, PDBXML, MMCIF or MMTF                                       |
-| `overwrite::Bool=false`          | If set `true`, overwrites the PDB file if exists in `pdb_dir`; by default skips downloading the PDB file |
+| Keyword Argument                | Description                                                                                              |
+| :------------------------------ | :------------------------------------------------------------------------------------------------------- |
+| `pdb_dir::AbstractString=pwd()` | The directory to which the PDB files are downloaded                                                      |
+| `file_format::Type=PDB`         | The format of the PDB file. Options are PDB, PDBXML, MMCIF or MMTF                                       |
+| `overwrite::Bool=false`         | If set `true`, overwrites the PDB file if exists in `pdb_dir`; by default skips downloading the PDB file |
 
-To update your local PDB directory based on the weekly status list of new, modified and obsolete PDB files from RCSB Server:
-
-```julia
-updatelocalpdb(pdb_dir="path/to/pdb/directory/", file_format=MMTF)
-```
-
-The `file_format` specifies the format of the PDB files present in the local PDB directory. Obsolete PDB files are stored in the autogenerated `obsolete` directory inside the specified local PDB directory.
-
-To download all obsolete PDB files from RCSB Server:
+To update your local PDB directory based on the weekly status list of new, modified and obsolete PDB files from the RCSB server:
 
 ```julia
-downloadallobsoletepdb(;obsolete_dir="/path/to/obsolete/directory/", file_format=MMCIF, overwrite=false)
+updatelocalpdb(pdb_dir="path/to/pdb/directory", file_format=MMTF)
 ```
 
-The `file_format` specfies the format in which the PDB files are downloaded; Options are PDB, PDBXML, MMCIF or MMTF.
+Obsolete PDB files are stored in the auto-generated `obsolete` directory inside the specified local PDB directory.
 
-If `overwrite=true`, the existing PDB files in obsolete directory will be overwritten by the newly downloaded ones.
+To maintain a local copy of the entire RCSB PDB database, run the `downloadentirepdb` function once to download all PDB files and set up a CRON job or similar to run `updatelocalpdb` function once a week to keep the local PDB directory up to date with the RCSB server.
 
-To maintain a local copy of the entire RCSB PDB Database: run the `downloadentirepdb` function once to download all PDB files and set up a CRON job or similar to run `updatelocalpdb` function once a week to keep the local PDB directory up to date with the RCSB Server.
+To download :
+
+```julia
+downloadallobsoletepdb(; obsolete_dir="/path/to/obsolete/directory", file_format=MMCIF, overwrite=false)
+```
 
 There are a few more functions that may help:
 
-| Function           | Returns                                                                         | Return type                                              |
-| :----------------- | :------------------------------------------------------------------------------ | :------------------------------------------------------- |
-| `pdbentrylist`     | List of all PDB entries from RCSB Server                                        | `Array{String,1}`                                        |
-| `pdbstatuslist`    | List of PDB entries from specified RCSB weekly status list URL                  | `Array{String,1}`                                        |
-| `pdbrecentchanges` | Added, modified and obsolete PDB lists from the recent RCSB weekly status files | `Tuple{Array{String,1},Array{String,1},Array{String,1}}` |
-| `pdbobsoletelist`  | List of all obsolete PDB entries in the RCSB server                             | `Array{String,1}`                                        |
-
+| Function                 | Returns                                                                         | Return type                                              |
+| :----------------------- | :------------------------------------------------------------------------------ | :------------------------------------------------------- |
+| `pdbentrylist`           | List of all PDB entries from the RCSB server                                    | `Array{String,1}`                                        |
+| `pdbstatuslist`          | List of PDB entries from a specified RCSB weekly status list URL                | `Array{String,1}`                                        |
+| `pdbrecentchanges`       | Added, modified and obsolete PDB lists from the recent RCSB weekly status files | `Tuple{Array{String,1},Array{String,1},Array{String,1}}` |
+| `pdbobsoletelist`        | List of all obsolete PDB entries                                                | `Array{String,1}`                                        |
+| `downloadallobsoletepdb` | Downloads all obsolete PDB files from the RCSB PDB server                       | `Array{String,1}`                                        |
 
 ## Examples
 
@@ -410,7 +414,7 @@ plot(resnumber.(calphas),
      label="")
 ```
 
-**B)** To print the PDB records for all C-alpha atoms within 5 Angstroms of residue 38:
+**B)** To print the PDB records for all C-alpha atoms within 5 Angstrom of residue 38:
 
 ```julia
 for at in calphas
@@ -450,10 +454,10 @@ scatter(rad2deg.(phi_angles),
      xlabel="Phi / degrees",
      ylabel="Psi / degrees",
      label="",
-     xticks=[-180,-90,0,90,180],
-     yticks=[-180,-90,0,90,180],
-     xlims=(-180,180),
-     ylims=(-180,180))
+     xticks=[-180, -90, 0, 90, 180],
+     yticks=[-180, -90, 0, 90, 180],
+     xlims=(-180, 180),
+     ylims=(-180, 180))
 ```
 
 **F)** To calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:
