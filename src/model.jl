@@ -1135,9 +1135,11 @@ end
 
 
 """
+    collectmodels(el)
+
 Returns a sorted `Vector` of the models in a `StructuralElementOrList`.
 Additional arguments are model selector functions - only models that return
-`true` from the functions are retained.
+`true` from all the functions are retained.
 """
 collectmodels(struc::ProteinStructure) = collect(struc)
 
