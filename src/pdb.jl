@@ -724,9 +724,15 @@ const floatspec = FormatSpec(".2f")
 
 Form a Protein Data Bank (PDB) format ATOM or HETATM record as a `String` from
 an `Atom` or `AtomRecord`.
+
+This will throw an `ArgumentError` if a value cannot fit into the allocated
+space, e.g. the chain ID is longer than one character or the atom serial is
+greater than 99999.
+In this case consider using `writemmcif` to write a mmCIF file.
 """
 function pdbline(at::Atom)
     return (ishetero(at) ? "HETATM" : "ATOM  ") *
+            # This will throw an error for serial numbers over 99999
             spacestring(serial(at), 5) *
             " " *
             spaceatomname(at) *

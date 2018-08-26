@@ -29,9 +29,9 @@ function coordarray(el::StructuralElementOrList, atom_selectors::Function...)
     at_list = collectatoms(el, atom_selectors...)
     coords_out = zeros(3, length(at_list))
     for j in eachindex(at_list)
-        coords_out[1,j] = x(at_list[j])
-        coords_out[2,j] = y(at_list[j])
-        coords_out[3,j] = z(at_list[j])
+        coords_out[1, j] = x(at_list[j])
+        coords_out[2, j] = y(at_list[j])
+        coords_out[3, j] = z(at_list[j])
     end
     return coords_out
 end
@@ -112,7 +112,7 @@ function sqdistance(el_one::StructuralElementOrList,
     min_sq_dist = Inf
     for i in 1:size(coords_one, 2)
         for j in 1:size(coords_two, 2)
-            @inbounds sq_dist = (coords_one[1,i] - coords_two[1,j]) ^ 2 + (coords_one[2,i] - coords_two[2,j]) ^ 2 + (coords_one[3,i] - coords_two[3,j]) ^ 2
+            @inbounds sq_dist = (coords_one[1, i] - coords_two[1, j]) ^ 2 + (coords_one[2, i] - coords_two[2, j]) ^ 2 + (coords_one[3, i] - coords_two[3, j]) ^ 2
             if sq_dist < min_sq_dist
                 min_sq_dist = sq_dist
             end
@@ -177,8 +177,8 @@ end
 Calculate the dihedral angle in radians defined by four `AbstractAtom`s or three
 vectors.
 
-The angle between the planes defined by atoms (A,B,C) and (B,C,D) is returned in
-the range -π to π.
+The angle between the planes defined by atoms (A, B, C) and (B, C, D) is
+returned in the range -π to π.
 """
 function dihedralangle(at_a::AbstractAtom,
             at_b::AbstractAtom,
@@ -479,7 +479,7 @@ function contactmap(el_one::StructuralElementOrList,
     for i in 1:length(el_one)
         for j in 1:length(el_two)
             if sqdistance(el_one_list[i], el_two_list[j]) <= sq_contact_dist
-                contacts[i,j] = true
+                contacts[i, j] = true
             end
         end
     end
@@ -491,11 +491,11 @@ function contactmap(el::StructuralElementOrList, contact_dist::Real)
     contacts = falses(length(el), length(el))
     el_list = collect(el)
     for i in 1:length(el)
-        contacts[i,i] = true
+        contacts[i, i] = true
         for j in 1:i-1
             if sqdistance(el_list[i], el_list[j]) <= sq_contact_dist
-                contacts[i,j] = true
-                contacts[j,i] = true
+                contacts[i, j] = true
+                contacts[j, i] = true
             end
         end
     end

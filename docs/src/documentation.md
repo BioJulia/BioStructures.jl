@@ -353,7 +353,7 @@ writemmcif("1EN2_out.dic", mmcif_dict)
 Multi-character chain IDs can be written to mmCIF files but will throw an error when written to a PDB file as the PDB format only has one character allocated to the chain ID.
 
 
-## RCSB PDB Utility Functions
+## RCSB PDB utility functions
 
 To get the list of all PDB entries:
 
