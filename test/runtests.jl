@@ -1,7 +1,7 @@
 module TestBioStructures
 
-using Base.Test
-using Formatting
+using Test
+using Format
 using BioCore
 using BioStructures
 using BioStructures:
@@ -42,61 +42,65 @@ temp_filename, io = mktemp()
 close(io)
 
 
-@testset "PDB Handling" begin
+@testset "PDB handling" begin
     @test length(pdbentrylist()) > 100000
-    @test length(pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb")) > 0
+
+    # This may be empty on a given date so we just check it has the correct type
+    @test isa(pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb"), Vector{String})
     # Invalid URL
     @test_throws ErrorException pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/dummy.pdb")
+
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
+
     @test length(pdbobsoletelist()) > 3600
 
-    pdb_dir = joinpath(tempdir(),"PDB")
+    pdb_dir = joinpath(tempdir(), "PDB")
     # Invalid PDB ID format
     @test_throws ArgumentError downloadpdb("1a df")
     # Valid PDB ID format but PDB does not exist
     @test_throws ErrorException downloadpdb("no1e", pdb_dir=pdb_dir)
-    # Invalid PDB file_format.
+    # Invalid PDB file_format
     @test_throws ArgumentError downloadpdb("1alw", pdb_dir=pdb_dir, file_format=String)
     # Biological assembly not available in PDBXML and MMTF
     @test_throws ArgumentError downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDBXML, ba_number=1)
-    # Invalid ba_number for PDB "1alw"
-    @test_throws ErrorException downloadpdb("1alw",pdb_dir=pdb_dir, file_format=MMCIF,ba_number=10)
-    # Tests if downloadpdb returns the correct path to the downloaded file
+    # Invalid ba_number for this PDB entry
+    @test_throws ErrorException downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMCIF, ba_number=10)
+    # Tests if downloadpdb returns the path to the downloaded file
     @test isfile(downloadpdb("1crn", pdb_dir=pdb_dir))
 
     # PDB format
     downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDB)
-    pdbpath = joinpath(pdb_dir,"1ALW$(pdbextension[PDB])")
+    pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[PDB])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # PDBXML format
     downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDBXML)
-    pdbpath = joinpath(pdb_dir,"1ALW$(pdbextension[PDBXML])")
+    pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[PDBXML])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # MMCIF format
     downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMCIF)
-    pdbpath = joinpath(pdb_dir,"1ALW$(pdbextension[MMCIF])")
+    pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[MMCIF])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # MMTF format
     downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMTF)
-    pdbpath = joinpath(pdb_dir,"1ALW$(pdbextension[MMTF])")
+    pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[MMTF])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Obsolete PDB
     downloadpdb("116l", pdb_dir=pdb_dir, file_format=PDB, obsolete=true)
-    pdbpath = joinpath(pdb_dir,"obsolete","116L$(pdbextension[PDB])")
+    pdbpath = joinpath(pdb_dir, "obsolete", "116L$(pdbextension[PDB])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Biological Assembly - PDB format
     downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDB, ba_number=1)
-    pdbpath = joinpath(pdb_dir,"1ALW_ba1$(pdbextension[PDB])")
+    pdbpath = joinpath(pdb_dir, "1ALW_ba1$(pdbextension[PDB])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Biological Assembly - MMCIF format
     downloadpdb("5a9z", pdb_dir=pdb_dir, file_format=MMCIF, ba_number=1)
-    pdbpath = joinpath(pdb_dir,"5A9Z_ba1$(pdbextension[MMCIF])")
+    pdbpath = joinpath(pdb_dir, "5A9Z_ba1$(pdbextension[MMCIF])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Download multiple PDB files
-    pdbidlist = ["1ent","1en2"]
+    pdbidlist = ["1ent", "1en2"]
     downloadpdb(pdbidlist, pdb_dir=pdb_dir, file_format=PDB)
     for pdbid in pdbidlist
-        pdbpath = joinpath(pdb_dir,"$(uppercase(pdbid))$(pdbextension[PDB])")
+        pdbpath = joinpath(pdb_dir, "$(uppercase(pdbid))$(pdbextension[PDB])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
     end
 
@@ -115,7 +119,7 @@ close(io)
         return n_chains
     end == [5, 1]
 
-    # Test Retrieving and reading options
+    # Test retrievepdb and readpdb
     struc = retrievepdb("1AKE", pdb_dir=pdb_dir, structure_name="New name")
     @test structurename(struc) == "New name"
     @test countatoms(struc) == 3804
@@ -202,15 +206,15 @@ end
 
 
     # Test show
-    show(DevNull, at)
-    show(DevNull, dis_at)
-    show(DevNull, res)
-    show(DevNull, dis_res)
-    show(DevNull, ch)
-    show(DevNull, mod)
-    show(DevNull, struc)
-    show(DevNull, Model())
-    show(DevNull, ProteinStructure())
+    show(devnull, at)
+    show(devnull, dis_at)
+    show(devnull, res)
+    show(devnull, dis_res)
+    show(devnull, ch)
+    show(devnull, mod)
+    show(devnull, struc)
+    show(devnull, Model())
+    show(devnull, ProteinStructure())
 
 
     # Test getters/setters
@@ -739,7 +743,7 @@ end
     line_d = "ATOM    669  CA  ILE A  90      31.743   "
     line_e = "REMARK   1 REFERENCE 1                                                          "
     at_rec = AtomRecord(line_a, 10)
-    show(DevNull, at_rec)
+    show(devnull, at_rec)
     @test !at_rec.het_atom
     @test at_rec.serial == 669
     @test at_rec.atom_name == " CA "
@@ -1250,7 +1254,7 @@ end
 
     # Test parser error handling
     error = PDBParseError("message", 10, "line")
-    showerror(DevNull, error)
+    showerror(devnull, error)
     # Missing coordinate (blank string)
     @test_throws PDBParseError read(testfilepath("PDB", "1AKE_err_a.pdb"), PDB)
     # Missing chain ID (line ends early)
@@ -1297,8 +1301,8 @@ end
 
 
     # Test output formatting
-    @test fmt(coordspec, 5.0) == "5.000"
-    @test fmt(floatspec, -10.0) == "-10.00"
+    @test pyfmt(coordspec, 5.0) == "5.000"
+    @test pyfmt(floatspec, -10.0) == "-10.00"
 
 
     # Test pdbline
@@ -1478,7 +1482,7 @@ end
     @test length(values(dic)) == 610
     @test haskey(dic, "_cell.entry_id")
     @test !haskey(dic, "nokey")
-    show(DevNull, dic)
+    show(devnull, dic)
 
     multiline_str = """
         data_test
@@ -1633,7 +1637,7 @@ end
 
     # Test AtomRecord
     at_rec = AtomRecord(MMCIFDict(testfilepath("mmCIF", "1AKE.cif")), 5)
-    show(DevNull, at_rec)
+    show(devnull, at_rec)
     @test !at_rec.het_atom
     @test at_rec.serial == 5
     @test at_rec.atom_name == "CB"
@@ -2050,22 +2054,22 @@ end
     res = Residue("ALA", 1, ' ', false, Chain('A'))
     at = Atom(100, "CA", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res)
     cs = coordarray(at)
-    @test size(cs) == (3,1)
+    @test size(cs) == (3, 1)
     @test cs[1] == 1.0
     @test cs[2] == 2.0
     @test cs[3] == 3.0
 
     struc_1AKE = read(testfilepath("PDB", "1AKE.pdb"), PDB)
     cs = coordarray(struc_1AKE)
-    @test size(cs) == (3,3804)
-    @test cs[1,3787] == 20.135
-    @test cs[2,3787] == -10.789
-    @test cs[3,3787] == -1.732
+    @test size(cs) == (3, 3804)
+    @test cs[1, 3787] == 20.135
+    @test cs[2, 3787] == -10.789
+    @test cs[3, 3787] == -1.732
     cs = coordarray(struc_1AKE['A'], calphaselector)
-    @test size(cs) == (3,214)
-    @test cs[1,10] == 17.487
-    @test cs[2,10] == 42.426
-    @test cs[3,10] == 19.756
+    @test size(cs) == (3, 214)
+    @test cs[1, 10] == 17.487
+    @test cs[2, 10] == 42.426
+    @test cs[3, 10] == 19.756
     @test coordarray(cs) == cs
 
 

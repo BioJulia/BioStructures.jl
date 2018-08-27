@@ -3,7 +3,8 @@ os:
   - linux
   - osx
 julia:
-  - 0.6
+  - 0.7
+  - 1.0
   - nightly
 notifications:
   email: false
@@ -11,5 +12,5 @@ matrix:
   allow_failures:
   - julia: nightly
 after_success:
-  - julia -e 'cd(Pkg.dir("BioStructures")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
-  - julia -e 'cd(Pkg.dir("BioStructures")); Pkg.add("Documenter"); include(joinpath("docs", "make.jl"))'
+  - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia -e 'using Pkg; Pkg.add("Documenter"); include(joinpath("docs", "make.jl"))'

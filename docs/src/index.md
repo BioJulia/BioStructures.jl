@@ -3,7 +3,6 @@
 **Latest Release:**
 
 [![Latest Release](https://img.shields.io/github/release/BioJulia/BioStructures.jl.svg)](https://github.com/BioJulia/BioStructures.jl/releases/latest)
-[![BioStructures](http://pkg.julialang.org/badges/BioStructures_0.6.svg)](http://pkg.julialang.org/?pkg=BioStructures)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/BioJulia/BioStructures.jl/blob/master/LICENSE.md)
 [![Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://biojulia.github.io/BioStructures.jl/stable)
 ![BioJulia maintainer: jgreener64](https://img.shields.io/badge/BioJulia%20Maintainer-jgreener64-orange.svg)
@@ -28,7 +27,8 @@ calculations and functions to access the PDB are also provided.
 Install BioStructures from the Julia REPL:
 
 ```julia
-julia> Pkg.add("BioStructures")
+using Pkg
+Pkg.add("BioStructures")
 ```
 
 If you are interested in the cutting edge of the development, please check out

@@ -3,8 +3,8 @@ export
     PDBXML,
     MMCIF,
     MMTF,
-    PDBParseError,
     pdbextension,
+    PDBParseError,
     pdbentrylist,
     pdbstatuslist,
     pdbrecentchanges,
@@ -20,14 +20,24 @@ export
     writepdb
 
 
-"Protein Data Bank (PDB) file formats."
+# PDB file formats
+
+"Protein Data Bank (PDB) file format."
 struct PDB <: BioCore.IO.FileFormat end
+
+"Protein Data Bank (PDB) XML file format."
 struct PDBXML <: BioCore.IO.FileFormat end
+
+"Protein Data Bank (PDB) mmCIF file format."
 struct MMCIF <: BioCore.IO.FileFormat end
+
+"Protein Data Bank (PDB) MMTF file format."
 struct MMTF <: BioCore.IO.FileFormat end
 
-# A Dict mapping the type to their file extensions
-const pdbextension = Dict{Type,String}( PDB => ".pdb", PDBXML => ".xml", MMCIF => ".cif", MMTF => ".mmtf")
+"Mapping of Protein Data Bank (PDB) formats to their file extensions."
+const pdbextension = Dict{Type, String}(PDB=> ".pdb", PDBXML=> ".xml",
+                                        MMCIF=> ".cif", MMTF=> ".mmtf")
+
 
 "Error arising from parsing a Protein Data Bank (PDB) file."
 struct PDBParseError <: Exception
@@ -35,7 +45,6 @@ struct PDBParseError <: Exception
     line_number::Int
     line::String
 end
-
 
 function Base.showerror(io::IO, e::PDBParseError)
     return print(io,
@@ -50,14 +59,16 @@ end
 """
     pdbentrylist()
 
-Fetch list of all PDB entries from RCSB server.
+Obtain the list of all Protein Data Bank (PDB) entries from the RCSB server.
+
+Requires an internet connection.
 """
 function pdbentrylist()
     pdbidlist = String[]
-    info("Fetching list of all PDB Entries from the RCSB server")
+    @info "Fetching the list of all PDB entries from the RCSB server"
     tempfilepath = tempname()
     try
-        download("ftp://ftp.wwpdb.org/pub/pdb/derived_data/index/entries.idx",tempfilepath)
+        download("ftp://ftp.wwpdb.org/pub/pdb/derived_data/index/entries.idx", tempfilepath)
         open(tempfilepath) do input
             # Skips the first two lines as it contains headers
             linecount = 1
@@ -66,10 +77,10 @@ function pdbentrylist()
                     # The first 4 characters in the line is the PDB ID
                     pdbid = uppercase(line[1:4])
                     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-                    if !ismatch(r"^[a-zA-Z0-9]{4}$", pdbid)
+                    if !occursin(r"^[a-zA-Z0-9]{4}$", pdbid)
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
-                    push!(pdbidlist,pdbid)
+                    push!(pdbidlist, pdbid)
                 end
                 linecount +=1
             end
@@ -80,16 +91,19 @@ function pdbentrylist()
     return pdbidlist
 end
 
-
 """
     pdbstatuslist(url::AbstractString)
 
-Fetch list of PDB entries from RCSB weekly status file by specifying its URL.
+Obtain the list of Protein Data Bank (PDB) entries from a RCSB weekly status
+file by specifying its URL.
+
+An example URL is ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb.
+Requires an internet connection.
 """
 function pdbstatuslist(url::AbstractString)
     statuslist = String[]
-    filename = split(url,"/")[end]
-    info("Fetching weekly status file $filename from the RCSB server")
+    filename = split(url, "/")[end]
+    @info "Fetching weekly status file $filename from the RCSB server"
     tempfilepath = tempname()
     try
         download(url, tempfilepath)
@@ -100,10 +114,10 @@ function pdbstatuslist(url::AbstractString)
                     # The first 4 characters in the line is the PDB ID
                     pdbid = uppercase(line[1:4])
                     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-                    if !ismatch(r"^[a-zA-Z0-9]{4}$", pdbid)
+                    if !occursin(r"^[a-zA-Z0-9]{4}$", pdbid)
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
-                    push!(statuslist,pdbid)
+                    push!(statuslist, pdbid)
                 end
             end
         end
@@ -113,12 +127,13 @@ function pdbstatuslist(url::AbstractString)
     return statuslist
 end
 
-
 """
     pdbrecentchanges()
 
-Fetch three lists consisting added, modified and obsolete PDB entries from the recent
-RCSB weekly status files.
+Obtain three lists giving the added, modified and obsolete Protein Data Bank
+(PDB) entries from the recent RCSB weekly status files.
+
+Requires an internet connection.
 """
 function pdbrecentchanges()
     addedlist = pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb")
@@ -127,15 +142,17 @@ function pdbrecentchanges()
     return addedlist, modifiedlist, obsoletelist
 end
 
-
 """
     pdbobsoletelist()
 
-Fetch list of all obsolete PDB entries in the RCSB server.
+Obtain the list of all obsolete Protein Data Bank (PDB) entries from the RCSB
+server.
+
+Requires an internet connection.
 """
 function pdbobsoletelist()
     obsoletelist = String[]
-    info("Fetching list of all obsolete PDB entries from the RCSB server")
+    @info "Fetching the list of all obsolete PDB entries from the RCSB server"
     tempfilepath = tempname()
     try
         download("ftp://ftp.wwpdb.org/pub/pdb/data/status/obsolete.dat", tempfilepath)
@@ -146,10 +163,10 @@ function pdbobsoletelist()
                     # The 21st to 24th characters in obsolete pdb entry has the pdb id
                     pdbid = uppercase(line[21:24])
                     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-                    if !ismatch(r"^[a-zA-Z0-9]{4}$", pdbid)
+                    if !occursin(r"^[a-zA-Z0-9]{4}$", pdbid)
                         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
                     end
-                    push!(obsoletelist,pdbid)
+                    push!(obsoletelist, pdbid)
                 end
             end
         end
@@ -162,28 +179,30 @@ end
 
 """
     downloadpdb(pdbid::AbstractString; <keyword arguments>)
-    downloadpdb(pdbid::Array{String,1}; <keyword arguments>)
+    downloadpdb(pdbid::Array{String, 1}; <keyword arguments>)
     downloadpdb(f::Function, args...)
 
 Download files from the Protein Data Bank (PDB) via RCSB.
-When given an `AbstractString`, e.g. `"1AKE"`, downloads the file and returns the path
-to the file.
-When given an `Array{String,1}`, downloads the files in the array and returns an array
-of the paths to the files.
-When given a function as the first argument, runs the function with the downloaded
-filepath(s) as an argument then removes the file(s).
+
+When given an `AbstractString`, e.g. `"1AKE"`, downloads the PDB file and
+returns the path to the file.
+When given an `Array{String, 1}`, downloads the PDB files in the array and
+returns an array of the paths to the files.
+When given a function as the first argument, runs the function with the
+downloaded filepath(s) as an argument then removes the file(s).
+Requires an internet connection.
 
 # Arguments
-- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is downloaded;
-defaults to current working directory.
-- `file_format::Type=PDB`: the format of the PDB file. Options <PDB, PDBXML, MMCIF, MMTF>;
-defaults to PDB format.
-- `obsolete::Bool=false`: if set `true`, the PDB file is downloaded in the auto-generated
-"obsolete" directory inside the specified `pdb_dir`.
-- `overwrite::Bool=false`: if set `true`, overwrites the PDB file if exists in `pdb_dir`;
-by default skips downloading PDB file if it exists in `pdb_dir`.
-- `ba_number::Integer=0`: if set > 0 downloads the respective biological assembly;
-by default downloads the PDB file.
+- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is
+    downloaded; defaults to the current working directory.
+- `file_format::Type=PDB`: the format of the PDB file. Options are PDB, PDBXML,
+    MMCIF and MMTF.
+- `obsolete::Bool=false`: if set `true`, the PDB file is downloaded in the
+    auto-generated "obsolete" directory inside the specified `pdb_dir`.
+- `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
+    in `pdb_dir`; by default skips downloading the PDB file if it exists.
+- `ba_number::Integer=0`: if set > 0 downloads the respective biological
+    assembly; by default downloads the PDB file.
 """
 function downloadpdb(pdbid::AbstractString;
                 pdb_dir::AbstractString=pwd(),
@@ -193,38 +212,38 @@ function downloadpdb(pdbid::AbstractString;
                 ba_number::Integer=0)
     pdbid = uppercase(pdbid)
     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
-    if !ismatch(r"^[a-zA-Z0-9]{4}$", pdbid)
+    if !occursin(r"^[a-zA-Z0-9]{4}$", pdbid)
         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
     end
-    # check if PDB file format is valid
+    # Check if PDB file format is valid
     if !haskey(pdbextension, file_format)
         throw(ArgumentError("Invalid PDB file format!"))
     end
     # Check if the PDB file is marked as obsolete
     if obsolete
         # Set the download path to obsolete directory inside the "pdb_dir"
-        pdb_dir = joinpath(pdb_dir,"obsolete")
+        pdb_dir = joinpath(pdb_dir, "obsolete")
     end
     # Check and create directory if it does not exists in filesystem
     if !isdir(pdb_dir)
-        info("Creating directory: $pdb_dir")
+        @info "Creating directory: $pdb_dir"
         mkpath(pdb_dir)
     end
     # Standard file name format for PDB and biological assembly
     if ba_number==0
-        pdbpath = joinpath(pdb_dir,"$pdbid$(pdbextension[file_format])")
+        pdbpath = joinpath(pdb_dir, "$pdbid$(pdbextension[file_format])")
     else
-        pdbpath = joinpath(pdb_dir,"$(pdbid)_ba$ba_number$(pdbextension[file_format])")
+        pdbpath = joinpath(pdb_dir, "$(pdbid)_ba$ba_number$(pdbextension[file_format])")
     end
     # Download the PDB file only if it does not exist in the "pdb_dir" and when "overwrite" is true
     if isfile(pdbpath) && !overwrite
-        info("PDB exists: $pdbid")
+        @info "PDB exists: $pdbid"
     else
         # Temporary location to download compressed PDB file.
         archivefilepath = tempname()
         try
             # Download the compressed PDB file to the temporary location
-            info("Downloading PDB: $pdbid")
+            @info "Downloading PDB: $pdbid"
             if ba_number == 0
                 if file_format == PDB || file_format == PDBXML || file_format == MMCIF
                     download("http://files.rcsb.org/download/$pdbid$(pdbextension[file_format]).gz", archivefilepath)
@@ -234,22 +253,22 @@ function downloadpdb(pdbid::AbstractString;
                 end
             else
                 if file_format == PDB
-                    download("http://files.rcsb.org/download/$pdbid$(pdbextension[file_format])$ba_number.gz",archivefilepath)
+                    download("http://files.rcsb.org/download/$pdbid$(pdbextension[file_format])$ba_number.gz", archivefilepath)
                 elseif file_format == MMCIF
                     download("http://files.rcsb.org/download/$pdbid-assembly$ba_number$(pdbextension[file_format]).gz", archivefilepath)
                 else
-                    throw(ArgumentError("Biological Assembly is available only in PDB and MMCIF formats!"))
+                    throw(ArgumentError("Biological assemblies are available in the PDB and mmCIF formats only"))
                 end
             end
             # Verify if the compressed PDB file is downloaded properly and extract it. For MMTF no extraction is needed
             if isfile(archivefilepath) && filesize(archivefilepath) > 0 && file_format != MMTF
-                input = open(archivefilepath) |> ZlibInflateInputStream
-                open(pdbpath,"w") do output
-                    for line in eachline(input)
+                stream = GzipDecompressorStream(open(archivefilepath))
+                open(pdbpath, "w") do output
+                    for line in eachline(stream)
                         println(output, line)
                     end
                 end
-                close(input)
+                close(stream)
             end
             # Verify if the PDB file is downloaded and extracted without any error
             if !isfile(pdbpath) || filesize(pdbpath)==0
@@ -264,7 +283,7 @@ function downloadpdb(pdbid::AbstractString;
     return pdbpath
 end
 
-function downloadpdb(pdbidlist::Array{String,1}; kwargs...)
+function downloadpdb(pdbidlist::Array{String, 1}; kwargs...)
     pdbpaths = String[]
     failedlist = String[]
     for pdbid in pdbidlist
@@ -272,12 +291,12 @@ function downloadpdb(pdbidlist::Array{String,1}; kwargs...)
             pdbpath = downloadpdb(pdbid; kwargs...)
             push!(pdbpaths, pdbpath)
         catch
-            warn("Error downloading PDB: $pdbid")
-            push!(failedlist,pdbid)
+            @warn "Error downloading PDB: $pdbid"
+            push!(failedlist, pdbid)
         end
     end
     if length(failedlist) > 0
-        warn(length(failedlist), " PDB file(s) failed to download: ", failedlist)
+        @warn "$(length(failedlist)) PDB file(s) failed to download: $failedlist"
     end
     return pdbpaths
 end
@@ -295,73 +314,80 @@ end
 """
     downloadentirepdb(; <keyword arguments>)
 
-Download the entire PDB files available in the RCSB server.
+Download the entire Protein Data Bank (PDB) from the RCSB server.
+
+Returns the list of PDB IDs downloaded.
+Ensure you have enough disk space and time before running.
+The function can be stopped any time and called again to resume downloading.
+Requires an internet connection.
 
 # Arguments
-- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB files are downloaded;
-defaults to current working directory.
-- `file_format::Type=PDB`: the format of the PDB file. Options <PDB, PDBXML, MMCIF, MMTF>;
-defaults to PDB format.
-- `overwrite::Bool=false`: if set `true`, overwrites the PDB file if exists in `pdb_dir`;
-by default skips downloading PDB file if it exists in `pdb_dir`.
+- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB files are
+    downloaded; defaults to the current working directory.
+- `file_format::Type=PDB`: the format of the PDB file. Options are PDB, PDBXML,
+    MMCIF and MMTF.
+- `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
+    in `pdb_dir`; by default skips downloading the PDB file if it exists.
 """
-function downloadentirepdb(;pdb_dir::AbstractString=pwd(), file_format::Type=PDB, overwrite::Bool=false)
-    # Get the list of all pdb entries from RCSB Server using getallpdbentries() and downloads them
+function downloadentirepdb(; pdb_dir::AbstractString=pwd(), file_format::Type=PDB, overwrite::Bool=false)
     pdblist = pdbentrylist()
-    info("About to download $(length(pdblist)) PDB files. Make sure you have enough disk space and time!")
-    info("You can stop it anytime and call the function again to resume downloading")
+    @info "About to download $(length(pdblist)) PDB files, make sure you have enough disk space and time"
+    @info "The function can be stopped any time and called again to resume downloading"
     downloadpdb(pdblist, pdb_dir=pdb_dir, overwrite=overwrite, file_format=file_format)
 end
 
-
 """
-    updatelocalpdb(;pdb_dir::AbstractString=pwd(), file_format::Type=PDB)
+    updatelocalpdb(; pdb_dir::AbstractString=pwd(), file_format::Type=PDB)
 
-Updates your local copy of the PDB files. It gets the recent weekly lists of new, modified
-and obsolete PDB entries and automatically updates the PDB files in the given `file_format`
-inside the local `pdb_dir` directory.
+Update a local copy of the Protein Data Bank (PDB).
+
+Obtains the recent weekly lists of new, modified and obsolete PDB entries and
+automatically updates the PDB files of the given `file_format` inside the local
+`pdb_dir` directory.
+Requires an internet connection.
 """
-function updatelocalpdb(;pdb_dir::AbstractString=pwd(), file_format::Type=PDB)
+function updatelocalpdb(; pdb_dir::AbstractString=pwd(), file_format::Type=PDB)
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
-    # download the newly added and modified pdb files
-    downloadpdb(vcat(addedlist,modifiedlist), pdb_dir=pdb_dir, overwrite=true, file_format=file_format)
-    # set the obsolete directory to be inside pdb_dir
-    obsolete_dir=joinpath(pdb_dir,"obsolete")
+    # Download the newly added and modified pdb files
+    downloadpdb(vcat(addedlist, modifiedlist), pdb_dir=pdb_dir, overwrite=true, file_format=file_format)
+    # Set the obsolete directory to be inside pdb_dir
+    obsolete_dir=joinpath(pdb_dir, "obsolete")
     for pdbid in obsoletelist
-        oldfile = joinpath(pdb_dir,"$pdbid$(pdbextension[file_format])")
+        oldfile = joinpath(pdb_dir, "$pdbid$(pdbextension[file_format])")
         newfile = joinpath(obsolete_dir, "$pdbid$(pdbextension[file_format])")
         # if obsolete pdb is in the "pdb_dir", move it to "obsolete" directory inside "pdb_dir"
         if isfile(oldfile)
             if !isdir(obsolete_dir)
                 mkpath(obsolete_dir)
             end
-            mv(oldfile,newfile)
-        # if obsolete pdb is already in the obsolete directory, inform the user and skip
+            mv(oldfile, newfile)
+        # If obsolete pdb is already in the obsolete directory, inform the user and skip
         elseif isfile(newfile)
-            info("PDB $pdbid is already moved to the obsolete directory")
-        # if obsolete pdb not available in both pdb_dir and obsolete, inform the user and skip
+            @info "PDB $pdbid is already moved to the obsolete directory"
+        # If obsolete pdb not available in both pdb_dir and obsolete, inform the user and skip
         else
-            info("Obsolete PDB $pdbid is missing")
+            @info "Obsolete PDB $pdbid is missing"
         end
     end
 end
 
-
 """
     downloadallobsoletepdb(; <keyword arguments>)
 
-Download all obsolete PDB files from RCSB server.
+Download all obsolete Protein Data Bank (PDB) files from the RCSB server.
+
+Returns the list of PDB IDs downloaded.
+Requires an internet connection.
 
 # Arguments
-- `obsolete_dir::AbstractString=pwd()`: the directory where the PDB files are downloaded;
-defaults to current working directory.
-- `file_format::Type=PDB`: the format of the PDB file. Options <PDB, PDBXML, MMCIF, MMTF>;
-defaults to PDB format.
-- `overwrite::Bool=false`: if set `true`, overwrites the PDB file if exists in
-`obsolete_dir`; by default skips downloading PDB file if it exists in `obsolete_dir`.
+- `obsolete_dir::AbstractString=pwd()`: the directory where the PDB files are
+    downloaded; defaults to the current working directory.
+- `file_format::Type=PDB`: the format of the PDB file. Options are PDB, PDBXML,
+    MMCIF and MMTF.
+- `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
+    in `pdb_dir`; by default skips downloading the PDB file if it exists.
 """
-function downloadallobsoletepdb(;obsolete_dir::AbstractString=pwd(), file_format::Type=PDB, overwrite::Bool=false)
-    # Get all obsolete PDB files in RCSB PDB Server using getallobsolete() and download them
+function downloadallobsoletepdb(; obsolete_dir::AbstractString=pwd(), file_format::Type=PDB, overwrite::Bool=false)
     obsoletelist = pdbobsoletelist()
     downloadpdb(obsoletelist, pdb_dir=obsolete_dir, file_format=file_format, overwrite=overwrite)
 end
@@ -370,23 +396,27 @@ end
 """
     retrievepdb(pdbid::AbstractString; <keyword arguments>)
 
-Download and parse(read) the PDB file or biological assembly from the RCSB PDB server.
+Download and read a Protein Data Bank (PDB) file or biological assembly from the
+RCSB server, returning a `ProteinStructure`.
+
+Requires an internet connection.
 
 # Arguments
-- `pdbid::AbstractString`: the PDB to be downloaded and read.
-- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is downloaded;
-defaults to current working directory.
-- `obsolete::Bool=false`: if set `true`, the PDB file is downloaded in the auto-generated
-"obsolete" directory inside the specified `pdb_dir`.
-- `overwrite::Bool=false`: if set `true`, overwrites the PDB file if exists in `pdb_dir`;
-by default skips downloading PDB file if it exists in `pdb_dir`.
-- `ba_number::Integer=0`: if set > 0 downloads the respective biological assembly;
-by default downloads the PDB file.
-- `structure_name::AbstractString="\$pdbid.pdb"`: used for representing the PDB structure
-when parsing the file; defaults to "<pdbid>.pdb".
-- `remove_disorder::Bool=false`: if set true, then disordered atoms wont be parsed.
-- `read_std_atoms::Bool=true`: if set false, then standard ATOM records wont be parsed.
-- `read_het_atoms::Bool=true`: if set false, then HETATOM records wont be parsed.
+- `pdbid::AbstractString`: the PDB ID to be downloaded and read.
+- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is
+    downloaded; defaults to the current working directory.
+- `obsolete::Bool=false`: if set `true`, the PDB file is downloaded in the
+    auto-generated "obsolete" directory inside the specified `pdb_dir`.
+- `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
+    in `pdb_dir`; by default skips downloading the PDB file if it exists.
+- `ba_number::Integer=0`: if set > 0 downloads the respective biological
+    assembly; by default downloads the PDB file.
+- `structure_name::AbstractString="\$pdbid.pdb"`: the name given to the returned
+    `ProteinStructure`.
+- `remove_disorder::Bool=false`: whether to read atoms with alt loc ID not ' '
+    or 'A'.
+- `read_std_atoms::Bool=true`: whether to read standard ATOM records.
+- `read_het_atoms::Bool=true`: whether to read HETATOM records.
 """
 function retrievepdb(pdbid::AbstractString;
             pdb_dir::AbstractString=pwd(),
@@ -397,8 +427,8 @@ function retrievepdb(pdbid::AbstractString;
             kwargs...)
     downloadpdb(pdbid, pdb_dir=pdb_dir, obsolete=obsolete, overwrite=overwrite, ba_number=ba_number)
     if obsolete
-        # if obsolete is set true, the PDB file is present in the obsolete directory inside "pdb_dir"
-        pdb_dir = joinpath(pdb_dir,"obsolete")
+        # If obsolete is set true, the PDB file is present in the obsolete directory inside "pdb_dir"
+        pdb_dir = joinpath(pdb_dir, "obsolete")
     end
     readpdb(pdbid; pdb_dir=pdb_dir, ba_number=ba_number, structure_name=structure_name, kwargs...)
 end
@@ -406,19 +436,23 @@ end
 """
     readpdb(pdbid::AbstractString; <keyword arguments>)
 
-Read a PDB file.
+Read a Protein Data Bank (PDB) file and return a `ProteinStructure`.
+
+This is an alternative to `read("\$pdb_dir/\$pdbid.pdb", PDB)` but is
+effectively the same.
 
 # Arguments
-- `pdbid::AbstractString`: the PDB to be read.
-- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is downloaded;
-defaults to current working directory.
-- `ba_number::Integer=0`: if set > 0 downloads the respective biological assembly;
-by default downloads the PDB file.
-- `structure_name::AbstractString="\$pdbid.pdb"`: used for representing the PDB structure
-when parsing the file; defaults to "<pdbid>.pdb".
-- `remove_disorder::Bool=false`: if set true, then disordered atoms wont be parsed.
-- `read_std_atoms::Bool=true`: if set false, then standard ATOM records wont be parsed.
-- `read_het_atoms::Bool=true`: if set false, then HETATOM records wont be parsed.
+- `pdbid::AbstractString`: the PDB ID to be read.
+- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is
+    downloaded; defaults to the current working directory.
+- `ba_number::Integer=0`: if set > 0 downloads the respective biological
+    assembly; by default downloads the PDB file.
+- `structure_name::AbstractString="\$pdbid.pdb"`: the name given to the returned
+    `ProteinStructure`.
+- `remove_disorder::Bool=false`: whether to read atoms with alt loc ID not ' '
+    or 'A'.
+- `read_std_atoms::Bool=true`: whether to read standard ATOM records.
+- `read_het_atoms::Bool=true`: whether to read HETATOM records.
 """
 function readpdb(pdbid::AbstractString;
             pdb_dir::AbstractString=pwd(),
@@ -428,12 +462,13 @@ function readpdb(pdbid::AbstractString;
     pdbid = uppercase(pdbid)
     # Standard file name format for PDB and biological assembly
     if ba_number==0
-        pdbpath = joinpath(pdb_dir,"$pdbid.pdb")
+        pdbpath = joinpath(pdb_dir, "$pdbid.pdb")
     else
-        pdbpath = joinpath(pdb_dir,"$(pdbid)_ba$ba_number.pdb")
+        pdbpath = joinpath(pdb_dir, "$(pdbid)_ba$ba_number.pdb")
     end
     read(pdbpath, PDB; structure_name=structure_name, kwargs...)
 end
+
 
 function Base.read(input::IO,
             ::Type{PDB};
@@ -628,10 +663,8 @@ function parsecharge(line::String)
 end
 
 
-"""
-Form a string of a certain length from a value by adding spaces to the left.
-Throws an error if the value is too long.
-"""
+# Form a string of a certain length from a value by adding spaces to the left
+# Throws an error if the value is too long
 function spacestring(val_in, new_length::Integer)
     string_out = string(val_in)
     if length(string_out) > new_length
@@ -640,13 +673,18 @@ function spacestring(val_in, new_length::Integer)
     return lpad(string_out, new_length)
 end
 
-
 """
+    spaceatomname(at::Atom)
+
 Space an `Atom` name such that the last element letter (generally) appears in
-the second column. If the `element` property of the `Atom` is set it is used to
-get the element, otherwise the name starts from the second column where
-possible. This function is generally not required as spacing is recorded when
-atom names are read in from a Protein Data Bank (PDB) file.
+the second column.
+
+If the `element` property of the `Atom` is set it is used to get the element,
+otherwise the name starts from the second column where possible.
+This function is generally not required as spacing is recorded when atom names
+are read in from a Protein Data Bank (PDB) file.
+However this spacing can be important, for example distinguising between C-alpha
+and calcium atoms.
 """
 function spaceatomname(at::Atom)
     at_name = atomname(at, strip=false)
@@ -659,11 +697,11 @@ function spaceatomname(at::Atom)
         throw(ArgumentError("Atom name is greater than four characters: \"$at_name\""))
     end
     # In the absence of the element, the first index goes in column two
-    if strip_el == "" || findfirst(at_name, strip_el[1]) == 0
+    if strip_el == "" || findfirst(isequal(strip_el[1]), at_name) == nothing
         cent_ind = 1
     # The last letter of the element goes in column two where possible
     else
-        cent_ind = findfirst(at_name, strip_el[1]) + length(strip_el) - 1
+        cent_ind = something(findfirst(isequal(strip_el[1]), at_name), 0) + length(strip_el) - 1
     end
     if cent_ind > 2
         throw(ArgumentError("Atom name is too long to space correctly: \"$at_name\""))
@@ -676,17 +714,25 @@ function spaceatomname(at::Atom)
     return rpad(out_string, 4)
 end
 
-
 # Decimal places to format output to
 const coordspec = FormatSpec(".3f")
 const floatspec = FormatSpec(".2f")
 
 """
-Form a Protein Data Bank (PDB) format ATOM or HETATM record from an `Atom` or
-`AtomRecord`.
+    pdbline(at::Atom)
+    pdbline(at::AtomRecord)
+
+Form a Protein Data Bank (PDB) format ATOM or HETATM record as a `String` from
+an `Atom` or `AtomRecord`.
+
+This will throw an `ArgumentError` if a value cannot fit into the allocated
+space, e.g. the chain ID is longer than one character or the atom serial is
+greater than 99999.
+In this case consider using `writemmcif` to write a mmCIF file.
 """
 function pdbline(at::Atom)
     return (ishetero(at) ? "HETATM" : "ATOM  ") *
+            # This will throw an error for serial numbers over 99999
             spacestring(serial(at), 5) *
             " " *
             spaceatomname(at) *
@@ -698,12 +744,12 @@ function pdbline(at::Atom)
             string(inscode(at)) *
             "   " *
             # This will throw an error for large coordinate values, e.g. -1000.123
-            spacestring(fmt(coordspec, round(x(at), 3)), 8) *
-            spacestring(fmt(coordspec, round(y(at), 3)), 8) *
-            spacestring(fmt(coordspec, round(z(at), 3)), 8) *
-            spacestring(fmt(floatspec, round(occupancy(at), 2)), 6) *
+            spacestring(pyfmt(coordspec, round(x(at), digits=3)), 8) *
+            spacestring(pyfmt(coordspec, round(y(at), digits=3)), 8) *
+            spacestring(pyfmt(coordspec, round(z(at), digits=3)), 8) *
+            spacestring(pyfmt(floatspec, round(occupancy(at), digits=2)), 6) *
             # This will throw an error for large temp facs, e.g. 1000.12
-            spacestring(fmt(floatspec, round(tempfactor(at), 2)), 6) *
+            spacestring(pyfmt(floatspec, round(tempfactor(at), digits=2)), 6) *
             "          " *
             spacestring(element(at), 2) *
             spacestring(charge(at), 2)
@@ -711,6 +757,7 @@ end
 
 function pdbline(at_rec::AtomRecord)
     return (at_rec.het_atom ? "HETATM" : "ATOM  ") *
+            # This will throw an error for serial numbers over 99999
             spacestring(at_rec.serial, 5) *
             " " *
             spacestring(at_rec.atom_name, 4) *
@@ -722,12 +769,12 @@ function pdbline(at_rec::AtomRecord)
             string(at_rec.ins_code) *
             "   " *
             # This will throw an error for large coordinate values, e.g. -1000.123
-            spacestring(fmt(coordspec, round(at_rec.coords[1], 3)), 8) *
-            spacestring(fmt(coordspec, round(at_rec.coords[2], 3)), 8) *
-            spacestring(fmt(coordspec, round(at_rec.coords[3], 3)), 8) *
-            spacestring(fmt(floatspec, round(at_rec.occupancy, 2)), 6) *
+            spacestring(pyfmt(coordspec, round(at_rec.coords[1], digits=3)), 8) *
+            spacestring(pyfmt(coordspec, round(at_rec.coords[2], digits=3)), 8) *
+            spacestring(pyfmt(coordspec, round(at_rec.coords[3], digits=3)), 8) *
+            spacestring(pyfmt(floatspec, round(at_rec.occupancy, digits=2)), 6) *
             # This will throw an error for large temp facs, e.g. 1000.12
-            spacestring(fmt(floatspec, round(at_rec.temp_factor, 2)), 6) *
+            spacestring(pyfmt(floatspec, round(at_rec.temp_factor, digits=2)), 6) *
             "          " *
             spacestring(at_rec.element, 2) *
             spacestring(at_rec.charge, 2)
@@ -739,12 +786,17 @@ function checkchainerror(el::Union{Chain, AbstractResidue, AbstractAtom})
     end
 end
 
+
 """
-Write a `StructuralElementOrList` to a Protein Data Bank (PDB) format file. Only
-ATOM, HETATM, MODEL and ENDMDL records are written - there is no header and
+    writepdb(output, element, atom_selectors...)
+
+Write a `StructuralElementOrList` to a Protein Data Bank (PDB) format file or
+output stream.
+
+Only ATOM, HETATM, MODEL and ENDMDL records are written - there is no header and
 there are no TER records.
-Additional arguments are atom selector functions - only atoms that return
-`true` from the functions are retained.
+Atom selector functions can be given as additional arguments - only atoms that
+return `true` from all the functions are retained.
 """
 function writepdb(output::IO,
                 el::Union{ProteinStructure, Vector{Model}},
@@ -763,7 +815,6 @@ function writepdb(output::IO,
         writepdb(output, el[1], atom_selectors...)
     end
 end
-
 
 function writepdb(output::IO,
                 el::Union{Model, Chain, AbstractResidue, Vector{Chain},
