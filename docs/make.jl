@@ -1,9 +1,21 @@
 using Documenter, BioStructures
 
-makedocs()
+makedocs(
+    format = :html,
+    sitename = "BioStructures.jl",
+    pages = [
+        "Home"         => "index.md",
+        "Documentation"=> "documentation.md",
+        "Contributing" => "contributing.md"
+    ],
+    authors = "Joe G Greener, The BioJulia Organisation and other contributors."
+)
+
 deploydocs(
-    deps = Deps.pip("mkdocs", "pygments", "mkdocs-material"),
     repo = "github.com/BioJulia/BioStructures.jl.git",
     julia = "1.0",
     osname = "linux",
+    target = "build",
+    deps = nothing,
+    make = nothing
 )
