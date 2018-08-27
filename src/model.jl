@@ -1170,7 +1170,7 @@ end
 """
 Return the number of `Model`s in a `StructuralElementOrList`.
 Additional arguments are model selector functions - only models that return
-`true` from the functions are counted.
+`true` from all the functions are counted.
 """
 function countmodels(el::StructuralElementOrList, model_selectors::Function...)
     return length(collectmodels(el, model_selectors...))
@@ -1184,7 +1184,7 @@ countmodels(mods::Vector{Model}) = length(mods)
 """
 Returns a sorted `Vector` of the chains in a `StructuralElementOrList`.
 Additional arguments are chain selector functions - only chains that return
-`true` from the functions are retained.
+`true` from all the functions are retained.
 """
 function collectchains(struc::ProteinStructure)
     if countmodels(struc) > 0
@@ -1230,7 +1230,7 @@ end
 """
 Return the number of `Chain`s in a `StructuralElementOrList`.
 Additional arguments are chain selector functions - only chains that return
-`true` from the functions are counted.
+`true` from all the functions are counted.
 """
 function countchains(el::StructuralElementOrList, chain_selectors::Function...)
     return length(collectchains(el, chain_selectors...))
@@ -1244,7 +1244,7 @@ countchains(chs::Vector{Chain}) = length(chs)
 """
 Returns a sorted `Vector` of the residues in a `StructuralElementOrList`.
 Additional arguments are residue selector functions - only residues that return
-`true` from the functions are retained.
+`true` from all the functions are retained.
 """
 function collectresidues(struc::ProteinStructure)
     if countmodels(struc) > 0
@@ -1292,7 +1292,7 @@ end
 """
 Return the number of residues in a `StructuralElementOrList`.
 Additional arguments are residue selector functions - only residues that return
-`true` from the functions are counted.
+`true` from all the functions are counted.
 """
 function countresidues(el::StructuralElementOrList, residue_selectors::Function...)
     return length(collectresidues(el, residue_selectors...))
@@ -1309,7 +1309,7 @@ end
 """
 Returns a sorted `Vector` of the atoms in a `StructuralElementOrList`.
 Additional arguments are atom selector functions - only atoms that return
-`true` from the functions are retained.
+`true` from all the functions are retained.
 """
 function collectatoms(struc::ProteinStructure)
     if countmodels(struc) > 0
@@ -1344,7 +1344,7 @@ end
 """
 Return the number of atoms in a `StructuralElementOrList`.
 Additional arguments are atom selector functions - only atoms that return
-`true` from the functions are counted.
+`true` from all the functions are counted.
 """
 function countatoms(el::StructuralElementOrList, atom_selectors::Function...)
     return length(collectatoms(el, atom_selectors...))

@@ -1,7 +1,7 @@
 module TestBioStructures
 
 using Test
-using Formatting
+using Format
 using BioCore
 using BioStructures
 using BioStructures:
@@ -1301,8 +1301,8 @@ end
 
 
     # Test output formatting
-    @test fmt(coordspec, 5.0) == "5.000"
-    @test fmt(floatspec, -10.0) == "-10.00"
+    @test pyfmt(coordspec, 5.0) == "5.000"
+    @test pyfmt(floatspec, -10.0) == "-10.00"
 
 
     # Test pdbline

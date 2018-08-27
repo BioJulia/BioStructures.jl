@@ -26,7 +26,8 @@ julia> struc = read("/path/to/pdb/file.pdb", PDB)
 ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 ```
 
-mmCIF files can be read into the same data structure with `read("/path/to/cif/file.cif", MMCIF)`. If you want to read an mmCIF file into a dictionary to query yourself (e.g. to access metadata fields), use `MMCIFDict`:
+mmCIF files can be read into the same data structure with `read("/path/to/cif/file.cif", MMCIF)`.
+If you want to read an mmCIF file into a dictionary to query yourself (e.g. to access metadata fields), use `MMCIFDict`:
 
 ```julia
 julia> mmcif_dict = MMCIFDict("/path/to/cif/file.cif")
@@ -35,6 +36,8 @@ mmCIF dictionary with 716 fields
 julia> mmcif_dict["_entity_src_nat.common_name"]
 "great nettle"
 ```
+
+A `MMCIFDict` can be accessed in similar ways to a standard dictionary, and if necessary the underlying dictionary of `MMCIFDict` `d` can be accessed with `d.dict`.
 
 Refer to [Downloading PDB files](#downloading-pdb-files) and [Reading PDB files](#reading-pdb-files) sections for more options.
 
@@ -56,7 +59,8 @@ Disordered atoms are stored in a `DisorderedAtom` container but calls fall back 
 
 Disordered residues (i.e. point mutations with different residue names) are stored in a `DisorderedResidue` container.
 
-The idea is that disorder will only bother you if you want it to. See the [Biopython discussion](http://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ#How_is_disorder_handled.3F) for more.
+The idea is that disorder will only bother you if you want it to.
+See the [Biopython discussion](http://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ#How_is_disorder_handled.3F) for more.
 
 Properties can be retrieved as follows:
 
@@ -121,9 +125,12 @@ end
 
 Models are ordered numerically; chains are ordered by chain ID character ordering, except the empty chain is last; residues are ordered by residue number and insertion code with hetero residues after standard residues; atoms are ordered by atom serial.
 
-`collect` can be used to get arrays of sub-elements. `collectatoms`, `collectresidues`, `collectchains` and `collectmodels` return arrays of a particular type from a structural element or element array.
+`collect` can be used to get arrays of sub-elements.
+`collectatoms`, `collectresidues`, `collectchains` and `collectmodels` return arrays of a particular type from a structural element or element array.
 
-Selectors are functions passed as additional arguments to these functions. Only elements that return `true` when passed to the selector are retained. For example:
+Selectors are functions passed as additional arguments to these functions.
+Only elements that return `true` when passed to all the selector are retained.
+For example:
 
 | Command                                                 | Action                                                            | Return type                |
 | :------------------------------------------------------ | :---------------------------------------------------------------- | :------------------------- |
@@ -150,7 +157,8 @@ The selectors available are:
 | notwaterselector  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name not HOH            |
 | disorderselector  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with alternative locations           |
 
-It is easy to define your own atom, residue, chain or model selectors. The below will collect all atoms with x coordinate less than 0:
+It is easy to define your own atom, residue, chain or model selectors.
+The below will collect all atoms with x coordinate less than 0:
 
 ```julia
 xselector(at::AbstractAtom) = x(at) < 0
@@ -163,7 +171,8 @@ Alternatively, you can use an anonymous function:
 collectatoms(struc, at -> x(at) < 0)
 ```
 
-`countatoms`, `countresidues`, `countchains` and `countmodels` can be used to count elements wth the same selector API. For example:
+`countatoms`, `countresidues`, `countchains` and `countmodels` can be used to count elements wth the same selector API.
+For example:
 
 ```julia
 julia> countatoms(struc)
@@ -290,7 +299,8 @@ julia> struc = read("/path/to/pdb/file.pdb", PDB)
 ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 ```
 
-Read a mmCIF file instead by replacing `PDB` with `MMCIF`. Various options can be set through optional keyword arguments when parsing PDB/mmCIF files:
+Read a mmCIF file instead by replacing `PDB` with `MMCIF`.
+Various options can be set through optional keyword arguments when parsing PDB/mmCIF files:
 
 | Keyword Argument                 | Description                                                                        |
 | :------------------------------- | :--------------------------------------------------------------------------------- |
@@ -299,7 +309,8 @@ Read a mmCIF file instead by replacing `PDB` with `MMCIF`. Various options can b
 | `read_std_atoms::Bool=true`      | If set to `false`, standard ATOM records wont be parsed                            |
 | `read_het_atoms::Bool=true`      | If set to `false`, HETATOM records wont be parsed                                  |
 
-The function `readpdb` provides a different way to download and read PDB files in line with `downloadpdb`. To parse a PDB file by specifying the PDB ID and PDB directory (file name must be in upper case, e.g. "1EN2.pdb"):
+The function `readpdb` provides a different way to download and read PDB files in line with `downloadpdb`.
+To parse a PDB file by specifying the PDB ID and PDB directory (file name must be in upper case, e.g. "1EN2.pdb"):
 
 ```julia
 struc = readpdb("1EN2", pdb_dir="/path/to/pdb/directory")
@@ -337,14 +348,16 @@ PDB format files can be written:
 writepdb("1EN2_out.pdb", struc)
 ```
 
-Any element type can be given as input to `writepdb`. Atom selectors can also be given as additional arguments:
+Any element type can be given as input to `writepdb`.
+Atom selectors can also be given as additional arguments:
 
 ```julia
 # Only backbone atoms are written out
 writepdb("1EN2_out.pdb", struc, backboneselector)
 ```
 
-To write mmCIF format files, use the `writemmcif` function with similar arguments. A `MMCIFDict` can also be written using `writemmcif`:
+To write mmCIF format files, use the `writemmcif` function with similar arguments.
+A `MMCIFDict` can also be written using `writemmcif`:
 
 ```julia
 writemmcif("1EN2_out.dic", mmcif_dict)

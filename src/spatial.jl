@@ -23,7 +23,7 @@ Get the atomic coordinates in Å of a `StructuralElementOrList` as a 2D `Array`
 with each column corresponding to one atom.
 
 Additional arguments are atom selector functions - only atoms that return
-`true` from the functions are retained.
+`true` from all the functions are retained.
 """
 function coordarray(el::StructuralElementOrList, atom_selectors::Function...)
     at_list = collectatoms(el, atom_selectors...)
