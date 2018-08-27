@@ -744,12 +744,12 @@ function pdbline(at::Atom)
             string(inscode(at)) *
             "   " *
             # This will throw an error for large coordinate values, e.g. -1000.123
-            spacestring(fmt(coordspec, round(x(at), digits=3)), 8) *
-            spacestring(fmt(coordspec, round(y(at), digits=3)), 8) *
-            spacestring(fmt(coordspec, round(z(at), digits=3)), 8) *
-            spacestring(fmt(floatspec, round(occupancy(at), digits=2)), 6) *
+            spacestring(pyfmt(coordspec, round(x(at), digits=3)), 8) *
+            spacestring(pyfmt(coordspec, round(y(at), digits=3)), 8) *
+            spacestring(pyfmt(coordspec, round(z(at), digits=3)), 8) *
+            spacestring(pyfmt(floatspec, round(occupancy(at), digits=2)), 6) *
             # This will throw an error for large temp facs, e.g. 1000.12
-            spacestring(fmt(floatspec, round(tempfactor(at), digits=2)), 6) *
+            spacestring(pyfmt(floatspec, round(tempfactor(at), digits=2)), 6) *
             "          " *
             spacestring(element(at), 2) *
             spacestring(charge(at), 2)
@@ -757,6 +757,7 @@ end
 
 function pdbline(at_rec::AtomRecord)
     return (at_rec.het_atom ? "HETATM" : "ATOM  ") *
+            # This will throw an error for serial numbers over 99999
             spacestring(at_rec.serial, 5) *
             " " *
             spacestring(at_rec.atom_name, 4) *
@@ -768,12 +769,12 @@ function pdbline(at_rec::AtomRecord)
             string(at_rec.ins_code) *
             "   " *
             # This will throw an error for large coordinate values, e.g. -1000.123
-            spacestring(fmt(coordspec, round(at_rec.coords[1], digits=3)), 8) *
-            spacestring(fmt(coordspec, round(at_rec.coords[2], digits=3)), 8) *
-            spacestring(fmt(coordspec, round(at_rec.coords[3], digits=3)), 8) *
-            spacestring(fmt(floatspec, round(at_rec.occupancy, digits=2)), 6) *
+            spacestring(pyfmt(coordspec, round(at_rec.coords[1], digits=3)), 8) *
+            spacestring(pyfmt(coordspec, round(at_rec.coords[2], digits=3)), 8) *
+            spacestring(pyfmt(coordspec, round(at_rec.coords[3], digits=3)), 8) *
+            spacestring(pyfmt(floatspec, round(at_rec.occupancy, digits=2)), 6) *
             # This will throw an error for large temp facs, e.g. 1000.12
-            spacestring(fmt(floatspec, round(at_rec.temp_factor, digits=2)), 6) *
+            spacestring(pyfmt(floatspec, round(at_rec.temp_factor, digits=2)), 6) *
             "          " *
             spacestring(at_rec.element, 2) *
             spacestring(at_rec.charge, 2)
