@@ -356,6 +356,7 @@ Atom selectors can also be given as additional arguments:
 writepdb("1EN2_out.pdb", struc, backboneselector)
 ```
 
+The first argument can also be a stream.
 To write mmCIF format files, use the `writemmcif` function with similar arguments.
 A `MMCIFDict` can also be written using `writemmcif`:
 
@@ -364,6 +365,21 @@ writemmcif("1EN2_out.dic", mmcif_dict)
 ```
 
 Multi-character chain IDs can be written to mmCIF files but will throw an error when written to a PDB file as the PDB format only has one character allocated to the chain ID.
+
+If you want the PDB record line for an `Atom`, use `pdbline`.
+For example:
+
+```julia
+julia> pdbline(at)
+"HETATM  101  C  A  X B  20      10.500  20.123  -5.123  0.50 50.13           C1+"
+```
+
+If you want to generate a PDB record line from values directly, do so using an `AtomRecord`:
+
+```julia
+julia> pdbline(AtomRecord(false, 669, "CA", ' ', "ILE", "A", 90, ' ', [31.743, 33.11, 31.221], 1.00, 25.76, "C", ""))
+"ATOM    669  CA  ILE A  90      31.743  33.110  31.221  1.00 25.76           C  "
+```
 
 
 ## RCSB PDB utility functions
