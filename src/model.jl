@@ -135,7 +135,10 @@ struct Residue <: AbstractResidue
     chain::StructuralElement
 end
 
-"A container to hold different versions of the same residue (point mutations)."
+"""
+A container to hold different versions of the same residue (point
+mutations).
+"""
 struct DisorderedResidue <: AbstractResidue
     names::Dict{String, Residue}
     default::String
@@ -170,8 +173,8 @@ end
 
 
 """
-A record for a single atom, e.g. as represented in a Protein Data Bank (PDB)
-file.
+A record for a single atom, e.g. as represented in a Protein Data Bank
+(PDB) file.
 """
 struct AtomRecord
     het_atom::Bool
@@ -571,9 +574,10 @@ isdisorderedatom(at::AbstractAtom) = isa(at, DisorderedAtom)
 """
     defaultaltlocid(dis_at)
 
-Get the alternative location ID of the default `Atom` in a `DisorderedAtom`.
+Get the alternative location ID of the default `Atom` in a `DisorderedAtom` as a
+`Char`.
 The default is the highest occupancy, or lowest character alternative location
-ID for ties (i.e. A beats B).
+ID for ties (i.e. 'A' beats 'B').
 """
 defaultaltlocid(dis_at::DisorderedAtom) = dis_at.default
 
@@ -592,7 +596,7 @@ end
 
 Return the default `Atom` in a `DisorderedAtom`.
 The default is the highest occupancy, or lowest character alternative location
-ID for ties (i.e. A beats B).
+ID for ties (i.e. 'A' beats 'B').
 """
 defaultatom(dis_at::DisorderedAtom) = dis_at[defaultaltlocid(dis_at)]
 
@@ -600,12 +604,12 @@ defaultatom(dis_at::DisorderedAtom) = dis_at[defaultaltlocid(dis_at)]
 """
     altlocids(dis_at)
 
-Get the list of alternative location IDs in an `AbstractAtom`, sorted by atom
-serial.
+Get the list of alternative location IDs in an `AbstractAtom` as a
+`Vector{Char}`, sorted by atom serial.
 """
 function altlocids(dis_at::DisorderedAtom)
     return sort(collect(keys(dis_at.alt_loc_ids)),
-        by= alt_loc_id -> dis_at[alt_loc_id])
+        by=alt_loc_id -> dis_at[alt_loc_id])
 end
 
 altlocids(at::Atom) = [altlocid(at)]
@@ -625,7 +629,7 @@ atomid(dis_at::DisorderedAtom) = atomid(defaultatom(dis_at))
     resname(at; strip=true)
     resname(res; strip=true)
 
-Get the residue name of an `AbstractAtom` or `AbstractResidue`.
+Get the residue name of an `AbstractAtom` or `AbstractResidue` as a `String`.
 `strip` determines whether surrounding whitespace is stripped.
 """
 function resname(res::Residue; strip::Bool=true)
@@ -645,7 +649,7 @@ resname(dis_res::DisorderedResidue; strip::Bool=true) = resname(defaultresidue(d
     resnumber(at)
     resnumber(res)
 
-Get the residue number of an `AbstractAtom` or `AbstractResidue`.
+Get the residue number of an `AbstractAtom` or `AbstractResidue` as an `Int`.
 """
 resnumber(at::Atom) = resnumber(residue(at))
 resnumber(dis_at::DisorderedAtom) = resnumber(defaultatom(dis_at))
@@ -657,7 +661,7 @@ resnumber(dis_res::DisorderedResidue) = resnumber(defaultresidue(dis_res))
     inscode(at)
     inscode(res)
 
-Get the insertion code of an `AbstractAtom` or `AbstractResidue`.
+Get the insertion code of an `AbstractAtom` or `AbstractResidue` as a `Char`.
 """
 inscode(at::Atom) = inscode(residue(at))
 inscode(dis_at::DisorderedAtom) = inscode(defaultatom(dis_at))
@@ -668,7 +672,8 @@ inscode(dis_res::DisorderedResidue) = inscode(defaultresidue(dis_res))
 """
     resid(res; full=true)
 
-Get a descriptive residue ID string for an `AbstractAtom` or `AbstractResidue`.
+Get a descriptive residue ID `String` for an `AbstractAtom` or
+`AbstractResidue`.
 Format is residue number then insertion code with "H_" in front for hetero
 residues.
 If `full` equals `true` the chain ID is also added after a colon.
@@ -772,7 +777,7 @@ disorderedres(dis_res::DisorderedResidue, res_name::AbstractString) = dis_res.na
 """
     defaultresname(dis_res)
 
-Get the name of the default `Residue` in a `DisorderedResidue`.
+Get the name of the default `Residue` in a `DisorderedResidue` as a `String`.
 The default is the first name read in.
 """
 defaultresname(dis_res::DisorderedResidue) = dis_res.default
@@ -790,7 +795,7 @@ defaultresidue(dis_res::DisorderedResidue) = dis_res.names[defaultresname(dis_re
 """
     resnames(dis_res)
 
-Get the residue names in an `AbstractResidue`.
+Get the residue names in an `AbstractResidue` as a `Vector{String}`.
 For a `DisorderedResidue` there will be multiple residue names - in this case
 the default residue name is placed first, then the others are ordered
 alphabetically.
@@ -871,7 +876,8 @@ model(mod::Model) = mod
 """
     modelnumber(el)
 
-Get the model number of a `Model`, `Chain`, `AbstractResidue` or `AbstractAtom`.
+Get the model number of a `Model`, `Chain`, `AbstractResidue` or `AbstractAtom`
+as an `Int`.
 """
 modelnumber(mod::Model) = mod.number
 modelnumber(el::Union{Chain, AbstractResidue, AbstractAtom}) = modelnumber(model(el))
@@ -882,7 +888,7 @@ modelnumber(el::Union{Chain, AbstractResidue, AbstractAtom}) = modelnumber(model
     chainids(struc)
 
 Get the sorted chain IDs of the chains in a `Model`, or the default `Model` of a
-`ProteinStructure`.
+`ProteinStructure`, as a `Vector{String}`.
 """
 chainids(mod::Model) = chainid.(sort(collect(values(chains(mod)))))
 
@@ -1168,7 +1174,9 @@ end
 
 
 """
-Return the number of `Model`s in a `StructuralElementOrList`.
+    countmodels(el)
+
+Return the number of `Model`s in a `StructuralElementOrList` as an `Int`.
 Additional arguments are model selector functions - only models that return
 `true` from all the functions are counted.
 """
@@ -1182,6 +1190,8 @@ countmodels(mods::Vector{Model}) = length(mods)
 
 
 """
+    collectchains(el)
+
 Returns a sorted `Vector` of the chains in a `StructuralElementOrList`.
 Additional arguments are chain selector functions - only chains that return
 `true` from all the functions are retained.
@@ -1228,7 +1238,9 @@ end
 
 
 """
-Return the number of `Chain`s in a `StructuralElementOrList`.
+    countchains(el)
+
+Return the number of `Chain`s in a `StructuralElementOrList` as an `Int`.
 Additional arguments are chain selector functions - only chains that return
 `true` from all the functions are counted.
 """
@@ -1242,9 +1254,11 @@ countchains(chs::Vector{Chain}) = length(chs)
 
 
 """
+    collectresidues(el)
+
 Returns a sorted `Vector` of the residues in a `StructuralElementOrList`.
-Additional arguments are residue selector functions - only residues that return
-`true` from all the functions are retained.
+Additional arguments are residue selector functions - only residues that
+return `true` from all the functions are retained.
 """
 function collectresidues(struc::ProteinStructure)
     if countmodels(struc) > 0
@@ -1290,9 +1304,11 @@ end
 
 
 """
-Return the number of residues in a `StructuralElementOrList`.
-Additional arguments are residue selector functions - only residues that return
-`true` from all the functions are counted.
+    countresidues(el)
+
+Return the number of residues in a `StructuralElementOrList` as an `Int`.
+Additional arguments are residue selector functions - only residues that
+return `true` from all the functions are counted.
 """
 function countresidues(el::StructuralElementOrList, residue_selectors::Function...)
     return length(collectresidues(el, residue_selectors...))
@@ -1307,6 +1323,8 @@ end
 
 
 """
+    collectatoms(el)
+
 Returns a sorted `Vector` of the atoms in a `StructuralElementOrList`.
 Additional arguments are atom selector functions - only atoms that return
 `true` from all the functions are retained.
@@ -1342,7 +1360,9 @@ end
 
 
 """
-Return the number of atoms in a `StructuralElementOrList`.
+    countatoms(el)
+
+Return the number of atoms in a `StructuralElementOrList` as an `Int`.
 Additional arguments are atom selector functions - only atoms that return
 `true` from all the functions are counted.
 """
@@ -1489,10 +1509,13 @@ fullatomname(dis_at::DisorderedAtom) = defaultatom(dis_at).name
 
 
 """
-Determine which of two `Atom`s representing a disorered atom better qualifies
-as the default location. The `Atom` with the highest occupancy is chosen; in the
-case of ties the `Atom` with the lowest alternative location ID in alphabetical
-order is chosen.
+    choosedefaultaltlocid(at_one, at_two)
+
+Determine which of two `Atom`s representing a disorered atom better
+qualifies as the default location.
+The `Atom` with the highest occupancy is chosen; in the case of ties the
+`Atom` with the lowest alternative location ID in alphabetical order is
+chosen.
 """
 function choosedefaultaltlocid(at_one::Atom, at_two::Atom)
     if occupancy(at_one) > occupancy(at_two) ||
@@ -1506,27 +1529,38 @@ end
 
 
 """
-Determines if an `AbstractAtom` represents a standard atom, e.g. came from a
-ATOM record in a Protein Data Bank (PDB) file, or if an `AbstractResidue`
-represents a standard molecule, e.g. consists of ATOM records from a PDB file.
+    standardselector(at)
+    standardselector(res)
+
+Determines if an `AbstractAtom` represents a standard atom, e.g. came from
+a ATOM record in a Protein Data Bank (PDB) file, or if an `AbstractResidue`
+represents a standard molecule, e.g. consists of ATOM records from a PDB
+file.
 """
 standardselector(at::AbstractAtom) = !ishetero(at)
 standardselector(res::AbstractResidue) = !ishetero(res)
 
 
 """
+    heteroselector(at)
+    heteroselector(res)
+
 Determines if an `AbstractAtom` represents a hetero atom, e.g. came from a
 HETATM record in a Protein Data Bank (PDB) file, or if an `AbstractResidue`
-represents a hetero molecule, e.g. consists of HETATM records from a PDB file.
+represents a hetero molecule, e.g. consists of HETATM records from a PDB
+file.
 """
 heteroselector(at::AbstractAtom) = ishetero(at)
 heteroselector(res::AbstractResidue) = ishetero(res)
 
 
 """
+    atomnameselector(at; strip=true)
+
 Determines if an `AbstractAtom` has its atom name in the given `Set` or
 `Vector`.
-`strip` determines whether surrounding whitespace is stripped (default `true`).
+`strip` determines whether surrounding whitespace is stripped from the atom
+name before it is checked in the list.
 """
 function atomnameselector(at::AbstractAtom,
                     atom_names::Set{String};
@@ -1547,6 +1581,8 @@ const calphaatomnames = Set(["CA"])
 
 
 """
+    calphaselector(at)
+
 Determines if an `AbstractAtom` is not a hetero-atom and corresponds to a
 C-alpha atom.
 """
@@ -1560,6 +1596,8 @@ const cbetaatomnames = Set(["CB"])
 
 
 """
+    cbetaselector(at)
+
 Determines if an `AbstractAtom` is not a hetero-atom and corresponds to a
 C-beta atom, or a C-alpha atom in glycine.
 """
@@ -1575,6 +1613,8 @@ const backboneatomnames = Set(["CA", "N", "C"])
 
 
 """
+    backboneselector(at)
+
 Determines if an `AbstractAtom` is not a hetero-atom and corresponds to a
 protein backbone atom.
 """
@@ -1584,15 +1624,20 @@ end
 
 
 """
-Determines if an `AbstractAtom` corresponds to a heavy (non-hydrogen) atom and
-is not a hetero-atom.
+    heavyatomselector(at)
+
+Determines if an `AbstractAtom` corresponds to a heavy (non-hydrogen) atom
+and is not a hetero-atom.
 """
 heavyatomselector(at::AbstractAtom) = standardselector(at) && !hydrogenselector(at)
 
 
 """
-Determines if an `AbstractResidue` or `AbstractAtom` has its residue name in
-the given `Set` or `Vector`.
+    resnameselector(res)
+    resnameselector(at)
+
+Determines if an `AbstractResidue` or `AbstractAtom` has its residue name
+in the given `Set` or `Vector`.
 """
 function resnameselector(el::Union{AbstractResidue, AbstractAtom},
                     res_names::Set{String})
@@ -1610,6 +1655,9 @@ const waterresnames = Set(["HOH"])
 
 
 """
+    waterselector(res)
+    waterselector(at)
+
 Determines if an `AbstractResidue` or `AbstractAtom` represents a water
 molecule.
 """
@@ -1619,8 +1667,11 @@ end
 
 
 """
-Determines if an `AbstractResidue` or `AbstractAtom` does not represent a water
-molecule.
+    notwaterselector(res)
+    notwaterselector(at)
+
+Determines if an `AbstractResidue` or `AbstractAtom` does not represent a
+water molecule.
 """
 function notwaterselector(el::Union{AbstractResidue, AbstractAtom})
     return !waterselector(el)
@@ -1628,9 +1679,12 @@ end
 
 
 """
-Determines whether an `AbstractAtom` or `AbstractResidue` is disordered, i.e.
-has multiple locations in the case of atoms or multiple residue names (point
-mutants) in the case of residues.
+    disorderselector(at)
+    disorderselector(res)
+
+Determines whether an `AbstractAtom` or `AbstractResidue` is disordered,
+i.e. has multiple locations in the case of atoms or multiple residue names
+(point mutants) in the case of residues.
 """
 disorderselector(at::AbstractAtom) = isdisorderedatom(at)
 disorderselector(res::AbstractResidue) = isdisorderedres(res)
@@ -1640,8 +1694,10 @@ disorderselector(res::AbstractResidue) = isdisorderedres(res)
 #   an H and there are no letters in the atom name before H
 # For example atom names "1H" and "H1" would be hydrogens but "NH1" would not
 """
-Determines if an `AbstractAtom` represents hydrogen. Uses the element field
-where possible, otherwise uses the atom name.
+    hydrogenselector(at)
+
+Determines if an `AbstractAtom` represents hydrogen.
+Uses the element field where possible, otherwise uses the atom name.
 """
 function hydrogenselector(at::AbstractAtom)
     return element(at, strip=true) == "H" ||

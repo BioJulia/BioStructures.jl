@@ -19,8 +19,8 @@ export
 """
     coordarray(element, atom_selectors...)
 
-Get the atomic coordinates in Å of a `StructuralElementOrList` as a 2D `Array`
-with each column corresponding to one atom.
+Get the atomic coordinates in Å of a `StructuralElementOrList` as a 2D
+`Array` with each column corresponding to one atom.
 
 Additional arguments are atom selector functions - only atoms that return
 `true` from all the functions are retained.
@@ -99,7 +99,8 @@ end
 """
     sqdistance(element_one, element_two, atom_selectors...)
 
-Get the minimum square distance in Å between two `StructuralElementOrList`s.
+Get the minimum square distance in Å between two
+`StructuralElementOrList`s.
 
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
@@ -174,8 +175,8 @@ end
     dihedralangle(atom_a, atom_b, atom_c, atom_d)
     dihedralangle(vec_ab, vec_bc, vec_cd)
 
-Calculate the dihedral angle in radians defined by four `AbstractAtom`s or three
-vectors.
+Calculate the dihedral angle in radians defined by four `AbstractAtom`s or
+three vectors.
 
 The angle between the planes defined by atoms (A, B, C) and (B, C, D) is
 returned in the range -π to π.
@@ -204,10 +205,10 @@ end
 
 Calculate the omega angle in radians for an `AbstractResidue`.
 
-Arguments can either be a residue and the previous residue or a chain and the
-position as a residue ID.
-The first residue (or one at the given index) requires the atoms "N" and "CA"
-and the previous residue requires the atoms "CA" and "C".
+Arguments can either be a residue and the previous residue or a chain and
+the position as a residue ID.
+The first residue (or one at the given index) requires the atoms "N" and
+"CA" and the previous residue requires the atoms "CA" and "C".
 The angle is in the range -π to π.
 """
 function omegaangle(res::AbstractResidue, res_prev::AbstractResidue)
