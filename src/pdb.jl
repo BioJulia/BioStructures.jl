@@ -516,7 +516,7 @@ function Base.read(input::IO,
 end
 
 function Base.read(filepath::AbstractString,
-            t::Type{<:Union{PDB, MMCIF}};
+            t::Type{<:Union{PDB, MMCIF, MMTF}};
             structure_name::AbstractString=splitdir(filepath)[2],
             kwargs...)
     open(filepath) do input
