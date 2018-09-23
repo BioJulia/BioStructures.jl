@@ -13,7 +13,8 @@ export
     phiangles,
     psiangles,
     ramachandranangles,
-    contactmap
+    SpatialMap,
+    ContactMap
 
 
 """
@@ -447,15 +448,19 @@ function ramachandranangles(el::StructuralElementOrList,
 end
 
 
+"A map of a structural property, e.g. a `ContactMap` or a `DistanceMap`."
+abstract type SpatialMap end
+
 """
-    contactmap(element, contact_distance)
-    contactmap(element_one, element_two, contact_distance)
+    ContactMap(element, contact_distance)
+    ContactMap(element_one, element_two, contact_distance)
+    ContactMap(bit_array)
 
 Calculate the contact map for a `StructuralElementOrList`, or between two
 `StructuralElementOrList`s.
 
-This is a `BitArray{2}` with `true` where the sub-elements are no further than
-the contact distance and `false` otherwise.
+This returns a `ContactMap` type containing a `BitArray{2}` with `true` where
+the sub-elements are no further than the contact distance and `false` otherwise.
 When one element is given as input this returns a symmetric square matrix.
 
 # Examples
@@ -463,31 +468,47 @@ When one element is given as input this returns a symmetric square matrix.
 cbetas_A = collectatoms(struc["A"], cbetaselector)
 cbetas_B = collectatoms(struc["B"], cbetaselector)
 
-# Contact map of chain A
-contactmap(cbetas_A, 8.0)
+# Contact map of chain A using standard C-beta and 8.0 Å definitions
+ContactMap(cbetas_A, 8.0)
 
 # Rectangular contact map of chains A and B
-contactmap(cbetas_A, cbetas_B, 8.0)
+ContactMap(cbetas_A, cbetas_B, 8.0)
 ```
 """
-function contactmap(el_one::StructuralElementOrList,
+struct ContactMap <: SpatialMap
+    data::BitArray{2}
+end
+
+Base.getindex(cm::ContactMap, args::Integer...) = cm.data[args...]
+
+function Base.setindex!(cm::ContactMap, v::Bool, args::Integer...)
+    cm.data[args...] = v
+    return cm
+end
+
+Base.size(cm::ContactMap) = size(cm.data)
+Base.size(cm::ContactMap, dim::Integer) = size(cm.data, dim)
+
+function Base.show(io::IO, cm::ContactMap)
+    print(io, "Contact map of size $(size(cm))")
+end
+
+function ContactMap(el_one::StructuralElementOrList,
                 el_two::StructuralElementOrList,
                 contact_dist::Real)
     sq_contact_dist = contact_dist ^ 2
     contacts = falses(length(el_one), length(el_two))
-    el_one_list = collect(el_one)
-    el_two_list = collect(el_two)
-    for i in 1:length(el_one)
-        for j in 1:length(el_two)
-            if sqdistance(el_one_list[i], el_two_list[j]) <= sq_contact_dist
+    for (i, subel_one) in enumerate(el_one)
+        for (j, subel_two) in enumerate(el_two)
+            if sqdistance(subel_one, subel_two) <= sq_contact_dist
                 contacts[i, j] = true
             end
         end
     end
-    return contacts
+    return ContactMap(contacts)
 end
 
-function contactmap(el::StructuralElementOrList, contact_dist::Real)
+function ContactMap(el::StructuralElementOrList, contact_dist::Real)
     sq_contact_dist = contact_dist ^ 2
     contacts = falses(length(el), length(el))
     el_list = collect(el)
@@ -500,5 +521,16 @@ function contactmap(el::StructuralElementOrList, contact_dist::Real)
             end
         end
     end
-    return contacts
+    return ContactMap(contacts)
+end
+
+# Plot recipe to show a ContactMap
+@recipe function plot(cm::ContactMap)
+    seriestype := :heatmap
+    fillcolor --> :dense
+    aspectratio --> 1
+    colorbar --> false
+    xs = string.(1:size(cm, 1))
+    ys = string.(size(cm, 2):-1:1)
+    xs, ys, reverse(cm.data, dims=2)
 end

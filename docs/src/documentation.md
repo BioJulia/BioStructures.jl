@@ -213,7 +213,7 @@ Various functions are provided to calculate spatial quantities for proteins:
 | `phiangles`          | `Vector` of phi dihedral angles of an element                                                   |
 | `psiangles`          | `Vector` of psi dihedral angles of an element                                                   |
 | `ramachandranangles` | `Vector`s of phi and psi angles of an element                                                   |
-| `contactmap`         | Contact map of two elements, or one element with itself                                         |
+| `ContactMap`         | `ContactMap` of two elements, or one element with itself                                        |
 | `rmsd`               | RMSD between two elements of the same size - assumes they are superimposed                      |
 | `displacements`      | `Vector` of displacements between two elements of the same size - assumes they are superimposed |
 
@@ -239,6 +239,24 @@ julia> rad2deg(psiangle(struc['A'][50], struc['A'][51]))
 julia> rad2deg(psiangle(struc['A'], 50))
 -177.38288114072924
 ```
+
+`ContactMap` takes in a structural element or a list, such as a `Chain` or `Vector{Atom}`, and returns a `ContactMap` object showing the contacts between the elements.
+`ContactMap` can also be given two structural elements as arguments, in which case a non-symmetrical 2D array is returned showing contacts between the elements.
+The underlying `BitArray{2}` for `ContactMap` `contacts` can be accessed with `contacts.data` if required.
+
+```julia
+julia> contacts = ContactMap(collectatoms(struc['A'], cbetaselector), 8.0)
+Contact map of size (85, 85)
+```
+
+A [plot recipe](http://docs.juliaplots.org/latest/recipes) is defined for this so it can shown with [Plots.jl](http://docs.juliaplots.org/latest):
+
+```julia
+using Plots
+plot(contacts)
+```
+
+![contactmap](contactmap.png)
 
 
 ## Downloading PDB files
@@ -452,26 +470,7 @@ for at in calphas
 end
 ```
 
-**D)** To view the contact map of a structure:
-
-```julia
-cbetas = collectatoms(struc, cbetaselector)
-contacts = contactmap(cbetas, 8.0)
-for i in 1:length(cbetas)
-    for j in 1:length(cbetas)
-        if contacts[i,j]
-            print("█")
-        else
-            print(" ")
-        end
-    end
-    println()
-end
-```
-
-`contactmap` can also be given two structural elements as arguments, in which case a non-symmetrical 2D array is returned showing contacts between the elements.
-
-**E)** To show the Ramachandran phi/psi angle plot of a structure, if you have Plots installed:
+**C)** To show the Ramachandran phi/psi angle plot of a structure, if you have Plots installed:
 
 ```julia
 using Plots
@@ -488,7 +487,7 @@ scatter(rad2deg.(phi_angles),
      ylims=(-180, 180))
 ```
 
-**F)** To calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:
+**D)** To calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:
 
 ```julia
 downloadpdb("1SSU")
@@ -497,7 +496,7 @@ rmsd(struc_nmr[5], struc_nmr[10], heavyatomselector)
 displacements(struc_nmr[5], struc_nmr[10], heavyatomselector)
 ```
 
-**G)** To calculate the cysteine fraction of every structure in the PDB:
+**E)** To calculate the cysteine fraction of every structure in the PDB:
 
 ```julia
 l = pdbentrylist()

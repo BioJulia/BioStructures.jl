@@ -12,6 +12,7 @@ using LinearAlgebra: dot, cross, norm
 
 using CodecZlib
 using Format
+using RecipesBase
 import BioCore
 import BioCore.distance
 import BioSymbols

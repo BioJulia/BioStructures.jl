@@ -2,6 +2,7 @@ module TestBioStructures
 
 using Test
 using Format
+using RecipesBase
 using BioCore
 using BioStructures
 using BioStructures:
@@ -2211,10 +2212,10 @@ end
     @test isapprox(phis[10], phiangle(struc_1AKE['A'], 10), atol=1e-5)
     @test isapprox(omegas[10], omegaangle(struc_1AKE['A'], 10), atol=1e-5)
 
-    # Test contactmap
+    # Test ContactMap
     cas = collectatoms(struc_1AKE, calphaselector)[1:10]
-    @test isa(contactmap(cas, 10), BitArray{2})
-    @test contactmap(cas, 10) == [
+    @test isa(ContactMap(cas, 10).data, BitArray{2})
+    @test ContactMap(cas, 10).data == [
         true  true  true  false false false false false false false
         true  true  true  true  false false false false false false
         true  true  true  true  true  true  false false false false
@@ -2226,21 +2227,28 @@ end
         false false false false false true  true  true  true  true
         false false false false false false true  true  true  true
     ]
-    @test contactmap(struc_1AKE[1], 1.0) == [
+    @test ContactMap(struc_1AKE[1], 1.0).data == [
         true  false
         false true
     ]
-    cmap = contactmap(struc_1AKE['A'], 5.0)
+    cmap = ContactMap(struc_1AKE['A'], 5.0)
     @test size(cmap) == (456, 456)
+    @test size(cmap, 2) == 456
     @test cmap[196, 110]
     @test !cmap[15, 89]
+    cmap[15, 89] = true
+    @test cmap[15, 89]
+    show(devnull, cmap)
 
-    @test contactmap(struc_1AKE['A'][10], struc_1AKE['A'][11], 4.0) == [
+    @test ContactMap(struc_1AKE['A'][10], struc_1AKE['A'][11], 4.0).data == [
         true  false false false false
         true  true  false false false
         true  true  true  false true
         true  true  true  false false
     ]
+
+    # Test the plot recipe
+    RecipesBase.apply_recipe(Dict{Symbol, Any}(), cmap)
 end
 
 # Delete temporary file
