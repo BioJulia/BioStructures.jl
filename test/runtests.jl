@@ -2212,6 +2212,7 @@ end
     @test isapprox(phis[10], phiangle(struc_1AKE['A'], 10), atol=1e-5)
     @test isapprox(omegas[10], omegaangle(struc_1AKE['A'], 10), atol=1e-5)
 
+
     # Test ContactMap
     cas = collectatoms(struc_1AKE, calphaselector)[1:10]
     @test isa(ContactMap(cas, 10).data, BitArray{2})
@@ -2249,6 +2250,8 @@ end
 
     # Test the plot recipe
     RecipesBase.apply_recipe(Dict{Symbol, Any}(), cmap)
+
+    showcontactmap(devnull, cmap)
 end
 
 # Delete temporary file

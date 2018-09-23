@@ -214,6 +214,7 @@ Various functions are provided to calculate spatial quantities for proteins:
 | `psiangles`          | `Vector` of psi dihedral angles of an element                                                   |
 | `ramachandranangles` | `Vector`s of phi and psi angles of an element                                                   |
 | `ContactMap`         | `ContactMap` of two elements, or one element with itself                                        |
+| `showcontactmap`     | Print a representation of a `ContactMap` to `stdout` or a specified `IO` instance               |
 | `rmsd`               | RMSD between two elements of the same size - assumes they are superimposed                      |
 | `displacements`      | `Vector` of displacements between two elements of the same size - assumes they are superimposed |
 
@@ -257,6 +258,8 @@ plot(contacts)
 ```
 
 ![contactmap](contactmap.png)
+
+For a quick, text-based representation of a `ContactMap` use `showcontactmap`.
 
 
 ## Downloading PDB files

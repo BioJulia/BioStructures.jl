@@ -14,7 +14,8 @@ export
     psiangles,
     ramachandranangles,
     SpatialMap,
-    ContactMap
+    ContactMap,
+    showcontactmap
 
 
 """
@@ -454,7 +455,7 @@ abstract type SpatialMap end
 """
     ContactMap(element, contact_distance)
     ContactMap(element_one, element_two, contact_distance)
-    ContactMap(bit_array)
+    ContactMap(bit_array_2D)
 
 Calculate the contact map for a `StructuralElementOrList`, or between two
 `StructuralElementOrList`s.
@@ -534,3 +535,36 @@ end
     ys = string.(size(cm, 2):-1:1)
     xs, ys, reverse(cm.data, dims=2)
 end
+
+"""
+    showcontactmap(contact_map)
+    showcontactmap(io, contact_map)
+
+Print a representation of a `ContactMap` to `stdout`, or a specified `IO`
+instance.
+A fully plotted version can be obtained with `plot(contact_map)` but that
+requires Plots.jl; `showcontactmap` works without that dependency.
+"""
+function showcontactmap(io::IO, cm::ContactMap)
+    size2 = size(cm, 2)
+    # Print two y values to each line for a nicer output
+    for j in 1:2:size2
+        for i in 1:size(cm, 1)
+            cont_one = cm[i, j]
+            cont_two = j + 1 <= size2 && cm[i, j + 1]
+            if cont_one && cont_two
+                char = "█"
+            elseif cont_one
+                char = "▀"
+            elseif cont_two
+                char = "▄"
+            else
+                char = " "
+            end
+            print(io, char)
+        end
+        println(io)
+    end
+end
+
+showcontactmap(cm::ContactMap) = showcontactmap(stdout, cm)
