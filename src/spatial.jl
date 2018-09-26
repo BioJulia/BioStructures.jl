@@ -15,6 +15,7 @@ export
     ramachandranangles,
     SpatialMap,
     ContactMap,
+    DistanceMap,
     showcontactmap
 
 
@@ -480,19 +481,53 @@ struct ContactMap <: SpatialMap
     data::BitArray{2}
 end
 
-Base.getindex(cm::ContactMap, args::Integer...) = cm.data[args...]
+"""
+    DistanceMap(element)
+    DistanceMap(element_one, element_two)
+    DistanceMap(float_array_2D)
 
-function Base.setindex!(cm::ContactMap, v::Bool, args::Integer...)
-    cm.data[args...] = v
-    return cm
+Calculate the distance map for a `StructuralElementOrList`, or between two
+`StructuralElementOrList`s.
+
+This returns a `DistanceMap` type containing a `Array{Float64, 2}` with minimum
+distances between the sub-elements.
+When one element is given as input this returns a symmetric square matrix.
+
+# Examples
+```julia
+cbetas_A = collectatoms(struc["A"], cbetaselector)
+cbetas_B = collectatoms(struc["B"], cbetaselector)
+
+# Distance map of chain A showing how far each residue is from the others
+DistanceMap(cbetas_A)
+
+# Rectangular distance map of chains A and B
+DistanceMap(cbetas_A, cbetas_B)
+```
+"""
+struct DistanceMap <: SpatialMap
+    data::Array{Float64, 2}
 end
 
-Base.size(cm::ContactMap) = size(cm.data)
-Base.size(cm::ContactMap, dim::Integer) = size(cm.data, dim)
+
+Base.getindex(m::SpatialMap, args::Integer...) = m.data[args...]
+
+function Base.setindex!(m::SpatialMap, v, args::Integer...)
+    m.data[args...] = v
+    return m
+end
+
+Base.size(m::SpatialMap) = size(m.data)
+Base.size(m::SpatialMap, dim::Integer) = size(m.data, dim)
 
 function Base.show(io::IO, cm::ContactMap)
     print(io, "Contact map of size $(size(cm))")
 end
+
+function Base.show(io::IO, dm::DistanceMap)
+    print(io, "Distance map of size $(size(dm))")
+end
+
 
 function ContactMap(el_one::StructuralElementOrList,
                 el_two::StructuralElementOrList,
@@ -525,16 +560,55 @@ function ContactMap(el::StructuralElementOrList, contact_dist::Real)
     return ContactMap(contacts)
 end
 
+function DistanceMap(el_one::StructuralElementOrList,
+                el_two::StructuralElementOrList)
+    dists = zeros(length(el_one), length(el_two))
+    for (i, subel_one) in enumerate(el_one)
+        for (j, subel_two) in enumerate(el_two)
+            dists[i, j] = distance(subel_one, subel_two)
+        end
+    end
+    return DistanceMap(dists)
+end
+
+function DistanceMap(el::StructuralElementOrList)
+    dists = zeros(length(el), length(el))
+    el_list = collect(el)
+    for i in 1:length(el)
+        for j in 1:i-1
+            dist = distance(el_list[i], el_list[j])
+            dists[i, j] = dist
+            dists[j, i] = dist
+        end
+    end
+    return DistanceMap(dists)
+end
+
+
 # Plot recipe to show a ContactMap
 @recipe function plot(cm::ContactMap)
     seriestype := :heatmap
     fillcolor --> :dense
     aspectratio --> 1
+    xmirror --> true
     colorbar --> false
     xs = string.(1:size(cm, 1))
     ys = string.(size(cm, 2):-1:1)
     xs, ys, reverse(cm.data, dims=2)
 end
+
+# Plot recipe to show a DistanceMap
+@recipe function plot(dm::DistanceMap)
+    seriestype := :heatmap
+    fillcolor --> :dense
+    aspectratio --> 1
+    xmirror --> true
+    colorbar --> true
+    xs = string.(1:size(dm, 1))
+    ys = string.(size(dm, 2):-1:1)
+    xs, ys, reverse(dm.data, dims=2)
+end
+
 
 """
     showcontactmap(contact_map)
