@@ -600,7 +600,7 @@ end
 # Plot recipe to show a DistanceMap
 @recipe function plot(dm::DistanceMap)
     seriestype := :heatmap
-    fillcolor --> :dense
+    fillcolor --> :inferno
     aspectratio --> 1
     xmirror --> true
     colorbar --> true

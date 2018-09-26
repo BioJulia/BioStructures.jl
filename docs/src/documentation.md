@@ -214,6 +214,7 @@ Various functions are provided to calculate spatial quantities for proteins:
 | `psiangles`          | `Vector` of psi dihedral angles of an element                                                   |
 | `ramachandranangles` | `Vector`s of phi and psi angles of an element                                                   |
 | `ContactMap`         | `ContactMap` of two elements, or one element with itself                                        |
+| `DistanceMap`        | `DistanceMap` of two elements, or one element with itself                                       |
 | `showcontactmap`     | Print a representation of a `ContactMap` to `stdout` or a specified `IO` instance               |
 | `rmsd`               | RMSD between two elements of the same size - assumes they are superimposed                      |
 | `displacements`      | `Vector` of displacements between two elements of the same size - assumes they are superimposed |
@@ -241,7 +242,7 @@ julia> rad2deg(psiangle(struc['A'], 50))
 -177.38288114072924
 ```
 
-`ContactMap` takes in a structural element or a list, such as a `Chain` or `Vector{Atom}`, and returns a `ContactMap` object showing the contacts between the elements.
+`ContactMap` takes in a structural element or a list, such as a `Chain` or `Vector{Atom}`, and returns a `ContactMap` object showing the contacts between the elements for a specified distance.
 `ContactMap` can also be given two structural elements as arguments, in which case a non-symmetrical 2D array is returned showing contacts between the elements.
 The underlying `BitArray{2}` for `ContactMap` `contacts` can be accessed with `contacts.data` if required.
 
@@ -260,6 +261,16 @@ plot(contacts)
 ![contactmap](contactmap.png)
 
 For a quick, text-based representation of a `ContactMap` use `showcontactmap`.
+
+`DistanceMap` works in an analogous way to `ContactMap` and gives a map of the distances. It can also be plotted:
+
+```julia
+dists = DistanceMap(collectatoms(struc['A'], cbetaselector))
+using Plots
+plot(dists)
+```
+
+![distancemap](distancemap.png)
 
 
 ## Downloading PDB files
