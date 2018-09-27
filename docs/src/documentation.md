@@ -39,7 +39,7 @@ julia> mmcif_dict["_entity_src_nat.common_name"]
 
 A `MMCIFDict` can be accessed in similar ways to a standard dictionary, and if necessary the underlying dictionary of `MMCIFDict` `d` can be accessed with `d.dict`.
 
-Refer to [Downloading PDB files](#downloading-pdb-files) and [Reading PDB files](#reading-pdb-files) sections for more options.
+Refer to [Downloading PDB files](#Downloading-PDB-files-1) and [Reading PDB files](#Reading-PDB-files-1) sections for more options.
 
 The elements of `struc` can be accessed as follows:
 
@@ -56,7 +56,6 @@ The elements of `struc` can be accessed as follows:
 | `struc["A"][15]["CG"]['A']` | For disordered atoms, access a specific location                                | `Atom`            |
 
 Disordered atoms are stored in a `DisorderedAtom` container but calls fall back to the default atom, so disorder can be ignored if you are not interested in it.
-
 Disordered residues (i.e. point mutations with different residue names) are stored in a `DisorderedResidue` container.
 
 The idea is that disorder will only bother you if you want it to.
@@ -124,6 +123,8 @@ end
 ```
 
 Models are ordered numerically; chains are ordered by chain ID character ordering, except the empty chain is last; residues are ordered by residue number and insertion code with hetero residues after standard residues; atoms are ordered by atom serial.
+If you want the first sub-element you can use `first`.
+For example `first(struc[1])` gets the first chain in model 1.
 
 `collect` can be used to get arrays of sub-elements.
 `collectatoms`, `collectresidues`, `collectchains` and `collectmodels` return arrays of a particular type from a structural element or element array.
@@ -313,13 +314,13 @@ end
 
 Various options can be set through optional keyword arguments when downloading PDB files:
 
-| Keyword Argument                | Description                                                                                                           |
-| :------------------------------ | :-------------------------------------------------------------------------------------------------------------------- |
-| `pdb_dir::AbstractString=pwd()` | The directory to which the PDB file is downloaded                                                                     |
-| `file_format::Type=PDB`         | The format of the PDB file. Options are PDB, PDBXML, MMCIF or MMTF                                                    |
-| `obsolete::Bool=false`          | If set `true`, the PDB file is downloaded into the auto-generated "obsolete" directory inside the specified `pdb_dir` |
-| `overwrite::Bool=false`         | If set `true`, overwrites the PDB file if exists in `pdb_dir`; by default skips downloading the PDB file              |
-| `ba_number::Integer=0`          | If set > 0, downloads the respective biological assembly; by default downloads the PDB file                           |
+| Keyword Argument                | Description                                                                                                              |
+| :------------------------------ | :----------------------------------------------------------------------------------------------------------------------- |
+| `pdb_dir::AbstractString=pwd()` | The directory to which the PDB file is downloaded; defaults to the current working directory                             |
+| `file_format::Type=PDB`         | The format of the PDB file; options are PDB, PDBXML, MMCIF and MMTF                                                      |
+| `obsolete::Bool=false`          | If set `true`, the PDB file is downloaded in the auto-generated "obsolete" directory inside the specified `pdb_dir`      |
+| `overwrite::Bool=false`         | If set `true`, overwrites the PDB file if it exists in `pdb_dir`; by default skips downloading the PDB file if it exists |
+| `ba_number::Integer=0`          | If set > 0 downloads the respective biological assembly; by default downloads the PDB file                               |
 
 
 ## Reading PDB files
@@ -336,13 +337,13 @@ Various options can be set through optional keyword arguments when parsing PDB/m
 
 | Keyword Argument                 | Description                                                                        |
 | :------------------------------- | :--------------------------------------------------------------------------------- |
-| `structure_name::AbstractString` | The name to give the resulting `ProteinStructure` - defaults to the given filename |
-| `remove_disorder::Bool=false`    | If set to `true`, only one location for disordered atoms will be parsed            |
-| `read_std_atoms::Bool=true`      | If set to `false`, standard ATOM records wont be parsed                            |
-| `read_het_atoms::Bool=true`      | If set to `false`, HETATOM records wont be parsed                                  |
+| `structure_name::AbstractString` | The name given to the returned `ProteinStructure`; defaults to the file name       |
+| `remove_disorder::Bool=false`    | Whether to remove atoms with alt loc ID not ' ' or 'A'.                            |
+| `read_std_atoms::Bool=true`      | Whether to read standard ATOM records.                                             |
+| `read_het_atoms::Bool=true`      | Whether to read HETATOM records.                                                   |
 
-The function `readpdb` provides a different way to download and read PDB files in line with `downloadpdb`.
-To parse a PDB file by specifying the PDB ID and PDB directory (file name must be in upper case, e.g. "1EN2.pdb"):
+The function `readpdb` provides an alternative way to read PDB files in line with `downloadpdb`.
+To parse a PDB file by specifying the PDB ID and PDB directory:
 
 ```julia
 struc = readpdb("1EN2", pdb_dir="/path/to/pdb/directory")
@@ -360,16 +361,16 @@ ProteinStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atom
 
 Various options can be set when using `retrievepdb`:
 
-| Keyword Argument                              | Description                                                                                                          |
-| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
-| `pdb_dir::AbstractString=pwd()`               | The directory to which the PDB file is downloaded                                                                    |
-| `obsolete::Bool=false`                        | If set to `true`, PDB file is downloaded into the auto-generated "obsolete" directory inside the specified `pdb_dir` |
-| `overwrite::Bool=false`                       | if set to `true`, overwrites the PDB file if exists in `pdb_dir`; by default skips downloading PDB file if exists    |
-| `ba_number::Integer=0`                        | If set to > 0 reads the respective biological assembly; by default reads PDB file                                    |
-| `structure_name::AbstractString="$pdbid.pdb"` | The name to give the resulting `ProteinStructure` - defaults to "$pdbid.pdb"                                         |
-| `remove_disorder::Bool=false`                 | If set to `true`, only one location for disordered atoms will be parsed                                              |
-| `read_std_atoms::Bool=true`                   | If set to `false`, standard ATOM records wont be parsed                                                              |
-| `read_het_atoms::Bool=true`                   | If set to `false`, HETATOM records wont be parsed                                                                    |
+| Keyword Argument                              | Description                                                                                                              |
+| :-------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| `pdb_dir::AbstractString=pwd()`               | The directory to which the PDB file is downloaded; defaults to the current working directory                             |
+| `obsolete::Bool=false`                        | If set `true`, the PDB file is downloaded in the auto-generated "obsolete" directory inside the specified `pdb_dir`      |
+| `overwrite::Bool=false`                       | If set `true`, overwrites the PDB file if it exists in `pdb_dir`; by default skips downloading the PDB file if it exists |
+| `ba_number::Integer=0`                        | If set > 0 downloads the respective biological assembly; by default downloads the PDB file                               |
+| `structure_name::AbstractString="$pdbid.pdb"` | The name given to the returned `ProteinStructure`; defaults to the PDB ID                                                |
+| `remove_disorder::Bool=false`                 | Whether to remove atoms with alt loc ID not ' ' or 'A'.                                                                  |
+| `read_std_atoms::Bool=true`                   | Whether to read standard ATOM records.                                                                                   |
+| `read_het_atoms::Bool=true`                   | Whether to read HETATOM records.                                                                                         |
 
 
 ## Writing PDB files
@@ -396,7 +397,7 @@ A `MMCIFDict` can also be written using `writemmcif`:
 writemmcif("1EN2_out.dic", mmcif_dict)
 ```
 
-Multi-character chain IDs can be written to mmCIF files but will throw an error when written to a PDB file as the PDB format only has one character allocated to the chain ID.
+Multi-character chain IDs can be written to mmCIF files but will throw an error when written to a PDB file as the PDB file format only has one character allocated to the chain ID.
 
 If you want the PDB record line for an `Atom`, use `pdbline`.
 For example:
@@ -429,13 +430,13 @@ downloadentirepdb(pdb_dir="path/to/pdb/directory", file_format=MMTF)
 ```
 
 This operation takes a lot of disk space and time to complete (depending on internet connection).
-The keyword arguments are described below:
+The keyword arguments are:
 
-| Keyword Argument                | Description                                                                                              |
-| :------------------------------ | :------------------------------------------------------------------------------------------------------- |
-| `pdb_dir::AbstractString=pwd()` | The directory to which the PDB files are downloaded                                                      |
-| `file_format::Type=PDB`         | The format of the PDB file. Options are PDB, PDBXML, MMCIF or MMTF                                       |
-| `overwrite::Bool=false`         | If set `true`, overwrites the PDB file if exists in `pdb_dir`; by default skips downloading the PDB file |
+| Keyword Argument                | Description                                                                                                              |
+| :------------------------------ | :----------------------------------------------------------------------------------------------------------------------- |
+| `pdb_dir::AbstractString=pwd()` | The directory to which the PDB files are downloaded; defaults to the current working directory                           |
+| `file_format::Type=PDB`         | The format of the PDB file; options are PDB, PDBXML, MMCIF and MMTF                                                      |
+| `overwrite::Bool=false`         | If set `true`, overwrites the PDB file if it exists in `pdb_dir`; by default skips downloading the PDB file if it exists |
 
 To update your local PDB directory based on the weekly status list of new, modified and obsolete PDB files from the RCSB server:
 
@@ -449,13 +450,13 @@ To maintain a local copy of the entire RCSB PDB database, run the `downloadentir
 
 There are a few more functions that may be useful:
 
-| Function                 | Returns                                                                         | Return type                                              |
-| :----------------------- | :------------------------------------------------------------------------------ | :------------------------------------------------------- |
-| `pdbentrylist`           | List of all PDB entries from the RCSB server                                    | `Array{String,1}`                                        |
-| `pdbstatuslist`          | List of PDB entries from a specified RCSB weekly status list URL                | `Array{String,1}`                                        |
-| `pdbrecentchanges`       | Added, modified and obsolete PDB lists from the recent RCSB weekly status files | `Tuple{Array{String,1},Array{String,1},Array{String,1}}` |
-| `pdbobsoletelist`        | List of all obsolete PDB entries                                                | `Array{String,1}`                                        |
-| `downloadallobsoletepdb` | Downloads all obsolete PDB files from the RCSB PDB server                       | `Array{String,1}`                                        |
+| Function                 | Returns                                                                         | Return type                                                 |
+| :----------------------- | :------------------------------------------------------------------------------ | :---------------------------------------------------------- |
+| `pdbentrylist`           | List of all PDB entries from the RCSB server                                    | `Array{String,1}`                                           |
+| `pdbstatuslist`          | List of PDB entries from a specified RCSB weekly status list URL                | `Array{String,1}`                                           |
+| `pdbrecentchanges`       | Added, modified and obsolete PDB lists from the recent RCSB weekly status files | `Tuple{Array{String,1},Array{String,1},` `Array{String,1}}` |
+| `pdbobsoletelist`        | List of all obsolete PDB entries                                                | `Array{String,1}`                                           |
+| `downloadallobsoletepdb` | Downloads all obsolete PDB files from the RCSB PDB server                       | `Array{String,1}`                                           |
 
 
 ## Examples

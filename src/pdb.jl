@@ -195,7 +195,7 @@ Requires an internet connection.
 # Arguments
 - `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is
     downloaded; defaults to the current working directory.
-- `file_format::Type=PDB`: the format of the PDB file. Options are PDB, PDBXML,
+- `file_format::Type=PDB`: the format of the PDB file; options are PDB, PDBXML,
     MMCIF and MMTF.
 - `obsolete::Bool=false`: if set `true`, the PDB file is downloaded in the
     auto-generated "obsolete" directory inside the specified `pdb_dir`.
@@ -321,7 +321,7 @@ Requires an internet connection.
 # Arguments
 - `pdb_dir::AbstractString=pwd()`: the directory to which the PDB files are
     downloaded; defaults to the current working directory.
-- `file_format::Type=PDB`: the format of the PDB file. Options are PDB, PDBXML,
+- `file_format::Type=PDB`: the format of the PDB file; options are PDB, PDBXML,
     MMCIF and MMTF.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
     in `pdb_dir`; by default skips downloading the PDB file if it exists.
@@ -379,7 +379,7 @@ Requires an internet connection.
 # Arguments
 - `obsolete_dir::AbstractString=pwd()`: the directory where the PDB files are
     downloaded; defaults to the current working directory.
-- `file_format::Type=PDB`: the format of the PDB file. Options are PDB, PDBXML,
+- `file_format::Type=PDB`: the format of the PDB file; options are PDB, PDBXML,
     MMCIF and MMTF.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
     in `pdb_dir`; by default skips downloading the PDB file if it exists.
@@ -409,8 +409,8 @@ Requires an internet connection.
 - `ba_number::Integer=0`: if set > 0 downloads the respective biological
     assembly; by default downloads the PDB file.
 - `structure_name::AbstractString="\$pdbid.pdb"`: the name given to the returned
-    `ProteinStructure`.
-- `remove_disorder::Bool=false`: whether to read atoms with alt loc ID not ' '
+    `ProteinStructure`; defaults to the PDB ID.
+- `remove_disorder::Bool=false`: whether to remove atoms with alt loc ID not ' '
     or 'A'.
 - `read_std_atoms::Bool=true`: whether to read standard ATOM records.
 - `read_het_atoms::Bool=true`: whether to read HETATOM records.
@@ -445,8 +445,8 @@ effectively the same.
 - `ba_number::Integer=0`: if set > 0 downloads the respective biological
     assembly; by default downloads the PDB file.
 - `structure_name::AbstractString="\$pdbid.pdb"`: the name given to the returned
-    `ProteinStructure`.
-- `remove_disorder::Bool=false`: whether to read atoms with alt loc ID not ' '
+    `ProteinStructure`; defaults to the PDB ID.
+- `remove_disorder::Bool=false`: whether to remove atoms with alt loc ID not ' '
     or 'A'.
 - `read_std_atoms::Bool=true`: whether to read standard ATOM records.
 - `read_het_atoms::Bool=true`: whether to read HETATOM records.
