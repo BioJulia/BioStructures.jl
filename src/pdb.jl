@@ -248,8 +248,7 @@ function downloadpdb(pdbid::AbstractString;
                 if file_format == PDB || file_format == PDBXML || file_format == MMCIF
                     download("http://files.rcsb.org/download/$pdbid$(pdbextension[file_format]).gz", archivefilepath)
                 else
-                    # MMTF is downloaded in uncompressed form, thus directly stored in pdbpath
-                    download("http://mmtf.rcsb.org/v1.0/full/$pdbid", pdbpath)
+                    download("http://mmtf.rcsb.org/v1.0/full/$pdbid.mmtf.gz", archivefilepath)
                 end
             else
                 if file_format == PDB
@@ -260,13 +259,11 @@ function downloadpdb(pdbid::AbstractString;
                     throw(ArgumentError("Biological assemblies are available in the PDB and mmCIF formats only"))
                 end
             end
-            # Verify if the compressed PDB file is downloaded properly and extract it. For MMTF no extraction is needed
-            if isfile(archivefilepath) && filesize(archivefilepath) > 0 && file_format != MMTF
+            # Verify if the compressed file is downloaded properly and extract it
+            if isfile(archivefilepath) && filesize(archivefilepath) > 0
                 stream = GzipDecompressorStream(open(archivefilepath))
                 open(pdbpath, "w") do output
-                    for line in eachline(stream)
-                        println(output, line)
-                    end
+                    write(output, stream)
                 end
                 close(stream)
             end
