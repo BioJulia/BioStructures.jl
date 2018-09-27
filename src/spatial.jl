@@ -592,9 +592,9 @@ end
     aspectratio --> 1
     xmirror --> true
     colorbar --> false
-    xs = string.(1:size(cm, 1))
-    ys = string.(size(cm, 2):-1:1)
-    xs, ys, reverse(cm.data, dims=2)
+    xs = string.(1:size(cm, 2))
+    ys = string.(size(cm, 1):-1:1)
+    xs, ys, reverse(cm.data, dims=1)
 end
 
 # Plot recipe to show a DistanceMap
@@ -604,9 +604,9 @@ end
     aspectratio --> 1
     xmirror --> true
     colorbar --> true
-    xs = string.(1:size(dm, 1))
-    ys = string.(size(dm, 2):-1:1)
-    xs, ys, reverse(dm.data, dims=2)
+    xs = string.(1:size(dm, 2))
+    ys = string.(size(dm, 1):-1:1)
+    xs, ys, reverse(dm.data, dims=1)
 end
 
 
@@ -620,12 +620,13 @@ A fully plotted version can be obtained with `plot(contact_map)` but that
 requires Plots.jl; `showcontactmap` works without that dependency.
 """
 function showcontactmap(io::IO, cm::ContactMap)
-    size2 = size(cm, 2)
+    size1 = size(cm, 1)
     # Print two y values to each line for a nicer output
-    for j in 1:2:size2
-        for i in 1:size(cm, 1)
+    for i in 1:2:size1
+        for j in 1:size(cm, 2)
             cont_one = cm[i, j]
-            cont_two = j + 1 <= size2 && cm[i, j + 1]
+            # Check we aren't going over the end of the map
+            cont_two = i + 1 <= size1 && cm[i + 1, j]
             if cont_one && cont_two
                 char = "█"
             elseif cont_one
