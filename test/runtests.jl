@@ -2,6 +2,7 @@ module TestBioStructures
 
 using Test
 using Format
+using RecipesBase
 using BioCore
 using BioStructures
 using BioStructures:
@@ -2211,10 +2212,11 @@ end
     @test isapprox(phis[10], phiangle(struc_1AKE['A'], 10), atol=1e-5)
     @test isapprox(omegas[10], omegaangle(struc_1AKE['A'], 10), atol=1e-5)
 
-    # Test contactmap
+
+    # Test ContactMap
     cas = collectatoms(struc_1AKE, calphaselector)[1:10]
-    @test isa(contactmap(cas, 10), BitArray{2})
-    @test contactmap(cas, 10) == [
+    @test isa(ContactMap(cas, 10).data, BitArray{2})
+    @test ContactMap(cas, 10).data == [
         true  true  true  false false false false false false false
         true  true  true  true  false false false false false false
         true  true  true  true  true  true  false false false false
@@ -2226,21 +2228,67 @@ end
         false false false false false true  true  true  true  true
         false false false false false false true  true  true  true
     ]
-    @test contactmap(struc_1AKE[1], 1.0) == [
+    @test ContactMap(struc_1AKE[1], 1.0).data == [
         true  false
         false true
     ]
-    cmap = contactmap(struc_1AKE['A'], 5.0)
+    cmap = ContactMap(struc_1AKE['A'], 5.0)
     @test size(cmap) == (456, 456)
+    @test size(cmap, 2) == 456
     @test cmap[196, 110]
     @test !cmap[15, 89]
+    cmap[15, 89] = true
+    @test cmap[15, 89]
+    show(devnull, cmap)
 
-    @test contactmap(struc_1AKE['A'][10], struc_1AKE['A'][11], 4.0) == [
+    @test ContactMap(struc_1AKE['A'][10], struc_1AKE['A'][11], 4.0).data == [
         true  false false false false
         true  true  false false false
         true  true  true  false true
         true  true  true  false false
     ]
+
+    # Test the plot recipe
+    RecipesBase.apply_recipe(Dict{Symbol, Any}(), cmap)
+
+    showcontactmap(devnull, cmap)
+
+
+    # Test DistanceMap
+    @test isa(DistanceMap(cas).data, Array{Float64, 2})
+    @test isapprox(DistanceMap(cas).data, [
+        0.0                3.8116564640586357 6.5343511537106735 10.30641673909997  12.934087289020436 16.277628113456824 19.66671792648687  23.24696586653837  24.371038508853083 24.24882335289694
+        3.8116564640586357 0.0                3.8115826109373554 7.075483093047433  10.24737590800689  13.368176240609639 16.959531449895664 20.432823079545326 21.590401316325735 21.931261910797566
+        6.5343511537106735 3.8115826109373554 0.0                3.844083635926775  6.56909392534465   9.783285439973628  13.273855091871388 16.83042189013692  18.152391219891662 18.44135962991883
+        10.30641673909997  7.075483093047433  3.844083635926775  0.0                3.852368622029827  6.369990659333809  10.066898131996766 13.489078471118772 14.9800810411693   15.83387716259034
+        12.934087289020436 10.24737590800689  6.56909392534465   3.852368622029827  0.0                3.8467504468057196 6.845814633774421  10.314890304797236 11.724292217443233 12.19677604943208
+        16.277628113456824 13.368176240609639 9.783285439973628  6.369990659333809  3.8467504468057196 0.0                3.8515559193655755 7.381047825342957  9.702061069690293  11.058714075334438
+        19.66671792648687  16.959531449895664 13.273855091871388 10.066898131996766 6.845814633774421  3.8515559193655755 0.0                3.8486537906130245 6.699431169883006  8.065864739753573
+        23.24696586653837  20.432823079545326 16.83042189013692  13.489078471118772 10.314890304797236 7.381047825342957  3.8486537906130245 0.0                3.86929786912303   6.311746667920065
+        24.371038508853083 21.590401316325735 18.152391219891662 14.9800810411693   11.724292217443233 9.702061069690293  6.699431169883006  3.86929786912303   0.0                3.8548294385095696
+        24.24882335289694  21.931261910797566 18.44135962991883  15.83387716259034  12.19677604943208  11.058714075334438 8.065864739753573  6.311746667920065  3.8548294385095696 0.0
+    ])
+    @test isapprox(DistanceMap(struc_1AKE[1]).data, [
+        0.0                2.6178134005310594
+        2.6178134005310594 0.0
+    ])
+    dmap = DistanceMap(struc_1AKE['A'])
+    @test size(dmap) == (456, 456)
+    @test size(dmap, 2) == 456
+    @test isapprox(dmap[196, 110], 3.0188665091388214)
+    dmap[196, 110] = 10.0
+    @test dmap[196, 110] == 10.0
+    show(devnull, dmap)
+
+    @test isapprox(DistanceMap(struc_1AKE['A'][10], struc_1AKE['A'][11]).data, [
+        2.8803883418733673 4.295162278657233  5.211988200293629  6.427722458227334 5.03904008715946
+        2.5066699024801813 3.850861981427013  4.557738913101538  5.762204526047301 5.0027798272560435
+        1.3632875705440877 2.4469166311911783 3.1850982716393537 4.33450689236965  3.799490623754715
+        2.2682515292621335 2.774401016435799  3.235280049702036  4.198412795331114 4.313454647959104
+    ])
+
+    # Test the plot recipe
+    RecipesBase.apply_recipe(Dict{Symbol, Any}(), dmap)
 end
 
 # Delete temporary file

@@ -13,7 +13,10 @@ export
     phiangles,
     psiangles,
     ramachandranangles,
-    contactmap
+    SpatialMap,
+    ContactMap,
+    DistanceMap,
+    showcontactmap
 
 
 """
@@ -447,15 +450,19 @@ function ramachandranangles(el::StructuralElementOrList,
 end
 
 
+"A map of a structural property, e.g. a `ContactMap` or a `DistanceMap`."
+abstract type SpatialMap end
+
 """
-    contactmap(element, contact_distance)
-    contactmap(element_one, element_two, contact_distance)
+    ContactMap(element, contact_distance)
+    ContactMap(element_one, element_two, contact_distance)
+    ContactMap(bit_array_2D)
 
 Calculate the contact map for a `StructuralElementOrList`, or between two
 `StructuralElementOrList`s.
 
-This is a `BitArray{2}` with `true` where the sub-elements are no further than
-the contact distance and `false` otherwise.
+This returns a `ContactMap` type containing a `BitArray{2}` with `true` where
+the sub-elements are no further than the contact distance and `false` otherwise.
 When one element is given as input this returns a symmetric square matrix.
 
 # Examples
@@ -463,31 +470,81 @@ When one element is given as input this returns a symmetric square matrix.
 cbetas_A = collectatoms(struc["A"], cbetaselector)
 cbetas_B = collectatoms(struc["B"], cbetaselector)
 
-# Contact map of chain A
-contactmap(cbetas_A, 8.0)
+# Contact map of chain A using standard C-beta and 8.0 Å definitions
+ContactMap(cbetas_A, 8.0)
 
 # Rectangular contact map of chains A and B
-contactmap(cbetas_A, cbetas_B, 8.0)
+ContactMap(cbetas_A, cbetas_B, 8.0)
 ```
 """
-function contactmap(el_one::StructuralElementOrList,
+struct ContactMap <: SpatialMap
+    data::BitArray{2}
+end
+
+"""
+    DistanceMap(element)
+    DistanceMap(element_one, element_two)
+    DistanceMap(float_array_2D)
+
+Calculate the distance map for a `StructuralElementOrList`, or between two
+`StructuralElementOrList`s.
+
+This returns a `DistanceMap` type containing a `Array{Float64, 2}` with minimum
+distances between the sub-elements.
+When one element is given as input this returns a symmetric square matrix.
+
+# Examples
+```julia
+cbetas_A = collectatoms(struc["A"], cbetaselector)
+cbetas_B = collectatoms(struc["B"], cbetaselector)
+
+# Distance map of chain A showing how far each residue is from the others
+DistanceMap(cbetas_A)
+
+# Rectangular distance map of chains A and B
+DistanceMap(cbetas_A, cbetas_B)
+```
+"""
+struct DistanceMap <: SpatialMap
+    data::Array{Float64, 2}
+end
+
+
+Base.getindex(m::SpatialMap, args::Integer...) = m.data[args...]
+
+function Base.setindex!(m::SpatialMap, v, args::Integer...)
+    m.data[args...] = v
+    return m
+end
+
+Base.size(m::SpatialMap) = size(m.data)
+Base.size(m::SpatialMap, dim::Integer) = size(m.data, dim)
+
+function Base.show(io::IO, cm::ContactMap)
+    print(io, "Contact map of size $(size(cm))")
+end
+
+function Base.show(io::IO, dm::DistanceMap)
+    print(io, "Distance map of size $(size(dm))")
+end
+
+
+function ContactMap(el_one::StructuralElementOrList,
                 el_two::StructuralElementOrList,
                 contact_dist::Real)
     sq_contact_dist = contact_dist ^ 2
     contacts = falses(length(el_one), length(el_two))
-    el_one_list = collect(el_one)
-    el_two_list = collect(el_two)
-    for i in 1:length(el_one)
-        for j in 1:length(el_two)
-            if sqdistance(el_one_list[i], el_two_list[j]) <= sq_contact_dist
+    for (i, subel_one) in enumerate(el_one)
+        for (j, subel_two) in enumerate(el_two)
+            if sqdistance(subel_one, subel_two) <= sq_contact_dist
                 contacts[i, j] = true
             end
         end
     end
-    return contacts
+    return ContactMap(contacts)
 end
 
-function contactmap(el::StructuralElementOrList, contact_dist::Real)
+function ContactMap(el::StructuralElementOrList, contact_dist::Real)
     sq_contact_dist = contact_dist ^ 2
     contacts = falses(length(el), length(el))
     el_list = collect(el)
@@ -500,5 +557,89 @@ function contactmap(el::StructuralElementOrList, contact_dist::Real)
             end
         end
     end
-    return contacts
+    return ContactMap(contacts)
 end
+
+function DistanceMap(el_one::StructuralElementOrList,
+                el_two::StructuralElementOrList)
+    dists = zeros(length(el_one), length(el_two))
+    for (i, subel_one) in enumerate(el_one)
+        for (j, subel_two) in enumerate(el_two)
+            dists[i, j] = distance(subel_one, subel_two)
+        end
+    end
+    return DistanceMap(dists)
+end
+
+function DistanceMap(el::StructuralElementOrList)
+    dists = zeros(length(el), length(el))
+    el_list = collect(el)
+    for i in 1:length(el)
+        for j in 1:i-1
+            dist = distance(el_list[i], el_list[j])
+            dists[i, j] = dist
+            dists[j, i] = dist
+        end
+    end
+    return DistanceMap(dists)
+end
+
+
+# Plot recipe to show a ContactMap
+@recipe function plot(cm::ContactMap)
+    seriestype := :heatmap
+    fillcolor --> :dense
+    aspectratio --> 1
+    xmirror --> true
+    colorbar --> false
+    xs = string.(1:size(cm, 2))
+    ys = string.(size(cm, 1):-1:1)
+    xs, ys, reverse(cm.data, dims=1)
+end
+
+# Plot recipe to show a DistanceMap
+@recipe function plot(dm::DistanceMap)
+    seriestype := :heatmap
+    fillcolor --> :inferno
+    aspectratio --> 1
+    xmirror --> true
+    colorbar --> true
+    xs = string.(1:size(dm, 2))
+    ys = string.(size(dm, 1):-1:1)
+    xs, ys, reverse(dm.data, dims=1)
+end
+
+
+"""
+    showcontactmap(contact_map)
+    showcontactmap(io, contact_map)
+
+Print a representation of a `ContactMap` to `stdout`, or a specified `IO`
+instance.
+A fully plotted version can be obtained with `plot(contact_map)` but that
+requires Plots.jl; `showcontactmap` works without that dependency.
+"""
+function showcontactmap(io::IO, cm::ContactMap)
+    size1 = size(cm, 1)
+    # Print two y values to each line for a nicer output
+    for i in 1:2:size1
+        for j in 1:size(cm, 2)
+            cont_one = cm[i, j]
+            # Check we aren't going over the end of the map
+            cont_two = i + 1 <= size1 && cm[i + 1, j]
+            if cont_one && cont_two
+                char = "█"
+            elseif cont_one
+                char = "▀"
+            elseif cont_two
+                char = "▄"
+            else
+                char = " "
+            end
+            print(io, char)
+        end
+        println(io)
+    end
+end
+
+showcontactmap(cm::ContactMap) = showcontactmap(stdout, cm)
