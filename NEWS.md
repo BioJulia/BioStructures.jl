@@ -1,6 +1,11 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.4.0 - September 2018
+
+* The `ContactMap` and `DistanceMap` types are introduced along with their supertype `SpatialMap`. `contactmap` is removed. Plot recipes are defined for visualisation of `ContactMap`s and `DistanceMap`s. `showcontactmap` provides a quick way to view a `ContactMap` in the terminal.
+* Bug fix on downloading MMTF files.
+
 ## v0.3.0 - August 2018
 
 * Code is now compatible with Julia v0.7 and v1.0. Support for earlier Julia versions is dropped.
