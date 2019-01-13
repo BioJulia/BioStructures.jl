@@ -24,11 +24,11 @@ calculations and functions to access the PDB are also provided.
 
 ## Installation
 
-Install BioStructures from the Julia REPL:
+Install BioStructures from the Julia package REPL, which can be accessed by
+pressing `]`:
 
-```julia
-using Pkg
-Pkg.add("BioStructures")
+```
+add BioStructures
 ```
 
 If you are interested in the cutting edge of the development, please check out

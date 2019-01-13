@@ -24,24 +24,25 @@ calculations and functions to access the PDB are also provided.
 
 ## Installation
 
-Install BioStructures from the Julia REPL:
+Install BioStructures from the Julia package REPL, which can be accessed by
+pressing `]`:
 
-```julia
-using Pkg
-Pkg.add("BioStructures")
+```
+add BioStructures
 ```
 
 If you are interested in the cutting edge of the development, please check out
 the master branch to try new features before release.
 
-## Contributing and Questions
+## Contributing and questions
 
 We appreciate contributions from users including reporting bugs, fixing issues,
 improving performance and adding new features.
-Please go to the [contributing section of the documentation](http://biojulia.github.io/BioStructures.jl/latest/contributing)
-for more information.
 
-If you have a question about
-contributing or using this package, you are encouraged to use the
-[Bio category of the Julia discourse
-site](https://discourse.julialang.org/c/domain/bio).
+Detailed guidance for contributing to all BioJulia packages is provided at the
+[BioJulia Contribution Documentation](https://github.com/BioJulia/BioStructures.jl/blob/master/CONTRIBUTING.md).
+
+If you have a question about contributing or using this package, you are
+encouraged to use the
+[BioJulia Gitter](https://gitter.im/BioJulia/Bio.jl) or the
+[Bio category of the Julia discourse site](https://discourse.julialang.org/c/domain/bio).
