@@ -459,6 +459,29 @@ There are a few more functions that may be useful:
 | `downloadallobsoletepdb` | Downloads all obsolete PDB files from the RCSB PDB server                       | `Array{String,1}`                                           |
 
 
+## Visualising structures
+
+The [Bio3DView.jl](https://github.com/jgreener64/Bio3DView.jl) package can be used to visualise molecular structures.
+For example:
+
+```julia
+using Bio3DView
+using Blink
+viewpdb("1CRN")
+```
+
+![viewpdb](viewpdb.png)
+
+```julia
+struc = retrievepdb("1AKE")
+viewstruc(struc['A'], surface=Surface(Dict("colorscheme"=> "greenCarbon")))
+```
+
+![viewstruc](viewstruc.png)
+
+See the [Bio3DView.jl tutorial](http://nbviewer.jupyter.org/github/jgreener64/Bio3DView.jl/blob/master/examples/tutorial.ipynb) for more information.
+
+
 ## Examples
 
 A few further examples of BioStructures usage are given below.
