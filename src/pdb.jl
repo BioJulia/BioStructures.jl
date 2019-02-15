@@ -490,7 +490,7 @@ function Base.read(input::IO,
         # Read MODEL record
         elseif startswith(line, "MODEL ")
             try
-                curr_model = parse(Int, line[11:14])
+                curr_model = parse(Int, line[11:end])
             catch
                 throw(PDBParseError(
                     "Could not read model serial number", line_n, line))

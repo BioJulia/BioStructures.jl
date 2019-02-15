@@ -5,3 +5,4 @@ docs/build/
 docs/site/
 .DS_Store
 todo.txt
+.tags*
