@@ -1260,11 +1260,9 @@ end
     @test_throws PDBParseError read(testfilepath("PDB", "1AKE_err_a.pdb"), PDB)
     # Missing chain ID (line ends early)
     @test_throws PDBParseError read(testfilepath("PDB", "1AKE_err_b.pdb"), PDB)    
-    
-    struc = read(testfilepath("PDB", "1SSU_err.pdb"), PDB)
-    @test isa(struc, ProteinStructure)
-    @test countmodels(struc) == 2
-    # TODO replace the above with the below once the pull request to BioFmtSpecimens is merged in
+    # Bad MODEL record
+    @test_throws PDBParseError read(testfilepath("PDB", "1SSU_err.pdb"), PDB)
+    # TODO uncomment this after PR BioFmtSpecimens#28 is merged
     # struc = read(testfilepath("PDB", "d9pcya_.ent"), PDB)
     # @test isa(struc, ProteinStructure)
     # @test countmodels(struc) == 16
