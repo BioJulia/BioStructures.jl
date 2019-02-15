@@ -1259,9 +1259,16 @@ end
     # Missing coordinate (blank string)
     @test_throws PDBParseError read(testfilepath("PDB", "1AKE_err_a.pdb"), PDB)
     # Missing chain ID (line ends early)
-    @test_throws PDBParseError read(testfilepath("PDB", "1AKE_err_b.pdb"), PDB)
-    # Bad MODEL record
-    @test_throws PDBParseError read(testfilepath("PDB", "1SSU_err.pdb"), PDB)
+    @test_throws PDBParseError read(testfilepath("PDB", "1AKE_err_b.pdb"), PDB)    
+    
+    struc = read(testfilepath("PDB", "1SSU_err.pdb"), PDB)
+    @test isa(struc, ProteinStructure)
+    @test countmodels(struc) == 2
+    # TODO replace the above with the below once the pull request to BioFmtSpecimens is merged in
+    # struc = read(testfilepath("PDB", "d9pcya_.ent"), PDB)
+    # @test isa(struc, ProteinStructure)
+    # @test countmodels(struc) == 16
+    
     # Duplicate atom names in same residue
     @test_throws ErrorException read(testfilepath("PDB", "1AKE_err_c.pdb"), PDB)
     # Non-existent file
