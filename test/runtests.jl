@@ -1262,10 +1262,10 @@ end
     @test_throws PDBParseError read(testfilepath("PDB", "1AKE_err_b.pdb"), PDB)    
     # Bad MODEL record
     @test_throws PDBParseError read(testfilepath("PDB", "1SSU_err.pdb"), PDB)
-    # TODO uncomment this after PR BioFmtSpecimens#28 is merged
-    # struc = read(testfilepath("PDB", "d9pcya_.ent"), PDB)
-    # @test isa(struc, ProteinStructure)
-    # @test countmodels(struc) == 16
+    # Truncated MODEL record from ASTRAL/SCOP95
+    struc = read(testfilepath("PDB", "d9pcya_.ent"), PDB)
+    @test isa(struc, ProteinStructure)
+    @test countmodels(struc) == 16
     
     # Duplicate atom names in same residue
     @test_throws ErrorException read(testfilepath("PDB", "1AKE_err_c.pdb"), PDB)
