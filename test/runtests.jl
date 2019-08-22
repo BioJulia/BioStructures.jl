@@ -49,7 +49,10 @@ close(io)
     # This may be empty on a given date so we just check it has the correct type
     @test isa(pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb"), Vector{String})
     # Invalid URL
-    @test_throws ErrorException pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/dummy.pdb")
+    # The error type changes from ErrorException to ProcessFailedException in Julia v1.2
+    # Therefore we check for the more general Exception type
+    # This also applies to two examples below
+    @test_throws Exception pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/dummy.pdb")
 
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
 
@@ -59,13 +62,13 @@ close(io)
     # Invalid PDB ID format
     @test_throws ArgumentError downloadpdb("1a df")
     # Valid PDB ID format but PDB does not exist
-    @test_throws ErrorException downloadpdb("no1e", pdb_dir=pdb_dir)
+    @test_throws Exception downloadpdb("no1e", pdb_dir=pdb_dir)
     # Invalid PDB file_format
     @test_throws ArgumentError downloadpdb("1alw", pdb_dir=pdb_dir, file_format=String)
     # Biological assembly not available in PDBXML and MMTF
     @test_throws ArgumentError downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDBXML, ba_number=1)
     # Invalid ba_number for this PDB entry
-    @test_throws ErrorException downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMCIF, ba_number=10)
+    @test_throws Exception downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMCIF, ba_number=10)
     # Tests if downloadpdb returns the path to the downloaded file
     @test isfile(downloadpdb("1crn", pdb_dir=pdb_dir))
 

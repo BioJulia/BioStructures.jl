@@ -268,7 +268,7 @@ function downloadpdb(pdbid::AbstractString;
                 close(stream)
             end
             # Verify if the PDB file is downloaded and extracted without any error
-            if !isfile(pdbpath) || filesize(pdbpath)==0
+            if !isfile(pdbpath) || filesize(pdbpath) == 0
                 throw(ErrorException("Error downloading PDB: $pdbid"))
             end
         finally
