@@ -33,6 +33,10 @@ using BioStructures:
     requiresquote
 
 
+# Skip download tests on Linux - required due to timeouts during CI
+# Set to false locally to run these tests
+skip_linux_download = true
+
 fmtdir = BioCore.Testing.get_bio_fmt_specimens()
 
 # Access files in BioFmtSpecimens to test against
@@ -44,110 +48,114 @@ close(io)
 
 
 @testset "PDB handling" begin
-    @test length(pdbentrylist()) > 100000
+    if skip_linux_download && Sys.islinux()
+        @info "Skipping download tests on Linux due to timeouts during CI; change skip_linux_download to run these tests"
+    else
+        @test length(pdbentrylist()) > 100000
 
-    # This may be empty on a given date so we just check it has the correct type
-    @test isa(pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb"), Vector{String})
-    # Invalid URL
-    # The error type changes from ErrorException to ProcessFailedException in Julia v1.2
-    # Therefore we check for the more general Exception type
-    # This also applies to two examples below
-    @test_throws Exception pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/dummy.pdb")
+        # This may be empty on a given date so we just check it has the correct type
+        @test isa(pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb"), Vector{String})
+        # Invalid URL
+        # The error type changes from ErrorException to ProcessFailedException in Julia v1.2
+        # Therefore we check for the more general Exception type
+        # This also applies to two examples below
+        @test_throws Exception pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/dummy.pdb")
 
-    addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
+        addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
 
-    @test length(pdbobsoletelist()) > 3600
+        @test length(pdbobsoletelist()) > 3600
 
-    pdb_dir = joinpath(tempdir(), "PDB")
-    # Invalid PDB ID format
-    @test_throws ArgumentError downloadpdb("1a df")
-    # Valid PDB ID format but PDB does not exist
-    @test_throws Exception downloadpdb("no1e", pdb_dir=pdb_dir)
-    # Invalid PDB file_format
-    @test_throws ArgumentError downloadpdb("1alw", pdb_dir=pdb_dir, file_format=String)
-    # Biological assembly not available in PDBXML and MMTF
-    @test_throws ArgumentError downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDBXML, ba_number=1)
-    # Invalid ba_number for this PDB entry
-    @test_throws Exception downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMCIF, ba_number=10)
-    # Tests if downloadpdb returns the path to the downloaded file
-    @test isfile(downloadpdb("1crn", pdb_dir=pdb_dir))
+        pdb_dir = joinpath(tempdir(), "PDB")
+        # Invalid PDB ID format
+        @test_throws ArgumentError downloadpdb("1a df")
+        # Valid PDB ID format but PDB does not exist
+        @test_throws Exception downloadpdb("no1e", pdb_dir=pdb_dir)
+        # Invalid PDB file_format
+        @test_throws ArgumentError downloadpdb("1alw", pdb_dir=pdb_dir, file_format=String)
+        # Biological assembly not available in PDBXML and MMTF
+        @test_throws ArgumentError downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDBXML, ba_number=1)
+        # Invalid ba_number for this PDB entry
+        @test_throws Exception downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMCIF, ba_number=10)
+        # Tests if downloadpdb returns the path to the downloaded file
+        @test isfile(downloadpdb("1crn", pdb_dir=pdb_dir))
 
-    # PDB format
-    downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDB)
-    pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[PDB])")
-    @test isfile(pdbpath) && filesize(pdbpath) > 0
-    # PDBXML format
-    downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDBXML)
-    pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[PDBXML])")
-    @test isfile(pdbpath) && filesize(pdbpath) > 0
-    # MMCIF format
-    downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMCIF)
-    pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[MMCIF])")
-    @test isfile(pdbpath) && filesize(pdbpath) > 0
-    # MMTF format
-    downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMTF)
-    pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[MMTF])")
-    @test isfile(pdbpath) && filesize(pdbpath) > 0
-    # Obsolete PDB
-    downloadpdb("116l", pdb_dir=pdb_dir, file_format=PDB, obsolete=true)
-    pdbpath = joinpath(pdb_dir, "obsolete", "116L$(pdbextension[PDB])")
-    @test isfile(pdbpath) && filesize(pdbpath) > 0
-    # Biological Assembly - PDB format
-    downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDB, ba_number=1)
-    pdbpath = joinpath(pdb_dir, "1ALW_ba1$(pdbextension[PDB])")
-    @test isfile(pdbpath) && filesize(pdbpath) > 0
-    # Biological Assembly - MMCIF format
-    downloadpdb("5a9z", pdb_dir=pdb_dir, file_format=MMCIF, ba_number=1)
-    pdbpath = joinpath(pdb_dir, "5A9Z_ba1$(pdbextension[MMCIF])")
-    @test isfile(pdbpath) && filesize(pdbpath) > 0
-    # Download multiple PDB files
-    pdbidlist = ["1ent", "1en2"]
-    downloadpdb(pdbidlist, pdb_dir=pdb_dir, file_format=PDB)
-    for pdbid in pdbidlist
-        pdbpath = joinpath(pdb_dir, "$(uppercase(pdbid))$(pdbextension[PDB])")
+        # PDB format
+        downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDB)
+        pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[PDB])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
-    end
-
-    # Test function as first argument to downloadpdb
-    @test downloadpdb(countlines, "1alw") == 3600
-    @test downloadpdb("1alw") do fp
-        s = read(fp, PDB)
-        return countresidues(s, standardselector)
-    end == 346
-    @test downloadpdb(["169l", "2lzm"]) do fps
-        n_chains = Int[]
-        for fp in fps
-            s = read(fp, PDB)
-            push!(n_chains, countchains(s))
+        # PDBXML format
+        downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDBXML)
+        pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[PDBXML])")
+        @test isfile(pdbpath) && filesize(pdbpath) > 0
+        # MMCIF format
+        downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMCIF)
+        pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[MMCIF])")
+        @test isfile(pdbpath) && filesize(pdbpath) > 0
+        # MMTF format
+        downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMTF)
+        pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[MMTF])")
+        @test isfile(pdbpath) && filesize(pdbpath) > 0
+        # Obsolete PDB
+        downloadpdb("116l", pdb_dir=pdb_dir, file_format=PDB, obsolete=true)
+        pdbpath = joinpath(pdb_dir, "obsolete", "116L$(pdbextension[PDB])")
+        @test isfile(pdbpath) && filesize(pdbpath) > 0
+        # Biological Assembly - PDB format
+        downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDB, ba_number=1)
+        pdbpath = joinpath(pdb_dir, "1ALW_ba1$(pdbextension[PDB])")
+        @test isfile(pdbpath) && filesize(pdbpath) > 0
+        # Biological Assembly - MMCIF format
+        downloadpdb("5a9z", pdb_dir=pdb_dir, file_format=MMCIF, ba_number=1)
+        pdbpath = joinpath(pdb_dir, "5A9Z_ba1$(pdbextension[MMCIF])")
+        @test isfile(pdbpath) && filesize(pdbpath) > 0
+        # Download multiple PDB files
+        pdbidlist = ["1ent", "1en2"]
+        downloadpdb(pdbidlist, pdb_dir=pdb_dir, file_format=PDB)
+        for pdbid in pdbidlist
+            pdbpath = joinpath(pdb_dir, "$(uppercase(pdbid))$(pdbextension[PDB])")
+            @test isfile(pdbpath) && filesize(pdbpath) > 0
         end
-        return n_chains
-    end == [5, 1]
 
-    # Test retrievepdb and readpdb
-    struc = retrievepdb("1AKE", pdb_dir=pdb_dir, structure_name="New name")
-    @test structurename(struc) == "New name"
-    @test countatoms(struc) == 3804
+        # Test function as first argument to downloadpdb
+        @test downloadpdb(countlines, "1alw") == 3600
+        @test downloadpdb("1alw") do fp
+            s = read(fp, PDB)
+            return countresidues(s, standardselector)
+        end == 346
+        @test downloadpdb(["169l", "2lzm"]) do fps
+            n_chains = Int[]
+            for fp in fps
+                s = read(fp, PDB)
+                push!(n_chains, countchains(s))
+            end
+            return n_chains
+        end == [5, 1]
 
-    struc = retrievepdb("1AKE", pdb_dir=pdb_dir, obsolete=true, read_het_atoms=false)
-    @test countatoms(struc) == 3312
-    @test serial(collectatoms(struc)[2000]) == 2006
-    @test sum(ishetero, collectatoms(struc)) == 0
+        # Test retrievepdb and readpdb
+        struc = retrievepdb("1AKE", pdb_dir=pdb_dir, structure_name="New name")
+        @test structurename(struc) == "New name"
+        @test countatoms(struc) == 3804
 
-    struc = retrievepdb("1AKE", pdb_dir=pdb_dir, ba_number=1, read_het_atoms=false, read_std_atoms=false)
-    @test countatoms(struc) == 0
-    @test countresidues(struc) == 0
-    @test countchains(struc) == 0
-    @test countmodels(struc) == 0
+        struc = retrievepdb("1AKE", pdb_dir=pdb_dir, obsolete=true, read_het_atoms=false)
+        @test countatoms(struc) == 3312
+        @test serial(collectatoms(struc)[2000]) == 2006
+        @test sum(ishetero, collectatoms(struc)) == 0
 
-    struc = readpdb("1AKE", pdb_dir=pdb_dir, read_std_atoms=false)
-    @test countatoms(struc) == 492
-    @test serial(collectatoms(struc)[400]) == 3726
-    @test sum(ishetero, collectatoms(struc)) == 492
+        struc = retrievepdb("1AKE", pdb_dir=pdb_dir, ba_number=1, read_het_atoms=false, read_std_atoms=false)
+        @test countatoms(struc) == 0
+        @test countresidues(struc) == 0
+        @test countchains(struc) == 0
+        @test countmodels(struc) == 0
 
-    struc = readpdb("1AKE", pdb_dir=pdb_dir, ba_number=1, remove_disorder=true)
-    @test countatoms(struc) == 1954
-    @test sum(isdisorderedatom, collectatoms(struc)) == 0
-    @test tempfactor(struc['A'][167]["NE"]) == 23.32
+        struc = readpdb("1AKE", pdb_dir=pdb_dir, read_std_atoms=false)
+        @test countatoms(struc) == 492
+        @test serial(collectatoms(struc)[400]) == 3726
+        @test sum(ishetero, collectatoms(struc)) == 492
+
+        struc = readpdb("1AKE", pdb_dir=pdb_dir, ba_number=1, remove_disorder=true)
+        @test countatoms(struc) == 1954
+        @test sum(isdisorderedatom, collectatoms(struc)) == 0
+        @test tempfactor(struc['A'][167]["NE"]) == 23.32
+    end
 end
 
 
