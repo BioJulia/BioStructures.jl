@@ -29,7 +29,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Installation",
     "category": "section",
-    "text": "Install BioStructures from the Julia REPL:using Pkg\nPkg.add(\"BioStructures\")If you are interested in the cutting edge of the development, please check out the master branch to try new features before release."
+    "text": "Install BioStructures from the Julia package REPL, which can be accessed by pressing ]:add BioStructuresIf you are interested in the cutting edge of the development, please check out the master branch to try new features before release."
+},
+
+{
+    "location": "index.html#Contributing-and-questions-1",
+    "page": "Home",
+    "title": "Contributing and questions",
+    "category": "section",
+    "text": "We appreciate contributions from users including reporting bugs, fixing issues, improving performance and adding new features.Detailed guidance for contributing to all BioJulia packages is provided at the BioJulia Contribution Documentation.If you have a question about contributing or using this package, you are encouraged to use the BioJulia Gitter or the Bio category of the Julia discourse site."
 },
 
 {
@@ -105,27 +113,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "documentation.html#Visualising-structures-1",
+    "page": "Documentation",
+    "title": "Visualising structures",
+    "category": "section",
+    "text": "The Bio3DView.jl package can be used to visualise molecular structures. For example:using Bio3DView\nusing Blink\nviewpdb(\"1CRN\")(Image: viewpdb)struc = retrievepdb(\"1AKE\")\nviewstruc(struc[\'A\'], surface=Surface(Dict(\"colorscheme\"=> \"greenCarbon\")))(Image: viewstruc)See the Bio3DView.jl tutorial for more information."
+},
+
+{
     "location": "documentation.html#Examples-1",
     "page": "Documentation",
     "title": "Examples",
     "category": "section",
     "text": "A few further examples of BioStructures usage are given below.A) To plot the temperature factors of a protein, if you have Plots installed:using Plots\ncalphas = collectatoms(struc, calphaselector)\nplot(resnumber.(calphas),\n     tempfactor.(calphas),\n     xlabel=\"Residue number\",\n     ylabel=\"Temperature factor\",\n     label=\"\")B) To print the PDB records for all C-alpha atoms within 5 Angstrom of residue 38:for at in calphas\n    if distance(struc[\'A\'][38], at) < 5.0 && resnumber(at) != 38\n        println(pdbline(at))\n    end\nendC) To show the Ramachandran phi/psi angle plot of a structure, if you have Plots installed:using Plots\nphi_angles, psi_angles = ramachandranangles(struc, standardselector)\nscatter(rad2deg.(phi_angles),\n     rad2deg.(psi_angles),\n     title=\"Ramachandran plot\",\n     xlabel=\"Phi / degrees\",\n     ylabel=\"Psi / degrees\",\n     label=\"\",\n     xticks=[-180, -90, 0, 90, 180],\n     yticks=[-180, -90, 0, 90, 180],\n     xlims=(-180, 180),\n     ylims=(-180, 180))D) To calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:downloadpdb(\"1SSU\")\nstruc_nmr = read(\"1SSU.pdb\", PDB)\nrmsd(struc_nmr[5], struc_nmr[10], heavyatomselector)\ndisplacements(struc_nmr[5], struc_nmr[10], heavyatomselector)E) To calculate the cysteine fraction of every structure in the PDB:l = pdbentrylist()\nfor p in l\n    downloadpdb(p, file_format=MMCIF) do fp\n        s = read(fp, MMCIF)\n        nres = countresidues(s, standardselector)\n        if nres > 0\n            frac = countresidues(s, standardselector, x -> resname(x) == \"CYS\") / nres\n            println(p, \"  \", round(frac, digits=2))\n        end\n    end\nend"
-},
-
-{
-    "location": "contributing.html#",
-    "page": "Contributing",
-    "title": "Contributing",
-    "category": "page",
-    "text": ""
-},
-
-{
-    "location": "contributing.html#Contributing-1",
-    "page": "Contributing",
-    "title": "Contributing",
-    "category": "section",
-    "text": "We appreciate contributions from users including reporting bugs, fixing issues, improving performance and adding new features.Detailed guidance for contributing to all BioJulia packages is provided at the BioJulia Contribution Documentation.If you have a question about contributing or using this package, you are encouraged to use the Bio category of the Julia discourse site."
 },
 
 ]}
