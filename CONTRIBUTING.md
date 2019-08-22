@@ -45,7 +45,7 @@ chimes in with helpful advice if you have questions.
 If you just have a question, or a problem that is not covered by this guide,
 then come on over to the Gitter and we'll be happy to help.
 
-* [Gitter, BioJulia message board](https://gitter.im/BioJulia/Bio.jl)
+* [Gitter, BioJulia message board](https://gitter.im/BioJulia/General)
 
 ## What should I know about BioJulia **BEFORE** I get started?
 
@@ -351,7 +351,7 @@ BioSequences.jl it creates in your current directory.
 It is beyond the scope of this document to describe good git and github use in
 more specific detail, as the folks at Git and GitHub have already done that wonderfully
 on their own sites. If you have additional questions, simply ping a BioJulia
-member or the [BioJulia Gitter](https://gitter.im/BioJulia/Bio.jl).
+member or the [BioJulia Gitter](https://gitter.im/BioJulia/General).
 
 #### How to make (good) code contributions and new Pull-Requests
 
