@@ -35,7 +35,7 @@ using BioStructures:
 
 # Skip download tests on Linux - required due to timeouts during CI
 # Set to false locally to run these tests
-skip_linux_download = false
+skip_linux_download = true
 
 fmtdir = BioCore.Testing.get_bio_fmt_specimens()
 
