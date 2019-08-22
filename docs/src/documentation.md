@@ -479,6 +479,7 @@ viewstruc(struc['A'], surface=Surface(Dict("colorscheme"=> "greenCarbon")))
 
 ![viewstruc](viewstruc.png)
 
+Here they are shown as static images but they are interactive when using Bio3DView.jl.
 See the [Bio3DView.jl tutorial](http://nbviewer.jupyter.org/github/jgreener64/Bio3DView.jl/blob/master/examples/tutorial.ipynb) for more information.
 
 
@@ -508,7 +509,19 @@ for at in calphas
 end
 ```
 
-**C)** To show the Ramachandran phi/psi angle plot of a structure, if you have Plots installed:
+**C)** To find the residues at the interface of a protein-protein interaction:
+
+```julia
+for res_a in collectresidues(struc["A"], standardselector)
+    for res_b in collectresidues(struc["B"], standardselector)
+        if distance(res_a, res_b) < 5.0
+            println(resnumber(res_a), "A ", resnumber(res_b), "B")
+        end
+    end
+end
+```
+
+**D)** To show the Ramachandran phi/psi angle plot of a structure, if you have Plots installed:
 
 ```julia
 using Plots
@@ -525,7 +538,7 @@ scatter(rad2deg.(phi_angles),
      ylims=(-180, 180))
 ```
 
-**D)** To calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:
+**E)** To calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:
 
 ```julia
 downloadpdb("1SSU")
@@ -534,7 +547,7 @@ rmsd(struc_nmr[5], struc_nmr[10], heavyatomselector)
 displacements(struc_nmr[5], struc_nmr[10], heavyatomselector)
 ```
 
-**E)** To calculate the cysteine fraction of every structure in the PDB:
+**F)** To calculate the cysteine fraction of every structure in the PDB:
 
 ```julia
 l = pdbentrylist()
