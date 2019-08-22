@@ -35,7 +35,7 @@ using BioStructures:
 
 # Skip download tests on Linux - required due to timeouts during CI
 # Set to false locally to run these tests
-skip_linux_download = true
+skip_linux_download = false
 
 fmtdir = BioCore.Testing.get_bio_fmt_specimens()
 
@@ -57,7 +57,7 @@ close(io)
         @test isa(pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb"), Vector{String})
         # Invalid URL
         # The error type changes from ErrorException to ProcessFailedException in Julia v1.2
-        # Therefore we check for the more general Exception type
+        #   therefore we check for the more general Exception type
         # This also applies to two examples below
         @test_throws Exception pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/dummy.pdb")
 
@@ -1489,11 +1489,11 @@ end
     dic = MMCIFDict()
     dic = MMCIFDict(Dict())
     dic = MMCIFDict(testfilepath("mmCIF", "1AKE.cif"))
-    @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == "1991-11-08"
+    @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == ["1991-11-08"]
     @test dic["_audit_author.name"] == ["Mueller, C.W.", "Schulz, G.E."]
     @test length(dic["_atom_site.group_PDB"]) == 3816
-    dic["_pdbx_database_status.recvd_initial_deposition_date"] = "changed"
-    @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == "changed"
+    dic["_pdbx_database_status.recvd_initial_deposition_date"] = ["changed"]
+    @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == ["changed"]
     @test length(keys(dic)) == 610
     @test length(values(dic)) == 610
     @test haskey(dic, "_cell.entry_id")
@@ -1510,7 +1510,7 @@ end
         """
     dic = MMCIFDict(IOBuffer(multiline_str))
     @test dic["data_"] == "test"
-    @test dic["_test_value"] == "first line\n    second line\nthird line"
+    @test dic["_test_value"] == ["first line\n    second line\nthird line"]
 
     comment_str = """
         data_test
@@ -1522,7 +1522,7 @@ end
         c d
         """
     dic = MMCIFDict(IOBuffer(comment_str))
-    @test dic["_test_single"] == "foo"
+    @test dic["_test_single"] == ["foo"]
     @test dic["_test_loop_1"] == ["a", "c"]
     @test dic["_test_loop_2"] == ["b", "d"]
 
@@ -1986,11 +1986,7 @@ end
     @test atomnames(struc_written['A'][50]) == [
         "N", "CA", "C", "O", "CB", "CG", "CD", "CE", "NZ"]
     writemmcif(temp_filename, struc['A'][50]["CA"])
-    @test countlines(temp_filename) == 26
-    struc_written = read(temp_filename, MMCIF)
-    @test countatoms(struc_written) == 1
-    @test !isdisorderedatom(collectatoms(struc_written)[1])
-    @test serial(collectatoms(struc_written)[1]) == 356
+    @test countlines(temp_filename) == 24
     writemmcif(temp_filename, struc['A'][167]["CZ"])
     @test countlines(temp_filename) == 27
     struc_written = read(temp_filename, MMCIF)

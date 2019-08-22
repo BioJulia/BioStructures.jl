@@ -38,6 +38,7 @@ julia> mmcif_dict["_entity_src_nat.common_name"]
 ```
 
 A `MMCIFDict` can be accessed in similar ways to a standard dictionary, and if necessary the underlying dictionary of `MMCIFDict` `d` can be accessed with `d.dict`.
+Note that the elements of the dictionary are always an `Array{String,1}`, even if only one value was read in or the data is numerical.
 
 Refer to [Downloading PDB files](#Downloading-PDB-files-1) and [Reading PDB files](#Reading-PDB-files-1) sections for more options.
 

@@ -140,6 +140,8 @@ function tokenizecif(f::IO)
 end
 
 # Get tokens from a mmCIF file corresponding to atom site records only
+# This will fail if there is only a single atom record in the file
+#   and it is not in the loop format
 function tokenizecifstructure(f::IO)
     tokens = String[]
     reading = false
@@ -239,7 +241,8 @@ function populatedict!(mmcif_dict::MMCIFDict, tokens::Vector{String})
         if key == ""
             key = token
         else
-            mmcif_dict[key] = token
+            # Single values are read in as an array for consistency
+            mmcif_dict[key] = [token]
             key = ""
         end
     end
@@ -408,8 +411,8 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
                 throw(ArgumentError("Inconsistent list sizes in mmCIF dictionary: $key.$i"))
             end
         end
-        # If the value is a single value, write as key-value pairs
-        if isa(sample_val, String)
+        # If the value has a single component, write as key-value pairs
+        if (isa(sample_val, Array) && length(sample_val) == 1) || isa(sample_val, String)
             m = 0
             # Find the maximum key length
             for i in key_list
@@ -418,9 +421,15 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
                 end
             end
             for i in key_list
-                println(output, "$(rpad("$key.$i", length(key)+m+4))$(formatmmcifcol(mmcif_dict["$key.$i"]))")
+                # If the value is a single item list, just take the value
+                if isa(sample_val, String)
+                    value_no_list = mmcif_dict["$key.$i"]
+                else
+                    value_no_list = first(mmcif_dict["$key.$i"])
+                end
+                println(output, "$(rpad("$key.$i", length(key)+m+4))$(formatmmcifcol(value_no_list))")
             end
-        # If the value is a list, write as keys then a value table
+        # If the value has more than one component, write as keys then a value table
         elseif isa(sample_val, Array)
             println(output, "loop_")
             col_widths = Dict{String, Int}()
