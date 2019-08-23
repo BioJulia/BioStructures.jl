@@ -34,7 +34,8 @@ julia> mmcif_dict = MMCIFDict("/path/to/cif/file.cif")
 mmCIF dictionary with 716 fields
 
 julia> mmcif_dict["_entity_src_nat.common_name"]
-"great nettle"
+1-element Array{String,1}:
+ "great nettle"
 ```
 
 A `MMCIFDict` can be accessed in similar ways to a standard dictionary, and if necessary the underlying dictionary of `MMCIFDict` `d` can be accessed with `d.dict`.
