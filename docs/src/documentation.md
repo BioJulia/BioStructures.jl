@@ -174,7 +174,7 @@ Alternatively, you can use an anonymous function:
 collectatoms(struc, at -> x(at) < 0)
 ```
 
-`countatoms`, `countresidues`, `countchains` and `countmodels` can be used to count elements wth the same selector API.
+`countatoms`, `countresidues`, `countchains` and `countmodels` can be used to count elements with the same selector API.
 For example:
 
 ```julia
@@ -415,6 +415,8 @@ If you want to generate a PDB record line from values directly, do so using an `
 julia> pdbline(AtomRecord(false, 669, "CA", ' ', "ILE", "A", 90, ' ', [31.743, 33.11, 31.221], 1.00, 25.76, "C", ""))
 "ATOM    669  CA  ILE A  90      31.743  33.110  31.221  1.00 25.76           C  "
 ```
+
+This can be useful when writing PDB files from your own data structures.
 
 
 ## RCSB PDB utility functions
