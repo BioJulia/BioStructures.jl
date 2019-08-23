@@ -41,15 +41,15 @@ const mmciforder = Dict(
 A macromolecular Crystallographic Information File (mmCIF) dictionary.
 
 Can be accessed using similar functions to a standard `Dict`.
-Keys are field names as a `String` and values are `String` or
-Vector{String}`.
+Keys are field names as a `String` and values are always `Vector{String}`, even
+for multiple components or numerical data.
 To directly access the underlying dictionary of `MMCIFDict` `d`, use
 `d.dict`.
 Call `MMCIFDict` with a filepath or stream to read the dictionary from that
 source.
 """
 struct MMCIFDict
-    dict::Dict{String, Union{String, Vector{String}}}
+    dict::Dict{String, Vector{String}}
 end
 
 MMCIFDict() = MMCIFDict(Dict())
@@ -57,7 +57,7 @@ MMCIFDict() = MMCIFDict(Dict())
 Base.getindex(mmcif_dict::MMCIFDict, field::AbstractString) = mmcif_dict.dict[field]
 
 function Base.setindex!(mmcif_dict::MMCIFDict,
-                    val::Union{String, Vector{String}},
+                    val::Vector{String},
                     field::AbstractString)
     mmcif_dict.dict[field] = val
     return mmcif_dict
@@ -190,7 +190,7 @@ function MMCIFDict(f::IO)
         return mmcif_dict
     end
     data_token = first(tokens)
-    mmcif_dict[data_token[1:5]] = data_token[6:end]
+    mmcif_dict[data_token[1:5]] = [data_token[6:end]]
     return populatedict!(mmcif_dict, tokens[2:end])
 end
 
@@ -357,7 +357,7 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
     # Form dictionary where key is first part of mmCIF key and value is list
     #   of corresponding second parts
     key_lists = Dict{String, Vector{String}}()
-    data_val = ""
+    data_val = String[]
     for key in keys(mmcif_dict)
         if lowercase(key) == "data_"
             data_val = mmcif_dict[key]
@@ -393,44 +393,31 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
     end
 
     # Write out top data_ line
-    if data_val != ""
-        println(output, "data_$data_val\n#")
+    if data_val != String[]
+        println(output, "data_$(first(data_val))\n#")
     else
         println(output, "data_unknown\n#")
     end
 
     for (key, key_list) in key_lists
-        # Pick a sample mmCIF value, which can be a list or a single value
-        sample_val = mmcif_dict["$key.$(key_list[1])"]
+        # Pick a sample mmCIF value
+        sample_val = mmcif_dict["$key.$(first(key_list))"]
         n_vals = length(sample_val)
         # Check the mmCIF dictionary has consistent list sizes
         for i in key_list
-            val = mmcif_dict["$key.$i"]
-            if (isa(sample_val, Array) && (isa(val, String) || length(val) != n_vals)) ||
-                    (isa(sample_val, String) && isa(val, Array))
+            if length(mmcif_dict["$key.$i"]) != n_vals
                 throw(ArgumentError("Inconsistent list sizes in mmCIF dictionary: $key.$i"))
             end
         end
         # If the value has a single component, write as key-value pairs
-        if (isa(sample_val, Array) && length(sample_val) == 1) || isa(sample_val, String)
-            m = 0
+        if length(sample_val) == 1
             # Find the maximum key length
+            m = maximum(length.(key_list))
             for i in key_list
-                if length(i) > m
-                    m = length(i)
-                end
-            end
-            for i in key_list
-                # If the value is a single item list, just take the value
-                if isa(sample_val, String)
-                    value_no_list = mmcif_dict["$key.$i"]
-                else
-                    value_no_list = first(mmcif_dict["$key.$i"])
-                end
-                println(output, "$(rpad("$key.$i", length(key)+m+4))$(formatmmcifcol(value_no_list))")
+                println(output, "$(rpad("$key.$i", length(key)+m+4))$(formatmmcifcol(first(mmcif_dict["$key.$i"])))")
             end
         # If the value has more than one component, write as keys then a value table
-        elseif isa(sample_val, Array)
+        else
             println(output, "loop_")
             col_widths = Dict{String, Int}()
             # Write keys and find max widths for each set of values
@@ -457,8 +444,6 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
                 end
                 println(output)
             end
-        else
-            throw(ArgumentError("Invalid type in mmCIF dictionary: $(typeof(sample_val))"))
         end
         println(output, "#")
     end
@@ -478,9 +463,9 @@ function writemmcif(output::IO,
                     Vector{Residue}, Vector{DisorderedResidue}},
                 atom_selectors::Function...)
     # Create an empty dictionary and add atoms one at a time
-    atom_dict = Dict{String, Union{String, Vector{String}}}(
+    atom_dict = Dict{String, Vector{String}}(
             ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
-    atom_dict["data_"] = structurename(first(el))
+    atom_dict["data_"] = [structurename(first(el))]
 
     # Ensure multiple models get written out correctly
     loop_el = el
@@ -519,9 +504,9 @@ function writemmcif(output::IO,
 end
 
 function writemmcif(output::IO, at::AbstractAtom, atom_selectors::Function...)
-    atom_dict = Dict{String, Union{String, Vector{String}}}(
+    atom_dict = Dict{String, Vector{String}}(
             ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
-    atom_dict["data_"] = structurename(at)
+    atom_dict["data_"] = [structurename(at)]
     for atom_record in at
         appendatom!(atom_dict, atom_record, string(modelnumber(at)),
             strip(chainid(at)) == "" ? "." : chainid(at),
@@ -534,9 +519,9 @@ end
 function writemmcif(output::IO,
                 ats::Vector{<:AbstractAtom},
                 atom_selectors::Function...)
-    atom_dict = Dict{String, Union{String, Vector{String}}}(
+    atom_dict = Dict{String, Vector{String}}(
             ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
-    atom_dict["data_"] = structurename(ats[1])
+    atom_dict["data_"] = [structurename(ats[1])]
     for at in collectatoms(ats, atom_selectors...)
         for atom_record in at
             appendatom!(atom_dict, atom_record, string(modelnumber(at)),

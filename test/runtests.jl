@@ -1489,6 +1489,7 @@ end
     dic = MMCIFDict()
     dic = MMCIFDict(Dict())
     dic = MMCIFDict(testfilepath("mmCIF", "1AKE.cif"))
+    @test isa(dic.dict, Dict{String, Vector{String}})
     @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == ["1991-11-08"]
     @test dic["_audit_author.name"] == ["Mueller, C.W.", "Schulz, G.E."]
     @test length(dic["_atom_site.group_PDB"]) == 3816
@@ -1509,7 +1510,7 @@ end
         ;
         """
     dic = MMCIFDict(IOBuffer(multiline_str))
-    @test dic["data_"] == "test"
+    @test dic["data_"] == ["test"]
     @test dic["_test_value"] == ["first line\n    second line\nthird line"]
 
     comment_str = """
@@ -1917,13 +1918,9 @@ end
         @test dic_one[k] == dic_two[k]
     end
 
-    writemmcif(temp_filename, MMCIFDict(Dict("key.key"=> "value")))
-    @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict("key"=> "value")))
-    @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict("key.key.key"=> "value")))
-    @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict(
-        "key.one"=> "value",
-        "key.two"=> ["value1", "value2"],
-    )))
+    writemmcif(temp_filename, MMCIFDict(Dict("key.key"=> ["value"])))
+    @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict("key"=> ["value"])))
+    @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict("key.key.key"=> ["value"])))
     @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict(
         "key.one"=> ["value"],
         "key.two"=> ["value1", "value2"],
