@@ -1641,12 +1641,12 @@ in the given `Set` or `Vector`.
 """
 function resnameselector(el::Union{AbstractResidue, AbstractAtom},
                     res_names::Set{String})
-    return resname(el) in res_names
+    return resname(el, strip=false) in res_names
 end
 
 function resnameselector(el::Union{AbstractResidue, AbstractAtom},
                     res_names::Vector{String})
-    return resname(el) in res_names
+    return resname(el, strip=false) in res_names
 end
 
 
