@@ -1555,7 +1555,7 @@ heteroselector(res::AbstractResidue) = ishetero(res)
 
 
 """
-    atomnameselector(at; strip=true)
+    atomnameselector(at, atom_names; strip=true)
 
 Determines if an `AbstractAtom` has its atom name in the given `Set` or
 `Vector`.
@@ -1633,8 +1633,8 @@ heavyatomselector(at::AbstractAtom) = standardselector(at) && !hydrogenselector(
 
 
 """
-    resnameselector(res)
-    resnameselector(at)
+    resnameselector(res, res_names)
+    resnameselector(at, res_names)
 
 Determines if an `AbstractResidue` or `AbstractAtom` has its residue name
 in the given `Set` or `Vector`.
