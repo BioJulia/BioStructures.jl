@@ -1079,20 +1079,20 @@ function Base.iterate(ch::Chain, state=1)
 end
 
 # Iterating over a Residue yields AbstractAtoms
-Base.length(res::Residue) = length(atomnames(res))
+Base.length(res::Residue) = length(atomnames(res, strip=false))
 Base.eltype(::Type{Residue}) = AbstractAtom
 function Base.iterate(res::Residue, state=1)
-    state <= length(res) ? (res[atomnames(res)[state]], state + 1) : nothing
+    state <= length(res) ? (res[atomnames(res, strip=false)[state]], state + 1) : nothing
 end
 
 # Iterating over a DisorderedResidue yields AbstractAtoms
 # This is not necessarily intuitive, it may be expected to yield Residues
 # However this way iterating over an AbstractResidue always yields AbstractAtoms
-Base.length(dis_res::DisorderedResidue) = length(atomnames(dis_res))
+Base.length(dis_res::DisorderedResidue) = length(atomnames(dis_res, strip=false))
 Base.eltype(::Type{DisorderedResidue}) = AbstractAtom
 function Base.iterate(dis_res::DisorderedResidue, state=1)
     if state <= length(dis_res)
-        (defaultresidue(dis_res)[atomnames(dis_res)[state]], state + 1)
+        (defaultresidue(dis_res)[atomnames(dis_res, strip=false)[state]], state + 1)
     else
         nothing
     end
