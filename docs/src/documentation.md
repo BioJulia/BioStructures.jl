@@ -130,6 +130,8 @@ end
 Models are ordered numerically; chains are ordered by chain ID character ordering, except the empty chain is last; residues are ordered by residue number and insertion code with hetero residues after standard residues; atoms are ordered by atom serial.
 If you want the first sub-element you can use `first`.
 For example `first(struc[1])` gets the first chain in model 1.
+Since the ordering of elements is defined you can use the `sort` function.
+For example `sort(res)` sorts a list of residues as described above, or `sort(res, by=resname)` will sort them alphabetically by residue name.
 
 `collect` can be used to get arrays of sub-elements.
 `collectatoms`, `collectresidues`, `collectchains` and `collectmodels` return arrays of a particular type from a structural element or element array.
@@ -163,11 +165,16 @@ The selectors available are:
 | notwaterselector  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name not HOH            |
 | disorderselector  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with alternative locations           |
 
+To create a new `atomnameselector` or `resnameselector`:
+```julia
+cdeltaselector(at::AbstractAtom) = atomnameselector(at, ["CD"])
+```
+
 It is easy to define your own atom, residue, chain or model selectors.
 The below will collect all atoms with x coordinate less than 0:
 
 ```julia
-xselector(at::AbstractAtom) = x(at) < 0
+xselector(at) = x(at) < 0
 collectatoms(struc, xselector)
 ```
 
