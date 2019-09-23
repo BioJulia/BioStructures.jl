@@ -325,16 +325,6 @@ downloadpdb("1ALW") do fp
 end
 ```
 
-Various options can be set through optional keyword arguments when downloading PDB files:
-
-| Keyword Argument                | Description                                                                                                              |
-| :------------------------------ | :----------------------------------------------------------------------------------------------------------------------- |
-| `pdb_dir::AbstractString=pwd()` | The directory to which the PDB file is downloaded; defaults to the current working directory                             |
-| `file_format::Type=PDB`         | The format of the PDB file; options are PDB, PDBXML, MMCIF and MMTF                                                      |
-| `obsolete::Bool=false`          | If set `true`, the PDB file is downloaded in the auto-generated "obsolete" directory inside the specified `pdb_dir`      |
-| `overwrite::Bool=false`         | If set `true`, overwrites the PDB file if it exists in `pdb_dir`; by default skips downloading the PDB file if it exists |
-| `ba_number::Integer=0`          | If set > 0 downloads the respective biological assembly; by default downloads the PDB file                               |
-
 
 ## Reading PDB files
 
@@ -355,7 +345,7 @@ Various options can be set through optional keyword arguments when parsing PDB/m
 | `read_std_atoms::Bool=true`      | Whether to read standard ATOM records.                                             |
 | `read_het_atoms::Bool=true`      | Whether to read HETATOM records.                                                   |
 
-The function `readpdb` provides an alternative way to read PDB files in line with `downloadpdb`.
+The function `readpdb` provides an alternative way to read PDB files with a similar interface to `downloadpdb`.
 To parse a PDB file by specifying the PDB ID and PDB directory:
 
 ```julia
@@ -364,26 +354,13 @@ struc = readpdb("1EN2", pdb_dir="/path/to/pdb/directory")
 
 The same keyword arguments are taken as `read` above, plus `pdb_dir` and `ba_number`.
 
-To download and parse a PDB file into a Structure-Model-Chain-Residue-Atom framework in a single line:
+Use `retrievepdb` to download and parse a PDB file into a Structure-Model-Chain-Residue-Atom framework in a single line:
 
 ```julia
 julia> struc = retrievepdb("1ALW", pdb_dir="path/to/pdb/directory")
 INFO: Downloading PDB: 1ALW
 ProteinStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atoms
 ```
-
-Various options can be set when using `retrievepdb`:
-
-| Keyword Argument                              | Description                                                                                                              |
-| :-------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| `pdb_dir::AbstractString=pwd()`               | The directory to which the PDB file is downloaded; defaults to the current working directory                             |
-| `obsolete::Bool=false`                        | If set `true`, the PDB file is downloaded in the auto-generated "obsolete" directory inside the specified `pdb_dir`      |
-| `overwrite::Bool=false`                       | If set `true`, overwrites the PDB file if it exists in `pdb_dir`; by default skips downloading the PDB file if it exists |
-| `ba_number::Integer=0`                        | If set > 0 downloads the respective biological assembly; by default downloads the PDB file                               |
-| `structure_name::AbstractString="$pdbid.pdb"` | The name given to the returned `ProteinStructure`; defaults to the PDB ID                                                |
-| `remove_disorder::Bool=false`                 | Whether to remove atoms with alt loc ID not ' ' or 'A'.                                                                  |
-| `read_std_atoms::Bool=true`                   | Whether to read standard ATOM records.                                                                                   |
-| `read_het_atoms::Bool=true`                   | Whether to read HETATOM records.                                                                                         |
 
 
 ## Writing PDB files
@@ -445,13 +422,6 @@ downloadentirepdb(pdb_dir="path/to/pdb/directory", file_format=MMTF)
 ```
 
 This operation takes a lot of disk space and time to complete (depending on internet connection).
-The keyword arguments are:
-
-| Keyword Argument                | Description                                                                                                              |
-| :------------------------------ | :----------------------------------------------------------------------------------------------------------------------- |
-| `pdb_dir::AbstractString=pwd()` | The directory to which the PDB files are downloaded; defaults to the current working directory                           |
-| `file_format::Type=PDB`         | The format of the PDB file; options are PDB, PDBXML, MMCIF and MMTF                                                      |
-| `overwrite::Bool=false`         | If set `true`, overwrites the PDB file if it exists in `pdb_dir`; by default skips downloading the PDB file if it exists |
 
 To update your local PDB directory based on the weekly status list of new, modified and obsolete PDB files from the RCSB server:
 
