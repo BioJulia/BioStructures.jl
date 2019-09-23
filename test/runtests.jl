@@ -940,8 +940,10 @@ end
     res = collectresidues(DisorderedResidue[struc['A'][16], struc['A'][10]])
     @test length(res) == 2
     @test isa(res, Vector{DisorderedResidue})
-    @test resnumber(res[1]) == 10
+    @test resnumber(res[1]) == 16
     @test countresidues(DisorderedResidue[struc['A'][16], struc['A'][10]]) == 2
+    sort!(res)
+    @test resnumber(res[1]) == 10
 
 
     # Test parsing 1SSU (multiple models)
@@ -959,13 +961,13 @@ end
     @test countatoms(struc, hydrogenselector) == 357
     ats = collectatoms(Model[struc[5], struc[10]])
     @test length(ats) == 1512
-    @test z(ats[20]) == -16.522
-    @test z(ats[1000]) == -0.394
+    @test z(ats[20]) == -14.782
+    @test z(ats[1000]) == -3.367
     @test countatoms(Model[struc[5], struc[10]]) == 1512
     res = collectresidues(Model[struc[5], struc[10]])
     @test length(res) == 102
-    @test y(res[10]["O"]) == -6.421
-    @test y(res[100]["O"]) == -15.66
+    @test y(res[10]["O"]) == -1.612
+    @test y(res[100]["O"]) == -13.184
     @test countresidues(Model[struc[5], struc[10]]) == 102
     chs = collectchains(Model[struc[5], struc[10]])
     @test length(chs) == 2
@@ -974,8 +976,8 @@ end
     @test countchains(Model[struc[5], struc[10]]) == 2
     mods = collectmodels(Model[struc[10], struc[5]])
     @test length(mods) == 2
-    @test modelnumber.(mods) == [5, 10]
-    @test z(mods[2]['A'][5]["CA"]) == -5.667
+    @test modelnumber.(mods) == [10, 5]
+    @test z(mods[2]['A'][5]["CA"]) == -5.837
     @test countmodels(Model[struc[10], struc[5]]) == 2
 
 
@@ -986,10 +988,10 @@ end
     @test isa(ats, Vector{AbstractAtom})
     @test isa(ats[70], Atom)
     @test isa(ats[1290], DisorderedAtom)
-    @test serial(ats[1660]) == 1666
+    @test serial(ats[1660]) == 3323
     ats = collectatoms(struc, heteroselector)
     @test length(ats) == 492
-    @test serial(ats[80]) == 3406
+    @test serial(ats[80]) == 3463
     ats = collectatoms(struc, disorderselector)
     @test length(ats) == 12
     @test serial(ats[10]) == 3338
@@ -998,7 +1000,7 @@ end
     @test serial(ats[4]) == 1294
     ats = collectatoms(struc[1])
     @test length(ats) == 3804
-    @test serial(ats[1660]) == 1666
+    @test serial(ats[1660]) == 3323
     ats = collectatoms(struc['A'])
     @test length(ats) == 1954
     @test serial(ats[240]) == 240
@@ -1016,21 +1018,21 @@ end
     @test serial(ats[1]) == 1292
     ats = collectatoms(Chain[struc['B'], struc['A']])
     @test length(ats) == 3804
-    @test serial(ats[5]) == 5
+    @test serial(ats[5]) == 1667
     ats = collectatoms(Residue[struc['A'][51], struc['A'][50]])
     @test length(ats) == 17
-    @test serial(ats[5]) == 359
+    @test serial(ats[5]) == 368
     ats = collectatoms(AbstractResidue[struc['A'][51], struc['A'][50]])
     @test length(ats) == 17
-    @test serial(ats[5]) == 359
+    @test serial(ats[5]) == 368
     ats = collectatoms(Atom[struc['A'][51]["CA"], struc['A'][50]["CA"]])
     @test length(ats) == 2
     @test isa(ats, Vector{Atom})
-    @test serial(ats[2]) == 365
+    @test serial(ats[2]) == 356
     ats = collectatoms(DisorderedAtom[struc['A'][167]["CZ"], struc['A'][167]["CD"]])
     @test length(ats) == 2
     @test isa(ats, Vector{DisorderedAtom})
-    @test serial(ats[2]) == 1292
+    @test serial(ats[2]) == 1288
     ats = collectatoms(AbstractAtom[struc['A'][50]["CA"], struc['A'][167]["CZ"]])
     @test length(ats) == 2
     @test isa(ats, Vector{AbstractAtom})
@@ -1094,19 +1096,19 @@ end
     @test resnumber(res[1]) == 167
     res = collectresidues(Chain[struc['B'], struc['A']])
     @test length(res) == 808
-    @test resid(res[5], full=true) == "5:A"
+    @test resid(res[5], full=true) == "5:B"
     res = collectresidues(Residue[struc['A'][51], struc['A'][50]])
     @test length(res) == 2
     @test isa(res, Vector{Residue})
-    @test resnumber(res[1]) == 50
+    @test resnumber(res[1]) == 51
     res = collectresidues(AbstractResidue[struc['A'][51], struc['A'][50]])
     @test length(res) == 2
     @test isa(res, Vector{AbstractResidue})
-    @test resnumber(res[1]) == 50
+    @test resnumber(res[1]) == 51
     res = collectresidues(Atom[struc['A'][51]["CA"], struc['A'][50]["CA"]])
     @test length(res) == 2
     @test isa(res, Vector{AbstractResidue})
-    @test resnumber(res[2]) == 51
+    @test resnumber(res[2]) == 50
     res = collectresidues(DisorderedAtom[struc['A'][167]["CZ"], struc['A'][167]["CD"]])
     @test length(res) == 1
     @test isa(res, Vector{AbstractResidue})
@@ -1162,7 +1164,7 @@ end
     @test chainid(chs[1]) == "A"
     chs = collectchains(Chain[struc['B'], struc['A']])
     @test length(chs) == 2
-    @test chainid(chs[2]) == "B"
+    @test chainid(chs[2]) == "A"
     chs = collectchains(Residue[struc['A'][51], struc['B'][50]])
     @test length(chs) == 2
     @test chainid(chs[2]) == "B"
@@ -1171,7 +1173,7 @@ end
     @test chainid(chs[2]) == "B"
     chs = collectchains(Atom[struc['B'][51]["CA"], struc['A'][50]["CA"]])
     @test length(chs) == 2
-    @test chainid(chs[2]) == "B"
+    @test chainid(chs[2]) == "A"
     chs = collectchains(DisorderedAtom[struc['A'][167]["CZ"], struc['A'][167]["CD"]])
     @test length(chs) == 1
     @test chainid(chs[1]) == "A"
@@ -1230,7 +1232,7 @@ end
     @test modelnumber(mods[1]) == 1
     mods = collectmodels(AbstractResidue[struc_1SSU[12]['A'][51], struc_1SSU['A'][50]])
     @test length(mods) == 2
-    @test modelnumber(mods[2]) == 12
+    @test modelnumber(mods[2]) == 1
     mods = collectmodels(Atom[struc_1SSU['A'][51]["CA"], struc_1SSU['A'][50]["CA"]])
     @test length(mods) == 1
     @test modelnumber(mods[1]) == 1
@@ -1767,7 +1769,7 @@ end
     res = collectresidues(DisorderedResidue[struc['A'][16], struc['A'][10]])
     @test length(res) == 2
     @test isa(res, Vector{DisorderedResidue})
-    @test resnumber(res[1]) == 10
+    @test resnumber(res[1]) == 16
     @test countresidues(DisorderedResidue[struc['A'][16], struc['A'][10]]) == 2
 
 
@@ -1793,8 +1795,8 @@ end
     @test countatoms(Model[struc[5], struc[10]]) == 1512
     res = collectresidues(Model[struc[5], struc[10]])
     @test length(res) == 102
-    @test y(res[10]["O"]) == -6.421
-    @test y(res[100]["O"]) == -15.66
+    @test y(res[10]["O"]) == -1.612
+    @test y(res[100]["O"]) == -13.184
     @test countresidues(Model[struc[5], struc[10]]) == 102
     chs = collectchains(Model[struc[5], struc[10]])
     @test length(chs) == 2
@@ -1803,8 +1805,8 @@ end
     @test countchains(Model[struc[5], struc[10]]) == 2
     mods = collectmodels(Model[struc[10], struc[5]])
     @test length(mods) == 2
-    @test modelnumber.(mods) == [5, 10]
-    @test z(mods[2]['A'][5]["CA"]) == -5.667
+    @test modelnumber.(mods) == [10, 5]
+    @test z(mods[2]['A'][5]["CA"]) == -5.837
     @test countmodels(Model[struc[10], struc[5]]) == 2
 
 

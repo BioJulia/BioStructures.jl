@@ -1143,7 +1143,7 @@ end
 """
     collectmodels(el)
 
-Returns a sorted `Vector` of the models in a `StructuralElementOrList`.
+Returns a `Vector` of the models in a `StructuralElementOrList`.
 Additional arguments are model selector functions - only models that return
 `true` from all the functions are retained.
 """
@@ -1153,7 +1153,7 @@ collectmodels(mod::Model) = [mod]
 
 collectmodels(el::Union{Chain, AbstractResidue, AbstractAtom}) = [model(el)]
 
-collectmodels(mods::Vector{Model}) = sort(mods)
+collectmodels(mods::Vector{Model}) = mods
 
 function collectmodels(els::Vector{<:Union{Chain, AbstractResidue, AbstractAtom}})
     mod_list = Model[]
@@ -1162,7 +1162,7 @@ function collectmodels(els::Vector{<:Union{Chain, AbstractResidue, AbstractAtom}
             push!(mod_list, model(el))
         end
     end
-    return sort!(mod_list)
+    return mod_list
 end
 
 # One selector explicitly defined to prevent this being called without selectors
@@ -1192,7 +1192,7 @@ countmodels(mods::Vector{Model}) = length(mods)
 """
     collectchains(el)
 
-Returns a sorted `Vector` of the chains in a `StructuralElementOrList`.
+Returns a `Vector` of the chains in a `StructuralElementOrList`.
 Additional arguments are chain selector functions - only chains that return
 `true` from all the functions are retained.
 """
@@ -1215,10 +1215,10 @@ function collectchains(mods::Vector{Model})
     for mod in mods
         append!(ch_list, collectchains(mod))
     end
-    return sort!(ch_list)
+    return ch_list
 end
 
-collectchains(chs::Vector{Chain}) = sort(chs)
+collectchains(chs::Vector{Chain}) = chs
 
 function collectchains(els::Vector{<:Union{AbstractResidue, AbstractAtom}})
     ch_list = Chain[]
@@ -1227,7 +1227,7 @@ function collectchains(els::Vector{<:Union{AbstractResidue, AbstractAtom}})
             push!(ch_list, chain(el))
         end
     end
-    return sort!(ch_list)
+    return ch_list
 end
 
 function collectchains(el::StructuralElementOrList,
@@ -1256,7 +1256,7 @@ countchains(chs::Vector{Chain}) = length(chs)
 """
     collectresidues(el)
 
-Returns a sorted `Vector` of the residues in a `StructuralElementOrList`.
+Returns a `Vector` of the residues in a `StructuralElementOrList`.
 Additional arguments are residue selector functions - only residues that
 return `true` from all the functions are retained.
 """
@@ -1273,7 +1273,7 @@ function collectresidues(el::Union{Model, Vector{Model}, Vector{Chain}})
     for sub_el in el
         append!(res_list, collectresidues(sub_el))
     end
-    return sort!(res_list)
+    return res_list
 end
 
 collectresidues(ch::Chain) = collect(ch)
@@ -1284,7 +1284,7 @@ collectresidues(at::AbstractAtom) = AbstractResidue[residue(at)]
 
 # Note output is always Vector{AbstractResidue} unless input was Vector{Residue}
 # or Vector{DisorderedResidue}, in which case output is same type as input type
-collectresidues(res_list::Vector{<:AbstractResidue}) = sort(res_list)
+collectresidues(res_list::Vector{<:AbstractResidue}) = res_list
 
 function collectresidues(at_list::Vector{<:AbstractAtom})
     res_list = AbstractResidue[]
@@ -1293,7 +1293,7 @@ function collectresidues(at_list::Vector{<:AbstractAtom})
             push!(res_list, residue(at))
         end
     end
-    return sort!(res_list)
+    return res_list
 end
 
 function collectresidues(el::StructuralElementOrList,
@@ -1325,7 +1325,7 @@ end
 """
     collectatoms(el)
 
-Returns a sorted `Vector` of the atoms in a `StructuralElementOrList`.
+Returns a `Vector` of the atoms in a `StructuralElementOrList`.
 Additional arguments are atom selector functions - only atoms that return
 `true` from all the functions are retained.
 """
@@ -1343,7 +1343,7 @@ function collectatoms(el::Union{Model, Chain, Vector{Model}, Vector{Chain},
     for sub_el in el
         append!(at_list, collectatoms(sub_el))
     end
-    return sort!(at_list)
+    return at_list
 end
 
 collectatoms(res::AbstractResidue) = collect(res)
@@ -1352,7 +1352,7 @@ collectatoms(at::AbstractAtom) = AbstractAtom[at]
 
 # Note output is always Vector{AbstractAtom} unless input was Vector{Atom} or
 # Vector{DisorderedAtom}, in which case output is same type as input type
-collectatoms(at_list::Vector{<:AbstractAtom}) = sort(at_list)
+collectatoms(at_list::Vector{<:AbstractAtom}) = at_list
 
 function collectatoms(el::StructuralElementOrList, atom_selector::Function, atom_selectors::Function...)
     return applyselectors(collectatoms(el), atom_selector, atom_selectors...)
@@ -1707,8 +1707,7 @@ function hydrogenselector(at::AbstractAtom)
 end
 
 
-# Residues are ordered in a chain with all hetero residues at the end
-# For obtaining sequence we will re-order them numerically
+# For obtaining sequence we will re-order residues numerically
 function AminoAcidSequence(ch::Chain, residue_selectors::Function...)
     return AminoAcidSequence(
         sort(collectresidues(ch, residue_selectors...), by=resnumber))
