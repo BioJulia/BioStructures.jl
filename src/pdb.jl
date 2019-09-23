@@ -440,10 +440,10 @@ effectively the same.
 
 # Arguments
 - `pdbid::AbstractString`: the PDB ID to be read.
-- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is
-    downloaded; defaults to the current working directory.
-- `ba_number::Integer=0`: if set > 0 downloads the respective biological
-    assembly; by default downloads the PDB file.
+- `pdb_dir::AbstractString=pwd()`: the directory from which the PDB file is
+    read; defaults to the current working directory.
+- `ba_number::Integer=0`: if set > 0 reads the respective biological
+    assembly; by default reads the PDB file.
 - `structure_name::AbstractString="\$pdbid.pdb"`: the name given to the returned
     `ProteinStructure`; defaults to the PDB ID.
 - `remove_disorder::Bool=false`: whether to remove atoms with alt loc ID not ' '
