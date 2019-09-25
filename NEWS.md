@@ -1,6 +1,24 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.6.0 - September 2019
+
+* `collectatoms`, `collectresidues`, `collectchains` and `collectmodels` no longer run `sort` before returning the final list. The user can run an explicit `sort` themselves if desired. This change makes the functions faster and allows preservation of the element order.
+* Speed up residue iteration.
+* Documentation improvements.
+
+## v0.5.1 - August 2019
+
+* Fix `MMCIFDict` to always contain a `Dict{String, Vector{String}}` rather than a `Dict{String, Union{String, Vector{String}}}`, which includes making the `"data_"` tag a `Vector{String}`.
+* More functions documented and documentation bugfixes.
+
+## v0.5.0 - August 2019
+
+* The mmCIF reader now returns `Array{String,1}` for dictionary values even when there is only a single component. This improves consistency.
+* Documentation expanded with references to Bio3DView.jl and an extra example.
+* Replace REQUIRE with Project.toml.
+* Bugfix when reading truncated MODEL line in a PDB file.
+
 ## v0.4.0 - September 2018
 
 * The `ContactMap` and `DistanceMap` types are introduced along with their supertype `SpatialMap`. `contactmap` is removed. Plot recipes are defined for visualisation of `ContactMap`s and `DistanceMap`s. `showcontactmap` provides a quick way to view a `ContactMap` in the terminal.
