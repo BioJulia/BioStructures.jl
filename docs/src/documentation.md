@@ -232,11 +232,11 @@ Various functions are provided to calculate spatial quantities for proteins:
 | `showcontactmap`     | Print a representation of a `ContactMap` to `stdout` or a specified `IO` instance                |
 | `rmsd`               | RMSD between two elements of the same size - assumes they are superimposed                       |
 | `displacements`      | `Vector` of displacements between two elements of the same size - assumes they are superimposed  |
+| `MetaGraph`          | Construct a graph of contacting elements                                                         |
 
 The `omegaangle`, `phiangle` and `psiangle` functions can take either a pair of residues or a chain and a position.
 The `omegaangle` and `phiangle` functions measure the angle between the residue at the given index and the one before.
 The `psiangle` function measures between the given index and the one after.
-
 For example:
 
 ```julia
@@ -285,6 +285,31 @@ plot(dists)
 ```
 
 ![distancemap](distancemap.png)
+
+The contacting elements in a molecular structure form a graph, and this can be retrieved using `MetaGraph`.
+This extends `MetaGraph` from [MetaGraphs.jl](https://github.com/JuliaGraphs/MetaGraphs.jl), allowing you to use all the graph analysis tools in [LightGraphs.jl](https://github.com/JuliaGraphs/LightGraphs.jl).
+For example:
+
+```julia
+julia> mg = MetaGraph(collectatoms(struc["A"], cbetaselector), 8.0)
+{85, 423} undirected Int64 metagraph with Float64 weights defined by :weight (default weight 1.0)
+
+julia> nv(mg)
+85
+
+julia> ne(mg)
+423
+
+julia> get_prop(mg, :contactdist)
+8.0
+
+julia> mg[10, :element]
+Atom CB with serial 71, coordinates [-3.766, 4.031, 23.526]
+```
+
+See the [LightGraphs docs](https://juliagraphs.github.io/LightGraphs.jl/latest) for details on how to calculate properties such as shortest paths, centrality measures, community detection and more.
+Similar to `ContactMap`, contacts are found between any element type passed in.
+So if you wanted the graph of chain contacts in a protein complex you could give a `Model` as the first argument.
 
 
 ## Downloading PDB files

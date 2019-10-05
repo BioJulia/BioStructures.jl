@@ -3,6 +3,8 @@ module TestBioStructures
 using Test
 using Format
 using RecipesBase
+using LightGraphs
+using MetaGraphs
 using BioCore
 using BioStructures
 using BioStructures:
@@ -2299,6 +2301,21 @@ end
 
     # Test the plot recipe
     RecipesBase.apply_recipe(Dict{Symbol, Any}(), dmap)
+
+
+    # Test atom graph constructor
+    cbetas = collectatoms(struc_1AKE["A"], cbetaselector)
+    mg = MetaGraph(cbetas, 8.0)
+    @test nv(mg) == 214
+    @test ne(mg) == 1027
+    @test get_prop(mg, :contactdist) == 8.0
+    @test mg[10, :element] == cbetas[10]
+
+    mg = MetaGraph(struc_1AKE[1], 10.0)
+    @test nv(mg) == 2
+    @test ne(mg) == 1
+    @test get_prop(mg, :contactdist) == 10.0
+    @test mg[2, :element] == struc_1AKE["B"]
 end
 
 # Delete temporary file
