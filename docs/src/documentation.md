@@ -472,7 +472,7 @@ See the [Bio3DView.jl tutorial](http://nbviewer.jupyter.org/github/jgreener64/Bi
 
 A few further examples of BioStructures usage are given below.
 
-**A)** To plot the temperature factors of a protein, if you have Plots installed:
+**A)** Plot the temperature factors of a protein:
 
 ```julia
 using Plots
@@ -484,7 +484,7 @@ plot(resnumber.(calphas),
      label="")
 ```
 
-**B)** To print the PDB records for all C-alpha atoms within 5 Angstrom of residue 38:
+**B)** Print the PDB records for all C-alpha atoms within 5 Angstrom of residue 38:
 
 ```julia
 for at in calphas
@@ -494,7 +494,7 @@ for at in calphas
 end
 ```
 
-**C)** To find the residues at the interface of a protein-protein interaction:
+**C)** Find the residues at the interface of a protein-protein interaction:
 
 ```julia
 for res_a in collectresidues(struc["A"], standardselector)
@@ -506,7 +506,7 @@ for res_a in collectresidues(struc["A"], standardselector)
 end
 ```
 
-**D)** To show the Ramachandran phi/psi angle plot of a structure, if you have Plots installed:
+**D)** Show the Ramachandran phi/psi angle plot of a structure:
 
 ```julia
 using Plots
@@ -523,7 +523,7 @@ scatter(rad2deg.(phi_angles),
      ylims=(-180, 180))
 ```
 
-**E)** To calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:
+**E)** Calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:
 
 ```julia
 downloadpdb("1SSU")
@@ -532,7 +532,7 @@ rmsd(struc_nmr[5], struc_nmr[10], heavyatomselector)
 displacements(struc_nmr[5], struc_nmr[10], heavyatomselector)
 ```
 
-**F)** To calculate the cysteine fraction of every structure in the PDB:
+**F)** Calculate the cysteine fraction of every structure in the PDB:
 
 ```julia
 l = pdbentrylist()
@@ -546,4 +546,15 @@ for p in l
         end
     end
 end
+```
+
+**G)** Interoperability is possible with other packages in the [Julia ecosystem](https://pkg.julialang.org/docs).
+For example, use [NearestNeighbors.jl](https://github.com/KristofferC/NearestNeighbors.jl) to find the 10 nearest residues to each residue:
+
+```julia
+using NearestNeighbors
+struc = retrievepdb("1AKE")
+ca = coordarray(struc["A"], cbetaselector)
+kdtree = KDTree(ca; leafsize=10)
+idxs, dists = knn(kdtree, ca, 10, true)
 ```
