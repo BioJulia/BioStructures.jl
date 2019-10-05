@@ -232,7 +232,7 @@ Various functions are provided to calculate spatial quantities for proteins:
 | `showcontactmap`     | Print a representation of a `ContactMap` to `stdout` or a specified `IO` instance                |
 | `rmsd`               | RMSD between two elements of the same size - assumes they are superimposed                       |
 | `displacements`      | `Vector` of displacements between two elements of the same size - assumes they are superimposed  |
-| `MetaGraph`          | Construct a graph of contacting elements                                                         |
+| `MetaGraph`          | Construct a `MetaGraph` of contacting elements                                                   |
 
 The `omegaangle`, `phiangle` and `psiangle` functions can take either a pair of residues or a chain and a position.
 The `omegaangle` and `phiangle` functions measure the angle between the residue at the given index and the one before.
