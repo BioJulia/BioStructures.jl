@@ -1719,8 +1719,8 @@ function AminoAcidSequence(res::Vector{<:AbstractResidue})
         else
             push!(seq, BioSymbols.AA_X)
         end
-        if i+1 <= length(res) && resnumber(res[i+1]) - resnumber(res[i]) > 1
-            append!(seq, [BioSymbols.AA_Gap for _ in 1:(resnumber(res[i+1]) - resnumber(res[i]) - 1)])
+        if i + 1 <= length(res) && resnumber(res[i + 1]) - resnumber(res[i]) > 1
+            append!(seq, [BioSymbols.AA_Gap for _ in 1:(resnumber(res[i + 1]) - resnumber(res[i]) - 1)])
         end
     end
     return AminoAcidSequence(seq)

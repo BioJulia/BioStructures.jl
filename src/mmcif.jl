@@ -84,7 +84,7 @@ function splitline(s::AbstractString)
         if c in whitespacechars
             if in_token && quote_open_char == ' '
                 in_token = false
-                push!(tokens, s[start_i:i-1])
+                push!(tokens, s[start_i:(i - 1)])
             end
         elseif c in quotechars
             if quote_open_char == ' '
@@ -94,10 +94,10 @@ function splitline(s::AbstractString)
                 quote_open_char = c
                 in_token = true
                 start_i = i + 1
-            elseif c == quote_open_char && (i == length(s) || s[i+1] in whitespacechars)
+            elseif c == quote_open_char && (i == length(s) || s[i + 1] in whitespacechars)
                 quote_open_char = ' '
                 in_token = false
-                push!(tokens, s[start_i:i-1])
+                push!(tokens, s[start_i:(i - 1)])
             end
         elseif c == '#' && quote_open_char == ' '
             return tokens
@@ -414,7 +414,7 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
             # Find the maximum key length
             m = maximum(length.(key_list))
             for i in key_list
-                println(output, "$(rpad("$key.$i", length(key)+m+4))$(formatmmcifcol(first(mmcif_dict["$key.$i"])))")
+                println(output, "$(rpad("$key.$i", length(key) + m + 4))$(formatmmcifcol(first(mmcif_dict["$key.$i"])))")
             end
         # If the value has more than one component, write as keys then a value table
         else
@@ -440,7 +440,7 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
             # Write the values as rows
             for i in 1:n_vals
                 for col in key_list
-                    print(output, formatmmcifcol(mmcif_dict["$key.$col"][i], col_widths[col]+1))
+                    print(output, formatmmcifcol(mmcif_dict["$key.$col"][i], col_widths[col] + 1))
                 end
                 println(output)
             end

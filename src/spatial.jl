@@ -233,10 +233,10 @@ function omegaangle(chain::Chain, res_id::Union{Integer, AbstractString})
         throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end
     i = inds[1]
-    if i == 1 || !sequentialresidues(chain[resids(chain)[i-1]], chain[resids(chain)[i]])
+    if i == 1 || !sequentialresidues(chain[resids(chain)[i - 1]], chain[resids(chain)[i]])
         throw(ArgumentError("Cannot calculate omega angle for residue \"$res_id\" due to a lack of connected residues"))
     end
-    return omegaangle(chain[resids(chain)[i]], chain[resids(chain)[i-1]])
+    return omegaangle(chain[resids(chain)[i]], chain[resids(chain)[i - 1]])
 end
 
 """
@@ -270,10 +270,10 @@ function phiangle(chain::Chain, res_id::Union{Integer, AbstractString})
         throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end
     i = inds[1]
-    if i == 1 || !sequentialresidues(chain[resids(chain)[i-1]], chain[resids(chain)[i]])
+    if i == 1 || !sequentialresidues(chain[resids(chain)[i - 1]], chain[resids(chain)[i]])
         throw(ArgumentError("Cannot calculate phi angle for residue \"$res_id\" due to a lack of connected residues"))
     end
-    return phiangle(chain[resids(chain)[i]], chain[resids(chain)[i-1]])
+    return phiangle(chain[resids(chain)[i]], chain[resids(chain)[i - 1]])
 end
 
 """
@@ -307,10 +307,10 @@ function psiangle(chain::Chain, res_id::Union{Integer, AbstractString})
         throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end
     i = inds[1]
-    if i == length(chain) || !sequentialresidues(chain[resids(chain)[i]], chain[resids(chain)[i+1]])
+    if i == length(chain) || !sequentialresidues(chain[resids(chain)[i]], chain[resids(chain)[i + 1]])
         throw(ArgumentError("Cannot calculate psi angle for residue \"$res_id\" due to a lack of connected residues"))
     end
-    return psiangle(chain[resids(chain)[i]], chain[resids(chain)[i+1]])
+    return psiangle(chain[resids(chain)[i]], chain[resids(chain)[i + 1]])
 end
 
 """
@@ -335,7 +335,7 @@ function omegaangles(el::StructuralElementOrList,
 
     for i in 2:length(res_list)
         res = res_list[i]
-        res_prev = res_list[i-1]
+        res_prev = res_list[i - 1]
         if sequentialresidues(res_prev, res)
             try
                 omega_angle = omegaangle(res, res_prev)
@@ -374,7 +374,7 @@ function phiangles(el::StructuralElementOrList,
 
     for i in 2:length(res_list)
         res = res_list[i]
-        res_prev = res_list[i-1]
+        res_prev = res_list[i - 1]
         if sequentialresidues(res_prev, res)
             try
                 phi_angle = phiangle(res, res_prev)
@@ -412,9 +412,9 @@ function psiangles(el::StructuralElementOrList,
 
     psi_angles = Float64[]
 
-    for i in 1:length(res_list)-1
+    for i in 1:(length(res_list) - 1)
         res = res_list[i]
-        res_next = res_list[i+1]
+        res_next = res_list[i + 1]
         if sequentialresidues(res, res_next)
             try
                 psi_angle = psiangle(res, res_next)
@@ -550,7 +550,7 @@ function ContactMap(el::StructuralElementOrList, contact_dist::Real)
     el_list = collect(el)
     for i in 1:length(el)
         contacts[i, i] = true
-        for j in 1:i-1
+        for j in 1:(i - 1)
             if sqdistance(el_list[i], el_list[j]) <= sq_contact_dist
                 contacts[i, j] = true
                 contacts[j, i] = true
@@ -575,7 +575,7 @@ function DistanceMap(el::StructuralElementOrList)
     dists = zeros(length(el), length(el))
     el_list = collect(el)
     for i in 1:length(el)
-        for j in 1:i-1
+        for j in 1:(i - 1)
             dist = distance(el_list[i], el_list[j])
             dists[i, j] = dist
             dists[j, i] = dist
