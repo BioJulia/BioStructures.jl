@@ -1316,8 +1316,7 @@ end
 
 countresidues(ch::Chain) = length(ch)
 
-function countresidues(res_list::Union{Vector{AbstractResidue},
-        Vector{Residue}, Vector{DisorderedResidue}})
+function countresidues(res_list::Vector{<:AbstractResidue})
     return length(res_list)
 end
 
@@ -1372,8 +1371,7 @@ end
 
 countatoms(res::AbstractResidue) = length(res)
 
-function countatoms(at_list::Union{Vector{AbstractAtom},
-        Vector{Atom}, Vector{DisorderedAtom}})
+function countatoms(at_list::Vector{<:AbstractAtom})
     return length(at_list)
 end
 
