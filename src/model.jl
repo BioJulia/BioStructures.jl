@@ -222,7 +222,10 @@ function Residue(name::AbstractString,
 end
 
 
-"A `StructuralElement` or `Vector` of `StructuralElement`s."
+"""
+A `StructuralElement` or `Vector` of `StructuralElement`s up to
+a `ProteinStructure`.
+"""
 const StructuralElementOrList = Union{
         StructuralElement,
         Vector{Model},
@@ -1706,9 +1709,11 @@ end
 
 
 # For obtaining sequence we will re-order residues numerically
-function AminoAcidSequence(ch::Chain, residue_selectors::Function...; gaps::Bool=true)
-    return AminoAcidSequence(
-        sort(collectresidues(ch, residue_selectors...), by=resnumber); gaps=gaps)
+function AminoAcidSequence(el::Union{StructuralElement, Vector{Model},
+                                    Vector{Chain}, Vector{<:AbstractAtom}},
+                        residue_selectors::Function...;
+                        gaps::Bool=true)
+    return AminoAcidSequence(collectresidues(el, residue_selectors...); gaps=gaps)
 end
 
 function AminoAcidSequence(res::Vector{<:AbstractResidue}; gaps::Bool=true)
@@ -1720,7 +1725,7 @@ function AminoAcidSequence(res::Vector{<:AbstractResidue}; gaps::Bool=true)
             push!(seq, BioSymbols.AA_X)
         end
         # Add gaps based on missing residue numbers
-        if gaps && i + 1 <= length(res) && resnumber(res[i + 1]) - resnumber(res[i]) > 1
+        if gaps && i + 1 <= length(res) && resnumber(res[i + 1]) - resnumber(res[i]) > 1 && chainid(res[i]) == chainid(res[i + 1])
             append!(seq, [BioSymbols.AA_Gap for _ in 1:(resnumber(res[i + 1]) - resnumber(res[i]) - 1)])
         end
     end

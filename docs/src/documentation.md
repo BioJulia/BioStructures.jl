@@ -198,7 +198,7 @@ julia> countresidues(struc, standardselector)
 85
 ```
 
-The sequence of a protein can be retrieved by passing a `Chain` or array of residues to `AminoAcidSequence` with optional residue selectors:
+The amino acid sequence of a protein can be retrieved by passing an element to `AminoAcidSequence` with optional residue selectors:
 
 ```julia
 julia> AminoAcidSequence(struc['A'], standardselector)
