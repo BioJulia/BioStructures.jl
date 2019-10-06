@@ -459,8 +459,7 @@ end
 
 function writemmcif(output::IO,
                 el::Union{ProteinStructure, Model, Chain, AbstractResidue,
-                    Vector{Model}, Vector{Chain}, Vector{AbstractResidue},
-                    Vector{Residue}, Vector{DisorderedResidue}},
+                    Vector{Model}, Vector{Chain}, Vector{<:AbstractResidue}},
                 atom_selectors::Function...)
     # Create an empty dictionary and add atoms one at a time
     atom_dict = Dict{String, Vector{String}}(

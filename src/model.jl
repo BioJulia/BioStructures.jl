@@ -230,12 +230,8 @@ const StructuralElementOrList = Union{
         StructuralElement,
         Vector{Model},
         Vector{Chain},
-        Vector{AbstractResidue},
-        Vector{Residue},
-        Vector{DisorderedResidue},
-        Vector{AbstractAtom},
-        Vector{Atom},
-        Vector{DisorderedAtom}
+        Vector{<:AbstractResidue},
+        Vector{<:AbstractAtom},
     }
 
 
@@ -1340,7 +1336,7 @@ function collectatoms(struc::ProteinStructure)
 end
 
 function collectatoms(el::Union{Model, Chain, Vector{Model}, Vector{Chain},
-        Vector{AbstractResidue}, Vector{Residue}, Vector{DisorderedResidue}})
+                                Vector{<:AbstractResidue}})
     at_list = AbstractAtom[]
     for sub_el in el
         append!(at_list, collectatoms(sub_el))

@@ -815,7 +815,7 @@ end
 
 function writepdb(output::IO,
                 el::Union{Model, Chain, AbstractResidue, Vector{Chain},
-                    Vector{AbstractResidue}, Vector{Residue}, Vector{DisorderedResidue}},
+                        Vector{<:AbstractResidue}},
                 atom_selectors::Function...)
     # Collect residues then expand out disordered residues
     for res in collectresidues(el)

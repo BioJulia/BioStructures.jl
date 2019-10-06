@@ -170,7 +170,7 @@ function bondangle(at_a::AbstractAtom,
     )
 end
 
-function bondangle(vec_a::Vector{Float64}, vec_b::Vector{Float64})
+function bondangle(vec_a::Vector{<:Real}, vec_b::Vector{<:Real})
     return acos(dot(vec_a, vec_b) / (norm(vec_a) * norm(vec_b)))
 end
 
@@ -195,9 +195,9 @@ function dihedralangle(at_a::AbstractAtom,
         coords(at_d) - coords(at_c))
 end
 
-function dihedralangle(vec_a::Vector{Float64},
-                    vec_b::Vector{Float64},
-                    vec_c::Vector{Float64})
+function dihedralangle(vec_a::Vector{<:Real},
+                    vec_b::Vector{<:Real},
+                    vec_c::Vector{<:Real})
     return atan(
         dot(cross(cross(vec_a, vec_b), cross(vec_b, vec_c)), vec_b / norm(vec_b)),
         dot(cross(vec_a, vec_b), cross(vec_b, vec_c)))
