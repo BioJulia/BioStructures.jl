@@ -198,7 +198,7 @@ julia> countresidues(struc, standardselector)
 85
 ```
 
-The sequence of a protein can be retrieved by passing a `Chain` or array of residues to `AminoAcidSequence`:
+The sequence of a protein can be retrieved by passing a `Chain` or array of residues to `AminoAcidSequence` with optional residue selectors:
 
 ```julia
 julia> AminoAcidSequence(struc['A'], standardselector)
@@ -206,7 +206,53 @@ julia> AminoAcidSequence(struc['A'], standardselector)
 RCGSQGGGSTCPGLRCCSIWGWCGDSEPYCGRTCENKCWSGERSDHRCGAAVGNPPCGQDRCCSVHGWCGGGNDYCSGGNCQYRC
 ```
 
-See [BioSequences.jl](https://github.com/BioJulia/BioSequences.jl) for more on how to deal with sequences.
+The `gaps` keyword argument determines whether to add gaps to the sequence based on missing residue numbers (default `true`).
+See [BioSequences.jl](https://github.com/BioJulia/BioSequences.jl) and [BioAlignments.jl](https://github.com/BioJulia/BioAlignments.jl) for more on how to deal with sequences.
+For example, to see the alignment of CDK1 and CDK2 (this example also makes use of Julia's [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/#Broadcasting-1)):
+
+```julia
+julia> struc1, struc2 = retrievepdb.(["4YC6", "1HCL"])
+2-element Array{ProteinStructure,1}:
+ ProteinStructure 4YC6.pdb with 1 models, 8 chains (A,B,C,D,E,F,G,H), 1420 residues, 12271 atoms
+ ProteinStructure 1HCL.pdb with 1 models, 1 chains (A), 294 residues, 2546 atoms
+
+julia> seq1, seq2 = AminoAcidSequence.([struc1["A"], struc2["A"]], standardselector, gaps=false)
+2-element Array{BioSequences.BioSequence{BioSequences.AminoAcidAlphabet},1}:
+ MEDYTKIEKIGEGTYGVVYKGRHKTTGQVVAMKKIRLES…SHVKNLDENGLDLLSKMLIYDPAKRISGKMALNHPYFND
+ MENFQKVEKIGEGTYGVVYKARNKLTGEVVALKKIRTEG…RSLLSQMLHYDPNKRISAKAALAHPFFQDVTKPVPHLRL
+
+julia> using BioAlignments
+
+julia> scoremodel = AffineGapScoreModel(BLOSUM62, gap_open=-5, gap_extend=-1);
+
+julia> al = pairalign(GlobalAlignment(), seq1, seq2, scoremodel)
+PairwiseAlignmentResult{Int64,BioSequences.BioSequence{BioSequences.AminoAcidAlphabet},BioSequences.BioSequence{BioSequences.AminoAcidAlphabet}}:
+  score: 972
+  seq:   1 MEDYTKIEKIGEGTYGVVYKGRHKTTGQVVAMKKIRLESEEEGVPSTAIREISLLKELRH  60
+           ||   | ||||||||||||| | | || ||| |||| |    |||||||||||||||| |
+  ref:   1 MENFQKVEKIGEGTYGVVYKARNKLTGEVVALKKIRTE----GVPSTAIREISLLKELNH  56
+
+  seq:  61 PNIVSLQDVLMQDSRLYLIFEFLSMDLKKYLDS-----IP-PGQYMDSSLVKSYLYQILQ 114
+           |||| | ||      ||| ||||  ||||  |      || |       | |||| | ||
+  ref:  57 PNIVKLLDVIHTENKLYLVFEFLHQDLKKFMDASALTGIPLP-------LIKSYLFQLLQ 109
+
+  seq: 115 GIVFCHSRRVLHRDLKPQNLLIDDKGTIKLADFGLARAFGV----YTHEVVTLWYRSPEV 170
+           |  |||| ||||||||||||||   | ||||||||||||||    ||||||||||| ||
+  ref: 110 GLAFCHSHRVLHRDLKPQNLLINTEGAIKLADFGLARAFGVPVRTYTHEVVTLWYRAPEI 169
+
+  seq: 171 LLGSARYSTPVDIWSIGTIFAELATKKPLFHGDSEIDQLFRIFRALGTPNNEVWPEVESL 230
+           |||   ||| ||||| | ||||  |   || ||||||||||||| ||||   ||| | |
+  ref: 170 LLGCKYYSTAVDIWSLGCIFAEMVTRRALFPGDSEIDQLFRIFRTLGTPDEVVWPGVTSM 229
+
+  seq: 231 QDYKNTFPKWKPGSLASHVKNLDENGLDLLSKMLIYDPAKRISGKMALNHPYFND----- 285
+            |||  ||||        |  ||| |  ||| || ||| |||| | || || | |
+  ref: 230 PDYKPSFPKWARQDFSKVVPPLDEDGRSLLSQMLHYDPNKRISAKAALAHPFFQDVTKPV 289
+
+  seq: 285 ----- 285
+
+  ref: 290 PHLRL 294
+
+```
 
 
 ## Spatial calculations
@@ -293,6 +339,8 @@ For example:
 ```julia
 julia> mg = MetaGraph(collectatoms(struc["A"], cbetaselector), 8.0)
 {85, 423} undirected Int64 metagraph with Float64 weights defined by :weight (default weight 1.0)
+
+julia> using LightGraphs, MetaGraphs
 
 julia> nv(mg)
 85
@@ -462,7 +510,6 @@ There are a few more functions that may be useful:
 
 | Function                 | Returns                                                                         | Return type                                                 |
 | :----------------------- | :------------------------------------------------------------------------------ | :---------------------------------------------------------- |
-| `pdbentrylist`           | List of all PDB entries from the RCSB server                                    | `Array{String,1}`                                           |
 | `pdbstatuslist`          | List of PDB entries from a specified RCSB weekly status list URL                | `Array{String,1}`                                           |
 | `pdbrecentchanges`       | Added, modified and obsolete PDB lists from the recent RCSB weekly status files | `Tuple{Array{String,1},Array{String,1},` `Array{String,1}}` |
 | `pdbobsoletelist`        | List of all obsolete PDB entries                                                | `Array{String,1}`                                           |

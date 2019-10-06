@@ -1706,12 +1706,12 @@ end
 
 
 # For obtaining sequence we will re-order residues numerically
-function AminoAcidSequence(ch::Chain, residue_selectors::Function...)
+function AminoAcidSequence(ch::Chain, residue_selectors::Function...; gaps::Bool=true)
     return AminoAcidSequence(
-        sort(collectresidues(ch, residue_selectors...), by=resnumber))
+        sort(collectresidues(ch, residue_selectors...), by=resnumber); gaps=gaps)
 end
 
-function AminoAcidSequence(res::Vector{<:AbstractResidue})
+function AminoAcidSequence(res::Vector{<:AbstractResidue}; gaps::Bool=true)
     seq = BioSymbols.AminoAcid[]
     for i in 1:length(res)
         if haskey(BioSymbols.threeletter_to_aa, resname(res[i]))
@@ -1719,7 +1719,8 @@ function AminoAcidSequence(res::Vector{<:AbstractResidue})
         else
             push!(seq, BioSymbols.AA_X)
         end
-        if i + 1 <= length(res) && resnumber(res[i + 1]) - resnumber(res[i]) > 1
+        # Add gaps based on missing residue numbers
+        if gaps && i + 1 <= length(res) && resnumber(res[i + 1]) - resnumber(res[i]) > 1
             append!(seq, [BioSymbols.AA_Gap for _ in 1:(resnumber(res[i + 1]) - resnumber(res[i]) - 1)])
         end
     end
