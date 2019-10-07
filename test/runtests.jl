@@ -6,6 +6,7 @@ using RecipesBase
 using LightGraphs
 using MetaGraphs
 using BioCore
+using BioAlignments
 using BioStructures
 using BioStructures:
     fixlists!,
@@ -729,6 +730,28 @@ end
         Residue("ALA", 10, 'A', false, Chain('A')),
     ])
     @test seq == AminoAcidSequence("VA")
+
+    # Test pairwise alignment
+    res = collectresidues(struc["A"], standardselector)
+    alres = pairalign(res[1:40], res[21:60])
+    al = alignment(alres)
+    @test score(alres) == 40
+    @test count_matches(al) == 20
+    @test count_insertions(al) == 20
+    @test length(al) == 60
+    alres = pairalign(res[1:40], res[21:60], alignment=LocalAlignment())
+    al = alignment(alres)
+    @test score(alres) == 100
+    @test count_matches(al) == 20
+    @test count_insertions(al) == 0
+    @test length(al) == 20
+    alres = pairalign(res[1:40], res[21:60],
+            scoremodel=AffineGapScoreModel(BLOSUM62, gap_open=-50, gap_extend=-1))
+    al = alignment(alres)
+    @test score(alres) == -29
+    @test count_matches(al) == 5
+    @test count_insertions(al) == 0
+    @test length(al) == 40
 end
 
 

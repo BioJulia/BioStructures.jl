@@ -85,7 +85,8 @@ export
     notwaterselector,
     disorderselector,
     hydrogenselector,
-    AminoAcidSequence
+    AminoAcidSequence,
+    pairalign
 
 
 "A macromolecular structural element."
@@ -1704,7 +1705,6 @@ function hydrogenselector(at::AbstractAtom)
 end
 
 
-# For obtaining sequence we will re-order residues numerically
 function AminoAcidSequence(el::Union{StructuralElement, Vector{Model},
                                     Vector{Chain}, Vector{<:AbstractAtom}},
                         residue_selectors::Function...;
@@ -1726,6 +1726,16 @@ function AminoAcidSequence(res::Vector{<:AbstractResidue}; gaps::Bool=true)
         end
     end
     return AminoAcidSequence(seq)
+end
+
+function BioAlignments.pairalign(el1::StructuralElementOrList,
+                            el2::StructuralElementOrList,
+                            residue_selectors::Function...;
+                            scoremodel::AbstractScoreModel=AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1),
+                            alignment::BioAlignments.AbstractAlignment=GlobalAlignment())
+    seq1 = AminoAcidSequence(el1, residue_selectors...; gaps=false)
+    seq2 = AminoAcidSequence(el2, residue_selectors...; gaps=false)
+    return pairalign(alignment, seq1, seq2, scoremodel)
 end
 
 

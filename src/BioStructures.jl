@@ -19,6 +19,7 @@ import BioCore
 import BioCore.distance
 import BioSymbols
 import BioSequences.AminoAcidSequence
+using BioAlignments
 
 include("model.jl")
 include("pdb.jl")

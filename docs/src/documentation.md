@@ -223,36 +223,35 @@ julia> seq1, seq2 = AminoAcidSequence.([struc1["A"], struc2["A"]], standardselec
 
 julia> using BioAlignments
 
-julia> scoremodel = AffineGapScoreModel(BLOSUM62, gap_open=-5, gap_extend=-1);
+julia> scoremodel = AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1);
 
-julia> al = pairalign(GlobalAlignment(), seq1, seq2, scoremodel)
+julia> alres = pairalign(GlobalAlignment(), seq1, seq2, scoremodel)
 PairwiseAlignmentResult{Int64,BioSequences.BioSequence{BioSequences.AminoAcidAlphabet},BioSequences.BioSequence{BioSequences.AminoAcidAlphabet}}:
-  score: 972
+  score: 945
   seq:   1 MEDYTKIEKIGEGTYGVVYKGRHKTTGQVVAMKKIRLESEEEGVPSTAIREISLLKELRH  60
            ||   | ||||||||||||| | | || ||| |||| |    |||||||||||||||| |
   ref:   1 MENFQKVEKIGEGTYGVVYKARNKLTGEVVALKKIRTE----GVPSTAIREISLLKELNH  56
 
-  seq:  61 PNIVSLQDVLMQDSRLYLIFEFLSMDLKKYLDS-----IP-PGQYMDSSLVKSYLYQILQ 114
-           |||| | ||      ||| ||||  ||||  |      || |       | |||| | ||
-  ref:  57 PNIVKLLDVIHTENKLYLVFEFLHQDLKKFMDASALTGIPLP-------LIKSYLFQLLQ 109
+  seq:  61 PNIVSLQDVLMQDSRLYLIFEFLSMDLKKYLD-SIPPGQYMDSSLVKSYLYQILQGIVFC 119
+           |||| | ||      ||| ||||  ||||  | |   |      | |||| | |||  ||
+  ref:  57 PNIVKLLDVIHTENKLYLVFEFLHQDLKKFMDASALTG--IPLPLIKSYLFQLLQGLAFC 114
 
-  seq: 115 GIVFCHSRRVLHRDLKPQNLLIDDKGTIKLADFGLARAFGV----YTHEVVTLWYRSPEV 170
-           |  |||| ||||||||||||||   | ||||||||||||||    ||||||||||| ||
-  ref: 110 GLAFCHSHRVLHRDLKPQNLLINTEGAIKLADFGLARAFGVPVRTYTHEVVTLWYRAPEI 169
+  seq: 120 HSRRVLHRDLKPQNLLIDDKGTIKLADFGLARAFGV----YTHEVVTLWYRSPEVLLGSA 175
+           || ||||||||||||||   | ||||||||||||||    ||||||||||| || |||
+  ref: 115 HSHRVLHRDLKPQNLLINTEGAIKLADFGLARAFGVPVRTYTHEVVTLWYRAPEILLGCK 174
 
-  seq: 171 LLGSARYSTPVDIWSIGTIFAELATKKPLFHGDSEIDQLFRIFRALGTPNNEVWPEVESL 230
-           |||   ||| ||||| | ||||  |   || ||||||||||||| ||||   ||| | |
-  ref: 170 LLGCKYYSTAVDIWSLGCIFAEMVTRRALFPGDSEIDQLFRIFRTLGTPDEVVWPGVTSM 229
+  seq: 176 RYSTPVDIWSIGTIFAELATKKPLFHGDSEIDQLFRIFRALGTPNNEVWPEVESLQDYKN 235
+            ||| ||||| | ||||  |   || ||||||||||||| ||||   ||| | |  |||
+  ref: 175 YYSTAVDIWSLGCIFAEMVTRRALFPGDSEIDQLFRIFRTLGTPDEVVWPGVTSMPDYKP 234
 
-  seq: 231 QDYKNTFPKWKPGSLASHVKNLDENGLDLLSKMLIYDPAKRISGKMALNHPYFND----- 285
-            |||  ||||        |  ||| |  ||| || ||| |||| | || || | |
-  ref: 230 PDYKPSFPKWARQDFSKVVPPLDEDGRSLLSQMLHYDPNKRISAKAALAHPFFQDVTKPV 289
-
-  seq: 285 ----- 285
-
-  ref: 290 PHLRL 294
+  seq: 236 TFPKWKPGSLASHVKNLDENGLDLLSKMLIYDPAKRISGKMALNHPYFND---------- 285
+            ||||        |  ||| |  ||| || ||| |||| | || || | |
+  ref: 235 SFPKWARQDFSKVVPPLDEDGRSLLSQMLHYDPNKRISAKAALAHPFFQDVTKPVPHLRL 294
 
 ```
+
+In fact, `pairalign` is extended to carry out the above steps and return the alignment by calling `pairalign(struc1["A"], struc2["A"], standardselector)` in this case.
+`scoremodel` and `alignment` are keyword arguments with the defaults shown above.
 
 
 ## Spatial calculations
