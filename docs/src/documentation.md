@@ -251,7 +251,7 @@ PairwiseAlignmentResult{Int64,BioSequences.BioSequence{BioSequences.AminoAcidAlp
 ```
 
 In fact, `pairalign` is extended to carry out the above steps and return the alignment by calling `pairalign(struc1["A"], struc2["A"], standardselector)` in this case.
-`scoremodel` and `alignment` are keyword arguments with the defaults shown above.
+`scoremodel` and `aligntype` are keyword arguments with the defaults shown above.
 
 
 ## Spatial calculations

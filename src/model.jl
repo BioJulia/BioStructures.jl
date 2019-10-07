@@ -1732,10 +1732,10 @@ function BioAlignments.pairalign(el1::StructuralElementOrList,
                             el2::StructuralElementOrList,
                             residue_selectors::Function...;
                             scoremodel::AbstractScoreModel=AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1),
-                            alignment::BioAlignments.AbstractAlignment=GlobalAlignment())
+                            aligntype::BioAlignments.AbstractAlignment=GlobalAlignment())
     seq1 = AminoAcidSequence(el1, residue_selectors...; gaps=false)
     seq2 = AminoAcidSequence(el2, residue_selectors...; gaps=false)
-    return pairalign(alignment, seq1, seq2, scoremodel)
+    return pairalign(aligntype, seq1, seq2, scoremodel)
 end
 
 

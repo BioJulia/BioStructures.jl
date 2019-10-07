@@ -739,7 +739,7 @@ end
     @test count_matches(al) == 20
     @test count_insertions(al) == 20
     @test length(al) == 60
-    alres = pairalign(res[1:40], res[21:60], alignment=LocalAlignment())
+    alres = pairalign(res[1:40], res[21:60], aligntype=LocalAlignment())
     al = alignment(alres)
     @test score(alres) == 100
     @test count_matches(al) == 20
