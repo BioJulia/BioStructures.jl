@@ -179,15 +179,15 @@ end
 
 """
     downloadpdb(pdbid::AbstractString; <keyword arguments>)
-    downloadpdb(pdbid::Array{String, 1}; <keyword arguments>)
+    downloadpdb(pdbid::Array{<:AbstractString, 1}; <keyword arguments>)
     downloadpdb(f::Function, args...)
 
 Download files from the Protein Data Bank (PDB) via RCSB.
 
 When given an `AbstractString`, e.g. `"1AKE"`, downloads the PDB file and
 returns the path to the file.
-When given an `Array{String, 1}`, downloads the PDB files in the array and
-returns an array of the paths to the files.
+When given an `Array{<:AbstractString, 1}`, downloads the PDB files in the array
+and returns an array of the paths to the files.
 When given a function as the first argument, runs the function with the
 downloaded filepath(s) as an argument then removes the file(s).
 Requires an internet connection.
@@ -280,7 +280,7 @@ function downloadpdb(pdbid::AbstractString;
     return pdbpath
 end
 
-function downloadpdb(pdbidlist::Array{String, 1}; kwargs...)
+function downloadpdb(pdbidlist::Array{<:AbstractString, 1}; kwargs...)
     pdbpaths = String[]
     failedlist = String[]
     for pdbid in pdbidlist
