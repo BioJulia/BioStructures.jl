@@ -1,5 +1,6 @@
 export
     coordarray,
+    applytransform,
     superimpose!,
     superimpose,
     rmsd,
@@ -43,8 +44,18 @@ function coordarray(el::StructuralElementOrList, atom_selectors::Function...)
 end
 
 # Selector functions ignored
-coordarray(coords_in::Array{Float64}, atom_selectors::Function...) = coords_in
+coordarray(coords_in::Array{<:Real}, atom_selectors::Function...) = coords_in
 
+
+"""
+...
+"""
+function applytransform(coords1::Array{<:Real, 2},
+                        trans1::Array{<:Real},
+                        trans2::Array{<:Real},
+                        rot::Array{<:Real, 2})
+    return rot * (coords1 .- trans1) .+ trans2
+end
 
 """
 ...
@@ -56,7 +67,7 @@ function superimpose!(el1::StructuralElementOrList,
     trans1, trans2, rot = superimpose(el1, el2, residue_selectors...; kwargs...)
     ats1 = collectatoms(el1)
     coords1 = coordarray(ats1)
-    new_coords = rot * (coords1 .- trans1) .+ trans2
+    new_coords = applytransform(coords1, trans1, trans2, rot)
     for (i, at) in enumerate(ats1)
         coords!(at, new_coords[:, i])
     end
@@ -71,7 +82,7 @@ function superimpose(el1::StructuralElementOrList,
                         residue_selectors::Function...;
                         scoremodel::AbstractScoreModel=AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1),
                         aligntype::BioAlignments.AbstractAlignment=LocalAlignment(),
-                        alignatoms::Vector{<AbstractString}=["CA"])
+                        alignatoms::Vector{<:AbstractString}=["CA"])
     res1 = collectresidues(el1, residue_selectors...)
     res2 = collectresidues(el2, residue_selectors...)
     alres = pairalign(res1, res2; scoremodel=scoremodel, aligntype=aligntype)
@@ -138,7 +149,7 @@ Assumes they are already superimposed.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
-function rmsd(coords_one::Array{Float64}, coords_two::Array{Float64})
+function rmsd(coords_one::Array{<:Real}, coords_two::Array{<:Real})
     if size(coords_one) != size(coords_two)
         throw(ArgumentError("Sizes of coordinate arrays are different - cannot calculate RMSD"))
     end
@@ -166,7 +177,7 @@ Assumes they are already superimposed.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
-function displacements(coords_one::Array{Float64}, coords_two::Array{Float64})
+function displacements(coords_one::Array{<:Real}, coords_two::Array{<:Real})
     if size(coords_one) != size(coords_two)
         throw(ArgumentError("Sizes of coordinate arrays are different - cannot calculate displacements"))
     end
