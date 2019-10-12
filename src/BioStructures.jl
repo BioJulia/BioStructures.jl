@@ -8,7 +8,8 @@
 
 module BioStructures
 
-using LinearAlgebra: dot, cross, norm
+using LinearAlgebra: dot, cross, norm, svd
+using Statistics: mean
 
 using CodecZlib
 using Format

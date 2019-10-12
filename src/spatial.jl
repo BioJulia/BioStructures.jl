@@ -1,5 +1,7 @@
 export
     coordarray,
+    superimpose!,
+    superimpose,
     rmsd,
     displacements,
     sqdistance,
@@ -42,6 +44,87 @@ end
 
 # Selector functions ignored
 coordarray(coords_in::Array{Float64}, atom_selectors::Function...) = coords_in
+
+
+"""
+...
+"""
+function superimpose!(el1::StructuralElementOrList,
+                        el2::StructuralElementOrList,
+                        residue_selectors::Function...;
+                        kwargs...)
+    trans1, trans2, rot = superimpose(el1, el2, residue_selectors...; kwargs...)
+    ats1 = collectatoms(el1)
+    coords1 = coordarray(ats1)
+    new_coords = rot * (coords1 .- trans1) .+ trans2
+    for (i, at) in enumerate(ats1)
+        coords!(at, new_coords[:, i])
+    end
+    return el1
+end
+
+"""
+...
+"""
+function superimpose(el1::StructuralElementOrList,
+                        el2::StructuralElementOrList,
+                        residue_selectors::Function...;
+                        scoremodel::AbstractScoreModel=AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1),
+                        aligntype::BioAlignments.AbstractAlignment=LocalAlignment(),
+                        alignatoms::Vector{<AbstractString}=["CA"])
+    res1 = collectresidues(el1, residue_selectors...)
+    res2 = collectresidues(el2, residue_selectors...)
+    alres = pairalign(res1, res2; scoremodel=scoremodel, aligntype=aligntype)
+    al = alignment(alres)
+    inds1, inds2 = Int[], Int[]
+    # Offset residue counter based on start of aligned region
+    first_anchor = first(al.a.aln.anchors)
+    counter1 = first_anchor.seqpos
+    counter2 = first_anchor.refpos
+    for (v1, v2) in al
+        if v1 != BioSymbols.AA_Gap
+            counter1 += 1
+        end
+        if v2 != BioSymbols.AA_Gap
+            counter2 += 1
+        end
+        if v1 != BioSymbols.AA_Gap && v2 != BioSymbols.AA_Gap
+            push!(inds1, counter1)
+            push!(inds2, counter2)
+        end
+    end
+    @info "Superimposing based on a sequence alignment between $(length(inds1)) residues"
+    atoms1, atoms2 = AbstractAtom[], AbstractAtom[]
+    for (i1, i2) in zip(inds1, inds2)
+        for at_name in alignatoms
+            if at_name in atomnames(res1[i1]) && at_name in atomnames(res2[i2])
+                push!(atoms1, res1[i1][at_name])
+                push!(atoms2, res2[i2][at_name])
+            end
+        end
+    end
+    if length(atoms1) == 0
+        @info "No atoms found to superimpose"
+        # return identity transform
+    end
+    @info "Superimposing based on $(length(atoms1)) atoms"
+    return superimpose(coordarray(atoms1), coordarray(atoms2))
+end
+
+function superimpose(coords1::Array{<:Real, 2}, coords2::Array{<:Real, 2})
+    if size(coords1) != size(coords2)
+        throw(ArgumentError("Size of coordinate arrays differ: $(size(coords1)) and $(size(coords2))"))
+    end
+    trans1 = mean(coords1, dims=2)
+    trans2 = mean(coords2, dims=2)
+    p = coords1 .- trans1
+    q = coords2 .- trans2
+    # Find the rotation that maps the coordinates
+    cov = p * transpose(q)
+    svd_res = svd(cov)
+    rot = svd_res.V * transpose(svd_res.U)
+    return trans1, trans2, rot
+end
 
 
 """
