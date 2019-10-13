@@ -568,7 +568,8 @@ ishetero(dis_res::DisorderedResidue) = ishetero(defaultresidue(dis_res))
 Determines if an `AbstractAtom` is a `DisorderedAtom`, i.e. if there are
 multiple locations present for an atom.
 """
-isdisorderedatom(at::AbstractAtom) = isa(at, DisorderedAtom)
+isdisorderedatom(::Atom) = false
+isdisorderedatom(::DisorderedAtom) = true
 
 
 """
@@ -763,7 +764,8 @@ atoms(dis_res::DisorderedResidue) = atoms(defaultresidue(dis_res))
 Determine if an `AbstractResidue` is a `DisorderedResidue`, i.e. there are
 multiple residue names with the same residue ID.
 """
-isdisorderedres(res::AbstractResidue) = isa(res, DisorderedResidue)
+isdisorderedres(::Residue) = false
+isdisorderedres(::DisorderedResidue) = true
 
 
 """
