@@ -5,6 +5,7 @@ using Format
 using RecipesBase
 using LightGraphs
 using MetaGraphs
+using DataFrames
 using BioCore
 using BioAlignments
 using BioStructures
@@ -752,6 +753,22 @@ end
     @test count_matches(al) == 5
     @test count_insertions(al) == 0
     @test length(al) == 40
+
+
+    # Test DataFrame constructor
+    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
+    df = DataFrame(collectatoms(struc))
+    @test size(df) == (3804, 17)
+    @test first(df)[:x] == 26.981
+    @test size(describe(df), 1) == 17
+    @test isapprox(sum(df.tempfactor), 164803.34)
+    @test first(sort(df, :x))[:x] == -7.668
+    df = DataFrame(collectresidues(struc))
+    @test size(df) == (808, 8)
+    @test first(df)[:resname] == "MET"
+    @test size(describe(df), 1) == 8
+    @test sum(df.countatoms) == 3804
+    @test first(sort(df, :resnumber, rev=true))[:resnumber] == 735
 end
 
 
