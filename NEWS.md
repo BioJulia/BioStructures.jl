@@ -1,6 +1,15 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.7.0 - Oct 2019
+
+* `MetaGraph` from MetaGraphs.jl is extended to create graphs of contacting elements in a molecular structure, giving access to all the graph analysis tools in LightGraphs.jl.
+* `DataFrame` from DataFrames.jl is extended to allow creation of data frames from lists of atoms or residues.
+* `pairalign` from BioAlignments.jl is extended to produce pairwise alignments from structural elements.
+* `AminoAcidSequence` now takes any element type and has the `gaps` keyword argument.
+* Documentation example of interoperability with NearestNeighbors.jl.
+* Parametric types used more extensively internally.
+
 ## v0.6.0 - Sep 2019
 
 * `collectatoms`, `collectresidues`, `collectchains` and `collectmodels` no longer run `sort` before returning the final list. The user can run an explicit `sort` themselves if desired. This change makes the functions faster and allows preservation of the element order.
