@@ -15,6 +15,7 @@ using Format
 using RecipesBase
 using LightGraphs
 using MetaGraphs
+using DataFrames
 import BioCore
 import BioCore.distance
 import BioSymbols

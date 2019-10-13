@@ -434,6 +434,32 @@ INFO: Downloading PDB: 1ALW
 ProteinStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atoms
 ```
 
+If you prefer to work with data frames rather than the data structures in BioStructures, the `DataFrame` constructor from [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) has been extended to construct relevant data frames from lists of atoms or residues:
+
+```julia
+julia> df = DataFrame(collectatoms(struc));
+
+julia> first(df, 3)
+3×17 DataFrame. Omitted printing of 5 columns
+│ Row │ ishetero │ serial │ atomname │ altlocid │ resname │ chainid │ resnumber │ inscode │ x       │ y       │ z       │ occupancy │
+│     │ Bool     │ Int64  │ String   │ Char     │ String  │ String  │ Int64     │ Char    │ Float64 │ Float64 │ Float64 │ Float64   │
+├─────┼──────────┼────────┼──────────┼──────────┼─────────┼─────────┼───────────┼─────────┼─────────┼─────────┼─────────┼───────────┤
+│ 1   │ false    │ 1      │ N        │ ' '      │ GLU     │ A       │ 94        │ ' '     │ 15.637  │ -47.066 │ 18.179  │ 1.0       │
+│ 2   │ false    │ 2      │ CA       │ ' '      │ GLU     │ A       │ 94        │ ' '     │ 14.439  │ -47.978 │ 18.304  │ 1.0       │
+│ 3   │ false    │ 3      │ C        │ ' '      │ GLU     │ A       │ 94        │ ' '     │ 14.141  │ -48.183 │ 19.736  │ 1.0       │
+
+julia> df = DataFrame(collectresidues(struc));
+
+julia> first(df, 3)
+3×8 DataFrame
+│ Row │ ishetero │ resname │ chainid │ resnumber │ inscode │ countatoms │ modelnumber │ isdisorderedres │
+│     │ Bool     │ String  │ String  │ Int64     │ Char    │ Int64      │ Int64       │ Bool            │
+├─────┼──────────┼─────────┼─────────┼───────────┼─────────┼────────────┼─────────────┼─────────────────┤
+│ 1   │ false    │ GLU     │ A       │ 94        │ ' '     │ 9          │ 1           │ false           │
+│ 2   │ false    │ GLU     │ A       │ 95        │ ' '     │ 9          │ 1           │ false           │
+│ 3   │ false    │ VAL     │ A       │ 96        │ ' '     │ 7          │ 1           │ false           │
+```
+
 
 ## Writing PDB files
 
@@ -628,4 +654,18 @@ struc = retrievepdb("1AKE")
 ca = coordarray(struc["A"], cbetaselector)
 kdtree = KDTree(ca; leafsize=10)
 idxs, dists = knn(kdtree, ca, 10, true)
+```
+
+**H)** Interoperability with [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) gives access to filtering, sorting, summary statistics and other writing options:
+
+```julia
+using DataFrames
+using CSV
+using Statistics
+struc = retrievepdb("1ALW")
+df = DataFrame(collectatoms(struc))
+describe(df) # Show summary
+mean(df.tempfactor) # Column-wise operations
+sort(df, :x) # Sorting
+CSV.write("1ALW.csv", df) # CSV file writing
 ```
