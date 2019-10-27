@@ -145,8 +145,8 @@ For example:
 | `collect(struc['A'][50])`                               | Collect the sub-elements of an element, e.g. atoms from a residue | `Array{AbstractAtom,1}`    |
 | `collectresidues(struc)`                                | Collect the residues of an element                                | `Array{AbstractResidue,1}` |
 | `collectatoms(struc) `                                  | Collect the atoms of an element                                   | `Array{AbstractAtom,1}`    |
-| `collectatoms(struc, calphaselector)`                   | Collect the C-alpha atoms of an element                           | `Array{AbstractAtom,1}`    |
-| `collectatoms(struc, calphaselector, disorderselector)` | Collect the disordered C-alpha atoms of an element                | `Array{AbstractAtom,1}`    |
+| `collectatoms(struc, calphaselector)`                   | Collect the Cα atoms of an element                           | `Array{AbstractAtom,1}`    |
+| `collectatoms(struc, calphaselector, disorderselector)` | Collect the disordered Cα atoms of an element                | `Array{AbstractAtom,1}`    |
 
 The selectors available are:
 
@@ -155,8 +155,8 @@ The selectors available are:
 | standardselector  | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from standard (ATOM) records |
 | heteroselector    | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from hetero (HETATM) records |
 | atomnameselector  | `AbstractAtom`                      | Atoms with atom name in a given list                |
-| calphaselector    | `AbstractAtom`                      | C-alpha atoms                                       |
-| cbetaselector     | `AbstractAtom`                      | C-beta atoms, or C-alpha atoms for glycine residues |
+| calphaselector    | `AbstractAtom`                      | Cα atoms                                       |
+| cbetaselector     | `AbstractAtom`                      | Cβ atoms, or Cα atoms for glycine residues |
 | backboneselector  | `AbstractAtom`                      | Atoms in the protein backbone (CA, N and C)         |
 | heavyatomselector | `AbstractAtom`                      | Non-hydrogen atoms                                  |
 | hydrogenselector  | `AbstractAtom`                      | Hydrogen atoms                                      |
@@ -581,7 +581,7 @@ plot(resnumber.(calphas),
      label="")
 ```
 
-**B)** Print the PDB records for all C-alpha atoms within 5 Angstrom of residue 38:
+**B)** Print the PDB records for all Cα atoms within 5 Angstrom of residue 38:
 
 ```julia
 for at in calphas

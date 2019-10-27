@@ -1577,7 +1577,7 @@ function atomnameselector(at::AbstractAtom,
 end
 
 
-"`Set` of C-alpha atom names."
+"`Set` of Cα atom names."
 const calphaatomnames = Set(["CA"])
 
 
@@ -1585,14 +1585,14 @@ const calphaatomnames = Set(["CA"])
     calphaselector(at)
 
 Determines if an `AbstractAtom` is not a hetero-atom and corresponds to a
-C-alpha atom.
+Cα atom.
 """
 function calphaselector(at::AbstractAtom)
     return standardselector(at) && atomnameselector(at, calphaatomnames)
 end
 
 
-"`Set` of C-beta atom names."
+"`Set` of Cβ atom names."
 const cbetaatomnames = Set(["CB"])
 
 
@@ -1600,7 +1600,7 @@ const cbetaatomnames = Set(["CB"])
     cbetaselector(at)
 
 Determines if an `AbstractAtom` is not a hetero-atom and corresponds to a
-C-beta atom, or a C-alpha atom in glycine.
+Cβ atom, or a Cα atom in glycine.
 """
 function cbetaselector(at::AbstractAtom)
     return standardselector(at) &&
