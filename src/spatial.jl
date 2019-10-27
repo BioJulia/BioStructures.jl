@@ -32,10 +32,11 @@ A 3D transformation to map one set of coordinates onto another.
 Found using the Kabsch algorithm.
 When called with structural elements, carries out a pairwise alignment and
 superimposes on atoms from aligned residues.
-In this case, keyword arguments for pairwise alignment can be given.
+In this case, keyword arguments for pairwise alignment can be given, see
+`pairalign`.
 The residue selectors determine which residues to do the pairwise alignment on.
-In addition, the keyword argument `alignatoms` is a list of strings for atom
-names to use for superimposition (default just `"CA"`).
+The keyword argument `alignatoms` is an atom selector that selects the atoms to
+calculate the superimposition on (default `calphaselector`).
 
 The returned `Transformation` object consists of the mean coordinates of the
 first set, the mean coordinates of the second set, and the rotation to map the
@@ -123,7 +124,7 @@ function Transformation(el1::StructuralElementOrList,
                         residue_selectors::Function...;
                         scoremodel::AbstractScoreModel=AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1),
                         aligntype::BioAlignments.AbstractAlignment=LocalAlignment(),
-                        alignatoms::Vector{<:AbstractString}=["CA"])
+                        alignatoms::Function=calphaselector)
     res1 = collectresidues(el1, residue_selectors...)
     res2 = collectresidues(el2, residue_selectors...)
     alres = pairalign(res1, res2; scoremodel=scoremodel, aligntype=aligntype)
@@ -133,6 +134,7 @@ function Transformation(el1::StructuralElementOrList,
     first_anchor = first(al.a.aln.anchors)
     counter1 = first_anchor.seqpos
     counter2 = first_anchor.refpos
+    # Obtain indices of residues used in alignment
     for (v1, v2) in al
         if v1 != BioSymbols.AA_Gap
             counter1 += 1
@@ -148,16 +150,15 @@ function Transformation(el1::StructuralElementOrList,
     @info "Superimposing based on a sequence alignment between $(length(inds1)) residues"
     atoms1, atoms2 = AbstractAtom[], AbstractAtom[]
     for (i1, i2) in zip(inds1, inds2)
-        for at_name in alignatoms
-            if at_name in atomnames(res1[i1]) && at_name in atomnames(res2[i2])
-                push!(atoms1, res1[i1][at_name])
-                push!(atoms2, res2[i2][at_name])
-            end
+        sel_ats1 = collectatoms(res1[i1], alignatoms)
+        sel_ats2 = collectatoms(res2[i2], alignatoms)
+        if length(atoms1) == length(atoms2)
+            append!(atoms1, sel_ats1)
+            append!(atoms2, sel_ats2)
         end
     end
     if length(atoms1) == 0
-        @info "No atoms found to superimpose"
-        # return identity transform
+        throw(ArgumentError("No atoms found to superimpose"))
     end
     @info "Superimposing based on $(length(atoms1)) atoms"
     return Transformation(coordarray(atoms1), coordarray(atoms2))
@@ -180,19 +181,25 @@ end
 
 
 """
-    rmsd(element_one, element_two, atom_selectors...)
+    rmsd(element_one, element_two, residue_selectors...)
+    rmsd(element_one, element_two, superimpose=false)
     rmsd(coords_one, coords_two)
 
 Get the root-mean-square deviation (RMSD) in Å between two
-`StructuralElementOrList`s or two coordinate `Array`s of the same size.
+`StructuralElementOrList`s or two coordinate `Array`s.
 
-Assumes they are already superimposed.
-Additional arguments are atom selector functions - only atoms that return
-`true` from the functions are retained.
+If `superimpose` is `true` (the default), the elements are superimposed before
+RMSD calculation and the RMSD is calculated on the superimposed residues.
+See `Transformation` for keyword arguments.
+If `superimpose` is `false` the elements are assumed to be superimposed and must
+be of the same length.
+The keyword argument `rmsdatoms` is an atom selector that selects the atoms to
+calculate RMSD on (default `calphaselector`).
 """
 function rmsd(coords_one::Array{<:Real}, coords_two::Array{<:Real})
     if size(coords_one) != size(coords_two)
-        throw(ArgumentError("Sizes of coordinate arrays are different - cannot calculate RMSD"))
+        throw(ArgumentError("Coordinate arrays have size $(size(coords_one)) " *
+            "and $(size(coords_two)) but must be the same to calculate RMSD"))
     end
     diff = coords_one - coords_two
     return sqrt.(dot(diff, diff) / size(coords_one, 2))
@@ -200,10 +207,18 @@ end
 
 function rmsd(el_one::StructuralElementOrList,
             el_two::StructuralElementOrList,
-            atom_selectors::Function...)
-    return rmsd(
-        coordarray(el_one, atom_selectors...),
-        coordarray(el_two, atom_selectors...))
+            residue_selectors::Function...;
+            superimpose::Bool=true,
+            rmsdatoms::Function=calphaselector,
+            kwargs...)
+    if superimpose
+        trans = Transformation(el_one, el_two, residue_selectors...; kwargs...)
+        return rmsd(applytransform(coordarray(el_one, rmsdatoms), trans),
+                    coordarray(el_two, rmsdatoms))
+    else
+        return rmsd(coordarray(el_one, rmsdatoms),
+                    coordarray(el_two, rmsdatoms))
+    end
 end
 
 
@@ -220,7 +235,8 @@ Additional arguments are atom selector functions - only atoms that return
 """
 function displacements(coords_one::Array{<:Real}, coords_two::Array{<:Real})
     if size(coords_one) != size(coords_two)
-        throw(ArgumentError("Sizes of coordinate arrays are different - cannot calculate displacements"))
+        throw(ArgumentError("Coordinate arrays have size $(size(coords_one)) " *
+            "and $(size(coords_two)) but must be the same to calculate RMSD"))
     end
     diff = coords_one - coords_two
     return sqrt.(sum(diff .* diff, dims=1))[:]

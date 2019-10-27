@@ -275,8 +275,12 @@ Various functions are provided to calculate spatial quantities for proteins:
 | `ContactMap`         | `ContactMap` of two elements, or one element with itself                                         |
 | `DistanceMap`        | `DistanceMap` of two elements, or one element with itself                                        |
 | `showcontactmap`     | Print a representation of a `ContactMap` to `stdout` or a specified `IO` instance                |
-| `rmsd`               | RMSD between two elements of the same size - assumes they are superimposed                       |
-| `displacements`      | `Vector` of displacements between two elements of the same size - assumes they are superimposed  |
+| `Transformation`     | The 3D transformation to map one set of coordinates onto another                                 |
+| `applytransform!`    | Modify all coordinates in an element according to a transformation                               |
+| `applytransform`     | Modify coordinates according to a transformation                                                 |
+| `superimpose!`       | Superimpose one element onto another                                                             |
+| `rmsd`               | RMSD between two elements, with or without superimposition                                       |
+| `displacements`      | `Vector` of displacements between two elements, with or without superimposition                  |
 | `MetaGraph`          | Construct a `MetaGraph` of contacting elements                                                   |
 
 The `omegaangle`, `phiangle` and `psiangle` functions can take either a pair of residues or a chain and a position.
@@ -625,8 +629,8 @@ scatter(rad2deg.(phi_angles),
 ```julia
 downloadpdb("1SSU")
 struc_nmr = read("1SSU.pdb", PDB)
-rmsd(struc_nmr[5], struc_nmr[10], heavyatomselector)
-displacements(struc_nmr[5], struc_nmr[10], heavyatomselector)
+rmsd(struc_nmr[5], struc_nmr[10], superimpose=false, rmsdatoms=heavyatomselector)
+displacements(struc_nmr[5], struc_nmr[10], superimpose=false, rmsdatoms=heavyatomselector)
 ```
 
 **F)** Calculate the cysteine fraction of every structure in the PDB:
