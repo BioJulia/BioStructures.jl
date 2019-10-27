@@ -1,8 +1,9 @@
 export
+    Transformation,
     coordarray,
+    applytransform!,
     applytransform,
     superimpose!,
-    superimpose,
     rmsd,
     displacements,
     sqdistance,
@@ -21,6 +22,34 @@ export
     DistanceMap,
     showcontactmap,
     MetaGraph
+
+
+"""
+    Transformation(el1, el2, residue_selectors...)
+    Transformation(coords1, coords2)
+
+A 3D transformation to map one set of coordinates onto another.
+Found using the Kabsch algorithm.
+When called with structural elements, carries out a pairwise alignment and
+superimposes on atoms from aligned residues.
+In this case, keyword arguments for pairwise alignment can be given.
+The residue selectors determine which residues to do the pairwise alignment on.
+In addition, the keyword argument `alignatoms` is a list of strings for atom
+names to use for superimposition (default just `"CA"`).
+
+The returned `Transformation` object consists of the mean coordinates of the
+first set, the mean coordinates of the second set, and the rotation to map the
+first centred set onto the second centred set.
+"""
+struct Transformation
+    trans1::Array{Float64}
+    trans2::Array{Float64}
+    rot::Array{Float64, 2}
+end
+
+Base.show(io::IO, trans::Transformation) = print("3D transformation with ",
+    "translation 1 ", trans.trans1, ", translation 2 ", trans.trans2,
+    ", rotation ", trans.rot)
 
 
 """
@@ -48,36 +77,48 @@ coordarray(coords_in::Array{<:Real}, atom_selectors::Function...) = coords_in
 
 
 """
-...
+    applytransform!(el, transformation)
+
+Modify all coordinates in an element according to a transformation.
 """
-function applytransform(coords1::Array{<:Real, 2},
-                        trans1::Array{<:Real},
-                        trans2::Array{<:Real},
-                        rot::Array{<:Real, 2})
-    return rot * (coords1 .- trans1) .+ trans2
+function applytransform!(el::StructuralElementOrList,
+                        transformation::Transformation)
+    ats = collectatoms(el)
+    cs = coordarray(ats)
+    new_coords = applytransform(cs, transformation)
+    for (i, at) in enumerate(ats)
+        coords!(at, new_coords[:, i])
+    end
+    return el
 end
 
 """
-...
+    applytransform(coords, transformation)
+
+Modify coordinates according to a transformation.
+"""
+function applytransform(cs::Array{<:Real, 2},
+                        t::Transformation)
+    return t.rot * (cs .- t.trans1) .+ t.trans2
+end
+
+"""
+    superimpose!(el1, el2, residue_selectors...)
+
+Calculate the `Transformation` that maps the first element onto the second,
+and modify all coordinates in the first element according to the transformation.
+See `Transformation` for keyword arguments.
 """
 function superimpose!(el1::StructuralElementOrList,
                         el2::StructuralElementOrList,
                         residue_selectors::Function...;
                         kwargs...)
-    trans1, trans2, rot = superimpose(el1, el2, residue_selectors...; kwargs...)
-    ats1 = collectatoms(el1)
-    coords1 = coordarray(ats1)
-    new_coords = applytransform(coords1, trans1, trans2, rot)
-    for (i, at) in enumerate(ats1)
-        coords!(at, new_coords[:, i])
-    end
+    transformation = Transformation(el1, el2, residue_selectors...; kwargs...)
+    applytransform!(el1, transformation)
     return el1
 end
 
-"""
-...
-"""
-function superimpose(el1::StructuralElementOrList,
+function Transformation(el1::StructuralElementOrList,
                         el2::StructuralElementOrList,
                         residue_selectors::Function...;
                         scoremodel::AbstractScoreModel=AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1),
@@ -119,10 +160,10 @@ function superimpose(el1::StructuralElementOrList,
         # return identity transform
     end
     @info "Superimposing based on $(length(atoms1)) atoms"
-    return superimpose(coordarray(atoms1), coordarray(atoms2))
+    return Transformation(coordarray(atoms1), coordarray(atoms2))
 end
 
-function superimpose(coords1::Array{<:Real, 2}, coords2::Array{<:Real, 2})
+function Transformation(coords1::Array{<:Real, 2}, coords2::Array{<:Real, 2})
     if size(coords1) != size(coords2)
         throw(ArgumentError("Size of coordinate arrays differ: $(size(coords1)) and $(size(coords2))"))
     end
@@ -134,7 +175,7 @@ function superimpose(coords1::Array{<:Real, 2}, coords2::Array{<:Real, 2})
     cov = p * transpose(q)
     svd_res = svd(cov)
     rot = svd_res.V * transpose(svd_res.U)
-    return trans1, trans2, rot
+    return Transformation(trans1, trans2, rot)
 end
 
 
