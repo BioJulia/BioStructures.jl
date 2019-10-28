@@ -39,13 +39,16 @@ The keyword argument `alignatoms` is an atom selector that selects the atoms to
 calculate the superimposition on (default `calphaselector`).
 
 The returned `Transformation` object consists of the mean coordinates of the
-first set, the mean coordinates of the second set, and the rotation to map the
-first centred set onto the second centred set.
+first set, the mean coordinates of the second set, the rotation to map the
+first centred set onto the second centred set, and the indices of the aligned
+residues in the first and second elements if relevant.
 """
 struct Transformation
     trans1::Array{Float64}
     trans2::Array{Float64}
     rot::Array{Float64, 2}
+    inds1::Vector{Int}
+    inds2::Vector{Int}
 end
 
 Base.show(io::IO, trans::Transformation) = print("3D transformation with ",
@@ -161,10 +164,13 @@ function Transformation(el1::StructuralElementOrList,
         throw(ArgumentError("No atoms found to superimpose"))
     end
     @info "Superimposing based on $(length(atoms1)) atoms"
-    return Transformation(coordarray(atoms1), coordarray(atoms2))
+    return Transformation(coordarray(atoms1), coordarray(atoms2), inds1, inds2)
 end
 
-function Transformation(coords1::Array{<:Real, 2}, coords2::Array{<:Real, 2})
+function Transformation(coords1::Array{<:Real, 2},
+                        coords2::Array{<:Real, 2},
+                        inds1::Vector{Int}=Int[],
+                        inds2::Vector{Int}=Int[])
     if size(coords1) != size(coords2)
         throw(ArgumentError("Size of coordinate arrays differ: $(size(coords1)) and $(size(coords2))"))
     end
@@ -176,7 +182,7 @@ function Transformation(coords1::Array{<:Real, 2}, coords2::Array{<:Real, 2})
     cov = p * transpose(q)
     svd_res = svd(cov)
     rot = svd_res.V * transpose(svd_res.U)
-    return Transformation(trans1, trans2, rot)
+    return Transformation(trans1, trans2, rot, inds1, inds2)
 end
 
 
@@ -205,19 +211,21 @@ function rmsd(coords_one::Array{<:Real}, coords_two::Array{<:Real})
     return sqrt.(dot(diff, diff) / size(coords_one, 2))
 end
 
-function rmsd(el_one::StructuralElementOrList,
-            el_two::StructuralElementOrList,
+function rmsd(el1::StructuralElementOrList,
+            el2::StructuralElementOrList,
             residue_selectors::Function...;
             superimpose::Bool=true,
             rmsdatoms::Function=calphaselector,
             kwargs...)
     if superimpose
-        trans = Transformation(el_one, el_two, residue_selectors...; kwargs...)
-        return rmsd(applytransform(coordarray(el_one, rmsdatoms), trans),
-                    coordarray(el_two, rmsdatoms))
+        res1 = collectresidues(el1, residue_selectors...)
+        res2 = collectresidues(el2, residue_selectors...)
+        trans = Transformation(res1, res2; kwargs...)
+        return rmsd(applytransform(coordarray(res1[trans.inds1], rmsdatoms), trans),
+                    coordarray(res2[trans.inds2], rmsdatoms))
     else
-        return rmsd(coordarray(el_one, rmsdatoms),
-                    coordarray(el_two, rmsdatoms))
+        return rmsd(coordarray(el1, rmsdatoms),
+                    coordarray(el2, rmsdatoms))
     end
 end
 
