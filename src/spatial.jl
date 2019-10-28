@@ -231,31 +231,46 @@ end
 
 
 """
-    displacements(element_one, element_two, atom_selectors...)
+    displacements(element_one, element_two, residue_selectors...)
+    displacements(element_one, element_two, superimpose=false)
     displacements(coords_one, coords_two)
 
 Get the displacements in Å between atomic coordinates from two
-`StructuralElementOrList`s or two coordinate `Array`s of the same size.
+`StructuralElementOrList`s or two coordinate `Array`s.
 
-Assumes they are already superimposed.
-Additional arguments are atom selector functions - only atoms that return
-`true` from the functions are retained.
+If `superimpose` is `true` (the default), the elements are superimposed before
+calculation and the displacements are calculated on the superimposed residues.
+See `Transformation` for keyword arguments.
+If `superimpose` is `false` the elements are assumed to be superimposed and must
+be of the same length.
+The keyword argument `dispatoms` is an atom selector that selects the atoms to
+calculate displacements on (default `calphaselector`).
 """
 function displacements(coords_one::Array{<:Real}, coords_two::Array{<:Real})
     if size(coords_one) != size(coords_two)
         throw(ArgumentError("Coordinate arrays have size $(size(coords_one)) " *
-            "and $(size(coords_two)) but must be the same to calculate RMSD"))
+            "and $(size(coords_two)) but must be the same to calculate displacements"))
     end
     diff = coords_one - coords_two
     return sqrt.(sum(diff .* diff, dims=1))[:]
 end
 
 function displacements(el1::StructuralElementOrList,
-                    el2::StructuralElementOrList,
-                    atom_selectors::Function...)
-    return displacements(
-        coordarray(el1, atom_selectors...),
-        coordarray(el2, atom_selectors...))
+            el2::StructuralElementOrList,
+            residue_selectors::Function...;
+            superimpose::Bool=true,
+            dispatoms::Function=calphaselector,
+            kwargs...)
+    if superimpose
+        res1 = collectresidues(el1, residue_selectors...)
+        res2 = collectresidues(el2, residue_selectors...)
+        trans = Transformation(res1, res2; kwargs...)
+        return displacements(applytransform(coordarray(res1[trans.inds1], dispatoms), trans),
+                    coordarray(res2[trans.inds2], dispatoms))
+    else
+        return displacements(coordarray(el1, dispatoms),
+                            coordarray(el2, dispatoms))
+    end
 end
 
 
