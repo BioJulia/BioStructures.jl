@@ -242,12 +242,12 @@ function displacements(coords_one::Array{<:Real}, coords_two::Array{<:Real})
     return sqrt.(sum(diff .* diff, dims=1))[:]
 end
 
-function displacements(el_one::StructuralElementOrList,
-                    el_two::StructuralElementOrList,
+function displacements(el1::StructuralElementOrList,
+                    el2::StructuralElementOrList,
                     atom_selectors::Function...)
     return displacements(
-        coordarray(el_one, atom_selectors...),
-        coordarray(el_two, atom_selectors...))
+        coordarray(el1, atom_selectors...),
+        coordarray(el2, atom_selectors...))
 end
 
 
@@ -260,11 +260,11 @@ Get the minimum square distance in Å between two
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
-function sqdistance(el_one::StructuralElementOrList,
-                    el_two::StructuralElementOrList,
+function sqdistance(el1::StructuralElementOrList,
+                    el2::StructuralElementOrList,
                     atom_selectors::Function...)
-    coords_one = coordarray(el_one, atom_selectors...)
-    coords_two = coordarray(el_two, atom_selectors...)
+    coords_one = coordarray(el1, atom_selectors...)
+    coords_two = coordarray(el2, atom_selectors...)
     min_sq_dist = Inf
     for i in 1:size(coords_one, 2)
         for j in 1:size(coords_two, 2)
@@ -292,10 +292,10 @@ Get the minimum distance in Å between two `StructuralElementOrList`s.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
-function distance(el_one::StructuralElementOrList,
-                      el_two::StructuralElementOrList,
+function distance(el1::StructuralElementOrList,
+                      el2::StructuralElementOrList,
                       atom_selectors::Function...)
-    return sqrt(sqdistance(el_one, el_two, atom_selectors...))
+    return sqrt(sqdistance(el1, el2, atom_selectors...))
 end
 
 function distance(at_one::AbstractAtom, at_two::AbstractAtom)
@@ -681,14 +681,14 @@ function Base.show(io::IO, dm::DistanceMap)
 end
 
 
-function ContactMap(el_one::StructuralElementOrList,
-                el_two::StructuralElementOrList,
+function ContactMap(el1::StructuralElementOrList,
+                el2::StructuralElementOrList,
                 contact_dist::Real)
     sq_contact_dist = contact_dist ^ 2
-    contacts = falses(length(el_one), length(el_two))
-    for (i, subel_one) in enumerate(el_one)
-        for (j, subel_two) in enumerate(el_two)
-            if sqdistance(subel_one, subel_two) <= sq_contact_dist
+    contacts = falses(length(el1), length(el2))
+    for (i, subel1) in enumerate(el1)
+        for (j, subel2) in enumerate(el2)
+            if sqdistance(subel1, subel2) <= sq_contact_dist
                 contacts[i, j] = true
             end
         end
@@ -712,12 +712,12 @@ function ContactMap(el::StructuralElementOrList, contact_dist::Real)
     return ContactMap(contacts)
 end
 
-function DistanceMap(el_one::StructuralElementOrList,
-                el_two::StructuralElementOrList)
-    dists = zeros(length(el_one), length(el_two))
-    for (i, subel_one) in enumerate(el_one)
-        for (j, subel_two) in enumerate(el_two)
-            dists[i, j] = distance(subel_one, subel_two)
+function DistanceMap(el1::StructuralElementOrList,
+                el2::StructuralElementOrList)
+    dists = zeros(length(el1), length(el2))
+    for (i, subel1) in enumerate(el1)
+        for (j, subel2) in enumerate(el2)
+            dists[i, j] = distance(subel1, subel2)
         end
     end
     return DistanceMap(dists)
