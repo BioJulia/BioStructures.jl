@@ -1610,7 +1610,7 @@ end
 
 
 "`Set` of protein backbone atom names."
-const backboneatomnames = Set(["CA", "N", "C"])
+const backboneatomnames = Set(["CA", "N", "C", "O"])
 
 
 """

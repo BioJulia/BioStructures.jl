@@ -145,8 +145,8 @@ For example:
 | `collect(struc['A'][50])`                               | Collect the sub-elements of an element, e.g. atoms from a residue | `Array{AbstractAtom,1}`    |
 | `collectresidues(struc)`                                | Collect the residues of an element                                | `Array{AbstractResidue,1}` |
 | `collectatoms(struc) `                                  | Collect the atoms of an element                                   | `Array{AbstractAtom,1}`    |
-| `collectatoms(struc, calphaselector)`                   | Collect the Cα atoms of an element                           | `Array{AbstractAtom,1}`    |
-| `collectatoms(struc, calphaselector, disorderselector)` | Collect the disordered Cα atoms of an element                | `Array{AbstractAtom,1}`    |
+| `collectatoms(struc, calphaselector)`                   | Collect the Cα atoms of an element                                | `Array{AbstractAtom,1}`    |
+| `collectatoms(struc, calphaselector, disorderselector)` | Collect the disordered Cα atoms of an element                     | `Array{AbstractAtom,1}`    |
 
 The selectors available are:
 
@@ -155,9 +155,9 @@ The selectors available are:
 | standardselector  | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from standard (ATOM) records |
 | heteroselector    | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from hetero (HETATM) records |
 | atomnameselector  | `AbstractAtom`                      | Atoms with atom name in a given list                |
-| calphaselector    | `AbstractAtom`                      | Cα atoms                                       |
-| cbetaselector     | `AbstractAtom`                      | Cβ atoms, or Cα atoms for glycine residues |
-| backboneselector  | `AbstractAtom`                      | Atoms in the protein backbone (CA, N and C)         |
+| calphaselector    | `AbstractAtom`                      | Cα atoms                                            |
+| cbetaselector     | `AbstractAtom`                      | Cβ atoms, or Cα atoms for glycine residues          |
+| backboneselector  | `AbstractAtom`                      | Atoms in the protein backbone (CA, N, C and O)      |
 | heavyatomselector | `AbstractAtom`                      | Non-hydrogen atoms                                  |
 | hydrogenselector  | `AbstractAtom`                      | Hydrogen atoms                                      |
 | resnameselector   | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name in a given list    |
@@ -334,6 +334,33 @@ plot(dists)
 ```
 
 ![distancemap](distancemap.png)
+
+Structural elements can be superimposed, and superposition-dependent properties such as the RMSD can be calculated.
+To carry out superimposition, BioStructures.jl carries out a sequence alignment and superimposes aligned residues using the [Kabsch algorithm](https://en.wikipedia.org/wiki/Kabsch_algorithm).
+For example:
+
+```julia
+# Change the coordinates of element 1 to superimpose it onto element 2
+# Do sequence alignment with standard residues and calculate the transformation with Cα atoms (the default)
+superimpose!(el1, el2, standardselector)
+
+# The transformation object for the above superimposition
+Transformation(el1, el2, standardselector)
+
+# Calculate the transformation with backbone atoms
+superimpose!(el1, el2, standardselector, alignatoms=backboneselector)
+
+# Calculate RMSD on Cα atoms (the default) after superimposition
+rmsd(el1, el2, standardselector)
+
+# Superimpose based on backbone atoms and calculate RMSD based on Cβ atoms
+rmsd(el1, el2, standardselector, alignatoms=backboneselector, rmsdatoms=cbetaselector)
+
+# Do not do a superimposition - assumes the elements are already superimposed
+rmsd(el1, el2, standardselector, superimpose=false)
+```
+
+`displacements` is used in a similar way to `rmsd` but returns the vector of distances for each superimposed atom.
 
 The contacting elements in a molecular structure form a graph, and this can be retrieved using `MetaGraph`.
 This extends `MetaGraph` from [MetaGraphs.jl](https://github.com/JuliaGraphs/MetaGraphs.jl), allowing you to use all the graph analysis tools in [LightGraphs.jl](https://github.com/JuliaGraphs/LightGraphs.jl).

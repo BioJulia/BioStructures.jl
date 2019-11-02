@@ -2169,9 +2169,9 @@ end
     @test_throws ArgumentError rmsd(cs_one, cs_two)
 
     struc_1SSU = read(testfilepath("PDB", "1SSU.pdb"), PDB)
-    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2], calphaselector), 4.1821925809691889)
-    @test isapprox(rmsd(struc_1SSU[5], struc_1SSU[6], backboneselector), 5.2878196391279939)
-    @test_throws ArgumentError rmsd(struc_1SSU[1]['A'][8], struc_1SSU[1]['A'][9])
+    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2], superimpose=false), 4.1821925809691889)
+    @test isapprox(rmsd(struc_1SSU[5], struc_1SSU[6], superimpose=false, rmsdatoms=backboneselector), 5.369970874332232)
+    @test_throws ArgumentError rmsd(struc_1SSU[1]['A'][8], struc_1SSU[1]['A'][9], superimpose=false, rmsdatoms=x -> true)
 
 
     # Test displacements
@@ -2199,11 +2199,11 @@ end
     ]
     @test_throws ArgumentError displacements(cs_one, cs_two)
 
-    disps = displacements(struc_1SSU[5], struc_1SSU[10])
+    disps = displacements(struc_1SSU[5], struc_1SSU[10], superimpose=false, dispatoms=x -> true)
     @test isa(disps, Vector{Float64})
     @test length(disps) == 756
     @test isapprox(disps[20], sqrt(1.984766))
-    disps = displacements(struc_1SSU[5], struc_1SSU[10], calphaselector)
+    disps = displacements(struc_1SSU[5], struc_1SSU[10], superimpose=false)
     @test length(disps) == 51
     @test isapprox(disps[20], sqrt(0.032822))
 
@@ -2217,7 +2217,7 @@ end
     @test isapprox(distance(struc_1AKE['A'], struc_1AKE['B']), sqrt(6.852947))
     @test isapprox(distance(struc_1AKE['A'], struc_1AKE['B'][50]), sqrt(530.645746))
     @test isapprox(distance(struc_1AKE['A'], struc_1AKE['B'][50]["CA"]), sqrt(574.699125))
-    @test isapprox(distance(struc_1AKE['A'], struc_1AKE['B'], backboneselector), sqrt(17.350083))
+    @test isapprox(distance(struc_1AKE['A'], struc_1AKE['B'], backboneselector), sqrt(11.752440))
     @test isapprox(distance(struc_1AKE['A'], struc_1AKE['B'], standardselector), sqrt(11.252973))
     @test isapprox(distance(struc_1AKE['A'][50]["CA"], struc_1AKE['B'][50]["CA"]), sqrt(2607.154834))
 
