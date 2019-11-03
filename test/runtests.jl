@@ -2143,6 +2143,63 @@ end
     @test coordarray(cs) == cs
 
 
+    # Test superimposition
+    cs_one = [
+        1.0 0.0 0.0
+        0.0 1.0 0.0
+        0.0 0.0 0.0
+    ]
+    cs_two = [
+        0.0 -1.0 0.0
+        1.0  0.0 0.0
+        1.0  1.0 1.0
+    ]
+    trans = Transformation(cs_one, cs_two)
+    @test isapprox(trans.trans1, [1/3, 1/3, 0])
+    @test isapprox(trans.trans2, [-1/3, 1/3, 1])
+    rot_real = [
+        0.0 -1.0 0.0
+        1.0  0.0 0.0
+        0.0  0.0 1.0
+    ]
+    @test isapprox(trans.rot, rot_real)
+
+    cs_one = [
+         7.0  5.0  3.0
+         2.0  0.0 -2.0
+        -1.0 -3.0 -5.0
+    ]
+    cs_two = [
+        -1.5 -0.5 0.5
+        -1.0  0.0 1.0
+         2.0  3.0 4.0
+    ]
+    trans = Transformation(cs_one, cs_two)
+    cs = applytransform(cs_one, trans)
+    cs_real = [
+        -2.5 -0.5 1.5
+        -2.0  0.0 2.0
+         1.0  3.0 5.0
+    ]
+    @test isapprox(cs, cs_real)
+
+    ats = [
+        Atom(100, "CA", ' ', [8.0, 3.0, 0.0], 1.0, 10.0, " C", "  ", res),
+        Atom(101, "CB", ' ', [4.0, -1.0, -4.0], 1.0, 10.0, " C", "  ", res)
+    ]
+    applytransform!(ats, trans)
+    cs_real = [
+        -3.5 0.5
+        -3.0 1.0
+         0.0 4.0
+    ]
+    @test isapprox(coordarray(ats), cs_real)
+
+    # superimpose! test
+    # rmsd and displacements test with superimposition
+    # test with 1SSU
+
+
     # Test rmsd
     cs_one = [
         0.0 0.0
