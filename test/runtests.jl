@@ -53,7 +53,7 @@ close(io)
 
 @testset "PDB handling" begin
     if skip_linux_download && Sys.islinux()
-        @info "Skipping download tests on Linux due to timeouts during CI; change skip_linux_download to run these tests"
+        @info "Skipping download tests on Linux due to timeouts during CI; change skip_linux_download in test/runtests.jl to run these tests"
     else
         @test length(pdbentrylist()) > 100000
 
@@ -601,6 +601,8 @@ end
         100, "1H", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "  ", "  ", res_a))
     @test !hydrogenselector(Atom(
         100, "NH1", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "  ", "  ", res_a))
+    @test allselector(at_a)
+    @test allselector(res_a)
 
 
     # Further tests for structural element ordering
@@ -2229,7 +2231,7 @@ end
     struc_1SSU = read(testfilepath("PDB", "1SSU.pdb"), PDB)
     @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2], superimpose=false), 4.1821925809691889)
     @test isapprox(rmsd(struc_1SSU[5], struc_1SSU[6], superimpose=false, rmsdatoms=backboneselector), 5.369970874332232)
-    @test_throws ArgumentError rmsd(struc_1SSU[1]['A'][8], struc_1SSU[1]['A'][9], superimpose=false, rmsdatoms=x -> true)
+    @test_throws ArgumentError rmsd(struc_1SSU[1]['A'][8], struc_1SSU[1]['A'][9], superimpose=false, rmsdatoms=allselector)
 
 
     # Test displacements
@@ -2257,7 +2259,7 @@ end
     ]
     @test_throws ArgumentError displacements(cs_one, cs_two)
 
-    disps = displacements(struc_1SSU[5], struc_1SSU[10], superimpose=false, dispatoms=x -> true)
+    disps = displacements(struc_1SSU[5], struc_1SSU[10], superimpose=false, dispatoms=allselector)
     @test isa(disps, Vector{Float64})
     @test length(disps) == 756
     @test isapprox(disps[20], sqrt(1.984766))

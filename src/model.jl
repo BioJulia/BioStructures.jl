@@ -85,6 +85,7 @@ export
     notwaterselector,
     disorderselector,
     hydrogenselector,
+    allselector,
     AminoAcidSequence,
     pairalign,
     DataFrame
@@ -1706,6 +1707,18 @@ function hydrogenselector(at::AbstractAtom)
         'H' in atomname(at) &&
         !occursin(r"[a-zA-Z]", atomname(at)[1:findfirst(isequal('H'), atomname(at)) - 1]))
 end
+
+
+"""
+    allselector(at)
+    allselector(res)
+
+Trivial selector that returns `true` for any `AbstractAtom` or
+`AbstractResidue`.
+Use it to select all atoms or residues.
+"""
+allselector(at::AbstractAtom) = true
+allselector(res::AbstractResidue) = true
 
 
 function AminoAcidSequence(el::Union{StructuralElement, Vector{Model},

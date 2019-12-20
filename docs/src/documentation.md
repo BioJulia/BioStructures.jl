@@ -164,6 +164,7 @@ The selectors available are:
 | waterselector     | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name HOH                |
 | notwaterselector  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name not HOH            |
 | disorderselector  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with alternative locations           |
+| allselector       | `AbstractAtom` or `AbstractResidue` | All atoms/residues                                  |
 
 To create a new `atomnameselector` or `resnameselector`:
 ```julia
