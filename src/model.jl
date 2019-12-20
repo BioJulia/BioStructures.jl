@@ -1036,7 +1036,7 @@ end
 
 
 """
-    sequentialresidue(res_first, res_second)
+    sequentialresidues(res_first, res_second)
 
 Determine if the second residue follows the first in sequence.
 For this to be `true` the residues need to have the same chain ID, both need to

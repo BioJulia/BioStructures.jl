@@ -362,6 +362,10 @@ rmsd(el1, el2, standardselector, superimpose=false)
 
 `displacements` is used in a similar way to `rmsd` but returns the vector of distances for each superimposed atom.
 
+These transformation functions may be useful beyond the context of protein structures.
+For example, `Transformation(c1, c2)` calculates the transformation to map one set of coordinates to another.
+The coordinate sets must be the same size and have the number of dimensions in the first axis and the number of points in the second axis.
+
 The contacting elements in a molecular structure form a graph, and this can be retrieved using `MetaGraph`.
 This extends `MetaGraph` from [MetaGraphs.jl](https://github.com/JuliaGraphs/MetaGraphs.jl), allowing you to use all the graph analysis tools in [LightGraphs.jl](https://github.com/JuliaGraphs/LightGraphs.jl).
 For example:

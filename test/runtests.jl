@@ -2198,6 +2198,7 @@ end
     # superimpose! test
     # rmsd and displacements test with superimposition
     # test with 1SSU
+    # test 2D transformation with coords
 
 
     # Test rmsd

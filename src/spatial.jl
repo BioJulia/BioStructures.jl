@@ -37,6 +37,9 @@ In this case, keyword arguments for pairwise alignment can be given, see
 The residue selectors determine which residues to do the pairwise alignment on.
 The keyword argument `alignatoms` is an atom selector that selects the atoms to
 calculate the superimposition on (default `calphaselector`).
+Can also be called with two sets of coordinates of the same size, with the
+number of dimensions in the first axis and the number of points in the second
+axis.
 
 The returned `Transformation` object consists of the mean coordinates of the
 first set, the mean coordinates of the second set, the rotation to map the
