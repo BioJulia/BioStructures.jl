@@ -18,7 +18,17 @@ MetaGraphs = "626554b9-1ddb-594c-aa3c-2596fe9399a5"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 
 [compat]
-julia = "≥ 0.7.0"
+julia = "1"
+BioCore = "2"
+BioSequences = "1"
+BioSymbols = "4"
+BioAlignments = "1"
+CodecZlib = "0.6"
+Format = "1"
+RecipesBase = "0.7"
+LightGraphs = "1"
+MetaGraphs = "0.6"
+DataFrames = "0.20"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
