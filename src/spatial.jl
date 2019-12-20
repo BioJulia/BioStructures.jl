@@ -133,24 +133,30 @@ function Transformation(el1::StructuralElementOrList,
                         alignatoms::Function=calphaselector)
     res1 = collectresidues(el1, residue_selectors...)
     res2 = collectresidues(el2, residue_selectors...)
-    alres = pairalign(res1, res2; scoremodel=scoremodel, aligntype=aligntype)
-    al = alignment(alres)
-    inds1, inds2 = Int[], Int[]
-    # Offset residue counter based on start of aligned region
-    first_anchor = first(al.a.aln.anchors)
-    counter1 = first_anchor.seqpos
-    counter2 = first_anchor.refpos
-    # Obtain indices of residues used in alignment
-    for (v1, v2) in al
-        if v1 != BioSymbols.AA_Gap
-            counter1 += 1
-        end
-        if v2 != BioSymbols.AA_Gap
-            counter2 += 1
-        end
-        if v1 != BioSymbols.AA_Gap && v2 != BioSymbols.AA_Gap
-            push!(inds1, counter1)
-            push!(inds2, counter2)
+    # Shortcut if the sequences are the same
+    if AminoAcidSequence(res1) == AminoAcidSequence(res2)
+        inds1 = collect(1:length(res1))
+        inds2 = collect(1:length(res2))
+    else
+        alres = pairalign(res1, res2; scoremodel=scoremodel, aligntype=aligntype)
+        al = alignment(alres)
+        inds1, inds2 = Int[], Int[]
+        # Offset residue counter based on start of aligned region
+        first_anchor = first(al.a.aln.anchors)
+        counter1 = first_anchor.seqpos
+        counter2 = first_anchor.refpos
+        # Obtain indices of residues used in alignment
+        for (v1, v2) in al
+            if v1 != BioSymbols.AA_Gap
+                counter1 += 1
+            end
+            if v2 != BioSymbols.AA_Gap
+                counter2 += 1
+            end
+            if v1 != BioSymbols.AA_Gap && v2 != BioSymbols.AA_Gap
+                push!(inds1, counter1)
+                push!(inds2, counter2)
+            end
         end
     end
     @info "Superimposing based on a sequence alignment between $(length(inds1)) residues"

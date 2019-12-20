@@ -2197,7 +2197,7 @@ end
     ]
     @test isapprox(coordarray(ats), cs_real)
 
-    # superimpose! test
+    # superimpose! test with and without shortcut
     # rmsd and displacements test with superimposition
     # test with 1SSU
     # test 2D transformation with coords
