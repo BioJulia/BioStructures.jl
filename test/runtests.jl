@@ -2197,10 +2197,22 @@ end
     ]
     @test isapprox(coordarray(ats), cs_real)
 
-    # superimpose! test with and without shortcut
-    # rmsd and displacements test with superimposition
-    # test with 1SSU
-    # test 2D transformation with coords
+    cs_one = [
+        0.0 1.0       2.0
+        0.0 sqrt(3.0) 0.0
+    ]
+    cs_two = [
+        2.0           4.0 0.0
+        2 * sqrt(3.0) 0.0 0.0
+    ]
+    trans = Transformation(cs_one, cs_two)
+    @test isapprox(trans.trans1, [1.0, sqrt(3.0) / 3])
+    @test isapprox(trans.trans2, [2.0, 2 * sqrt(3.0) / 3])
+    rot_real = [
+         cos(2 * pi / 3) sin(2 * pi / 3)
+        -sin(2 * pi / 3) cos(2 * pi / 3)
+    ]
+    @test isapprox(trans.rot, rot_real)
 
 
     # Test rmsd
@@ -2230,7 +2242,9 @@ end
 
     struc_1SSU = read(testfilepath("PDB", "1SSU.pdb"), PDB)
     @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2], superimpose=false), 4.1821925809691889)
+    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2]), 2.5485946775879444)
     @test isapprox(rmsd(struc_1SSU[5], struc_1SSU[6], superimpose=false, rmsdatoms=backboneselector), 5.369970874332232)
+    @test isapprox(rmsd(struc_1SSU[5], struc_1SSU[6], rmsdatoms=backboneselector), 3.654863051573419)
     @test_throws ArgumentError rmsd(struc_1SSU[1]['A'][8], struc_1SSU[1]['A'][9], superimpose=false, rmsdatoms=allselector)
 
 
@@ -2263,9 +2277,13 @@ end
     @test isa(disps, Vector{Float64})
     @test length(disps) == 756
     @test isapprox(disps[20], sqrt(1.984766))
+    disps = displacements(struc_1SSU[5], struc_1SSU[10], dispatoms=allselector)
+    @test isapprox(disps[20], 3.6275352691135354)
     disps = displacements(struc_1SSU[5], struc_1SSU[10], superimpose=false)
     @test length(disps) == 51
     @test isapprox(disps[20], sqrt(0.032822))
+    disps = displacements(struc_1SSU[5], struc_1SSU[10])
+    @test isapprox(disps[20], 0.7170142947224434)
 
 
     # Test sqdistance and distance
