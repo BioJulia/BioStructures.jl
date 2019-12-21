@@ -52,7 +52,7 @@ close(io)
 
 
 @testset "PDB handling" begin
-    if skip_linux_download && Sys.islinux()
+    if skip_linux_download || Sys.islinux()
         @info "Skipping download tests on Linux due to timeouts during CI; change skip_linux_download in test/runtests.jl to run these tests"
     else
         @test length(pdbentrylist()) > 100000
@@ -2215,6 +2215,45 @@ end
     @test isapprox(trans.rot, rot_real)
 
 
+    struc_1SSU = read(testfilepath("PDB", "1SSU.pdb"), PDB)
+    theta = 2 * pi * rand()
+    rand_rot = [
+        1.0 0.0         0.0
+        0.0 cos(theta) -sin(theta)
+        0.0 sin(theta)  cos(theta)
+    ]
+    rand_trans = Transformation(100 * randn(3), 100 * randn(3), rand_rot)
+    applytransform!(struc_1SSU[1], rand_trans)
+    superimpose!(struc_1SSU[1], struc_1SSU[2], standardselector)
+    @test isapprox(coords(struc_1SSU[1]["A"][10]["CA"]),
+                    [2.68601, -2.06401, 3.73024], atol=1e-5)
+    @test coords(struc_1SSU[2]["A"][10]["CA"]) == [3.983, -3.252, 2.368]
+    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2], superimpose=false),
+                    2.54859, atol=1e-5)
+    applytransform!(struc_1SSU[1], rand_trans)
+    superimpose!(struc_1SSU[1], struc_1SSU[2], standardselector,
+                    alignatoms=cbetaselector)
+    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2], superimpose=false),
+                    2.55015, atol=1e-5)
+    trans = Transformation(collectresidues(struc_1SSU[3])[1:40],
+                    collectresidues(struc_1SSU[2])[11:end],
+                    standardselector)
+    rot_real = [
+        0.999633     0.00144653 -0.02704
+        -0.00108653  0.999911    0.0133232
+        0.0270569   -0.013289    0.999546
+    ]
+    @test isapprox(trans.rot, rot_real, atol=1e-5)
+    @test trans.inds1 == collect(11:40)
+    @test trans.inds2 == collect(1:30)
+    superimpose!(collectresidues(struc_1SSU[3])[1:40],
+                    collectresidues(struc_1SSU[2])[11:end],
+                    standardselector)
+    @test isapprox(rmsd(collectresidues(struc_1SSU[3])[21:30],
+                    collectresidues(struc_1SSU[2])[21:30],
+                    superimpose=false), 0.365745, atol=1e-5)
+
+
     # Test rmsd
     cs_one = [
         0.0 0.0
@@ -2241,10 +2280,10 @@ end
     @test_throws ArgumentError rmsd(cs_one, cs_two)
 
     struc_1SSU = read(testfilepath("PDB", "1SSU.pdb"), PDB)
-    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2], superimpose=false), 4.1821925809691889)
-    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2]), 2.5485946775879444)
-    @test isapprox(rmsd(struc_1SSU[5], struc_1SSU[6], superimpose=false, rmsdatoms=backboneselector), 5.369970874332232)
-    @test isapprox(rmsd(struc_1SSU[5], struc_1SSU[6], rmsdatoms=backboneselector), 3.654863051573419)
+    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2], superimpose=false), 4.18219, atol=1e-5)
+    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2]), 2.54859, atol=1e-5)
+    @test isapprox(rmsd(struc_1SSU[5], struc_1SSU[6], superimpose=false, rmsdatoms=backboneselector), 5.36997, atol=1e-5)
+    @test isapprox(rmsd(struc_1SSU[5], struc_1SSU[6], rmsdatoms=backboneselector), 3.65486, atol=1e-5)
     @test_throws ArgumentError rmsd(struc_1SSU[1]['A'][8], struc_1SSU[1]['A'][9], superimpose=false, rmsdatoms=allselector)
 
 
@@ -2278,12 +2317,12 @@ end
     @test length(disps) == 756
     @test isapprox(disps[20], sqrt(1.984766))
     disps = displacements(struc_1SSU[5], struc_1SSU[10], dispatoms=allselector)
-    @test isapprox(disps[20], 3.6275352691135354)
+    @test isapprox(disps[20], 3.62754, atol=1e-5)
     disps = displacements(struc_1SSU[5], struc_1SSU[10], superimpose=false)
     @test length(disps) == 51
     @test isapprox(disps[20], sqrt(0.032822))
     disps = displacements(struc_1SSU[5], struc_1SSU[10])
-    @test isapprox(disps[20], 0.7170142947224434)
+    @test isapprox(disps[20], 0.717014, atol=1e-5)
 
 
     # Test sqdistance and distance
@@ -2304,10 +2343,10 @@ end
     at_a = Atom(100, "CA", ' ', [1.0, 0.0, 1.0], 1.0, 10.0, " C", "  ", res)
     at_b = Atom(100, "CA", ' ', [0.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
     at_c = Atom(100, "CA", ' ', [3.0, 2.0, 1.0], 1.0, 10.0, " C", "  ", res)
-    @test isapprox(bondangle(at_a, at_b, at_c), 0.713724378944765)
+    @test isapprox(bondangle(at_a, at_b, at_c), 0.713724, atol=1e-5)
     vec_a = [2.0, 0.0, 0.0]
     vec_b = [2.0, 1.0, 1.0]
-    @test isapprox(bondangle(vec_a, vec_b), 0.615479708670387)
+    @test isapprox(bondangle(vec_a, vec_b), 0.615480, atol=1e-5)
 
 
     # Test dihedral functions
@@ -2315,15 +2354,15 @@ end
     at_b = Atom(100, "CA", ' ', [0.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
     at_c = Atom(100, "CA", ' ', [1.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
     at_d = Atom(100, "CA", ' ', [2.0, 1.0, -1.0], 1.0, 10.0, " C", "  ", res)
-    @test isapprox(dihedralangle(at_a, at_b, at_c, at_d), 2.356194490192345)
+    @test isapprox(dihedralangle(at_a, at_b, at_c, at_d), 2.35619, atol=1e-5)
     vec_a = [1.0, 1.0, 0.0]
     vec_b = [1.0, 0.0, 0.0]
     vec_c = [1.0, -1.0, 1.0]
-    @test isapprox(dihedralangle(vec_a, vec_b, vec_c), -0.785398163397448)
+    @test isapprox(dihedralangle(vec_a, vec_b, vec_c), -0.785398, atol=1e-5)
 
-    @test isapprox(omegaangle(struc_1AKE['A'][20], struc_1AKE['A'][19]), -3.091913621551854, atol=1e-5)
-    @test isapprox(phiangle(struc_1AKE['A'][7], struc_1AKE['A'][6]), 2.851151641716221, atol=1e-5)
-    @test isapprox(psiangle(struc_1AKE['A'][8], struc_1AKE['A'][9]), 2.838265381719911, atol=1e-5)
+    @test isapprox(omegaangle(struc_1AKE['A'][20], struc_1AKE['A'][19]), -3.09191, atol=1e-5)
+    @test isapprox(phiangle(struc_1AKE['A'][7], struc_1AKE['A'][6]), 2.85115, atol=1e-5)
+    @test isapprox(psiangle(struc_1AKE['A'][8], struc_1AKE['A'][9]), 2.83827, atol=1e-5)
     @test_throws ArgumentError omegaangle(struc_1AKE['A'][20], Residue("ALA", 19, ' ', false, Chain('A')))
     @test_throws ArgumentError phiangle(struc_1AKE['A'][7], Residue("ALA", 6, ' ', false, Chain('A')))
     @test_throws ArgumentError psiangle(struc_1AKE['A'][8], Residue("ALA", 9, ' ', false, Chain('A')))
@@ -2341,8 +2380,8 @@ end
     phis, psis = ramachandranangles(struc_1AKE['A'])
     @test size(phis) == (456,)
     @test size(psis) == (456,)
-    @test isapprox(phis[5], -1.764512005880236, atol=1e-5)
-    @test isapprox(psis[10], 0.4425094841355222, atol=1e-5)
+    @test isapprox(phis[5], -1.76451, atol=1e-5)
+    @test isapprox(psis[10], 0.442509, atol=1e-5)
     @test isnan(phis[1])
     @test isnan(psis[214])
     @test sum(isnan, phis) == 243
@@ -2414,15 +2453,15 @@ end
         23.24696586653837  20.432823079545326 16.83042189013692  13.489078471118772 10.314890304797236 7.381047825342957  3.8486537906130245 0.0                3.86929786912303   6.311746667920065
         24.371038508853083 21.590401316325735 18.152391219891662 14.9800810411693   11.724292217443233 9.702061069690293  6.699431169883006  3.86929786912303   0.0                3.8548294385095696
         24.24882335289694  21.931261910797566 18.44135962991883  15.83387716259034  12.19677604943208  11.058714075334438 8.065864739753573  6.311746667920065  3.8548294385095696 0.0
-    ])
+    ], atol=1e-5)
     @test isapprox(DistanceMap(struc_1AKE[1]).data, [
-        0.0                2.6178134005310594
-        2.6178134005310594 0.0
-    ])
+        0.0     2.61781
+        2.61781 0.0
+    ], atol=1e-5)
     dmap = DistanceMap(struc_1AKE['A'])
     @test size(dmap) == (456, 456)
     @test size(dmap, 2) == 456
-    @test isapprox(dmap[196, 110], 3.0188665091388214)
+    @test isapprox(dmap[196, 110], 3.01887, atol=1e-5)
     dmap[196, 110] = 10.0
     @test dmap[196, 110] == 10.0
     show(devnull, dmap)
@@ -2432,7 +2471,7 @@ end
         2.5066699024801813 3.850861981427013  4.557738913101538  5.762204526047301 5.0027798272560435
         1.3632875705440877 2.4469166311911783 3.1850982716393537 4.33450689236965  3.799490623754715
         2.2682515292621335 2.774401016435799  3.235280049702036  4.198412795331114 4.313454647959104
-    ])
+    ], atol=1e-5)
 
     # Test the plot recipe
     RecipesBase.apply_recipe(Dict{Symbol, Any}(), dmap)

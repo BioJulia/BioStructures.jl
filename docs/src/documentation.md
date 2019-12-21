@@ -362,6 +362,7 @@ rmsd(el1, el2, standardselector, superimpose=false)
 ```
 
 `displacements` is used in a similar way to `rmsd` but returns the vector of distances for each superimposed atom.
+`dispatoms` selects the atoms to calculate the displacements on.
 
 These transformation functions may be useful beyond the context of protein structures.
 For example, `Transformation(c1, c2)` calculates the transformation to map one set of coordinates to another.
