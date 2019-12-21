@@ -27,6 +27,7 @@ export
 """
     Transformation(el1, el2, residue_selectors...)
     Transformation(coords1, coords2)
+    Transformation(trans1, trans2, rot)
 
 A 3D transformation to map one set of coordinates onto another.
 Found using the Kabsch algorithm.
@@ -52,6 +53,12 @@ struct Transformation
     rot::Array{Float64, 2}
     inds1::Vector{Int}
     inds2::Vector{Int}
+end
+
+function Transformation(trans1::Array{<:Real},
+                        trans2::Array{<:Real},
+                        rot::Array{<:Real, 2})
+    return Transformation(trans1, trans2, rot, [], [])
 end
 
 Base.show(io::IO, trans::Transformation) = print("3D transformation with ",
