@@ -52,7 +52,7 @@ close(io)
 
 
 @testset "PDB handling" begin
-    if skip_linux_download || Sys.islinux()
+    if skip_linux_download && Sys.islinux()
         @info "Skipping download tests on Linux due to timeouts during CI; change skip_linux_download in test/runtests.jl to run these tests"
     else
         @test length(pdbentrylist()) > 100000

@@ -1,6 +1,14 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.8.0 - Dec 2019
+
+* Superimposition of structural elements is supported using the Kabsch algorithm. New functions are `superimpose!`, `Transformation`, `applytransform!` and `applytransform`.
+* `rmsd` and `displacements` carry out superimposition by default, with the relevant keyword arguments available. Setting `superimpose` to `false` prevents this. `rmsdatoms` and `dispatoms` respectively determine which atoms to calculate the property for.
+* The trivial `allselector`, which selects all atoms or residues, is added.
+* The backbone oxygen `"O"` is added to `backboneatomnames`.
+* Compatible bounds of package dependencies are added to Project.toml.
+
 ## v0.7.0 - Oct 2019
 
 * `MetaGraph` from MetaGraphs.jl is extended to create graphs of contacting elements in a molecular structure, giving access to all the graph analysis tools in LightGraphs.jl.
