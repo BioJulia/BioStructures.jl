@@ -3,8 +3,15 @@ export
     writemmtf
 
 """
-A MMTF dictionary.
+A Macromolecular Transmission Format (MMTF) dictionary.
+
+Can be accessed using similar functions to a standard `Dict`.
 Keys are field names as a `String` and values are various types.
+To directly access the underlying dictionary of `MMTFDict` `d`, use
+`d.dict`.
+Call `MMTFDict` with a filepath or stream to read the dictionary from that
+source.
+The keyword argument `gzip` (default `false`) determines if the file is gzipped.
 """
 struct MMTFDict
     dict::Dict{String, Any}
@@ -52,10 +59,10 @@ MMTFDict() = MMTFDict(Dict{String, Any}(
         "unitCell"           => Any[],
         "xCoordList"         => Float32[],
         "yCoordList"         => Float32[],
-        "zCoordList"         => Float32[]
-    ))
+        "zCoordList"         => Float32[]))
 
-MMTFDict(filepath::AbstractString) = MMTFDict(parsemmtf(filepath))
+MMTFDict(filepath::AbstractString, gzip::Bool=false) = MMTFDict(parsemmtf(filepath; gzip=gzip))
+MMTFDict(io::IO, gzip::Bool=false) = MMTFDict(parsemmtf(io; gzip=gzip))
 
 Base.getindex(mmtf_dict::MMTFDict, field::AbstractString) = mmtf_dict.dict[field]
 
@@ -80,8 +87,9 @@ function Base.read(input::IO,
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
-            read_het_atoms::Bool=true)
-    d = parsemmtf(input)
+            read_het_atoms::Bool=true,
+            gzip::Bool=false)
+    d = parsemmtf(input; gzip=gzip)
     struc = ProteinStructure(structure_name)
     # Extract hetero atom information from entity list
     hets = trues(length(d["chainIdList"]))
@@ -168,10 +176,8 @@ function writemmtf(output::IO,
                 gzip::Bool=false)
     d = MMTFDict()
     # Index of standard and hetero atom entities; 0 means not yet added
-    at_entity_i, het_entity_i = 0, 0
     group_names = String[]
     for mod in collectmodels(el)
-        push!(d["chainsPerModel"], countchains(mod))
         chain_i = 0
         for ch in mod
             # MMTF splits chains up by molecules so we determine chain splits
@@ -179,37 +185,33 @@ function writemmtf(output::IO,
             prev_resname = ""
             prev_het = true
             group_count = 0
+            sequence = ""
             for res in ch
                 # Determine whether we have changed entity
                 # ATOM blocks, and hetero molecules with the same name, are
                 #   treated as the same entity
-                if ishetero(res) != prev_het || (prev_het && resname(res) != prev_resname)
-                    println(res)
+                if ishetero(res) != prev_het || (prev_het && resname(res) != prev_resname) || group_count == 0
                     chain_i += 1
                     push!(d["chainIdList"], generatechainid(chain_i))
                     push!(d["chainNameList"], chainid(ch))
-                    # Add the groupsPerChain for the previous chain
+                    # Add the groupsPerChain and sequence for the previous chain
                     if group_count > 0
                         push!(d["groupsPerChain"], group_count)
+                        d["entityList"][end]["sequence"] = sequence
                         group_count = 0
+                        sequence = ""
                     end
-                    # Check whether we need to add the entity for ATOM/HETATM
-                    if (ishetero(res) && het_entity_i == 0) || (!ishetero(res) && at_entity_i == 0)
-                        push!(d["entityList"], Dict{Any, Any}(
-                            "chainIndexList"=> Any[],
-                            "description"   => "",
-                            "sequence"      => "",
-                            "type"          => ishetero(res) ? "non-polymer" : "polymer"
-                        ))
-                        if ishetero(res)
-                            het_entity_i = length(d["entityList"])
-                        else
-                            at_entity_i = length(d["entityList"])
-                        end
-                    entity_i = ishetero(res) ? het_entity_i : at_entity_i
-                    push!(d["entityList"][entity_i]["chainIndexList"],
-                        length(d["chainIdList"]) - 1)
-                    end
+                    # Checking for similar entities is non-trivial so we treat
+                    #   each molecule as a separate entity
+                    push!(d["entityList"], Dict{Any, Any}(
+                        "chainIndexList"=> Any[length(d["chainIdList"]) - 1],
+                        "description"   => "",
+                        "sequence"      => "", # This is changed later
+                        "type"          => ishetero(res) ? "non-polymer" : "polymer"
+                    ))
+                end
+                if !ishetero(res)
+                    sequence *= string(AminoAcidSequence(res))
                 end
                 group_count += 1
 
@@ -243,10 +245,13 @@ function writemmtf(output::IO,
                 prev_resname = resname(res)
                 prev_het = ishetero(res)
             end
+            # Add the groupsPerChain and sequence for the last chain
             if group_count > 0
                 push!(d["groupsPerChain"], group_count)
+                d["entityList"][end]["sequence"] = sequence
             end
         end
+        push!(d["chainsPerModel"], chain_i)
     end
     writemmtf(output, d; gzip=gzip)
 end
