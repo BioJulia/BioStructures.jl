@@ -447,12 +447,13 @@ ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 Read a mmCIF file instead by replacing `PDB` with `MMCIF`.
 Various options can be set through optional keyword arguments when parsing PDB/mmCIF files:
 
-| Keyword Argument                 | Description                                                                        |
-| :------------------------------- | :--------------------------------------------------------------------------------- |
-| `structure_name::AbstractString` | The name given to the returned `ProteinStructure`; defaults to the file name       |
-| `remove_disorder::Bool=false`    | Whether to remove atoms with alt loc ID not ' ' or 'A'.                            |
-| `read_std_atoms::Bool=true`      | Whether to read standard ATOM records.                                             |
-| `read_het_atoms::Bool=true`      | Whether to read HETATOM records.                                                   |
+| Keyword Argument                 | Description                                                                  |
+| :------------------------------- | :--------------------------------------------------------------------------- |
+| `structure_name::AbstractString` | The name given to the returned `ProteinStructure`; defaults to the file name |
+| `remove_disorder::Bool=false`    | Whether to remove atoms with alt loc ID not ' ' or 'A'                       |
+| `read_std_atoms::Bool=true`      | Whether to read standard ATOM records                                        |
+| `read_het_atoms::Bool=true`      | Whether to read HETATOM records                                              |
+| `gzip::Bool=false`               | Whether the file is gzipped (MMTF files only)                                |
 
 The function `readpdb` provides an alternative way to read PDB files with a similar interface to `downloadpdb`.
 To parse a PDB file by specifying the PDB ID and PDB directory:

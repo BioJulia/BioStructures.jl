@@ -110,39 +110,38 @@ function Base.read(input::IO,
         struc[model_i] = Model(model_i, struc)
         for ci in 1:modelchaincount
             chain_i += 1
-            if (!read_std_atoms && !hets[chain_i]) || (!read_het_atoms && hets[chain_i])
-                continue
-            end
             for gi in 1:d["groupsPerChain"][chain_i]
                 group_i += 1
                 # 0-based indexing in MMTF
                 group = d["groupList"][d["groupTypeList"][group_i] + 1]
                 for ai in 1:length(group["atomNameList"])
                     atom_i += 1
-                    unsafe_addatomtomodel!(
-                        struc[model_i],
-                        AtomRecord(
-                            hets[chain_i],
-                            d["atomIdList"][atom_i],
-                            group["atomNameList"][ai],
-                            d["altLocList"][atom_i] == '\0' ? ' ' : d["altLocList"][atom_i],
-                            group["groupName"],
-                            d["chainNameList"][chain_i],
-                            d["groupIdList"][group_i],
-                            d["insCodeList"][group_i] == '\0' ? ' ' : d["insCodeList"][group_i],
-                            [
-                                d["xCoordList"][atom_i],
-                                d["yCoordList"][atom_i],
-                                d["zCoordList"][atom_i],
-                            ],
-                            d["occupancyList"][atom_i],
-                            d["bFactorList"][atom_i],
-                            group["elementList"][ai],
-                            # Add + to positive charges to match PDB convention
-                            group["formalChargeList"][ai] > 0 ? "+$(group["formalChargeList"][ai])" :
-                                        string(group["formalChargeList"][ai])
-                        );
-                        remove_disorder=remove_disorder)
+                    if (read_std_atoms || hets[chain_i]) && (read_het_atoms || !hets[chain_i])
+                        unsafe_addatomtomodel!(
+                            struc[model_i],
+                            AtomRecord(
+                                hets[chain_i],
+                                d["atomIdList"][atom_i],
+                                group["atomNameList"][ai],
+                                d["altLocList"][atom_i] == '\0' ? ' ' : d["altLocList"][atom_i],
+                                group["groupName"],
+                                d["chainNameList"][chain_i],
+                                d["groupIdList"][group_i],
+                                d["insCodeList"][group_i] == '\0' ? ' ' : d["insCodeList"][group_i],
+                                [
+                                    d["xCoordList"][atom_i],
+                                    d["yCoordList"][atom_i],
+                                    d["zCoordList"][atom_i],
+                                ],
+                                d["occupancyList"][atom_i],
+                                d["bFactorList"][atom_i],
+                                group["elementList"][ai],
+                                # Add + to positive charges to match PDB convention
+                                group["formalChargeList"][ai] > 0 ? "+$(group["formalChargeList"][ai])" :
+                                            string(group["formalChargeList"][ai])
+                            );
+                            remove_disorder=remove_disorder)
+                    end
                 end
             end
         end
@@ -175,8 +174,6 @@ function writemmtf(output::IO,
                 atom_selectors::Function...;
                 gzip::Bool=false)
     d = MMTFDict()
-    # Index of standard and hetero atom entities; 0 means not yet added
-    group_names = String[]
     for mod in collectmodels(el)
         chain_i = 0
         for ch in mod
@@ -211,12 +208,21 @@ function writemmtf(output::IO,
                     ))
                 end
                 if !ishetero(res)
-                    sequence *= string(AminoAcidSequence(res))
+                    sequence *= string(AminoAcidSequence(res; gaps=false))
                 end
                 group_count += 1
 
-                if !(resname(res) in group_names)
-                    push!(group_names, resname(res))
+                # Look for an existing group with the correct residue name and
+                #   atom names present
+                group_i = 0
+                for (gi, group) in enumerate(d["groupList"])
+                    if group["groupName"] == resname(res) && group["atomNameList"] == atomnames(res)
+                        group_i = gi
+                        break
+                    end
+                end
+
+                if group_i == 0
                     push!(d["groupList"], Dict{Any, Any}(
                         "groupName"       => resname(res),
                         "bondAtomList"    => Any[],
@@ -229,8 +235,10 @@ function writemmtf(output::IO,
                     ))
                 end
                 push!(d["groupIdList"], resnumber(res))
-                push!(d["groupTypeList"], findfirst(isequal(resname(res)), group_names) - 1)
+                push!(d["groupTypeList"], group_i == 0 ? length(d["groupList"]) - 1 : group_i - 1)
                 push!(d["insCodeList"], inscode(res) == ' ' ? '\0' : inscode(res))
+                push!(d["secStructList"], -1)
+                push!(d["sequenceIndexList"], ishetero(res) ? -1 : length(sequence) - 1)
                 for outer_at in collectatoms(res, atom_selectors...)
                     for at in outer_at
                         push!(d["altLocList"], altlocid(at) == ' ' ? '\0' : altlocid(at))
@@ -253,5 +261,13 @@ function writemmtf(output::IO,
         end
         push!(d["chainsPerModel"], chain_i)
     end
+
+    d["numModels"] = countmodels(el)
+    d["numChains"] = length(d["chainIdList"])
+    d["numGroups"] = length(d["groupIdList"])
+    d["numAtoms"] = length(d["atomIdList"])
+    d["structureId"] = structurename(el)
+    d["mmtfVersion"] = "1.0.0"
+    d["mmtfProducer"] = "BioStructures.jl"
     writemmtf(output, d; gzip=gzip)
 end

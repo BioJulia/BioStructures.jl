@@ -275,7 +275,7 @@ function Base.setindex!(dis_res::DisorderedResidue, at::AbstractAtom, atom_name:
 end
 
 # Accessing a Chain with an AbstractString returns the AbstractResidue with that
-#  residue ID
+#   residue ID
 Base.getindex(ch::Chain, res_id::AbstractString) = ch.residues[res_id]
 
 function Base.setindex!(ch::Chain, res::AbstractResidue, res_id::AbstractString)
