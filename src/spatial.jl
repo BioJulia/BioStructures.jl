@@ -74,9 +74,13 @@ Get the atomic coordinates in Å of a `StructuralElementOrList` as a 2D
 
 Additional arguments are atom selector functions - only atoms that return
 `true` from all the functions are retained.
+The keyword argument `expand_disordered` (default `false`) determines whether to
+return coordinates for all copies of disordered atoms separately.
 """
-function coordarray(el::StructuralElementOrList, atom_selectors::Function...)
-    at_list = collectatoms(el, atom_selectors...)
+function coordarray(el::StructuralElementOrList,
+                    atom_selectors::Function...;
+                    expand_disordered::Bool=false)
+    at_list = collectatoms(el, atom_selectors...; expand_disordered=expand_disordered)
     coords_out = zeros(3, length(at_list))
     for j in eachindex(at_list)
         coords_out[1, j] = x(at_list[j])
@@ -97,7 +101,7 @@ Modify all coordinates in an element according to a transformation.
 """
 function applytransform!(el::StructuralElementOrList,
                         transformation::Transformation)
-    ats = collectatoms(el)
+    ats = collectatoms(el; expand_disordered=true)
     cs = coordarray(ats)
     new_coords = applytransform(cs, transformation)
     for (i, at) in enumerate(ats)

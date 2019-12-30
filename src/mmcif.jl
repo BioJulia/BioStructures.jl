@@ -341,11 +341,13 @@ end
     writemmcif(output, element, atom_selectors...)
     writemmcif(output, mmcif_dict)
 
-Write a `StructuralElementOrList` or a `MMCIFDict` to a mmCIF format file
-or output stream.
+Write a `StructuralElementOrList` or a `MMCIFDict` to a mmCIF format file or
+output stream.
 
 Atom selector functions can be given as additional arguments - only atoms
 that return `true` from all the functions are retained.
+The keyword argument `expand_disordered` (default `true`) determines whether to
+return all copies of disordered residues and atoms.
 """
 function writemmcif(filepath::AbstractString, mmcif_dict::MMCIFDict)
     open(filepath, "w") do output
@@ -451,16 +453,19 @@ end
 
 function writemmcif(filepath::AbstractString,
                 el::StructuralElementOrList,
-                atom_selectors::Function...)
+                atom_selectors::Function...;
+                expand_disordered::Bool=true)
     open(filepath, "w") do output
-        writemmcif(output, el, atom_selectors...)
+        writemmcif(output, el, atom_selectors...;
+                    expand_disordered=expand_disordered)
     end
 end
 
 function writemmcif(output::IO,
                 el::Union{ProteinStructure, Model, Chain, AbstractResidue,
                     Vector{Model}, Vector{Chain}, Vector{<:AbstractResidue}},
-                atom_selectors::Function...)
+                atom_selectors::Function...;
+                expand_disordered::Bool=true)
     # Create an empty dictionary and add atoms one at a time
     atom_dict = Dict{String, Vector{String}}(
             ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
@@ -472,29 +477,16 @@ function writemmcif(output::IO,
         loop_el = collectmodels(el)
     end
 
-    # Collect residues then expand out disordered residues
-    for res in collectresidues(loop_el)
+    for res in collectresidues(loop_el; expand_disordered=expand_disordered)
         model_n = string(modelnumber(res))
         chain_id = strip(chainid(res)) == "" ? "." : chainid(res)
         res_n = string(resnumber(res))
         het = ishetero(res) ? "HETATM" : "ATOM"
-        if isa(res, Residue)
-            res_name = resname(res)
-            for at in collectatoms(res, atom_selectors...)
-                for atom_record in at
-                    appendatom!(atom_dict, atom_record, model_n, chain_id,
+        res_name = resname(res)
+        for at in collectatoms(res, atom_selectors...;
+                                expand_disordered=expand_disordered)
+            appendatom!(atom_dict, at, model_n, chain_id,
                         res_n, res_name, het)
-                end
-            end
-        else
-            for res_name in resnames(res)
-                for at in collectatoms(disorderedres(res, res_name), atom_selectors...)
-                    for atom_record in at
-                        appendatom!(atom_dict, atom_record, model_n, chain_id,
-                            res_n, res_name, het)
-                    end
-                end
-            end
         end
     end
 
@@ -502,32 +494,27 @@ function writemmcif(output::IO,
     return writemmcif(output, MMCIFDict(atom_dict))
 end
 
-function writemmcif(output::IO, at::AbstractAtom, atom_selectors::Function...)
-    atom_dict = Dict{String, Vector{String}}(
-            ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
-    atom_dict["data_"] = [structurename(at)]
-    for atom_record in at
-        appendatom!(atom_dict, atom_record, string(modelnumber(at)),
-            strip(chainid(at)) == "" ? "." : chainid(at),
-            string(resnumber(at)), resname(at),
-            ishetero(at) ? "HETATM" : "ATOM")
-    end
-    return writemmcif(output, MMCIFDict(atom_dict))
+function writemmcif(output::IO,
+                    at::AbstractAtom,
+                    atom_selectors::Function...;
+                    expand_disordered::Bool=true)
+    return writemmcif(output, [at], atom_selectors...;
+                        expand_disordered=expand_disordered)
 end
 
 function writemmcif(output::IO,
                 ats::Vector{<:AbstractAtom},
-                atom_selectors::Function...)
+                atom_selectors::Function...;
+                expand_disordered::Bool=true)
     atom_dict = Dict{String, Vector{String}}(
             ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
-    atom_dict["data_"] = [structurename(ats[1])]
-    for at in collectatoms(ats, atom_selectors...)
-        for atom_record in at
-            appendatom!(atom_dict, atom_record, string(modelnumber(at)),
-                strip(chainid(at)) == "" ? "." : chainid(at),
-                string(resnumber(at)), resname(at),
-                ishetero(at) ? "HETATM" : "ATOM")
-        end
+    atom_dict["data_"] = [structurename(first(ats))]
+    for at in collectatoms(ats, atom_selectors...;
+                            expand_disordered=expand_disordered)
+        appendatom!(atom_dict, at, string(modelnumber(at)),
+            strip(chainid(at)) == "" ? "." : chainid(at),
+            string(resnumber(at)), resname(at),
+            ishetero(at) ? "HETATM" : "ATOM")
     end
     return writemmcif(output, MMCIFDict(atom_dict))
 end

@@ -151,6 +151,20 @@ function Base.read(input::IO,
 end
 
 
+"""
+    writemmtf(output, element, atom_selectors...)
+    writemmtf(output, mmtf_dict)
+
+Write a `StructuralElementOrList` or a `MMTFDict` to a MMTF file or output
+stream.
+
+Atom selector functions can be given as additional arguments - only atoms
+that return `true` from all the functions are retained.
+The keyword argument `expand_disordered` (default `true`) determines whether to
+return all copies of disordered residues and atoms.
+The keyword argument `gzip` (default `false`) determines if the file should be
+gzipped.
+"""
 function writemmtf(output::Union{AbstractString, IO},
                 d::MMTFDict;
                 gzip::Bool=false)
@@ -161,9 +175,11 @@ end
 function writemmtf(filepath::AbstractString,
                 el::StructuralElementOrList,
                 atom_selectors::Function...;
+                expand_disordered::Bool=true,
                 gzip::Bool=false)
     open(filepath, "w") do output
-        writemmtf(output, el, atom_selectors...; gzip=gzip)
+        writemmtf(output, el, atom_selectors...;
+                    expand_disordered=expand_disordered, gzip=gzip)
     end
 end
 
@@ -172,6 +188,7 @@ generatechainid(i::Integer) = string(Char(64 + i))
 function writemmtf(output::IO,
                 el::StructuralElementOrList,
                 atom_selectors::Function...;
+                expand_disordered::Bool=true,
                 gzip::Bool=false)
     d = MMTFDict()
     for mod in collectmodels(el)
@@ -183,7 +200,7 @@ function writemmtf(output::IO,
             prev_het = true
             group_count = 0
             sequence = ""
-            for res in ch
+            for res in collectresidues(ch; expand_disordered=expand_disordered)
                 # Determine whether we have changed entity
                 # ATOM blocks, and hetero molecules with the same name, are
                 #   treated as the same entity
@@ -239,16 +256,15 @@ function writemmtf(output::IO,
                 push!(d["insCodeList"], inscode(res) == ' ' ? '\0' : inscode(res))
                 push!(d["secStructList"], -1)
                 push!(d["sequenceIndexList"], ishetero(res) ? -1 : length(sequence) - 1)
-                for outer_at in collectatoms(res, atom_selectors...)
-                    for at in outer_at
-                        push!(d["altLocList"], altlocid(at) == ' ' ? '\0' : altlocid(at))
-                        push!(d["atomIdList"], serial(at))
-                        push!(d["bFactorList"], tempfactor(at))
-                        push!(d["occupancyList"], occupancy(at))
-                        push!(d["xCoordList"], x(at))
-                        push!(d["yCoordList"], y(at))
-                        push!(d["zCoordList"], z(at))
-                    end
+                for at in collectatoms(res, atom_selectors...;
+                                        expand_disordered=expand_disordered)
+                    push!(d["altLocList"], altlocid(at) == ' ' ? '\0' : altlocid(at))
+                    push!(d["atomIdList"], serial(at))
+                    push!(d["bFactorList"], tempfactor(at))
+                    push!(d["occupancyList"], occupancy(at))
+                    push!(d["xCoordList"], x(at))
+                    push!(d["yCoordList"], y(at))
+                    push!(d["zCoordList"], z(at))
                 end
                 prev_resname = resname(res)
                 prev_het = ishetero(res)

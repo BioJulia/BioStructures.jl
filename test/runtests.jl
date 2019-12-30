@@ -91,7 +91,7 @@ close(io)
         downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDBXML)
         pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[PDBXML])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
-        # MMCIF format
+        # mmCIF format
         downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMCIF)
         pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[MMCIF])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
@@ -103,11 +103,11 @@ close(io)
         downloadpdb("116l", pdb_dir=pdb_dir, file_format=PDB, obsolete=true)
         pdbpath = joinpath(pdb_dir, "obsolete", "116L$(pdbextension[PDB])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
-        # Biological Assembly - PDB format
+        # Biological assembly - PDB format
         downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDB, ba_number=1)
         pdbpath = joinpath(pdb_dir, "1ALW_ba1$(pdbextension[PDB])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
-        # Biological Assembly - MMCIF format
+        # Biological assembly - mmCIF format
         downloadpdb("5a9z", pdb_dir=pdb_dir, file_format=MMCIF, ba_number=1)
         pdbpath = joinpath(pdb_dir, "5A9Z_ba1$(pdbextension[MMCIF])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
@@ -760,16 +760,16 @@ end
     # Test DataFrame constructor
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
     df = DataFrame(collectatoms(struc))
-    @test size(df) == (3804, 17)
+    @test size(df) == (3816, 17)
     @test first(df)[:x] == 26.981
     @test size(describe(df), 1) == 17
-    @test isapprox(sum(df.tempfactor), 164803.34)
+    @test isapprox(sum(df.tempfactor), 165121.99)
     @test first(sort(df, :x))[:x] == -7.668
     df = DataFrame(collectresidues(struc))
     @test size(df) == (808, 8)
     @test first(df)[:resname] == "MET"
     @test size(describe(df), 1) == 8
-    @test sum(df.countatoms) == 3804
+    @test sum(df.countatoms) == 3816
     @test first(sort(df, :resnumber, rev=true))[:resnumber] == 735
 end
 
@@ -1441,7 +1441,8 @@ end
     @test countatoms(struc_written) == 492
     @test chainids(struc_written) == ["A", "B"]
     @test tempfactor(struc_written['B']["H_705"]["O"]) == 64.17
-    writepdb(temp_filename, struc, standardselector, disorderselector)
+    writepdb(temp_filename, collectatoms(struc, standardselector
+                                            disorderselector))
     @test countlines(temp_filename) == 10
     struc_written = read(temp_filename, PDB)
     @test countatoms(struc_written) == 5
@@ -2020,7 +2021,8 @@ end
     @test countatoms(struc_written) == 492
     @test chainids(struc_written) == ["A", "B"]
     @test tempfactor(struc_written['B']["H_705"]["O"]) == 64.17
-    writemmcif(temp_filename, struc, standardselector, disorderselector)
+    writemmcif(temp_filename, collectatoms(struc, standardselector,
+                                                disorderselector))
     @test countlines(temp_filename) == 35
     struc_written = read(temp_filename, MMCIF)
     @test countatoms(struc_written) == 5

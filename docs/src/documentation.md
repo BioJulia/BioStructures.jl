@@ -410,10 +410,11 @@ To download multiple PDB files to a specified directory:
 downloadpdb(["1EN2", "1ALW", "1AKE"], pdb_dir="path/to/pdb/directory")
 ```
 
-To download a PDB file in PDB, XML, MMCIF or MMTF format use the `file_format` argument:
+To download a PDB file in PDB, XML, mmCIF or MMTF format use the `file_format` argument:
 
 ```julia
-downloadpdb("1ALW", pdb_dir="path/to/pdb/directory", file_format=MMTF)
+# To get mmCIF
+downloadpdb("1ALW", pdb_dir="path/to/pdb/directory", file_format=MMCIF)
 
 # To get XML
 downloadpdb("1ALW", pdb_dir="path/to/pdb/directory", file_format=PDBXML)

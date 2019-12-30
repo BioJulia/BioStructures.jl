@@ -1092,6 +1092,8 @@ end
 # Iterating over a DisorderedResidue yields AbstractAtoms
 # This is not necessarily intuitive, it may be expected to yield Residues
 # However this way iterating over an AbstractResidue always yields AbstractAtoms
+# Use collectresidues with the expand_disordered flag to unroll disordered
+#   residues
 Base.length(dis_res::DisorderedResidue) = length(atomnames(dis_res, strip=false))
 Base.eltype(::Type{DisorderedResidue}) = AbstractAtom
 function Base.iterate(dis_res::DisorderedResidue, state=1)
@@ -1190,8 +1192,6 @@ end
 
 countmodels(struc::ProteinStructure) = length(struc)
 
-countmodels(mods::Vector{Model}) = length(mods)
-
 
 """
     collectchains(el)
@@ -1254,8 +1254,6 @@ end
 
 countchains(mod::Model) = length(mod)
 
-countchains(chs::Vector{Chain}) = length(chs)
-
 
 """
     collectresidues(el)
@@ -1263,34 +1261,59 @@ countchains(chs::Vector{Chain}) = length(chs)
 Returns a `Vector` of the residues in a `StructuralElementOrList`.
 Additional arguments are residue selector functions - only residues that
 return `true` from all the functions are retained.
+The keyword argument `expand_disordered` (default `false`) determines whether to
+return all copies of disordered residues separately.
 """
-function collectresidues(struc::ProteinStructure)
+function collectresidues(struc::ProteinStructure; expand_disordered::Bool=false)
     if countmodels(struc) > 0
-        return collectresidues(defaultmodel(struc))
+        return collectresidues(defaultmodel(struc); expand_disordered=expand_disordered)
     else
         return AbstractResidue[]
     end
 end
 
-function collectresidues(el::Union{Model, Vector{Model}, Vector{Chain}})
+function collectresidues(el::Union{Model, Vector{Model}, Vector{Chain}};
+                            expand_disordered::Bool=false)
     res_list = AbstractResidue[]
     for sub_el in el
-        append!(res_list, collectresidues(sub_el))
+        append!(res_list, collectresidues(sub_el; expand_disordered=expand_disordered))
     end
     return res_list
 end
 
-collectresidues(ch::Chain) = collect(ch)
-
-collectresidues(res::AbstractResidue) = AbstractResidue[res]
-
-collectresidues(at::AbstractAtom) = AbstractResidue[residue(at)]
-
 # Note output is always Vector{AbstractResidue} unless input was Vector{Residue}
-# or Vector{DisorderedResidue}, in which case output is same type as input type
-collectresidues(res_list::Vector{<:AbstractResidue}) = res_list
+#   or Vector{DisorderedResidue}, in which case output is same type as input
+#   type
+function collectresidues(el::Union{Chain, Vector{<:AbstractResidue}};
+                            expand_disordered::Bool=false)
+    if expand_disordered
+        res_list = AbstractResidue[]
+        for res in el
+            if isa(res, Residue)
+                push!(res_list, res)
+            else
+                append!(res_list, collectresidues(res; expand_disordered=true))
+            end
+        end
+        return res_list
+    else
+        return isa(el, Chain) ? collect(el) : el
+    end
+end
 
-function collectresidues(at_list::Vector{<:AbstractAtom})
+collectresidues(res::Residue; expand_disordered::Bool=false) = AbstractResidue[res]
+
+function collectresidues(dis_res::DisorderedResidue; expand_disordered::Bool=false)
+    if expand_disordered
+        return AbstractResidue[disorderedres(dis_res, res_name) for res_name in resnames(dis_res)]
+    else
+        return AbstractResidue[dis_res]
+    end
+end
+
+collectresidues(at::AbstractAtom; expand_disordered::Bool=false) = AbstractResidue[residue(at)]
+
+function collectresidues(at_list::Vector{<:AbstractAtom}; expand_disordered::Bool=false)
     res_list = AbstractResidue[]
     for at in at_list
         if !(residue(at) in res_list)
@@ -1302,8 +1325,10 @@ end
 
 function collectresidues(el::StructuralElementOrList,
                     residue_selector::Function,
-                    residue_selectors::Function...)
-    return applyselectors(collectresidues(el), residue_selector, residue_selectors...)
+                    residue_selectors::Function...;
+                    expand_disordered::Bool=false)
+    return applyselectors(collectresidues(el; expand_disordered=expand_disordered),
+                            residue_selector, residue_selectors...)
 end
 
 
@@ -1313,15 +1338,14 @@ end
 Return the number of residues in a `StructuralElementOrList` as an `Int`.
 Additional arguments are residue selector functions - only residues that
 return `true` from all the functions are counted.
+The keyword argument `expand_disordered` (default `false`) determines whether to
+return all copies of disordered residues separately.
 """
-function countresidues(el::StructuralElementOrList, residue_selectors::Function...)
-    return length(collectresidues(el, residue_selectors...))
-end
-
-countresidues(ch::Chain) = length(ch)
-
-function countresidues(res_list::Vector{<:AbstractResidue})
-    return length(res_list)
+function countresidues(el::StructuralElementOrList,
+                        residue_selectors::Function...;
+                        expand_disordered::Bool=false)
+    return length(collectresidues(el, residue_selectors...;
+                                    expand_disordered=expand_disordered))
 end
 
 
@@ -1331,34 +1355,71 @@ end
 Returns a `Vector` of the atoms in a `StructuralElementOrList`.
 Additional arguments are atom selector functions - only atoms that return
 `true` from all the functions are retained.
+The keyword argument `expand_disordered` (default `false`) determines whether to
+return all copies of disordered atoms separately.
 """
-function collectatoms(struc::ProteinStructure)
+function collectatoms(struc::ProteinStructure; expand_disordered::Bool=false)
     if countmodels(struc) > 0
-        return collectatoms(defaultmodel(struc))
+        return collectatoms(defaultmodel(struc); expand_disordered=expand_disordered)
     else
         return AbstractAtom[]
     end
 end
 
 function collectatoms(el::Union{Model, Chain, Vector{Model}, Vector{Chain},
-                                Vector{<:AbstractResidue}})
+                                Vector{<:AbstractResidue}};
+                        expand_disordered::Bool=false)
     at_list = AbstractAtom[]
     for sub_el in el
-        append!(at_list, collectatoms(sub_el))
+        append!(at_list, collectatoms(sub_el; expand_disordered=expand_disordered))
     end
     return at_list
 end
 
-collectatoms(res::AbstractResidue) = collect(res)
-
-collectatoms(at::AbstractAtom) = AbstractAtom[at]
-
 # Note output is always Vector{AbstractAtom} unless input was Vector{Atom} or
-# Vector{DisorderedAtom}, in which case output is same type as input type
-collectatoms(at_list::Vector{<:AbstractAtom}) = at_list
+#   Vector{DisorderedAtom}, in which case output is same type as input type
+function collectatoms(el::Union{Residue, Vector{<:AbstractAtom}};
+                            expand_disordered::Bool=false)
+    if expand_disordered
+        at_list = AbstractAtom[]
+        for at in el
+            if isa(at, Atom)
+                push!(at_list, at)
+            else
+                append!(at_list, collectatoms(at; expand_disordered=true))
+            end
+        end
+        return at_list
+    else
+        return isa(el, Residue) ? collect(el) : el
+    end
+end
 
-function collectatoms(el::StructuralElementOrList, atom_selector::Function, atom_selectors::Function...)
-    return applyselectors(collectatoms(el), atom_selector, atom_selectors...)
+function collectatoms(dis_res::DisorderedResidue; expand_disordered::Bool=false)
+    if expand_disordered
+        return collectatoms(collectresidues(dis_res; expand_disordered=true);
+                            expand_disordered=true)
+    else
+        return collectatoms(defaultresidue(dis_res))
+    end
+end
+
+collectatoms(at::Atom; expand_disordered::Bool=false) = AbstractAtom[at]
+
+function collectatoms(dis_at::DisorderedAtom; expand_disordered::Bool=false)
+    if expand_disordered
+        return AbstractAtom[at for at in dis_at]
+    else
+        return AbstractAtom[dis_at]
+    end
+end
+
+function collectatoms(el::StructuralElementOrList,
+                        atom_selector::Function,
+                        atom_selectors::Function...;
+                        expand_disordered::Bool=false)
+    return applyselectors(collectatoms(el; expand_disordered=expand_disordered),
+                            atom_selector, atom_selectors...)
 end
 
 
@@ -1368,15 +1429,14 @@ end
 Return the number of atoms in a `StructuralElementOrList` as an `Int`.
 Additional arguments are atom selector functions - only atoms that return
 `true` from all the functions are counted.
+The keyword argument `expand_disordered` (default `false`) determines whether to
+return all copies of disordered atoms separately.
 """
-function countatoms(el::StructuralElementOrList, atom_selectors::Function...)
-    return length(collectatoms(el, atom_selectors...))
-end
-
-countatoms(res::AbstractResidue) = length(res)
-
-function countatoms(at_list::Vector{<:AbstractAtom})
-    return length(at_list)
+function countatoms(el::StructuralElementOrList,
+                    atom_selectors::Function...;
+                    expand_disordered::Bool=false)
+    return length(collectatoms(el, atom_selectors...;
+                                expand_disordered=expand_disordered))
 end
 
 
@@ -1757,7 +1817,8 @@ end
 
 # DataFrame constructors for interoperability
 function DataFrames.DataFrame(ats::Vector{<:AbstractAtom},
-                    atom_selectors::Function...)
+                    atom_selectors::Function...;
+                    expand_disordered::Bool=true)
     df = DataFrame(ishetero=Bool[],
                     serial=Int[],
                     atomname=String[],
@@ -1775,7 +1836,8 @@ function DataFrames.DataFrame(ats::Vector{<:AbstractAtom},
                     charge=String[],
                     modelnumber=Int[],
                     isdisorderedatom=Bool[])
-    for a in collectatoms(ats, atom_selectors...)
+    for a in collectatoms(ats, atom_selectors...;
+                            expand_disordered=expand_disordered)
         push!(df, (ishetero(a), serial(a), atomname(a), altlocid(a), resname(a),
                     chainid(a), resnumber(a), inscode(a), x(a), y(a), z(a),
                     occupancy(a), tempfactor(a), element(a), charge(a),
@@ -1785,7 +1847,8 @@ function DataFrames.DataFrame(ats::Vector{<:AbstractAtom},
 end
 
 function DataFrames.DataFrame(res::Vector{<:AbstractResidue},
-                    residue_selectors::Function...)
+                    residue_selectors::Function...;
+                    expand_disordered::Bool=true)
     df = DataFrame(ishetero=Bool[],
                     resname=String[],
                     chainid=String[],
@@ -1794,10 +1857,11 @@ function DataFrames.DataFrame(res::Vector{<:AbstractResidue},
                     countatoms=Int[],
                     modelnumber=Int[],
                     isdisorderedres=Bool[])
-    for r in collectresidues(res, residue_selectors...)
+    for r in collectresidues(res, residue_selectors...;
+                                expand_disordered=expand_disordered)
         push!(df, (ishetero(r), resname(r), chainid(r), resnumber(r),
-                    inscode(r), countatoms(r), modelnumber(r),
-                    isdisorderedres(r)))
+                    inscode(r), countatoms(r; expand_disordered=expand_disordered),
+                    modelnumber(r), isdisorderedres(r)))
     end
     return df
 end
