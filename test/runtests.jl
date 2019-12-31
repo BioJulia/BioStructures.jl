@@ -765,12 +765,27 @@ end
     @test size(describe(df), 1) == 17
     @test isapprox(sum(df.tempfactor), 165121.99)
     @test first(sort(df, :x))[:x] == -7.668
+    df = DataFrame(collectatoms(struc), expand_disordered=false)
+    @test size(df) == (3804, 17)
     df = DataFrame(collectresidues(struc))
     @test size(df) == (808, 8)
     @test first(df)[:resname] == "MET"
     @test size(describe(df), 1) == 8
     @test sum(df.countatoms) == 3816
     @test first(sort(df, :resnumber, rev=true))[:resnumber] == 735
+    df = DataFrame(collectresidues(struc), expand_disordered=false)
+    @test size(df) == (808, 8)
+    @test sum(df.countatoms) == 3804
+    struc = read(testfilepath("PDB", "1EN2.pdb"), PDB)
+    # Residues need expanding first or you miss disordered residues
+    df = DataFrame(collectatoms(collectresidues(struc; expand_disordered=true)))
+    @test size(df) == (819, 17)
+    df = DataFrame(collectatoms(struc), expand_disordered=false)
+    @test size(df) == (754, 17)
+    df = DataFrame(collectresidues(struc))
+    @test size(df) == (171, 8)
+    df = DataFrame(collectresidues(struc), expand_disordered=false)
+    @test size(df) == (166, 8)
 end
 
 
@@ -1098,6 +1113,12 @@ end
     @test length(ats) == 2
     @test isa(ats, Vector{AbstractAtom})
     @test serial(ats[2]) == 1292
+    ats = collectatoms(struc, expand_disordered=true)
+    @test length(ats) == 3816
+    @test isa(ats, Vector{AbstractAtom})
+    @test all(isa.(ats, Atom))
+    ats = collectatoms(struc, standardselector, expand_disordered=true)
+    @test length(ats) == 3317
 
 
     # Test countatoms
@@ -1116,6 +1137,8 @@ end
     @test countatoms(struc['A'], standardselector) == 1656
     @test countatoms(struc['A'], heteroselector) == 298
     @test countatoms(struc['A'], standardselector, disorderselector) == 5
+    @test countatoms(struc, expand_disordered=true) == 3816
+    @test countatoms(struc, standardselector, expand_disordered=true) == 3317
 
     @test countatoms(ProteinStructure()) == 0
     @test countatoms(Model()) == 0
@@ -1178,9 +1201,20 @@ end
     @test length(res) == 2
     @test isa(res, Vector{AbstractResidue})
     @test atomnames(res[1]) == ["N", "CA", "C", "O", "CB", "CG", "CD", "CE", "NZ"]
+    struc = read(testfilepath("PDB", "1EN2.pdb"), PDB)
+    res = collectresidues(struc)
+    @test length(res) == 166
+    @test isa(res[9], DisorderedResidue)
+    res = collectresidues(struc, expand_disordered=true)
+    @test length(res) == 171
+    @test isa(res, Vector{AbstractResidue})
+    @test all(isa.(res, Residue))
+    res = collectresidues(struc, standardselector, expand_disordered=true)
+    @test length(res) == 90
 
 
     # Test countresidues
+    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
     @test countresidues(struc) == 808
     @test countresidues(struc[1]) == 808
     @test countresidues(struc['A']) == 456
@@ -1196,6 +1230,9 @@ end
     @test countresidues(struc['A'], standardselector) == 214
     @test countresidues(struc['A'], heteroselector) == 242
     @test countresidues(struc, standardselector, res -> chainid(res) == "A") == 214
+    struc = read(testfilepath("PDB", "1EN2.pdb"), PDB)
+    @test countresidues(struc, expand_disordered=true) == 171
+    @test countresidues(struc, standardselector, expand_disordered=true) == 90
 
     @test countresidues(ProteinStructure()) == 0
     @test countresidues(Model()) == 0
@@ -1204,6 +1241,7 @@ end
 
 
     # Test collectchains
+    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
     chs = collectchains(struc)
     @test length(chs) == 2
     @test isa(chs, Vector{Chain})
@@ -1398,6 +1436,9 @@ end
     ch_b["H_20"]["11H11"] = Atom(1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", ch_b["H_20"])
     @test_throws ArgumentError pdbline(ch_b["H_20"]["11H11"])
 
+    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
+    @test pdbline(struc["A"][167]["NH1"]) == "ATOM   1294  NH1AARG A 167      24.181  40.144  13.699  0.50 27.31           N  "
+
     line_a = "ATOM    669  CA  ILE A  90      31.743  33.110  31.221  1.00 25.76           C  "
     line_b = "HETATM 3474  O  B XX A 334A      8.802  62.000   8.672  1.00 39.15           O1-"
     at_rec = AtomRecord(line_a)
@@ -1441,13 +1482,19 @@ end
     @test countatoms(struc_written) == 492
     @test chainids(struc_written) == ["A", "B"]
     @test tempfactor(struc_written['B']["H_705"]["O"]) == 64.17
-    writepdb(temp_filename, collectatoms(struc, standardselector
+    writepdb(temp_filename, collectatoms(struc, standardselector,
                                             disorderselector))
     @test countlines(temp_filename) == 10
     struc_written = read(temp_filename, PDB)
     @test countatoms(struc_written) == 5
     @test sum(isdisorderedatom, collectatoms(struc_written)) == 5
     @test defaultaltlocid(struc_written['A'][167]["NH1"]) == 'A'
+    writepdb(temp_filename, struc)
+    @test countlines(temp_filename) == 3816
+    writepdb(temp_filename, struc, expand_disordered=false)
+    @test countlines(temp_filename) == 3804
+    struc_written = read(temp_filename, PDB)
+    @test !any(isdisorderedatom.(collectatoms(struc_written)))
 
 
     # Test writing different element types
@@ -1537,6 +1584,11 @@ end
     @test altlocid(disorderedres(struc_written['A'][10], "GLY")["O"]) == 'B'
     @test countatoms(struc_written['A'][10]) == 6
     @test countatoms(struc_written['A'][16]) == 11
+    writepdb(temp_filename, struc, expand_disordered=false)
+    @test countlines(temp_filename) == 754
+    struc_written = read(temp_filename, PDB)
+    @test !any(isdisorderedres.(collectresidues(struc_written)))
+    @test !any(isdisorderedatom.(collectatoms(struc_written)))
 
     @test_throws ArgumentError writepdb(temp_filename, Atom(
         1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res))
@@ -2028,6 +2080,12 @@ end
     @test countatoms(struc_written) == 5
     @test sum(isdisorderedatom, collectatoms(struc_written)) == 5
     @test defaultaltlocid(struc_written['A'][167]["NH1"]) == 'A'
+    writemmcif(temp_filename, struc)
+    @test countlines(temp_filename) == 3841
+    writemmcif(temp_filename, struc, expand_disordered=false)
+    @test countlines(temp_filename) == 3829
+    struc_written = read(temp_filename, MMCIF)
+    @test !any(isdisorderedatom.(collectatoms(struc_written)))
 
 
     # Test writing different element types
@@ -2113,6 +2171,11 @@ end
     @test altlocid(disorderedres(struc_written['A'][10], "GLY")["O"]) == 'B'
     @test countatoms(struc_written['A'][10]) == 6
     @test countatoms(struc_written['A'][16]) == 11
+    writemmcif(temp_filename, struc, expand_disordered=false)
+    @test countlines(temp_filename) == 779
+    struc_written = read(temp_filename, MMCIF)
+    @test !any(isdisorderedres.(collectresidues(struc_written)))
+    @test !any(isdisorderedatom.(collectatoms(struc_written)))
 
 
     # Test writing multi-character chain IDs
@@ -2145,6 +2208,8 @@ end
     @test cs[2, 10] == 42.426
     @test cs[3, 10] == 19.756
     @test coordarray(cs) == cs
+    cs = coordarray(struc_1AKE, expand_disordered=true)
+    @test size(cs) == (3, 3816)
 
 
     # Test superimposition

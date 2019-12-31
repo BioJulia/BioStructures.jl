@@ -59,7 +59,6 @@ The elements of `struc` can be accessed as follows:
 
 Disordered atoms are stored in a `DisorderedAtom` container but calls fall back to the default atom, so disorder can be ignored if you are not interested in it.
 Disordered residues (i.e. point mutations with different residue names) are stored in a `DisorderedResidue` container.
-
 The idea is that disorder will only bother you if you want it to.
 See the [Biopython discussion](http://biopython.org/wiki/The_Biopython_Structural_Bioinformatics_FAQ#How_is_disorder_handled.3F) for more.
 
@@ -135,6 +134,8 @@ For example `sort(res)` sorts a list of residues as described above, or `sort(re
 
 `collect` can be used to get arrays of sub-elements.
 `collectatoms`, `collectresidues`, `collectchains` and `collectmodels` return arrays of a particular type from a structural element or element array.
+Since most operations should use a single version of an atom or residue, disordered entities are not expanded by default and only one entity is present in the array.
+This can be changed by setting `expand_disordered` to `true` in `collectatoms` or `collectresidues`.
 
 Selectors are functions passed as additional arguments to these functions.
 Only elements that return `true` when passed to all the selector are retained.
@@ -197,6 +198,9 @@ julia> countatoms(struc, calphaselector)
 
 julia> countresidues(struc, standardselector)
 85
+
+julia> countatoms(struc, expand_disordered=true)
+819
 ```
 
 The amino acid sequence of a protein can be retrieved by passing an element to `AminoAcidSequence` with optional residue selectors:
@@ -499,6 +503,8 @@ julia> first(df, 3)
 │ 3   │ false    │ VAL     │ A       │ 96        │ ' '     │ 7          │ 1           │ false           │
 ```
 
+As with file writing disordered entities are expanded by default but this can be changed by setting `expand_disordered` to `false`.
+
 
 ## Writing PDB files
 
@@ -518,11 +524,15 @@ writepdb("1EN2_out.pdb", struc, backboneselector)
 
 The first argument can also be a stream.
 To write mmCIF format files, use the `writemmcif` function with similar arguments.
+
 A `MMCIFDict` can also be written using `writemmcif`:
 
 ```julia
 writemmcif("1EN2_out.dic", mmcif_dict)
 ```
+
+Unlike for the `collect` functions, `expand_disordered` is set to `true` when writing files as it is usually desirable to retain all entities.
+Set `expand_disordered` to `false` to not write out more than one atom or residue at each location.
 
 Multi-character chain IDs can be written to mmCIF files but will throw an error when written to a PDB file as the PDB file format only has one character allocated to the chain ID.
 
@@ -620,7 +630,7 @@ plot(resnumber.(calphas),
      label="")
 ```
 
-**B)** Print the PDB records for all Cα atoms within 5 Angstrom of residue 38:
+**B)** Print the PDB records for all Cα atoms within 5 Å of residue 38:
 
 ```julia
 for at in calphas

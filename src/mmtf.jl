@@ -231,9 +231,12 @@ function writemmtf(output::IO,
 
                 # Look for an existing group with the correct residue name and
                 #   atom names present
+                ats = collectatoms(res, atom_selectors...;
+                                    expand_disordered=expand_disordered)
+                at_names = atomname.(ats)
                 group_i = 0
                 for (gi, group) in enumerate(d["groupList"])
-                    if group["groupName"] == resname(res) && group["atomNameList"] == atomnames(res)
+                    if group["groupName"] == resname(res) && group["atomNameList"] == at_names
                         group_i = gi
                         break
                     end
@@ -247,17 +250,18 @@ function writemmtf(output::IO,
                         "formalChargeList"=> Any[parse(Int64, charge(at)) for at in res],
                         "singleLetterCode"=> "",
                         "chemCompType"    => "",
-                        "atomNameList"    => Any[atomnames(res)...],
+                        "atomNameList"    => Any[at_names...],
                         "bondOrderList"   => Any[]
                     ))
                 end
+
                 push!(d["groupIdList"], resnumber(res))
                 push!(d["groupTypeList"], group_i == 0 ? length(d["groupList"]) - 1 : group_i - 1)
                 push!(d["insCodeList"], inscode(res) == ' ' ? '\0' : inscode(res))
                 push!(d["secStructList"], -1)
                 push!(d["sequenceIndexList"], ishetero(res) ? -1 : length(sequence) - 1)
-                for at in collectatoms(res, atom_selectors...;
-                                        expand_disordered=expand_disordered)
+
+                for at in ats
                     push!(d["altLocList"], altlocid(at) == ' ' ? '\0' : altlocid(at))
                     push!(d["atomIdList"], serial(at))
                     push!(d["bFactorList"], tempfactor(at))
