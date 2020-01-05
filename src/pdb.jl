@@ -35,8 +35,8 @@ struct MMCIF <: BioCore.IO.FileFormat end
 struct MMTF <: BioCore.IO.FileFormat end
 
 "Mapping of Protein Data Bank (PDB) formats to their file extensions."
-const pdbextension = Dict{Type, String}(PDB=> ".pdb", PDBXML=> ".xml",
-                                        MMCIF=> ".cif", MMTF=> ".mmtf")
+const pdbextension = Dict{Type, String}(PDB=> "pdb", PDBXML=> "xml",
+                                        MMCIF=> "cif", MMTF=> "mmtf")
 
 
 "Error arising from parsing a Protein Data Bank (PDB) file."
@@ -231,9 +231,9 @@ function downloadpdb(pdbid::AbstractString;
     end
     # Standard file name format for PDB and biological assembly
     if ba_number==0
-        pdbpath = joinpath(pdb_dir, "$pdbid$(pdbextension[file_format])")
+        pdbpath = joinpath(pdb_dir, "$pdbid.$(pdbextension[file_format])")
     else
-        pdbpath = joinpath(pdb_dir, "$(pdbid)_ba$ba_number$(pdbextension[file_format])")
+        pdbpath = joinpath(pdb_dir, "$(pdbid)_ba$ba_number.$(pdbextension[file_format])")
     end
     # Download the PDB file only if it does not exist in the "pdb_dir" and when "overwrite" is true
     if isfile(pdbpath) && !overwrite
@@ -246,15 +246,15 @@ function downloadpdb(pdbid::AbstractString;
             @info "Downloading PDB: $pdbid"
             if ba_number == 0
                 if file_format == PDB || file_format == PDBXML || file_format == MMCIF
-                    download("http://files.rcsb.org/download/$pdbid$(pdbextension[file_format]).gz", archivefilepath)
+                    download("http://files.rcsb.org/download/$pdbid.$(pdbextension[file_format]).gz", archivefilepath)
                 else
                     download("http://mmtf.rcsb.org/v1.0/full/$pdbid.mmtf.gz", archivefilepath)
                 end
             else
                 if file_format == PDB
-                    download("http://files.rcsb.org/download/$pdbid$(pdbextension[file_format])$ba_number.gz", archivefilepath)
+                    download("http://files.rcsb.org/download/$pdbid.$(pdbextension[file_format])$ba_number.gz", archivefilepath)
                 elseif file_format == MMCIF
-                    download("http://files.rcsb.org/download/$pdbid-assembly$ba_number$(pdbextension[file_format]).gz", archivefilepath)
+                    download("http://files.rcsb.org/download/$pdbid-assembly$ba_number.$(pdbextension[file_format]).gz", archivefilepath)
                 else
                     throw(ArgumentError("Biological assemblies are available in the PDB and mmCIF formats only"))
                 end
@@ -350,8 +350,8 @@ function updatelocalpdb(; pdb_dir::AbstractString=pwd(), file_format::Type=PDB)
     # Set the obsolete directory to be inside pdb_dir
     obsolete_dir=joinpath(pdb_dir, "obsolete")
     for pdbid in obsoletelist
-        oldfile = joinpath(pdb_dir, "$pdbid$(pdbextension[file_format])")
-        newfile = joinpath(obsolete_dir, "$pdbid$(pdbextension[file_format])")
+        oldfile = joinpath(pdb_dir, "$pdbid.$(pdbextension[file_format])")
+        newfile = joinpath(obsolete_dir, "$pdbid.$(pdbextension[file_format])")
         # if obsolete pdb is in the "pdb_dir", move it to "obsolete" directory inside "pdb_dir"
         if isfile(oldfile)
             if !isdir(obsolete_dir)

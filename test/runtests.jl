@@ -86,37 +86,37 @@ close(io)
 
         # PDB format
         downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDB)
-        pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[PDB])")
+        pdbpath = joinpath(pdb_dir, "1ALW.$(pdbextension[PDB])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
         # PDBXML format
         downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDBXML)
-        pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[PDBXML])")
+        pdbpath = joinpath(pdb_dir, "1ALW.$(pdbextension[PDBXML])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
         # mmCIF format
         downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMCIF)
-        pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[MMCIF])")
+        pdbpath = joinpath(pdb_dir, "1ALW.$(pdbextension[MMCIF])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
         # MMTF format
         downloadpdb("1alw", pdb_dir=pdb_dir, file_format=MMTF)
-        pdbpath = joinpath(pdb_dir, "1ALW$(pdbextension[MMTF])")
+        pdbpath = joinpath(pdb_dir, "1ALW.$(pdbextension[MMTF])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
         # Obsolete PDB
         downloadpdb("116l", pdb_dir=pdb_dir, file_format=PDB, obsolete=true)
-        pdbpath = joinpath(pdb_dir, "obsolete", "116L$(pdbextension[PDB])")
+        pdbpath = joinpath(pdb_dir, "obsolete", "116L.$(pdbextension[PDB])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
         # Biological assembly - PDB format
         downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDB, ba_number=1)
-        pdbpath = joinpath(pdb_dir, "1ALW_ba1$(pdbextension[PDB])")
+        pdbpath = joinpath(pdb_dir, "1ALW_ba1.$(pdbextension[PDB])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
         # Biological assembly - mmCIF format
         downloadpdb("5a9z", pdb_dir=pdb_dir, file_format=MMCIF, ba_number=1)
-        pdbpath = joinpath(pdb_dir, "5A9Z_ba1$(pdbextension[MMCIF])")
+        pdbpath = joinpath(pdb_dir, "5A9Z_ba1.$(pdbextension[MMCIF])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
         # Download multiple PDB files
         pdbidlist = ["1ent", "1en2"]
         downloadpdb(pdbidlist, pdb_dir=pdb_dir, file_format=PDB)
         for pdbid in pdbidlist
-            pdbpath = joinpath(pdb_dir, "$(uppercase(pdbid))$(pdbextension[PDB])")
+            pdbpath = joinpath(pdb_dir, "$(uppercase(pdbid)).$(pdbextension[PDB])")
             @test isfile(pdbpath) && filesize(pdbpath) > 0
         end
 
@@ -2396,7 +2396,7 @@ end
 
 
     for (ft, dir_name) in ((PDB, "PDB"), (MMCIF, "mmCIF"), (MMTF, "MMTF"))
-        struc = read(testfilepath(dir_name, "1SSU$(pdbextension[ft])"), ft)
+        struc = read(testfilepath(dir_name, "1SSU.$(pdbextension[ft])"), ft)
         writemmtf(temp_filename, struc)
         struc_written = read(temp_filename, MMTF)
         @test isa(struc_written, ProteinStructure)
