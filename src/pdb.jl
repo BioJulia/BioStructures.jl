@@ -783,7 +783,9 @@ end
 
 function checkchainerror(el::Union{Chain, AbstractResidue, AbstractAtom})
     if length(chainid(el)) != 1
-        throw(ArgumentError("Cannot write valid PDB file with non-single character chain ID: \"$(chainid(el))\""))
+        throw(ArgumentError("Cannot write valid PDB file with non-single " *
+            "character chain ID \"$(chainid(el))\", consider writing a mmCIF " *
+            "or MMTF file"))
     end
 end
 

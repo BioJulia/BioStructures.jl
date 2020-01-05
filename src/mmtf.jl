@@ -1,8 +1,13 @@
 export
     MMTFDict,
+    generatechainid,
     writemmtf
 
 """
+    MMTFDict(filepath)
+    MMTFDict(io)
+    MMTFDict()
+
 A Macromolecular Transmission Format (MMTF) dictionary.
 
 Can be accessed using similar functions to a standard `Dict`.
@@ -61,8 +66,8 @@ MMTFDict() = MMTFDict(Dict{String, Any}(
         "yCoordList"         => Float32[],
         "zCoordList"         => Float32[]))
 
-MMTFDict(filepath::AbstractString, gzip::Bool=false) = MMTFDict(parsemmtf(filepath; gzip=gzip))
-MMTFDict(io::IO, gzip::Bool=false) = MMTFDict(parsemmtf(io; gzip=gzip))
+MMTFDict(filepath::AbstractString; gzip::Bool=false) = MMTFDict(parsemmtf(filepath; gzip=gzip))
+MMTFDict(io::IO; gzip::Bool=false) = MMTFDict(parsemmtf(io; gzip=gzip))
 
 Base.getindex(mmtf_dict::MMTFDict, field::AbstractString) = mmtf_dict.dict[field]
 
@@ -119,35 +124,64 @@ function Base.read(input::IO,
                     if (read_std_atoms || hets[chain_i]) && (read_het_atoms || !hets[chain_i])
                         unsafe_addatomtomodel!(
                             struc[model_i],
-                            AtomRecord(
-                                hets[chain_i],
-                                d["atomIdList"][atom_i],
-                                group["atomNameList"][ai],
-                                d["altLocList"][atom_i] == '\0' ? ' ' : d["altLocList"][atom_i],
-                                group["groupName"],
-                                d["chainNameList"][chain_i],
-                                d["groupIdList"][group_i],
-                                d["insCodeList"][group_i] == '\0' ? ' ' : d["insCodeList"][group_i],
-                                [
-                                    d["xCoordList"][atom_i],
-                                    d["yCoordList"][atom_i],
-                                    d["zCoordList"][atom_i],
-                                ],
-                                d["occupancyList"][atom_i],
-                                d["bFactorList"][atom_i],
-                                group["elementList"][ai],
-                                # Add + to positive charges to match PDB convention
-                                group["formalChargeList"][ai] > 0 ? "+$(group["formalChargeList"][ai])" :
-                                            string(group["formalChargeList"][ai])
-                            );
-                            remove_disorder=remove_disorder)
+                                AtomRecord(
+                                    hets[chain_i],
+                                    d["atomIdList"][atom_i],
+                                    group["atomNameList"][ai],
+                                    d["altLocList"][atom_i] == '\0' ? ' ' : d["altLocList"][atom_i],
+                                    group["groupName"],
+                                    d["chainNameList"][chain_i],
+                                    d["groupIdList"][group_i],
+                                    d["insCodeList"][group_i] == '\0' ? ' ' : d["insCodeList"][group_i],
+                                    [
+                                        d["xCoordList"][atom_i],
+                                        d["yCoordList"][atom_i],
+                                        d["zCoordList"][atom_i],
+                                    ],
+                                    d["occupancyList"][atom_i],
+                                    d["bFactorList"][atom_i],
+                                    group["elementList"][ai],
+                                    # Add + to positive charges to match PDB convention
+                                    group["formalChargeList"][ai] > 0 ? "+$(group["formalChargeList"][ai])" :
+                                                string(group["formalChargeList"][ai])
+                                );
+                                remove_disorder=remove_disorder)
                     end
                 end
             end
         end
     end
+    if length(d["atomIdList"]) != atom_i
+        throw(ArgumentError("Discrepancy between atom count ($(length(d["atomIdList"]))) and atoms read in ($atom_i)"))
+    end
+    # Remove any models that were not added to
+    for model in struc
+        if countchains(model) == 0
+            delete!(models(struc), modelnumber(model))
+        end
+    end
     fixlists!(struc)
     return struc
+end
+
+
+"""
+    generatechainid(entity_id)
+
+Convert a positive `Integer` into a chain ID.
+Goes A to Z, then AA to ZA, AB to ZB etc.
+This is in line with PDB conventions.
+"""
+function generatechainid(entity_id::Integer)
+    entity_id > 0 || throw(ArgumentError("Entity ID $entity_id is not positive"))
+    divisor = entity_id
+    out_string = ""
+    while divisor > 0
+        mod = (divisor - 1) % 26
+        out_string *= Char(65 + mod)
+        divisor = Int(floor((divisor - mod) / 26))
+    end
+    return out_string
 end
 
 
@@ -172,20 +206,7 @@ function writemmtf(output::Union{AbstractString, IO},
     return
 end
 
-function writemmtf(filepath::AbstractString,
-                el::StructuralElementOrList,
-                atom_selectors::Function...;
-                expand_disordered::Bool=true,
-                gzip::Bool=false)
-    open(filepath, "w") do output
-        writemmtf(output, el, atom_selectors...;
-                    expand_disordered=expand_disordered, gzip=gzip)
-    end
-end
-
-generatechainid(i::Integer) = string(Char(64 + i))
-
-function writemmtf(output::IO,
+function writemmtf(output::Union{AbstractString, IO},
                 el::StructuralElementOrList,
                 atom_selectors::Function...;
                 expand_disordered::Bool=true,
@@ -201,6 +222,12 @@ function writemmtf(output::IO,
             group_count = 0
             sequence = ""
             for res in collectresidues(ch; expand_disordered=expand_disordered)
+                ats = collectatoms(res, atom_selectors...;
+                                    expand_disordered=expand_disordered)
+                if countatoms(ats) == 0
+                    continue
+                end
+
                 # Determine whether we have changed entity
                 # ATOM blocks, and hetero molecules with the same name, are
                 #   treated as the same entity
@@ -231,8 +258,6 @@ function writemmtf(output::IO,
 
                 # Look for an existing group with the correct residue name and
                 #   atom names present
-                ats = collectatoms(res, atom_selectors...;
-                                    expand_disordered=expand_disordered)
                 at_names = atomname.(ats)
                 group_i = 0
                 for (gi, group) in enumerate(d["groupList"])
@@ -246,8 +271,9 @@ function writemmtf(output::IO,
                     push!(d["groupList"], Dict{Any, Any}(
                         "groupName"       => resname(res),
                         "bondAtomList"    => Any[],
-                        "elementList"     => Any[element(at) for at in res],
-                        "formalChargeList"=> Any[parse(Int64, charge(at)) for at in res],
+                        "elementList"     => Any[element(at) for at in ats],
+                        # MMTF specifies missing charges as zero
+                        "formalChargeList"=> Any[charge(at) == "" ? 0 : parse(Int64, charge(at)) for at in ats],
                         "singleLetterCode"=> "",
                         "chemCompType"    => "",
                         "atomNameList"    => Any[at_names...],
@@ -286,8 +312,9 @@ function writemmtf(output::IO,
     d["numChains"] = length(d["chainIdList"])
     d["numGroups"] = length(d["groupIdList"])
     d["numAtoms"] = length(d["atomIdList"])
-    d["structureId"] = structurename(el)
+    d["structureId"] = isa(el, StructuralElement) ? structurename(el) : structurename(first(el))
     d["mmtfVersion"] = "1.0.0"
     d["mmtfProducer"] = "BioStructures.jl"
+
     writemmtf(output, d; gzip=gzip)
 end

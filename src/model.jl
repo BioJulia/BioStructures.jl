@@ -227,7 +227,7 @@ end
 
 """
 A `StructuralElement` or `Vector` of `StructuralElement`s up to
-a `ProteinStructure`.
+a `Vector{Model}`.
 """
 const StructuralElementOrList = Union{
         StructuralElement,

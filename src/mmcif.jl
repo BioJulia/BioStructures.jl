@@ -38,6 +38,10 @@ const mmciforder = Dict(
 
 
 """
+    MMCFDict(filepath)
+    MMCFDict(io)
+    MMCFDict()
+
 A macromolecular Crystallographic Information File (mmCIF) dictionary.
 
 Can be accessed using similar functions to a standard `Dict`.
