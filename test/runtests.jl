@@ -1510,6 +1510,14 @@ end
     struc_written = read(temp_filename, PDB)
     @test countatoms(struc_written) == 2
     @test !ishetero(struc_written['A'][51]["CA"])
+    writepdb(temp_filename, struc['A'][51]["N"], calphaselector)
+    @test countlines(temp_filename) == 0
+    struc_written = read(temp_filename, PDB)
+    @test countatoms(struc_written) == 0
+    writepdb(temp_filename, ProteinStructure())
+    @test countlines(temp_filename) == 0
+    struc_written = read(temp_filename, PDB)
+    @test countatoms(struc_written) == 0
 
     # Test multiple model writing
     struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)
@@ -2006,6 +2014,12 @@ end
     @test atomnames(struc_written[15]['A']["39"]) == [
         "N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
 
+    writemmcif(temp_filename, MMCIFDict())
+    dic_written = MMCIFDict(temp_filename)
+    @test length(keys(dic_written)) == 1
+    struc_written = read(temp_filename, MMCIF)
+    @test countatoms(struc_written) == 0
+
     # Test writing to stream
     open(temp_filename, "w") do file
         writemmcif(file, struc)
@@ -2079,6 +2093,16 @@ end
     struc_written = read(temp_filename, MMCIF)
     @test countatoms(struc_written) == 2
     @test !ishetero(struc_written['A'][51]["CA"])
+    writemmcif(temp_filename, struc['A'][51]["N"], calphaselector)
+    dic_written = MMCIFDict(temp_filename)
+    @test length(keys(dic_written)) == 1
+    struc_written = read(temp_filename, MMCIF)
+    @test countatoms(struc_written) == 0
+    writemmcif(temp_filename, ProteinStructure())
+    dic_written = MMCIFDict(temp_filename)
+    @test length(keys(dic_written)) == 1
+    struc_written = read(temp_filename, MMCIF)
+    @test countatoms(struc_written) == 0
 
     # Test multiple model writing
     struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)
@@ -2343,6 +2367,12 @@ end
             "N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
     end
 
+    writemmtf(temp_filename, MMTFDict())
+    dic_written = MMTFDict(temp_filename)
+    @test length(keys(dic_written)) == 39
+    struc_written = read(temp_filename, MMTF)
+    @test countatoms(struc_written) == 0
+
     struc_red = read(testfilepath("MMTF", "1AKE_reduced.mmtf"), MMTF)
     writemmtf(temp_filename, struc_red)
     struc_written = read(temp_filename, MMTF)
@@ -2424,6 +2454,16 @@ end
     struc_written = read(temp_filename, MMTF)
     @test countatoms(struc_written) == 2
     @test !ishetero(struc_written['A'][51]["CA"])
+    writemmtf(temp_filename, struc['A'][51]["N"], calphaselector)
+    dic_written = MMTFDict(temp_filename)
+    @test length(keys(dic_written)) == 39
+    struc_written = read(temp_filename, MMTF)
+    @test countatoms(struc_written) == 0
+    writemmtf(temp_filename, ProteinStructure())
+    dic_written = MMTFDict(temp_filename)
+    @test length(keys(dic_written)) == 39
+    struc_written = read(temp_filename, MMTF)
+    @test countatoms(struc_written) == 0
 
     # Test multiple model writing
     struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)

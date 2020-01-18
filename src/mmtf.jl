@@ -216,6 +216,9 @@ function writemmtf(output::Union{AbstractString, IO},
                             expand_disordered=expand_disordered)),
                             by=residue), by=model)
     d = MMTFDict()
+    if length(ats) == 0
+        return writemmtf(output, d; gzip=gzip)
+    end
     last_model = model(first(ats))
     last_chain = chain(first(ats))
     last_res = residue(first(ats))

@@ -814,13 +814,17 @@ function writepdb(output::IO,
     # If there are multiple models, write out MODEL/ENDMDL lines
     if length(el) > 1
         for mod in sort(collect(el))
+            ats = collectatoms(mod, atom_selectors...;
+                                    expand_disordered=expand_disordered)
+            if length(ats) == 0
+                continue
+            end
             println(output, "MODEL     ", spacestring(modelnumber(mod), 4), repeat(" ", 66))
-            writepdb(output, mod, atom_selectors...;
-                        expand_disordered=expand_disordered)
+            writepdb(output, ats; expand_disordered=expand_disordered)
             println(output, "ENDMDL$(repeat(" ", 74))")
         end
     # If there is only one model, do not write out MODEL/ENDMDL lines
-    else
+    elseif length(el) == 1
         writepdb(output, first(el), atom_selectors...;
                     expand_disordered=expand_disordered)
     end

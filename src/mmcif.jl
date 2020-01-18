@@ -460,16 +460,21 @@ function writemmcif(output::IO,
                 el::StructuralElementOrList,
                 atom_selectors::Function...;
                 expand_disordered::Bool=true)
-    # Create an empty dictionary and add atoms one at a time
-    atom_dict = Dict{String, Vector{String}}(
-            ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
-    atom_dict["data_"] = [structurename(first(el))]
-
     # Ensure multiple models get written out correctly
     loop_el = isa(el, ProteinStructure) ? collectmodels(el) : el
+    ats = collectatoms(loop_el, atom_selectors...;
+                                        expand_disordered=expand_disordered)
+    if length(ats) > 0
+        # Create an empty dictionary and add atoms one at a time
+        atom_dict = Dict{String, Vector{String}}(
+                ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
+        atom_dict["data_"] = [structurename(first(el))]
+    else
+        # If we are not writing any atoms, don't write the dictionary keys
+        atom_dict = Dict{String, Vector{String}}(["data_"=> ["unknown"]])
+    end
 
-    for at in collectatoms(loop_el, atom_selectors...;
-                            expand_disordered=expand_disordered)
+    for at in ats
         appendatom!(atom_dict, at, string(modelnumber(at)),
             strip(chainid(at)) == "" ? "." : chainid(at),
             string(resnumber(at)), resname(at),
