@@ -23,7 +23,6 @@ export
     showcontactmap,
     MetaGraph
 
-
 """
     Transformation(el1, el2, residue_selectors...)
     Transformation(coords1, coords2)
@@ -65,7 +64,6 @@ Base.show(io::IO, trans::Transformation) = print("3D transformation with ",
     "translation 1 ", trans.trans1, ", translation 2 ", trans.trans2,
     ", rotation ", trans.rot)
 
-
 """
     coordarray(element, atom_selectors...)
 
@@ -92,7 +90,6 @@ end
 
 # Selector functions ignored
 coordarray(coords_in::Array{<:Real}, atom_selectors::Function...) = coords_in
-
 
 """
     applytransform!(el, transformation)
@@ -205,7 +202,6 @@ function Transformation(coords1::Array{<:Real, 2},
     return Transformation(trans1, trans2, rot, inds1, inds2)
 end
 
-
 """
     rmsd(element_one, element_two, residue_selectors...)
     rmsd(element_one, element_two, superimpose=false)
@@ -248,7 +244,6 @@ function rmsd(el1::StructuralElementOrList,
                     coordarray(el2, rmsdatoms))
     end
 end
-
 
 """
     displacements(element_one, element_two, residue_selectors...)
@@ -293,7 +288,6 @@ function displacements(el1::StructuralElementOrList,
     end
 end
 
-
 """
     sqdistance(element_one, element_two, atom_selectors...)
 
@@ -326,7 +320,6 @@ function sqdistance(at_one::AbstractAtom, at_two::AbstractAtom)
            (z(at_one) - z(at_two)) ^ 2
 end
 
-
 """
     distance(element_one, element_two, atom_selectors...)
 
@@ -344,7 +337,6 @@ end
 function distance(at_one::AbstractAtom, at_two::AbstractAtom)
     return sqrt(sqdistance(at_one, at_two))
 end
-
 
 """
     bondangle(atom_a, atom_b, atom_c)
@@ -367,7 +359,6 @@ end
 function bondangle(vec_a::Vector{<:Real}, vec_b::Vector{<:Real})
     return acos(dot(vec_a, vec_b) / (norm(vec_a) * norm(vec_b)))
 end
-
 
 """
     dihedralangle(atom_a, atom_b, atom_c, atom_d)
@@ -644,7 +635,6 @@ function ramachandranangles(el::StructuralElementOrList,
     return phiangles(el, residue_selectors...), psiangles(el, residue_selectors...)
 end
 
-
 "A map of a structural property, e.g. a `ContactMap` or a `DistanceMap`."
 abstract type SpatialMap end
 
@@ -704,7 +694,6 @@ struct DistanceMap <: SpatialMap
     data::Array{Float64, 2}
 end
 
-
 Base.getindex(m::SpatialMap, args::Integer...) = m.data[args...]
 
 function Base.setindex!(m::SpatialMap, v, args::Integer...)
@@ -722,7 +711,6 @@ end
 function Base.show(io::IO, dm::DistanceMap)
     print(io, "Distance map of size $(size(dm))")
 end
-
 
 function ContactMap(el1::StructuralElementOrList,
                 el2::StructuralElementOrList,
@@ -779,7 +767,6 @@ function DistanceMap(el::StructuralElementOrList)
     return DistanceMap(dists)
 end
 
-
 # Plot recipe to show a ContactMap
 @recipe function plot(cm::ContactMap)
     seriestype := :heatmap
@@ -803,7 +790,6 @@ end
     ys = string.(size(dm, 1):-1:1)
     xs, ys, reverse(dm.data, dims=1)
 end
-
 
 """
     showcontactmap(contact_map)
@@ -838,7 +824,6 @@ function showcontactmap(io::IO, cm::ContactMap)
 end
 
 showcontactmap(cm::ContactMap) = showcontactmap(stdout, cm)
-
 
 # Construct a graph of atoms where edges are contacts
 function MetaGraphs.MetaGraph(el::StructuralElementOrList, contact_dist::Real)

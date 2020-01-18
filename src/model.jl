@@ -90,10 +90,8 @@ export
     pairalign,
     DataFrame
 
-
 "A macromolecular structural element."
 abstract type StructuralElement end
-
 
 """
 An atom that is part of a macromolecule - either an `Atom` or a
@@ -119,7 +117,6 @@ struct DisorderedAtom <: AbstractAtom
     alt_loc_ids::Dict{Char, Atom}
     default::Char
 end
-
 
 """
 A residue (amino acid) or other molecule - either a `Residue` or a
@@ -147,7 +144,6 @@ struct DisorderedResidue <: AbstractResidue
     default::String
 end
 
-
 "A chain (molecule) from a macromolecular structure."
 struct Chain <: StructuralElement
     id::String # mmCIF files can have multi-character chain IDs
@@ -156,14 +152,12 @@ struct Chain <: StructuralElement
     model::StructuralElement
 end
 
-
 "A conformation of a macromolecular structure."
 struct Model <: StructuralElement
     number::Int
     chains::Dict{String, Chain}
     structure::StructuralElement
 end
-
 
 """
 A container for multiple `Model`s that represents a Protein Data Bank (PDB)
@@ -173,7 +167,6 @@ struct ProteinStructure <: StructuralElement
     name::String
     models::Dict{Int, Model}
 end
-
 
 """
 A record for a single atom, e.g. as represented in a Protein Data Bank
@@ -195,13 +188,11 @@ struct AtomRecord
     charge::String
 end
 
-
 # Constructors without sub-elements and without super-elements
 
 ProteinStructure(name::AbstractString) = ProteinStructure(name, Dict())
 
 ProteinStructure() = ProteinStructure("")
-
 
 Model(number::Integer, struc::ProteinStructure) = Model(number, Dict(), struc)
 
@@ -209,12 +200,10 @@ Model(number::Integer) = Model(number, ProteinStructure())
 
 Model() = Model(1)
 
-
 Chain(id::AbstractString, mod::Model) = Chain(id, [], Dict(), mod)
 Chain(id::Char, mod::Model) = Chain(string(id), [], Dict(), mod)
 
 Chain(id::Union{AbstractString, Char}) = Chain(id, Model())
-
 
 function Residue(name::AbstractString,
                 number::Integer,
@@ -223,7 +212,6 @@ function Residue(name::AbstractString,
                 ch::Chain)
     return Residue(name, number, ins_code, het_res, [], Dict(), ch)
 end
-
 
 """
 A `StructuralElement` or `Vector` of `StructuralElement`s up to
@@ -236,7 +224,6 @@ const StructuralElementOrList = Union{
         Vector{<:AbstractResidue},
         Vector{<:AbstractAtom},
     }
-
 
 # Allow accessing sub elements contained in an element like a dictionary
 # e.g. allows you to do res[atom_name] rather than res.atoms[atom_name]
@@ -364,7 +351,6 @@ function findatombyname(res::Residue, atom_name::AbstractString)
     throw(KeyError(atom_name))
 end
 
-
 # Getters and setters for structural elements
 
 """
@@ -374,7 +360,6 @@ Get the serial number of an `AbstractAtom` as an `Int`.
 """
 serial(at::Atom) = at.serial
 serial(dis_at::DisorderedAtom) = serial(defaultatom(dis_at))
-
 
 """
     atomname(at; strip=true)
@@ -392,7 +377,6 @@ end
 
 atomname(dis_at::DisorderedAtom; strip::Bool=true) = atomname(defaultatom(dis_at), strip=strip)
 
-
 """
     altlocid(at)
 
@@ -400,7 +384,6 @@ Get the alternative location ID of an `AbstractAtom` as a `Char`.
 """
 altlocid(at::Atom) = at.alt_loc_id
 altlocid(dis_at::DisorderedAtom) = defaultaltlocid(dis_at)
-
 
 """
     x(at)
@@ -419,7 +402,6 @@ For `DisorderedAtom`s only the default atom is updated.
 x!(at::Atom, x::Real) = (at.coords[1] = x; at)
 x!(dis_at::DisorderedAtom, x::Real) = x!(defaultatom(dis_at), x)
 
-
 """
     y(at)
 
@@ -437,7 +419,6 @@ For `DisorderedAtom`s only the default atom is updated.
 y!(at::Atom, y::Real) = (at.coords[2] = y; at)
 y!(dis_at::DisorderedAtom, y::Real) = y!(defaultatom(dis_at), y)
 
-
 """
     z(at)
 
@@ -454,7 +435,6 @@ For `DisorderedAtom`s only the default atom is updated.
 """
 z!(at::Atom, z::Real) = (at.coords[3] = z; at)
 z!(dis_at::DisorderedAtom, z::Real) = z!(defaultatom(dis_at), z)
-
 
 """
     coords(at)
@@ -484,7 +464,6 @@ function coords!(dis_at::DisorderedAtom, coords::Vector{<:Real})
     coords!(defaultatom(dis_at), coords)
 end
 
-
 """
     occupancy(at)
 
@@ -494,7 +473,6 @@ The occupancy is set to `1.0` if not specified during atom creation.
 occupancy(at::Atom) = at.occupancy
 occupancy(dis_at::DisorderedAtom) = occupancy(defaultatom(dis_at))
 
-
 """
     tempfactor(at)
 
@@ -503,7 +481,6 @@ The temperature factor is set to `0.0` if not specified during atom creation.
 """
 tempfactor(at::Atom) = at.temp_factor
 tempfactor(dis_at::DisorderedAtom) = tempfactor(defaultatom(dis_at))
-
 
 """
     element(at; strip=true)
@@ -522,7 +499,6 @@ end
 
 element(dis_at::DisorderedAtom; strip::Bool=true) = element(defaultatom(dis_at), strip=strip)
 
-
 """
     charge(at; strip=true)
 
@@ -540,7 +516,6 @@ end
 
 charge(dis_at::DisorderedAtom; strip::Bool=true) = charge(defaultatom(dis_at), strip=strip)
 
-
 """
     residue(at)
 
@@ -549,7 +524,6 @@ Get the `Residue` that an `AbstractAtom` belongs to.
 residue(at::Atom) = at.residue
 residue(dis_at::DisorderedAtom) = residue(defaultatom(dis_at))
 residue(res::AbstractResidue) = res
-
 
 """
     ishetero(at)
@@ -563,7 +537,6 @@ ishetero(at::AbstractAtom) = ishetero(residue(at))
 ishetero(res::Residue) = res.het_res
 ishetero(dis_res::DisorderedResidue) = ishetero(defaultresidue(dis_res))
 
-
 """
     isdisorderedatom(at)
 
@@ -572,7 +545,6 @@ multiple locations present for an atom.
 """
 isdisorderedatom(::Atom) = false
 isdisorderedatom(::DisorderedAtom) = true
-
 
 """
     defaultaltlocid(dis_at)
@@ -584,7 +556,6 @@ ID for ties (i.e. 'A' beats 'B').
 """
 defaultaltlocid(dis_at::DisorderedAtom) = dis_at.default
 
-
 # Constructor acts as a setter for the default alt loc ID
 function DisorderedAtom(dis_at::DisorderedAtom, default::Char)
     if !(default in altlocids(dis_at))
@@ -592,7 +563,6 @@ function DisorderedAtom(dis_at::DisorderedAtom, default::Char)
     end
     return DisorderedAtom(dis_at.alt_loc_ids, default)
 end
-
 
 """
     defaultatom(dis_at)
@@ -602,7 +572,6 @@ The default is the highest occupancy, or lowest character alternative location
 ID for ties (i.e. 'A' beats 'B').
 """
 defaultatom(dis_at::DisorderedAtom) = dis_at[defaultaltlocid(dis_at)]
-
 
 """
     altlocids(dis_at)
@@ -617,7 +586,6 @@ end
 
 altlocids(at::Atom) = [altlocid(at)]
 
-
 """
     atomid(at)
 
@@ -626,7 +594,6 @@ Get a descriptive atom ID for an `AbstractAtom` as a `Tuple` of the form
 """
 atomid(at::Atom) = (resid(at, full=true), resname(at), atomname(at))
 atomid(dis_at::DisorderedAtom) = atomid(defaultatom(dis_at))
-
 
 """
     resname(at; strip=true)
@@ -647,7 +614,6 @@ resname(at::Atom; strip::Bool=true) = resname(residue(at), strip=strip)
 resname(dis_at::DisorderedAtom; strip::Bool=true) = resname(defaultatom(dis_at), strip=strip)
 resname(dis_res::DisorderedResidue; strip::Bool=true) = resname(defaultresidue(dis_res), strip=strip)
 
-
 """
     resnumber(at)
     resnumber(res)
@@ -659,7 +625,6 @@ resnumber(dis_at::DisorderedAtom) = resnumber(defaultatom(dis_at))
 resnumber(res::Residue) = res.number
 resnumber(dis_res::DisorderedResidue) = resnumber(defaultresidue(dis_res))
 
-
 """
     inscode(at)
     inscode(res)
@@ -670,7 +635,6 @@ inscode(at::Atom) = inscode(residue(at))
 inscode(dis_at::DisorderedAtom) = inscode(defaultatom(dis_at))
 inscode(res::Residue) = res.ins_code
 inscode(dis_res::DisorderedResidue) = inscode(defaultresidue(dis_res))
-
 
 """
     resid(res; full=true)
@@ -733,7 +697,6 @@ function resid(hetatm::Bool, resnum::Int, inscode::Char)
     end
 end
 
-
 """
     atomnames(res; strip=true)
 
@@ -750,7 +713,6 @@ end
 
 atomnames(dis_res::DisorderedResidue; strip::Bool=true) = atomnames(defaultresidue(dis_res), strip=strip)
 
-
 """
     atoms(res)
 
@@ -758,7 +720,6 @@ Return the dictionary of `AbstractAtom`s in an `AbstractResidue`.
 """
 atoms(res::Residue) = res.atoms
 atoms(dis_res::DisorderedResidue) = atoms(defaultresidue(dis_res))
-
 
 """
     isdisorderedres(res)
@@ -769,14 +730,12 @@ multiple residue names with the same residue ID.
 isdisorderedres(::Residue) = false
 isdisorderedres(::DisorderedResidue) = true
 
-
 """
     disorderedres(dis_res, res_name)
 
 Return the `Residue` in a `DisorderedResidue` with a given residue name.
 """
 disorderedres(dis_res::DisorderedResidue, res_name::AbstractString) = dis_res.names[res_name]
-
 
 """
     defaultresname(dis_res)
@@ -786,7 +745,6 @@ The default is the first name read in.
 """
 defaultresname(dis_res::DisorderedResidue) = dis_res.default
 
-
 """
     defaultresidue(dis_res)
 
@@ -794,7 +752,6 @@ Return the default `Residue` in a `DisorderedResidue`.
 The default is the first name read in.
 """
 defaultresidue(dis_res::DisorderedResidue) = dis_res.names[defaultresname(dis_res)]
-
 
 """
     resnames(dis_res)
@@ -814,7 +771,6 @@ end
 
 resnames(res::Residue) = [resname(res, strip=false)]
 
-
 # Constructor acts as a setter for the default residue name
 function DisorderedResidue(dis_res::DisorderedResidue, default::AbstractString)
     if !(default in resnames(dis_res))
@@ -822,7 +778,6 @@ function DisorderedResidue(dis_res::DisorderedResidue, default::AbstractString)
     end
     return DisorderedResidue(dis_res.names, default)
 end
-
 
 """
     chain(at)
@@ -836,7 +791,6 @@ chain(res::Residue) = res.chain
 chain(dis_res::DisorderedResidue) = chain(defaultresidue(dis_res))
 chain(ch::Chain) = ch
 
-
 """
     chainid(el)
 
@@ -846,7 +800,6 @@ Get the chain ID of an `AbstractAtom`, `AbstractResidue` or `Chain` as a
 chainid(el::Union{AbstractResidue, AbstractAtom}) = chainid(chain(el))
 chainid(ch::Chain) = ch.id
 
-
 """
     resids(ch)
 
@@ -854,14 +807,12 @@ Get the sorted list of `AbstractResidue`s in a `Chain`.
 """
 resids(ch::Chain) = ch.res_list
 
-
 """
     residues(ch)
 
 Return the dictionary of `AbstractResidue`s in a `Chain`.
 """
 residues(ch::Chain) = ch.residues
-
 
 """
     model(el)
@@ -876,7 +827,6 @@ model(dis_res::DisorderedResidue) = model(defaultresidue(dis_res))
 model(ch::Chain) = ch.model
 model(mod::Model) = mod
 
-
 """
     modelnumber(el)
 
@@ -885,7 +835,6 @@ as an `Int`.
 """
 modelnumber(mod::Model) = mod.number
 modelnumber(el::Union{Chain, AbstractResidue, AbstractAtom}) = modelnumber(model(el))
-
 
 """
     chainids(mod)
@@ -904,7 +853,6 @@ function chainids(struc::ProteinStructure)
     end
 end
 
-
 """
     chains(mod)
     chains(struc)
@@ -922,7 +870,6 @@ function chains(struc::ProteinStructure)
     end
 end
 
-
 """
     structure(el)
 
@@ -937,7 +884,6 @@ structure(ch::Chain) = structure(model(ch))
 structure(mod::Model) = mod.structure
 structure(struc::ProteinStructure) = struc
 
-
 """
     structurename(el)
 
@@ -946,7 +892,6 @@ a `String`.
 """
 structurename(el::Union{Model, Chain, AbstractResidue, AbstractAtom}) = structurename(structure(el))
 structurename(struc::ProteinStructure) = struc.name
-
 
 """
     modelnumbers(struc)
@@ -957,14 +902,12 @@ function modelnumbers(struc::ProteinStructure)
     return modelnumber.(sort(collect(values(models(struc)))))
 end
 
-
 """
     models(struc)
 
 Return the dictionary of `Model`s in a `ProteinStructure`.
 """
 models(struc::ProteinStructure) = struc.models
-
 
 """
     defaultmodel(struc)
@@ -973,7 +916,6 @@ Get the default `Model` in a `ProteinStructure`.
 This is the `Model` with the lowest model number.
 """
 defaultmodel(struc::ProteinStructure) = struc.models[modelnumbers(struc)[1]]
-
 
 # Sort lists of elements
 
@@ -1035,7 +977,6 @@ function Base.isless(mod_one::Model, mod_two::Model)
     return isless(modelnumber(mod_one), modelnumber(mod_two))
 end
 
-
 """
     sequentialresidues(res_first, res_second)
 
@@ -1057,7 +998,6 @@ function sequentialresidues(res_first::AbstractResidue, res_second::AbstractResi
     end
     return false
 end
-
 
 # Iterators to yield sub elements when looping over an element
 
@@ -1145,7 +1085,6 @@ function applyselectors!(els::Vector{<:StructuralElement}, selectors::Function..
     return els
 end
 
-
 """
     collectmodels(el)
 
@@ -1178,7 +1117,6 @@ function collectmodels(el::StructuralElementOrList,
     return applyselectors(collectmodels(el), model_selector, model_selectors...)
 end
 
-
 """
     countmodels(el)
 
@@ -1191,7 +1129,6 @@ function countmodels(el::StructuralElementOrList, model_selectors::Function...)
 end
 
 countmodels(struc::ProteinStructure) = length(struc)
-
 
 """
     collectchains(el)
@@ -1240,7 +1177,6 @@ function collectchains(el::StructuralElementOrList,
     return applyselectors(collectchains(el), chain_selector, chain_selectors...)
 end
 
-
 """
     countchains(el)
 
@@ -1253,7 +1189,6 @@ function countchains(el::StructuralElementOrList, chain_selectors::Function...)
 end
 
 countchains(mod::Model) = length(mod)
-
 
 """
     collectresidues(el)
@@ -1331,7 +1266,6 @@ function collectresidues(el::StructuralElementOrList,
                             residue_selector, residue_selectors...)
 end
 
-
 """
     countresidues(el)
 
@@ -1347,7 +1281,6 @@ function countresidues(el::StructuralElementOrList,
     return length(collectresidues(el, residue_selectors...;
                                     expand_disordered=expand_disordered))
 end
-
 
 """
     collectatoms(el)
@@ -1422,7 +1355,6 @@ function collectatoms(el::StructuralElementOrList,
                             atom_selector, atom_selectors...)
 end
 
-
 """
     countatoms(el)
 
@@ -1438,7 +1370,6 @@ function countatoms(el::StructuralElementOrList,
     return length(collectatoms(el, atom_selectors...;
                                 expand_disordered=expand_disordered))
 end
-
 
 # Add an atom represented in an AtomRecord to a Model
 # Unsafe as sub-element lists are not updated (for speed)
@@ -1543,7 +1474,6 @@ end
 
 fullresname(res::Residue) = res.name
 
-
 # Internal function to form ordered sub-element lists after parsing
 function fixlists!(struc::ProteinStructure)
     for mod in struc
@@ -1569,7 +1499,6 @@ end
 fullatomname(at::Atom) = at.name
 fullatomname(dis_at::DisorderedAtom) = defaultatom(dis_at).name
 
-
 """
     choosedefaultaltlocid(at_one, at_two)
 
@@ -1589,7 +1518,6 @@ function choosedefaultaltlocid(at_one::Atom, at_two::Atom)
     end
 end
 
-
 """
     standardselector(at)
     standardselector(res)
@@ -1602,7 +1530,6 @@ file.
 standardselector(at::AbstractAtom) = !ishetero(at)
 standardselector(res::AbstractResidue) = !ishetero(res)
 
-
 """
     heteroselector(at)
     heteroselector(res)
@@ -1614,7 +1541,6 @@ file.
 """
 heteroselector(at::AbstractAtom) = ishetero(at)
 heteroselector(res::AbstractResidue) = ishetero(res)
-
 
 """
     atomnameselector(at, atom_names; strip=true)
@@ -1637,10 +1563,8 @@ function atomnameselector(at::AbstractAtom,
     return atomname(at, strip=strip) in atom_names
 end
 
-
 "`Set` of Cα atom names."
 const calphaatomnames = Set(["CA"])
-
 
 """
     calphaselector(at)
@@ -1652,10 +1576,8 @@ function calphaselector(at::AbstractAtom)
     return standardselector(at) && atomnameselector(at, calphaatomnames)
 end
 
-
 "`Set` of Cβ atom names."
 const cbetaatomnames = Set(["CB"])
-
 
 """
     cbetaselector(at)
@@ -1669,10 +1591,8 @@ function cbetaselector(at::AbstractAtom)
         (resname(at) == "GLY" && atomnameselector(at, calphaatomnames)))
 end
 
-
 "`Set` of protein backbone atom names."
 const backboneatomnames = Set(["CA", "N", "C", "O"])
-
 
 """
     backboneselector(at)
@@ -1684,7 +1604,6 @@ function backboneselector(at::AbstractAtom)
     return standardselector(at) && atomnameselector(at, backboneatomnames)
 end
 
-
 """
     heavyatomselector(at)
 
@@ -1692,7 +1611,6 @@ Determines if an `AbstractAtom` corresponds to a heavy (non-hydrogen) atom
 and is not a hetero-atom.
 """
 heavyatomselector(at::AbstractAtom) = standardselector(at) && !hydrogenselector(at)
-
 
 """
     resnameselector(res, res_names)
@@ -1711,10 +1629,8 @@ function resnameselector(el::Union{AbstractResidue, AbstractAtom},
     return resname(el, strip=false) in res_names
 end
 
-
 "`Set` of residue names corresponding to water."
 const waterresnames = Set(["HOH"])
-
 
 """
     waterselector(res)
@@ -1727,7 +1643,6 @@ function waterselector(el::Union{AbstractResidue, AbstractAtom})
     return resnameselector(el, waterresnames)
 end
 
-
 """
     notwaterselector(res)
     notwaterselector(at)
@@ -1739,7 +1654,6 @@ function notwaterselector(el::Union{AbstractResidue, AbstractAtom})
     return !waterselector(el)
 end
 
-
 """
     disorderselector(at)
     disorderselector(res)
@@ -1750,7 +1664,6 @@ i.e. has multiple locations in the case of atoms or multiple residue names
 """
 disorderselector(at::AbstractAtom) = isdisorderedatom(at)
 disorderselector(res::AbstractResidue) = isdisorderedres(res)
-
 
 # Either the element is H or the element field is empty, the atom name contains
 #   an H and there are no letters in the atom name before H
@@ -1768,7 +1681,6 @@ function hydrogenselector(at::AbstractAtom)
         !occursin(r"[a-zA-Z]", atomname(at)[1:findfirst(isequal('H'), atomname(at)) - 1]))
 end
 
-
 """
     allselector(at)
     allselector(res)
@@ -1779,7 +1691,6 @@ Use it to select all atoms or residues.
 """
 allselector(at::AbstractAtom) = true
 allselector(res::AbstractResidue) = true
-
 
 function AminoAcidSequence(el::Union{StructuralElement, Vector{Model},
                                     Vector{Chain}, Vector{<:AbstractAtom}},
@@ -1813,7 +1724,6 @@ function BioAlignments.pairalign(el1::StructuralElementOrList,
     seq2 = AminoAcidSequence(el2, residue_selectors...; gaps=false)
     return pairalign(aligntype, seq1, seq2, scoremodel)
 end
-
 
 # DataFrame constructors for interoperability
 function DataFrames.DataFrame(ats::Vector{<:AbstractAtom},
@@ -1865,7 +1775,6 @@ function DataFrames.DataFrame(res::Vector{<:AbstractResidue},
     end
     return df
 end
-
 
 # Descriptive showing of elements on a single line
 

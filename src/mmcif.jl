@@ -36,7 +36,6 @@ const mmciforder = Dict(
     ]
 )
 
-
 """
     MMCIFDict(filepath)
     MMCIFDict(io)
@@ -74,7 +73,6 @@ Base.haskey(mmcif_dict::MMCIFDict, key) = haskey(mmcif_dict.dict, key)
 function Base.show(io::IO, mmcif_dict::MMCIFDict)
     print(io, "mmCIF dictionary with $(length(keys(mmcif_dict))) fields")
 end
-
 
 # Split a mmCIF line into tokens
 # See https://www.iucr.org/resources/cif/spec/version1.1/cifsyntax for syntax
@@ -118,7 +116,6 @@ function splitline(s::AbstractString)
     end
     return tokens
 end
-
 
 # Get tokens from a mmCIF file
 function tokenizecif(f::IO)
@@ -178,7 +175,6 @@ function tokenizecifstructure(f::IO)
     return tokens
 end
 
-
 function MMCIFDict(mmcif_filepath::AbstractString)
     open(mmcif_filepath) do f
         MMCIFDict(f)
@@ -197,7 +193,6 @@ function MMCIFDict(f::IO)
     mmcif_dict[data_token[1:5]] = [data_token[6:end]]
     return populatedict!(mmcif_dict, tokens[2:end])
 end
-
 
 # Add tokens to a mmCIF dictionary
 function populatedict!(mmcif_dict::MMCIFDict, tokens::Vector{String})
@@ -253,7 +248,6 @@ function populatedict!(mmcif_dict::MMCIFDict, tokens::Vector{String})
     return mmcif_dict
 end
 
-
 function Base.read(input::IO,
             ::Type{MMCIF};
             structure_name::AbstractString="",
@@ -285,7 +279,6 @@ function Base.read(input::IO,
     return struc
 end
 
-
 # Constructor from mmCIF ATOM/HETATM line
 AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
     d["_atom_site.group_PDB"][i] == "HETATM",
@@ -306,7 +299,6 @@ AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
     d["_atom_site.type_symbol"][i] in missingvals ? "  " : d["_atom_site.type_symbol"][i],
     d["_atom_site.pdbx_formal_charge"][i] in missingvals ? "  " : d["_atom_site.pdbx_formal_charge"][i],
 )
-
 
 # Format a mmCIF data value by enclosing with quotes or semicolon lines where
 #   appropriate. See
@@ -339,7 +331,6 @@ function requiresquote(val)
         val[1] in specialchars || startswith(lowercase(val), "data_") ||
         startswith(lowercase(val), "save_") || val in specialwords
 end
-
 
 """
     writemmcif(output, element, atom_selectors...)
@@ -522,7 +513,6 @@ function writemmcif(output::IO,
     end
     return writemmcif(output, MMCIFDict(atom_dict))
 end
-
 
 # Add an atom record to a growing atom dictionary
 function appendatom!(atom_dict, at, model_n, chain_id, res_n, res_name, het)

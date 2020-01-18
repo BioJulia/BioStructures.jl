@@ -19,7 +19,6 @@ export
     pdbline,
     writepdb
 
-
 # PDB file formats
 
 "Protein Data Bank (PDB) file format."
@@ -38,7 +37,6 @@ struct MMTF <: BioCore.IO.FileFormat end
 const pdbextension = Dict{Type, String}(PDB=> "pdb", PDBXML=> "xml",
                                         MMCIF=> "cif", MMTF=> "mmtf")
 
-
 "Error arising from parsing a Protein Data Bank (PDB) file."
 struct PDBParseError <: Exception
     message::String
@@ -54,7 +52,6 @@ function Base.showerror(io::IO, e::PDBParseError)
             " of file:\n",
             e.line)
 end
-
 
 """
     pdbentrylist()
@@ -175,7 +172,6 @@ function pdbobsoletelist()
     end
     return obsoletelist
 end
-
 
 """
     downloadpdb(pdbid::AbstractString; <keyword arguments>)
@@ -307,7 +303,6 @@ function downloadpdb(f::Function, args...; kwargs...)
     end
 end
 
-
 """
     downloadentirepdb(; <keyword arguments>)
 
@@ -389,7 +384,6 @@ function downloadallobsoletepdb(; obsolete_dir::AbstractString=pwd(), file_forma
     downloadpdb(obsoletelist, pdb_dir=obsolete_dir, file_format=file_format, overwrite=overwrite)
 end
 
-
 """
     retrievepdb(pdbid::AbstractString; <keyword arguments>)
 
@@ -466,7 +460,6 @@ function readpdb(pdbid::AbstractString;
     read(pdbpath, PDB; structure_name=structure_name, kwargs...)
 end
 
-
 function Base.read(input::IO,
             ::Type{PDB};
             structure_name::AbstractString="",
@@ -524,7 +517,6 @@ function Base.read(filepath::AbstractString,
     end
 end
 
-
 # Constructor from PDB ATOM/HETATM line
 AtomRecord(pdb_line::String, line_n::Integer=1) = AtomRecord(
     pdb_line[1] == 'H', # This assumes the line has already been checked as an ATOM/HETATM record
@@ -545,7 +537,6 @@ AtomRecord(pdb_line::String, line_n::Integer=1) = AtomRecord(
     parseelement(pdb_line),
     parsecharge(pdb_line)
 )
-
 
 function parseserial(line::String, line_n::Integer=1)
     try
@@ -658,7 +649,6 @@ function parsecharge(line::String)
         return "  "
     end
 end
-
 
 # Form a string of a certain length from a value by adding spaces to the left
 # Throws an error if the value is too long
@@ -788,7 +778,6 @@ function checkchainerror(el::Union{Chain, AbstractResidue, AbstractAtom})
             "or MMTF file"))
     end
 end
-
 
 """
     writepdb(output, element, atom_selectors...)
