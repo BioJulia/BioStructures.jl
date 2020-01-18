@@ -1,12 +1,11 @@
 # BioStructures documentation
 
-The BioStructures.jl package provides functionality to manipulate macromolecular structures, and in particular to read and write [Protein Data Bank](http://www.rcsb.org/pdb/home/home.do) (PDB) and mmCIF files.
+The BioStructures.jl package provides functionality to manipulate macromolecular structures, and in particular to read and write [Protein Data Bank](http://www.rcsb.org/pdb/home/home.do) (PDB), mmCIF and MMTF files.
 It is designed to be used for standard structural analysis tasks, as well as acting as a platform on which others can build to create more specific tools.
 
 It compares favourably in terms of performance to other PDB parsers - see some [benchmarks](https://github.com/jgreener64/pdb-benchmarks).
-The PDB and mmCIF parsers currently read in the whole PDB without explicit errors (with one exception).
+The PDB, mmCIF and MMTF parsers currently read in the whole PDB without explicit errors (with one exception).
 Help can be found on individual functions using `?function_name`.
-
 
 ## Basics
 
@@ -39,7 +38,12 @@ julia> mmcif_dict["_entity_src_nat.common_name"]
 ```
 
 A `MMCIFDict` can be accessed in similar ways to a standard dictionary, and if necessary the underlying dictionary of `MMCIFDict` `d` can be accessed with `d.dict`.
-Note that the elements of the dictionary are always an `Array{String,1}`, even if only one value was read in or the data is numerical.
+Note that the values of the dictionary are always an `Array{String,1}`, even if only one value was read in or the data is numerical.
+
+MMTF files can be read into the same data structure with `read("/path/to/mmtf/file.mmtf", MMTF)`.
+The keyword argument `gzip`, default `false`, determines if the file is gzipped.
+In a similar manner to mmCIF dictionaries, a MMTF file can be read into a dictionary with `MMTFDict`.
+The values of the dictionary are a variety of types depending on the MMTF specification.
 
 Refer to [Downloading PDB files](#Downloading-PDB-files-1) and [Reading PDB files](#Reading-PDB-files-1) sections for more options.
 
@@ -108,7 +112,6 @@ Properties can be retrieved as follows:
 The `strip` keyword argument determines whether surrounding whitespace is stripped for `atomname`, `element`, `charge`, `resname` and `atomnames` (default `true`).
 
 The coordinates of an atom can be set using `x!`, `y!`, `z!` and `coords!`.
-
 
 ## Manipulating structures
 
@@ -258,7 +261,6 @@ PairwiseAlignmentResult{Int64,BioSequences.BioSequence{BioSequences.AminoAcidAlp
 In fact, `pairalign` is extended to carry out the above steps and return the alignment by calling `pairalign(struc1["A"], struc2["A"], standardselector)` in this case.
 `scoremodel` and `aligntype` are keyword arguments with the defaults shown above.
 
-
 ## Spatial calculations
 
 Various functions are provided to calculate spatial quantities for proteins:
@@ -399,7 +401,6 @@ See the [LightGraphs docs](https://juliagraphs.github.io/LightGraphs.jl/latest) 
 Similar to `ContactMap`, contacts are found between any element type passed in.
 So if you wanted the graph of chain contacts in a protein complex you could give a `Model` as the first argument.
 
-
 ## Downloading PDB files
 
 To download a PDB file to a specified directory:
@@ -439,7 +440,6 @@ downloadpdb("1ALW") do fp
 end
 ```
 
-
 ## Reading PDB files
 
 To parse an existing PDB file into a Structure-Model-Chain-Residue-Atom framework:
@@ -449,8 +449,8 @@ julia> struc = read("/path/to/pdb/file.pdb", PDB)
 ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 ```
 
-Read a mmCIF file instead by replacing `PDB` with `MMCIF`.
-Various options can be set through optional keyword arguments when parsing PDB/mmCIF files:
+Read a mmCIF/MMTF file instead by replacing `PDB` with `MMCIF`/`MMTF`.
+Various options can be set through optional keyword arguments when parsing PDB/mmCIF/MMTF files:
 
 | Keyword Argument                 | Description                                                                  |
 | :------------------------------- | :--------------------------------------------------------------------------- |
@@ -505,7 +505,6 @@ julia> first(df, 3)
 
 As with file writing disordered entities are expanded by default but this can be changed by setting `expand_disordered` to `false`.
 
-
 ## Writing PDB files
 
 PDB format files can be written:
@@ -515,6 +514,7 @@ writepdb("1EN2_out.pdb", struc)
 ```
 
 Any element type can be given as input to `writepdb`.
+The first argument can also be a stream.
 Atom selectors can also be given as additional arguments:
 
 ```julia
@@ -522,19 +522,20 @@ Atom selectors can also be given as additional arguments:
 writepdb("1EN2_out.pdb", struc, backboneselector)
 ```
 
-The first argument can also be a stream.
 To write mmCIF format files, use the `writemmcif` function with similar arguments.
-
 A `MMCIFDict` can also be written using `writemmcif`:
 
 ```julia
 writemmcif("1EN2_out.dic", mmcif_dict)
 ```
 
+To write out a MMTF file, use the `writemmtf` function with any element type or a `MMTFDict` as an argument.
+The `gzip` keyword argument, default `false`, determines whether to gzip the written file.
+
 Unlike for the `collect` functions, `expand_disordered` is set to `true` when writing files as it is usually desirable to retain all entities.
 Set `expand_disordered` to `false` to not write out more than one atom or residue at each location.
 
-Multi-character chain IDs can be written to mmCIF files but will throw an error when written to a PDB file as the PDB file format only has one character allocated to the chain ID.
+Multi-character chain IDs can be written to mmCIF and MMTF files but will throw an error when written to a PDB file as the PDB file format only has one character allocated to the chain ID.
 
 If you want the PDB record line for an `Atom`, use `pdbline`.
 For example:
@@ -552,7 +553,6 @@ julia> pdbline(AtomRecord(false, 669, "CA", ' ', "ILE", "A", 90, ' ', [31.743, 3
 ```
 
 This can be useful when writing PDB files from your own data structures.
-
 
 ## RCSB PDB utility functions
 
@@ -588,7 +588,6 @@ There are a few more functions that may be useful:
 | `pdbrecentchanges`       | Added, modified and obsolete PDB lists from the recent RCSB weekly status files | `Tuple{Array{String,1},Array{String,1},` `Array{String,1}}` |
 | `pdbobsoletelist`        | List of all obsolete PDB entries                                                | `Array{String,1}`                                           |
 | `downloadallobsoletepdb` | Downloads all obsolete PDB files from the RCSB PDB server                       | `Array{String,1}`                                           |
-
 
 ## Visualising structures
 
