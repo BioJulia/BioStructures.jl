@@ -202,7 +202,7 @@ Requires an internet connection.
 """
 function downloadpdb(pdbid::AbstractString;
                 pdb_dir::AbstractString=pwd(),
-                file_format::Type=PDB,
+                file_format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB,
                 obsolete::Bool=false,
                 overwrite::Bool=false,
                 ba_number::Integer=0)
@@ -321,7 +321,9 @@ Requires an internet connection.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
     in `pdb_dir`; by default skips downloading the PDB file if it exists.
 """
-function downloadentirepdb(; pdb_dir::AbstractString=pwd(), file_format::Type=PDB, overwrite::Bool=false)
+function downloadentirepdb(; pdb_dir::AbstractString=pwd(),
+                    file_format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB,
+                    overwrite::Bool=false)
     pdblist = pdbentrylist()
     @info "About to download $(length(pdblist)) PDB files, make sure you have enough disk space and time"
     @info "The function can be stopped any time and called again to resume downloading"
@@ -338,7 +340,8 @@ automatically updates the PDB files of the given `file_format` inside the local
 `pdb_dir` directory.
 Requires an internet connection.
 """
-function updatelocalpdb(; pdb_dir::AbstractString=pwd(), file_format::Type=PDB)
+function updatelocalpdb(; pdb_dir::AbstractString=pwd(),
+                    file_format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB)
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
     # Download the newly added and modified pdb files
     downloadpdb(vcat(addedlist, modifiedlist), pdb_dir=pdb_dir, overwrite=true, file_format=file_format)
@@ -379,7 +382,9 @@ Requires an internet connection.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
     in `pdb_dir`; by default skips downloading the PDB file if it exists.
 """
-function downloadallobsoletepdb(; obsolete_dir::AbstractString=pwd(), file_format::Type=PDB, overwrite::Bool=false)
+function downloadallobsoletepdb(; obsolete_dir::AbstractString=pwd(),
+                    file_format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB,
+                    overwrite::Bool=false)
     obsoletelist = pdbobsoletelist()
     downloadpdb(obsoletelist, pdb_dir=obsolete_dir, file_format=file_format, overwrite=overwrite)
 end
