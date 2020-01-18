@@ -6,6 +6,7 @@ makedocs(
     pages = [
         "Home"         => "index.md",
         "Documentation"=> "documentation.md"
+        "Examples"     => "examples.md"
     ],
     authors = "Joe G Greener, The BioJulia Organisation and other contributors."
 )
