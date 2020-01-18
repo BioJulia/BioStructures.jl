@@ -211,8 +211,8 @@ function writemmtf(output::Union{AbstractString, IO},
                 atom_selectors::Function...;
                 expand_disordered::Bool=true,
                 gzip::Bool=false)
-    el_exp = isa(el, ProteinStructure) ? collectmodels(el) : el
-    ats = sort(sort(sort(collectatoms(el_exp, atom_selectors...;
+    loop_el = isa(el, ProteinStructure) ? collectmodels(el) : el
+    ats = sort(sort(sort(collectatoms(loop_el, atom_selectors...;
                             expand_disordered=expand_disordered)),
                             by=residue), by=model)
     d = MMTFDict()
@@ -332,9 +332,9 @@ function writemmtf(output::Union{AbstractString, IO},
     d["numChains"] = length(d["chainIdList"])
     d["numGroups"] = length(d["groupIdList"])
     d["numAtoms"] = length(d["atomIdList"])
-    d["structureId"] = isa(el, StructuralElement) ? structurename(el) : structurename(first(el))
+    d["structureId"] = structurename(first(el))
     d["mmtfVersion"] = "1.0.0"
     d["mmtfProducer"] = "BioStructures.jl"
 
-    writemmtf(output, d; gzip=gzip)
+    return writemmtf(output, d; gzip=gzip)
 end

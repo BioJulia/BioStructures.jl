@@ -457,8 +457,7 @@ function writemmcif(filepath::AbstractString,
 end
 
 function writemmcif(output::IO,
-                el::Union{ProteinStructure, Model, Chain, AbstractResidue,
-                    Vector{Model}, Vector{Chain}, Vector{<:AbstractResidue}},
+                el::StructuralElementOrList,
                 atom_selectors::Function...;
                 expand_disordered::Bool=true)
     # Create an empty dictionary and add atoms one at a time
@@ -467,50 +466,17 @@ function writemmcif(output::IO,
     atom_dict["data_"] = [structurename(first(el))]
 
     # Ensure multiple models get written out correctly
-    loop_el = el
-    if isa(el, ProteinStructure)
-        loop_el = collectmodels(el)
-    end
+    loop_el = isa(el, ProteinStructure) ? collectmodels(el) : el
 
-    for res in collectresidues(loop_el; expand_disordered=expand_disordered)
-        model_n = string(modelnumber(res))
-        chain_id = strip(chainid(res)) == "" ? "." : chainid(res)
-        res_n = string(resnumber(res))
-        het = ishetero(res) ? "HETATM" : "ATOM"
-        res_name = resname(res)
-        for at in collectatoms(res, atom_selectors...;
-                                expand_disordered=expand_disordered)
-            appendatom!(atom_dict, at, model_n, chain_id,
-                        res_n, res_name, het)
-        end
-    end
-
-    # Now the MMCIFDict has been generated, write it out to the file
-    return writemmcif(output, MMCIFDict(atom_dict))
-end
-
-function writemmcif(output::IO,
-                    at::AbstractAtom,
-                    atom_selectors::Function...;
-                    expand_disordered::Bool=true)
-    return writemmcif(output, [at], atom_selectors...;
-                        expand_disordered=expand_disordered)
-end
-
-function writemmcif(output::IO,
-                ats::Vector{<:AbstractAtom},
-                atom_selectors::Function...;
-                expand_disordered::Bool=true)
-    atom_dict = Dict{String, Vector{String}}(
-            ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
-    atom_dict["data_"] = [structurename(first(ats))]
-    for at in collectatoms(ats, atom_selectors...;
+    for at in collectatoms(loop_el, atom_selectors...;
                             expand_disordered=expand_disordered)
         appendatom!(atom_dict, at, string(modelnumber(at)),
             strip(chainid(at)) == "" ? "." : chainid(at),
             string(resnumber(at)), resname(at),
             ishetero(at) ? "HETATM" : "ATOM")
     end
+
+    # Now the MMCIFDict has been generated, write it out to the file
     return writemmcif(output, MMCIFDict(atom_dict))
 end
 
