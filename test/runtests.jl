@@ -1592,6 +1592,8 @@ end
     struc_written = read(temp_filename, PDB)
     @test !any(isdisorderedres.(collectresidues(struc_written)))
     @test !any(isdisorderedatom.(collectatoms(struc_written)))
+    @test countresidues(struc_written, expand_disordered=true) == 166
+    @test countatoms(struc_written, expand_disordered=true) == 754
 
     @test_throws ArgumentError writepdb(temp_filename, Atom(
         1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res))
@@ -2177,6 +2179,8 @@ end
     struc_written = read(temp_filename, MMCIF)
     @test !any(isdisorderedres.(collectresidues(struc_written)))
     @test !any(isdisorderedatom.(collectatoms(struc_written)))
+    @test countresidues(struc_written, expand_disordered=true) == 166
+    @test countatoms(struc_written, expand_disordered=true) == 754
 
 
     # Test writing multi-character chain IDs
@@ -2496,11 +2500,12 @@ end
     struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)
     writemmtf(temp_filename, Model[struc[10], struc[5]])
     struc_written = read(temp_filename, MMTF)
-    @test modelnumbers(struc_written) == [5, 10]
-    @test modelnumber(defaultmodel(struc_written)) == 5
-    @test countatoms(struc_written[5]) == 756
-    @test countatoms(struc_written[10]) == 756
-    @test_throws KeyError struc_written[1]
+    # Differs from PDB and mmCIF as model numbers are not recorded by MMTF
+    @test modelnumbers(struc_written) == [1, 2]
+    @test modelnumber(defaultmodel(struc_written)) == 1
+    @test countatoms(struc_written[1]) == 756
+    @test countatoms(struc_written[2]) == 756
+    @test_throws KeyError struc_written[5]
 
 
     # Test disordered residue writing
@@ -2532,8 +2537,8 @@ end
     struc_written = read(temp_filename, MMTF)
     @test !any(isdisorderedres.(collectresidues(struc_written)))
     @test !any(isdisorderedatom.(collectatoms(struc_written)))
-    @test countresidues(struc_written, expand_disordered=true) == 754
-    @test countatoms(struc_written, expand_disordered=true) == 166
+    @test countresidues(struc_written, expand_disordered=true) == 166
+    @test countatoms(struc_written, expand_disordered=true) == 754
 
 
     # Test generatechainid

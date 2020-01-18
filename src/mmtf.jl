@@ -211,104 +211,124 @@ function writemmtf(output::Union{AbstractString, IO},
                 atom_selectors::Function...;
                 expand_disordered::Bool=true,
                 gzip::Bool=false)
+    el_exp = isa(el, ProteinStructure) ? collectmodels(el) : el
+    ats = sort(sort(sort(collectatoms(el_exp, atom_selectors...;
+                            expand_disordered=expand_disordered)),
+                            by=residue), by=model)
     d = MMTFDict()
-    for mod in collectmodels(el)
-        chain_i = 0
-        for ch in mod
+    last_model = model(first(ats))
+    last_chain = chain(first(ats))
+    last_res = residue(first(ats))
+    chain_i = 0
+    group_count = 0
+    sequence = ""
+    prev_resname = ""
+    prev_het = true
+    for (i, at) in enumerate(ats)
+        if model(at) != last_model
+            push!(d["chainsPerModel"], chain_i)
+            chain_i = 0
+            last_model = model(at)
+        end
+
+        if chain(at) != last_chain || i == 1
             # MMTF splits chains up by molecules so we determine chain splits
             #   at the residue level
+            # The below just ensures we have a new entity for each chain
             prev_resname = ""
             prev_het = true
-            group_count = 0
-            sequence = ""
-            for res in collectresidues(ch; expand_disordered=expand_disordered)
-                ats = collectatoms(res, atom_selectors...;
-                                    expand_disordered=expand_disordered)
-                if countatoms(ats) == 0
-                    continue
-                end
-
-                # Determine whether we have changed entity
-                # ATOM blocks, and hetero molecules with the same name, are
-                #   treated as the same entity
-                if ishetero(res) != prev_het || (prev_het && resname(res) != prev_resname) || group_count == 0
-                    chain_i += 1
-                    push!(d["chainIdList"], generatechainid(chain_i))
-                    push!(d["chainNameList"], chainid(ch))
-                    # Add the groupsPerChain and sequence for the previous chain
-                    if group_count > 0
-                        push!(d["groupsPerChain"], group_count)
-                        d["entityList"][end]["sequence"] = sequence
-                        group_count = 0
-                        sequence = ""
-                    end
-                    # Checking for similar entities is non-trivial so we treat
-                    #   each molecule as a separate entity
-                    push!(d["entityList"], Dict{Any, Any}(
-                        "chainIndexList"=> Any[length(d["chainIdList"]) - 1],
-                        "description"   => "",
-                        "sequence"      => "", # This is changed later
-                        "type"          => ishetero(res) ? "non-polymer" : "polymer"
-                    ))
-                end
-                if !ishetero(res)
-                    sequence *= string(AminoAcidSequence(res; gaps=false))
-                end
-                group_count += 1
-
-                # Look for an existing group with the correct residue name and
-                #   atom names present
-                at_names = atomname.(ats)
-                group_i = 0
-                for (gi, group) in enumerate(d["groupList"])
-                    if group["groupName"] == resname(res) && group["atomNameList"] == at_names
-                        group_i = gi
-                        break
-                    end
-                end
-
-                if group_i == 0
-                    push!(d["groupList"], Dict{Any, Any}(
-                        "groupName"       => resname(res),
-                        "bondAtomList"    => Any[],
-                        "elementList"     => Any[element(at) for at in ats],
-                        # MMTF specifies missing charges as zero
-                        "formalChargeList"=> Any[charge(at) == "" ? 0 : parse(Int64, charge(at)) for at in ats],
-                        "singleLetterCode"=> "",
-                        "chemCompType"    => "",
-                        "atomNameList"    => Any[at_names...],
-                        "bondOrderList"   => Any[]
-                    ))
-                end
-
-                push!(d["groupIdList"], resnumber(res))
-                push!(d["groupTypeList"], group_i == 0 ? length(d["groupList"]) - 1 : group_i - 1)
-                push!(d["insCodeList"], inscode(res) == ' ' ? '\0' : inscode(res))
-                push!(d["secStructList"], -1)
-                push!(d["sequenceIndexList"], ishetero(res) ? -1 : length(sequence) - 1)
-
-                for at in ats
-                    push!(d["altLocList"], altlocid(at) == ' ' ? '\0' : altlocid(at))
-                    push!(d["atomIdList"], serial(at))
-                    push!(d["bFactorList"], tempfactor(at))
-                    push!(d["occupancyList"], occupancy(at))
-                    push!(d["xCoordList"], x(at))
-                    push!(d["yCoordList"], y(at))
-                    push!(d["zCoordList"], z(at))
-                end
-                prev_resname = resname(res)
-                prev_het = ishetero(res)
-            end
-            # Add the groupsPerChain and sequence for the last chain
-            if group_count > 0
-                push!(d["groupsPerChain"], group_count)
-                d["entityList"][end]["sequence"] = sequence
-            end
+            last_chain = chain(at)
         end
-        push!(d["chainsPerModel"], chain_i)
+
+        res = residue(at)
+        if residue(at) != last_res || i == 1
+            # Determine whether we have changed entity
+            # ATOM blocks, and hetero molecules with the same name, are
+            #   treated as the same entity
+            if ishetero(res) != prev_het || (prev_het && resname(res) != prev_resname) || group_count == 0
+                chain_i += 1
+                push!(d["chainIdList"], generatechainid(chain_i))
+                push!(d["chainNameList"], chainid(res))
+                # Add the groupsPerChain and sequence for the previous chain
+                if group_count > 0
+                    push!(d["groupsPerChain"], group_count)
+                    d["entityList"][end]["sequence"] = sequence
+                    group_count = 0
+                    sequence = ""
+                end
+                # Checking for similar entities is non-trivial so we treat
+                #   each molecule as a separate entity
+                push!(d["entityList"], Dict{Any, Any}(
+                    "chainIndexList"=> Any[length(d["chainIdList"]) - 1],
+                    "description"   => "",
+                    "sequence"      => "", # This is changed later
+                    "type"          => ishetero(res) ? "non-polymer" : "polymer"
+                ))
+            end
+            if !ishetero(res)
+                sequence *= string(AminoAcidSequence(res; gaps=false))
+            end
+            group_count += 1
+
+            # Look for an existing group with the correct residue name and
+            #   atom names present
+            # Look forwards in the loop to get atom names
+            ats_res = AbstractAtom[at]
+            for j in (i + 1):length(ats)
+                if residue(ats[j]) == res
+                    push!(ats_res, ats[j])
+                else
+                    break
+                end
+            end
+            at_names = atomname.(ats_res)
+            group_i = 0
+            for (gi, group) in enumerate(d["groupList"])
+                if group["groupName"] == resname(res) && group["atomNameList"] == at_names
+                    group_i = gi
+                    break
+                end
+            end
+
+            if group_i == 0
+                push!(d["groupList"], Dict{Any, Any}(
+                    "groupName"       => resname(res),
+                    "bondAtomList"    => Any[],
+                    "elementList"     => Any[element(at) for at in ats_res],
+                    # MMTF specifies missing charges as zero
+                    "formalChargeList"=> Any[charge(at) == "" ? 0 : parse(Int64, charge(at)) for at in ats_res],
+                    "singleLetterCode"=> "",
+                    "chemCompType"    => "",
+                    "atomNameList"    => Any[at_names...],
+                    "bondOrderList"   => Any[]
+                ))
+            end
+
+            push!(d["groupIdList"], resnumber(res))
+            push!(d["groupTypeList"], group_i == 0 ? length(d["groupList"]) - 1 : group_i - 1)
+            push!(d["insCodeList"], inscode(res) == ' ' ? '\0' : inscode(res))
+            push!(d["secStructList"], -1)
+            push!(d["sequenceIndexList"], ishetero(res) ? -1 : length(sequence) - 1)
+
+            prev_resname = resname(res)
+            prev_het = ishetero(res)
+            last_res = res
+        end
+
+        push!(d["altLocList"], altlocid(at) == ' ' ? '\0' : altlocid(at))
+        push!(d["atomIdList"], serial(at))
+        push!(d["bFactorList"], tempfactor(at))
+        push!(d["occupancyList"], occupancy(at))
+        push!(d["xCoordList"], x(at))
+        push!(d["yCoordList"], y(at))
+        push!(d["zCoordList"], z(at))
     end
 
-    d["numModels"] = countmodels(el)
+    push!(d["chainsPerModel"], chain_i)
+    push!(d["groupsPerChain"], group_count)
+    d["entityList"][end]["sequence"] = sequence
+
+    d["numModels"] = length(d["chainsPerModel"])
     d["numChains"] = length(d["chainIdList"])
     d["numGroups"] = length(d["groupIdList"])
     d["numAtoms"] = length(d["atomIdList"])
