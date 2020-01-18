@@ -797,6 +797,16 @@ return `true` from all the functions are retained.
 The keyword argument `expand_disordered` (default `true`) determines whether to
 return all copies of disordered residues and atoms.
 """
+function writepdb(filepath::AbstractString,
+                el::StructuralElementOrList,
+                atom_selectors::Function...;
+                expand_disordered::Bool=true)
+    open(filepath, "w") do output
+        writepdb(output, el, atom_selectors...;
+                    expand_disordered=expand_disordered)
+    end
+end
+
 function writepdb(output::IO,
                     el::Union{ProteinStructure, Vector{Model}},
                     atom_selectors::Function...;
@@ -805,13 +815,11 @@ function writepdb(output::IO,
     if length(el) > 1
         for mod in sort(collect(el))
             println(output, "MODEL     ", spacestring(modelnumber(mod), 4), repeat(" ", 66))
-            writepdb(output, mod, atom_selectors...)
+            writepdb(output, mod, atom_selectors...;
+                        expand_disordered=expand_disordered)
             println(output, "ENDMDL$(repeat(" ", 74))")
         end
     # If there is only one model, do not write out MODEL/ENDMDL lines
-    elseif isa(el, ProteinStructure)
-        writepdb(output, defaultmodel(el), atom_selectors...;
-                    expand_disordered=expand_disordered)
     else
         writepdb(output, first(el), atom_selectors...;
                     expand_disordered=expand_disordered)
@@ -819,43 +827,14 @@ function writepdb(output::IO,
 end
 
 function writepdb(output::IO,
-                    el::Union{Model, Chain, AbstractResidue, Vector{Chain},
-                            Vector{<:AbstractResidue}},
-                    atom_selectors::Function...;
-                    expand_disordered::Bool=true)
-    for res in collectresidues(el; expand_disordered=expand_disordered)
-        checkchainerror(res)
-        # No need to expand disorder twice
-        writepdb(output, collectatoms(res, atom_selectors...;
-                    expand_disordered=expand_disordered); expand_disordered=false)
-    end
-end
-
-function writepdb(output::IO,
-                    at::AbstractAtom,
-                    atom_selectors::Function...;
-                    expand_disordered::Bool=true)
-    return writepdb(output, [at], atom_selectors...;
-                    expand_disordered=expand_disordered)
-end
-
-function writepdb(output::IO,
-                ats::Vector{<:AbstractAtom},
+                el::Union{Model, Chain, AbstractResidue, AbstractAtom,
+                            Vector{Chain}, Vector{<:AbstractResidue},
+                            Vector{<:AbstractAtom}},
                 atom_selectors::Function...;
                 expand_disordered::Bool=true)
-    for at in collectatoms(ats, atom_selectors...;
+    for at in collectatoms(el, atom_selectors...;
                             expand_disordered=expand_disordered)
         checkchainerror(at)
         println(output, pdbline(at))
-    end
-end
-
-function writepdb(filepath::AbstractString,
-                el::StructuralElementOrList,
-                atom_selectors::Function...;
-                expand_disordered::Bool=true)
-    open(filepath, "w") do output
-        writepdb(output, el, atom_selectors...;
-                    expand_disordered=expand_disordered)
     end
 end
