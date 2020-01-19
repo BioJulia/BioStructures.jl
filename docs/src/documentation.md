@@ -440,6 +440,9 @@ downloadpdb("1ALW") do fp
 end
 ```
 
+Note that some PDB entries, e.g. large viral assemblies, are not available as PDB format files.
+In this case consider downloading the mmCIF file or MMTF file instead.
+
 ## Reading PDB files
 
 To parse an existing PDB file into a Structure-Model-Chain-Residue-Atom framework:

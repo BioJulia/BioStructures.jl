@@ -211,10 +211,6 @@ function downloadpdb(pdbid::AbstractString;
     if !occursin(r"^[a-zA-Z0-9]{4}$", pdbid)
         throw(ArgumentError("Not a valid PDB ID: \"$pdbid\""))
     end
-    # Check if PDB file format is valid
-    if !haskey(pdbextension, file_format)
-        throw(ArgumentError("Invalid PDB file format!"))
-    end
     # Check if the PDB file is marked as obsolete
     if obsolete
         # Set the download path to obsolete directory inside the "pdb_dir"
@@ -233,18 +229,18 @@ function downloadpdb(pdbid::AbstractString;
     end
     # Download the PDB file only if it does not exist in the "pdb_dir" and when "overwrite" is true
     if isfile(pdbpath) && !overwrite
-        @info "PDB exists: $pdbid"
+        @info "File exists: $pdbid"
     else
         # Temporary location to download compressed PDB file.
         archivefilepath = tempname()
         try
             # Download the compressed PDB file to the temporary location
-            @info "Downloading PDB: $pdbid"
+            @info "Downloading file from PDB: $pdbid"
             if ba_number == 0
-                if file_format == PDB || file_format == PDBXML || file_format == MMCIF
-                    download("http://files.rcsb.org/download/$pdbid.$(pdbextension[file_format]).gz", archivefilepath)
-                else
+                if file_format == MMTF
                     download("http://mmtf.rcsb.org/v1.0/full/$pdbid.mmtf.gz", archivefilepath)
+                else
+                    download("http://files.rcsb.org/download/$pdbid.$(pdbextension[file_format]).gz", archivefilepath)
                 end
             else
                 if file_format == PDB
@@ -265,7 +261,11 @@ function downloadpdb(pdbid::AbstractString;
             end
             # Verify if the PDB file is downloaded and extracted without any error
             if !isfile(pdbpath) || filesize(pdbpath) == 0
-                throw(ErrorException("Error downloading PDB: $pdbid"))
+                if file_format == PDB
+                    throw(ErrorException("Error downloading file: $pdbid; some PDB entries are not available as PDB format files, consider downloading the mmCIF file or MMTF file instead"))
+                else
+                    throw(ErrorException("Error downloading file: $pdbid"))
+                end
             end
         finally
             # Remove the temporary compressd PDB file downloaded to clear up space

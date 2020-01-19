@@ -559,7 +559,7 @@ defaultaltlocid(dis_at::DisorderedAtom) = dis_at.default
 # Constructor acts as a setter for the default alt loc ID
 function DisorderedAtom(dis_at::DisorderedAtom, default::Char)
     if !(default in altlocids(dis_at))
-        throw(ArgumentError("The new default alternative location ID must be present in the atom"))
+        throw(ArgumentError("The new default alternative location ID \"$default\" must be present in the atom"))
     end
     return DisorderedAtom(dis_at.alt_loc_ids, default)
 end
@@ -774,7 +774,7 @@ resnames(res::Residue) = [resname(res, strip=false)]
 # Constructor acts as a setter for the default residue name
 function DisorderedResidue(dis_res::DisorderedResidue, default::AbstractString)
     if !(default in resnames(dis_res))
-        throw(ArgumentError("The new default residue name must be present in the residue"))
+        throw(ArgumentError("The new default residue name \"$default\" must be present in the residue"))
     end
     return DisorderedResidue(dis_res.names, default)
 end

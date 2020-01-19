@@ -40,6 +40,7 @@ using BioStructures:
 # Set to false locally to run these tests
 skip_linux_download = true
 
+# Get the path to BioFmtSpecimens and download it if required
 fmtdir = BioCore.Testing.get_bio_fmt_specimens()
 
 # Access files in BioFmtSpecimens to test against
@@ -2878,6 +2879,6 @@ end
 end
 
 # Delete temporary file
-rm(temp_filename)
+rm(temp_filename, force=true)
 
 end # TestBioStructures
