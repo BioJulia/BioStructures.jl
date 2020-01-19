@@ -1,6 +1,15 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.9.0 - Jan 2020
+
+* A reader and writer are added for the MMTF file format, building on top of [MMTF.jl](https://github.com/BioJulia/MMTF.jl). The interface is the same as for PDB and mmCIF files, with files either being read into the standard hierarchical structure or a `MMTFDict`. Gzipped files are supported. PDB, mmCIF and MMTF files can be interconverted.
+* The `expand_disordered` flag is added to `collectatoms`, `collectresidues`, `countatoms`, `countresidues`, `coordarray`, `writepdb`, `writemmcif`, `writemmtf` and `DataFrame`. It determines whether disordered atoms and residues are expanded to include all entries. By default it is `false` except for the output functions, i.e. the last four above, where it is `true` by default.
+* The `pdbextension` dictionary is changed to remove leading dots in the values.
+* Improved file writing of empty elements.
+* Examples are split off into a separate section in the documentation.
+* A benchmark suite is added to track performance.
+
 ## v0.8.0 - Dec 2019
 
 * Superimposition of structural elements is supported using the Kabsch algorithm. New functions are `superimpose!`, `Transformation`, `applytransform!` and `applytransform`.
