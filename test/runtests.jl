@@ -75,7 +75,7 @@ close(io)
         # Valid PDB ID format but PDB does not exist
         @test_throws Exception downloadpdb("no1e", pdb_dir=pdb_dir)
         # Invalid PDB file_format
-        @test_throws ArgumentError downloadpdb("1alw", pdb_dir=pdb_dir, file_format=String)
+        @test_throws TypeError downloadpdb("1alw", pdb_dir=pdb_dir, file_format=String)
         # Biological assembly not available in PDBXML and MMTF
         @test_throws ArgumentError downloadpdb("1alw", pdb_dir=pdb_dir, file_format=PDBXML, ba_number=1)
         # Invalid ba_number for this PDB entry
@@ -159,6 +159,9 @@ close(io)
         @test countatoms(struc) == 1954
         @test sum(isdisorderedatom, collectatoms(struc)) == 0
         @test tempfactor(struc['A'][167]["NE"]) == 23.32
+
+        # Delete temporary directory
+        rm(pdb_dir, recursive=true, force=true)
     end
 end
 
