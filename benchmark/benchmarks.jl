@@ -35,7 +35,7 @@ for pdbid in pdbids
     for f in keys(formats)
         SUITE["read"][f][pdbid] = @benchmarkable read(
                 $(testfilepath(f, "$pdbid.$(pdbextension[formats[f]])")), $(formats[f]))
-        SUITE["write"][f][pdbid] = @benchmarkable writefunctions[f](
+        SUITE["write"][f][pdbid] = @benchmarkable $(writefunctions[f])(
                 $temp_filename, $(struc[pdbid])) teardown=(rm(temp_filename))
     end
 end
