@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.9.1 - Jan 2020
+
+* Fix documentation build.
+
 ## v0.9.0 - Jan 2020
 
 * A reader and writer are added for the MMTF file format, building on top of [MMTF.jl](https://github.com/BioJulia/MMTF.jl). The interface is the same as for PDB and mmCIF files, with files either being read into the standard hierarchical structure or a `MMTFDict`. Gzipped files are supported. PDB, mmCIF and MMTF files can be interconverted.
