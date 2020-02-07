@@ -1060,6 +1060,18 @@ function Base.iterate(dis_at::DisorderedAtom, state=1)
     state <= length(dis_at) ? (dis_at[altlocids(dis_at)[state]], state + 1) : nothing
 end
 
+# Collection methods defined separately to iteration for speed
+Base.collect(struc::ProteinStructure) = [struc[mn] for mn in modelnumbers(struc)]
+Base.collect(mod::Model) = [mod[cn] for cn in chainids(mod)]
+Base.collect(ch::Chain) = AbstractResidue[ch[rn] for rn in resids(ch)]
+Base.collect(res::Residue) = AbstractAtom[res.atoms[an] for an in atomnames(res, strip=false)]
+function Base.collect(dis_res::DisorderedResidue)
+    res = defaultresidue(dis_res)
+    return AbstractAtom[res.atoms[an] for an in atomnames(res, strip=false)]
+end
+Base.collect(at::Atom) = [at]
+Base.collect(dis_at::DisorderedAtom) = [dis_at[al] for al in altlocids(dis_at)]
+
 """
     applyselectors(els, selectors...)
 

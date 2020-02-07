@@ -456,41 +456,48 @@ end
     @test isa(defaultmodel(struc), Model)
     @test modelnumber(defaultmodel(struc)) == 1
 
-    # Test iteration over elements
-    at_col = collect(at)
-    @test isa(at_col, Vector{Atom})
-    @test length(at_col) == 1
-    @test serial(at_col[1]) == 100
+    # Test iteration and collecting of elements
+    for at_col in (collect(at), eltype(at)[i for i in at])
+        @test isa(at_col, Vector{Atom})
+        @test length(at_col) == 1
+        @test serial(at_col[1]) == 100
+    end
 
-    dis_at_col = collect(dis_at)
-    @test isa(dis_at_col, Vector{Atom})
-    @test length(dis_at_col) == 2
-    @test serial(dis_at_col[2]) == 201
+    for dis_at_col in (collect(dis_at), eltype(dis_at)[i for i in dis_at])
+        @test isa(dis_at_col, Vector{Atom})
+        @test length(dis_at_col) == 2
+        @test serial(dis_at_col[2]) == 201
+    end
 
-    res_col = collect(res)
-    @test isa(res_col, Vector{AbstractAtom})
-    @test length(res_col) == 2
-    @test serial(res_col[2]) == 200
+    for res_col in (collect(res), eltype(res)[i for i in res])
+        @test isa(res_col, Vector{AbstractAtom})
+        @test length(res_col) == 2
+        @test serial(res_col[2]) == 200
+    end
 
-    dis_res_col = collect(dis_res)
-    @test isa(dis_res_col, Vector{AbstractAtom})
-    @test length(dis_res_col) == 1
-    @test serial(dis_res_col[1]) == 300
+    for dis_res_col in (collect(dis_res), eltype(dis_res)[i for i in dis_res])
+        @test isa(dis_res_col, Vector{AbstractAtom})
+        @test length(dis_res_col) == 1
+        @test serial(dis_res_col[1]) == 300
+    end
 
-    ch_col = collect(ch)
-    @test isa(ch_col, Vector{AbstractResidue})
-    @test length(ch_col) == 2
-    @test resname(ch_col[2]) == "VA"
+    for ch_col in (collect(ch), eltype(ch)[i for i in ch])
+        @test isa(ch_col, Vector{AbstractResidue})
+        @test length(ch_col) == 2
+        @test resname(ch_col[2]) == "VA"
+    end
 
-    mod_col = collect(mod)
-    @test isa(mod_col, Vector{Chain})
-    @test length(mod_col) == 2
-    @test chainid(mod_col[2]) == "B"
+    for mod_col in (collect(mod), eltype(mod)[i for i in mod])
+        @test isa(mod_col, Vector{Chain})
+        @test length(mod_col) == 2
+        @test chainid(mod_col[2]) == "B"
+    end
 
-    struc_col = collect(struc)
-    @test isa(struc_col, Vector{Model})
-    @test length(struc_col) == 2
-    @test modelnumber(struc_col[2]) == 3
+    for struc_col in (collect(struc), eltype(struc)[i for i in struc])
+        @test isa(struc_col, Vector{Model})
+        @test length(struc_col) == 2
+        @test modelnumber(struc_col[2]) == 3
+    end
 
     # Test element indices
     @test isa(dis_at['A'], Atom)
