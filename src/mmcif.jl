@@ -7,7 +7,10 @@ const quotechars = Set(['\'', '\"'])
 const whitespacechars = Set([' ', '\t'])
 const missingvals = Set([".", "?"])
 const specialchars = Set(['_', '#', '\$', '[', ']', ';'])
-const specialwords = Set(["loop_", "stop_", "global_"])
+# These are technically case-insensitive at any letter but just checking the
+#   all-upper and all-lower forms is faster; this also appears in code below
+const specialwords = Set(["loop_", "LOOP_", "stop_", "STOP_",
+                            "global_", "GLOBAL_"])
 
 # If certain entries should have a certain order of keys, that is specified here
 const mmciforder = Dict(
@@ -164,7 +167,8 @@ function tokenizecifstructure(f::IO)
                 push!(token_buffer, inner_strip)
             end
             push!(tokens, join(token_buffer, "\n"))
-        elseif (!in_keys && startswith(line, "_")) || startswith(line, "loop_")
+        elseif (!in_keys && startswith(line, "_")) || startswith(line, "loop_") ||
+                    startswith(line, "LOOP_")
             break
         else
             in_keys = false
@@ -202,7 +206,7 @@ function populatedict!(mmcif_dict::MMCIFDict, tokens::Vector{String})
     i = 0 # Value counter
     n = 0 # Key counter
     for token in tokens
-        if lowercase(token) == "loop_"
+        if token == "loop_" || token == "LOOP_"
             loop_flag = true
             keys = String[]
             i = 0
@@ -328,8 +332,9 @@ end
 
 function requiresquote(val)
     return occursin(" ", val) || occursin("'", val) || occursin("\"", val) ||
-        val[1] in specialchars || startswith(lowercase(val), "data_") ||
-        startswith(lowercase(val), "save_") || val in specialwords
+        val[1] in specialchars || startswith(val, "data_") ||
+        startswith(val, "DATA_") || startswith(val, "save_") ||
+        startswith(val, "SAVE_") || val in specialwords
 end
 
 """
@@ -356,7 +361,7 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
     key_lists = Dict{String, Vector{String}}()
     data_val = String[]
     for key in keys(mmcif_dict)
-        if lowercase(key) == "data_"
+        if key == "data_" || key == "DATA_"
             data_val = mmcif_dict[key]
         else
             s = split(key, ".")
