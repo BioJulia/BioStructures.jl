@@ -4,7 +4,7 @@ The BioStructures.jl package provides functionality to manipulate macromolecular
 It is designed to be used for standard structural analysis tasks, as well as acting as a platform on which others can build to create more specific tools.
 
 It compares favourably in terms of performance to other PDB parsers - see some [benchmarks online](https://github.com/jgreener64/pdb-benchmarks) and the [benchmark suite](https://github.com/BioJulia/BioStructures.jl/blob/master/benchmark/benchmarks.jl).
-The PDB, mmCIF and MMTF parsers currently read in the whole PDB without explicit errors (with one exception).
+The PDB, mmCIF and MMTF parsers currently read in the whole PDB without explicit errors (with a handful of known exceptions).
 Help can be found on individual functions using `?function_name`.
 
 ## Basics
@@ -93,21 +93,21 @@ Properties can be retrieved as follows:
 | `inscode`            | Insertion code of a residue or atom                           | `Char`                          |
 | `resid`              | Residue ID of an atom or residue (`full=true` includes chain) | `String`                        |
 | `atomnames`          | Atom names of the atoms in a residue, sorted by serial        | `Array{String,1}`               |
-| `atoms`              | Dictionary of atoms in a residue                              | `Dict{String, AbstractAtom}`    |
+| `atoms`              | Dictionary of atoms in a residue                              | `Dict{String,AbstractAtom}`    |
 | `isdisorderedres`    | `true` if the residue has multiple residue names              | `Bool`                          |
 | `disorderedres`      | Access a particular residue name in a `DisorderedResidue`     | `Residue`                       |
 | `chain`              | Chain a residue or atom belongs to                            | `Chain`                         |
 | `chainid`            | Chain ID of a chain, residue or atom                          | `String`                        |
 | `resids`             | Sorted residue IDs in a chain                                 | `Array{String,1}`               |
-| `residues`           | Dictionary of residues in a chain                             | `Dict{String, AbstractResidue}` |
+| `residues`           | Dictionary of residues in a chain                             | `Dict{String,AbstractResidue}` |
 | `model`              | Model a chain, residue or atom belongs to                     | `Model`                         |
 | `modelnumber`        | Model number of a model, chain, residue or atom               | `Int`                           |
 | `chainids`           | Sorted chain IDs in a model or structure                      | `Array{String,1}`               |
-| `chains`             | Dictionary of chains in a model or structure                  | `Dict{String, Chain}`           |
+| `chains`             | Dictionary of chains in a model or structure                  | `Dict{String,Chain}`           |
 | `structure`          | Structure a model, chain, residue or atom belongs to          | `ProteinStructure`              |
 | `structurename`      | Name of the structure an element belongs to                   | `String`                        |
 | `modelnumbers`       | Sorted model numbers in a structure                           | `Array{Int,1}`                  |
-| `models`             | Dictionary of models in a structure                           | `Dict{Int, Model}`              |
+| `models`             | Dictionary of models in a structure                           | `Dict{Int,Model}`              |
 
 The `strip` keyword argument determines whether surrounding whitespace is stripped for `atomname`, `element`, `charge`, `resname` and `atomnames` (default `true`).
 

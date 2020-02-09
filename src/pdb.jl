@@ -731,7 +731,7 @@ function pdbline(at::Atom)
             " " *
             spaceatomname(at) *
             string(altlocid(at)) *
-            spacestring(resname(at), 3) *
+            spacestring(resname(at, strip=false), 3) *
             " " *
             chainid(at) * # This is checked during writing for being one character
             spacestring(resnumber(at), 4) *
@@ -745,8 +745,8 @@ function pdbline(at::Atom)
             # This will throw an error for large temp facs, e.g. 1000.12
             spacestring(pyfmt(floatspec, round(tempfactor(at), digits=2)), 6) *
             "          " *
-            spacestring(element(at), 2) *
-            spacestring(charge(at), 2)
+            spacestring(element(at, strip=false), 2) *
+            spacestring(charge(at, strip=false), 2)
 end
 
 pdbline(dis_at::DisorderedAtom) = pdbline(defaultatom(dis_at))

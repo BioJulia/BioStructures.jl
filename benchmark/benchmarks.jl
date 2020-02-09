@@ -63,11 +63,11 @@ SUITE["collect"]["models"      ] = @benchmarkable collectmodels(  $(struc["1SSU"
 
 SUITE["spatial"]["coordarray"    ] = @benchmarkable coordarray($(collectatoms(struc["1AKE"])))
 SUITE["spatial"]["transformation"] = @benchmarkable Transformation($(collectresidues(struc["1SSU"][5], standardselector)), $(collectresidues(struc["1SSU"][10], standardselector)))
-SUITE["spatial"]["rmsd"          ] = @benchmarkable rmsd($(struc["1SSU"][5]), $(struc["1SSU"][10]), superimpose=false, rmsdatoms=heavyatomselector)
+SUITE["spatial"]["rmsd"          ] = @benchmarkable rmsd($(coordarray(struc["1SSU"][5], heavyatomselector)), $(coordarray(struc["1SSU"][10], heavyatomselector)))
 SUITE["spatial"]["distance"      ] = @benchmarkable distance($(struc["1AKE"]["A"][50]), $(struc["1AKE"]["A"][60]))
 SUITE["spatial"]["bondangle"     ] = @benchmarkable bondangle($(struc["1AKE"]["A"][20]["N"]), $(struc["1AKE"]["A"][20]["CA"]), $(struc["1AKE"]["A"][20]["C"]))
 SUITE["spatial"]["dihedralangle" ] = @benchmarkable dihedralangle($(struc["1AKE"]["A"][20]["N"]), $(struc["1AKE"]["A"][20]["CA"]), $(struc["1AKE"]["A"][20]["C"]), $(struc["1AKE"]["A"][21]["N"]))
-SUITE["spatial"]["ramachandran"  ] = @benchmarkable ramachandranangles($(struc["1AKE"]["A"]), standardselector)
+SUITE["spatial"]["ramachandran"  ] = @benchmarkable ramachandranangles($(collectresidues(struc["1AKE"]["A"], standardselector)))
 SUITE["spatial"]["contactmap"    ] = @benchmarkable ContactMap($(collectatoms(struc["1AKE"]["A"], cbetaselector)), 8.0)
 SUITE["spatial"]["distancemap"   ] = @benchmarkable DistanceMap($(collectresidues(struc["1AKE"]["A"], standardselector)))
 SUITE["spatial"]["contactgraph"  ] = @benchmarkable MetaGraph($(collectatoms(struc["1AKE"]["A"], cbetaselector)), 8.0)

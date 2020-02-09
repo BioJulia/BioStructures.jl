@@ -1600,7 +1600,7 @@ Cβ atom, or a Cα atom in glycine.
 function cbetaselector(at::AbstractAtom)
     return standardselector(at) &&
         (atomnameselector(at, cbetaatomnames) ||
-        (resname(at) == "GLY" && atomnameselector(at, calphaatomnames)))
+        (resname(at, strip=false) == "GLY" && atomnameselector(at, calphaatomnames)))
 end
 
 "`Set` of protein backbone atom names."
@@ -1687,10 +1687,11 @@ Determines if an `AbstractAtom` represents hydrogen.
 Uses the element field where possible, otherwise uses the atom name.
 """
 function hydrogenselector(at::AbstractAtom)
-    return element(at, strip=true) == "H" ||
-        (element(at, strip=true) == "" &&
-        'H' in atomname(at) &&
-        !occursin(r"[a-zA-Z]", atomname(at)[1:findfirst(isequal('H'), atomname(at)) - 1]))
+    at_name = atomname(at)
+    return element(at) == "H" ||
+        (element(at) == "" &&
+        'H' in at_name &&
+        !occursin(r"[a-zA-Z]", at_name[1:findfirst(isequal('H'), at_name) - 1]))
 end
 
 """
