@@ -1714,8 +1714,8 @@ end
 function AminoAcidSequence(res::Vector{<:AbstractResidue}; gaps::Bool=true)
     seq = BioSymbols.AminoAcid[]
     for i in 1:length(res)
-        if haskey(BioSymbols.threeletter_to_aa, resname(res[i]))
-            push!(seq, BioSymbols.threeletter_to_aa[resname(res[i])])
+        if haskey(BioSymbols.threeletter_to_aa, resname(res[i], strip=false))
+            push!(seq, BioSymbols.threeletter_to_aa[resname(res[i], strip=false)])
         else
             push!(seq, BioSymbols.AA_X)
         end
