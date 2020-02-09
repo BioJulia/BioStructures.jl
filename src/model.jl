@@ -915,7 +915,7 @@ models(struc::ProteinStructure) = struc.models
 Get the default `Model` in a `ProteinStructure`.
 This is the `Model` with the lowest model number.
 """
-defaultmodel(struc::ProteinStructure) = struc.models[modelnumbers(struc)[1]]
+defaultmodel(struc::ProteinStructure) = first(sort(collect(values(models(struc)))))
 
 # Sort lists of elements
 
