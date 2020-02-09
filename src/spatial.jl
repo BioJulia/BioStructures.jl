@@ -401,13 +401,15 @@ The first residue (or one at the given index) requires the atoms "N" and
 The angle is in the range -π to π.
 """
 function omegaangle(res::AbstractResidue, res_prev::AbstractResidue)
-    if !("CA" in atomnames(res_prev))
+    at_names = atomnames(res, strip=false)
+    at_names_prev = atomnames(res_prev, strip=false)
+    if !("CA" in at_names_prev || " CA " in at_names_prev)
         throw(ArgumentError("Atom with atom name \"CA\" not found in previous residue"))
-    elseif !("C"  in atomnames(res_prev))
+    elseif !("C" in at_names_prev || " C  " in at_names_prev)
         throw(ArgumentError("Atom with atom name \"C\" not found in previous residue"))
-    elseif !("N"  in atomnames(res))
+    elseif !("N" in at_names || " N  " in at_names)
         throw(ArgumentError("Atom with atom name \"N\" not found in residue"))
-    elseif !("CA" in atomnames(res))
+    elseif !("CA" in at_names || " CA " in at_names)
         throw(ArgumentError("Atom with atom name \"CA\" not found in residue"))
     end
     return dihedralangle(res_prev["CA"], res_prev["C"], res["N"], res["CA"])
@@ -438,13 +440,15 @@ The first residue (or one at the given index) requires the atoms "N", "CA" and
 The angle is in the range -π to π.
 """
 function phiangle(res::AbstractResidue, res_prev::AbstractResidue)
-    if !("C"  in atomnames(res_prev))
+    at_names = atomnames(res, strip=false)
+    at_names_prev = atomnames(res_prev, strip=false)
+    if !("C" in at_names_prev || " C  " in at_names_prev)
         throw(ArgumentError("Atom with atom name \"C\" not found in previous residue"))
-    elseif !("N"  in atomnames(res))
+    elseif !("N" in at_names || " N  " in at_names)
         throw(ArgumentError("Atom with atom name \"N\" not found in residue"))
-    elseif !("CA" in atomnames(res))
+    elseif !("CA" in at_names || " CA " in at_names)
         throw(ArgumentError("Atom with atom name \"CA\" not found in residue"))
-    elseif !("C"  in atomnames(res))
+    elseif !("C" in at_names || " C  " in at_names)
         throw(ArgumentError("Atom with atom name \"C\" not found in residue"))
     end
     return dihedralangle(res_prev["C"], res["N"], res["CA"], res["C"])
@@ -475,13 +479,15 @@ The first residue (or one at the given index) requires the atoms "N", "CA" and
 The angle is in the range -π to π.
 """
 function psiangle(res::AbstractResidue, res_next::AbstractResidue)
-    if !("N"  in atomnames(res))
+    at_names = atomnames(res, strip=false)
+    at_names_next = atomnames(res_next, strip=false)
+    if !("N" in at_names || " N  " in at_names)
         throw(ArgumentError("Atom with atom name \"N\" not found in residue"))
-    elseif !("CA" in atomnames(res))
+    elseif !("CA" in at_names || " CA " in at_names)
         throw(ArgumentError("Atom with atom name \"CA\" not found in residue"))
-    elseif !("C"  in atomnames(res))
+    elseif !("C" in at_names || " C  " in at_names)
         throw(ArgumentError("Atom with atom name \"C\" not found in residue"))
-    elseif !("N"  in atomnames(res_next))
+    elseif !("N" in at_names_next || " N  " in at_names_next)
         throw(ArgumentError("Atom with atom name \"N\" not found in next residue"))
     end
     return dihedralangle(res["N"], res["CA"], res["C"], res_next["N"])
