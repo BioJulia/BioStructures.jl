@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.9.3 - Mar 2020
+
+* Change compatibility bounds for new RecipesBase.jl release.
+
 ## v0.9.2 - Feb 2020
 
 * Improvements to performance throughout the package. Some functions are made up to 5 times faster.
