@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.9.4 - Apr 2020
+
+* Change compatibility bounds for new RecipesBase.jl and CodecZlib.jl releases.
+
 ## v0.9.3 - Mar 2020
 
 * Change compatibility bounds for new RecipesBase.jl release.
