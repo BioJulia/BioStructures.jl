@@ -67,7 +67,7 @@ displacements(struc_nmr[5], struc_nmr[10], superimpose=false, rmsdatoms=heavyato
 ```julia
 l = pdbentrylist()
 for p in l
-    downloadpdb(p, file_format=MMCIF) do fp
+    downloadpdb(p, format=MMCIF) do fp
         s = read(fp, MMCIF)
         nres = countresidues(s, standardselector)
         if nres > 0

@@ -43,7 +43,7 @@ Note that the values of the dictionary are always an `Array{String,1}`, even if 
 MMTF files can be read into the same data structure with `read("/path/to/mmtf/file.mmtf", MMTF)`.
 The keyword argument `gzip`, default `false`, determines if the file is gzipped.
 In a similar manner to mmCIF dictionaries, a MMTF file can be read into a dictionary with `MMTFDict`.
-The values of the dictionary are a variety of types depending on the MMTF specification.
+The values of the dictionary are a variety of types depending on the [MMTF specification](https://github.com/rcsb/mmtf/blob/master/spec.md).
 
 Refer to [Downloading PDB files](#Downloading-PDB-files-1) and [Reading PDB files](#Reading-PDB-files-1) sections for more options.
 
@@ -406,23 +406,23 @@ So if you wanted the graph of chain contacts in a protein complex you could give
 To download a PDB file to a specified directory:
 
 ```julia
-downloadpdb("1EN2", pdb_dir="path/to/pdb/directory")
+downloadpdb("1EN2", dir="path/to/pdb/directory")
 ```
 
 To download multiple PDB files to a specified directory:
 
 ```julia
-downloadpdb(["1EN2", "1ALW", "1AKE"], pdb_dir="path/to/pdb/directory")
+downloadpdb(["1EN2", "1ALW", "1AKE"], dir="path/to/pdb/directory")
 ```
 
-To download a PDB file in PDB, XML, mmCIF or MMTF format use the `file_format` argument:
+To download a PDB file in PDB, XML, mmCIF or MMTF format use the `format` argument:
 
 ```julia
 # To get mmCIF
-downloadpdb("1ALW", pdb_dir="path/to/pdb/directory", file_format=MMCIF)
+downloadpdb("1ALW", dir="path/to/pdb/directory", format=MMCIF)
 
 # To get XML
-downloadpdb("1ALW", pdb_dir="path/to/pdb/directory", file_format=PDBXML)
+downloadpdb("1ALW", dir="path/to/pdb/directory", format=PDBXML)
 ```
 
 To apply a function to a downloaded file and delete the file afterwards:
@@ -467,15 +467,15 @@ The function `readpdb` provides an alternative way to read PDB files with a simi
 To parse a PDB file by specifying the PDB ID and PDB directory:
 
 ```julia
-struc = readpdb("1EN2", pdb_dir="/path/to/pdb/directory")
+struc = readpdb("1EN2", dir="/path/to/pdb/directory")
 ```
 
-The same keyword arguments are taken as `read` above, plus `pdb_dir` and `ba_number`.
+The same keyword arguments are taken as `read` above, plus `dir` and `ba_number`.
 
 Use `retrievepdb` to download and parse a PDB file into a Structure-Model-Chain-Residue-Atom framework in a single line:
 
 ```julia
-julia> struc = retrievepdb("1ALW", pdb_dir="path/to/pdb/directory")
+julia> struc = retrievepdb("1ALW", dir="path/to/pdb/directory")
 INFO: Downloading PDB: 1ALW
 ProteinStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atoms
 ```
@@ -568,7 +568,7 @@ l = pdbentrylist()
 To download the entire RCSB PDB database in your preferred file format:
 
 ```julia
-downloadentirepdb(pdb_dir="path/to/pdb/directory", file_format=MMTF)
+downloadentirepdb(dir="path/to/pdb/directory", format=MMTF)
 ```
 
 This operation takes a lot of disk space and time to complete (depending on internet connection).
@@ -576,7 +576,7 @@ This operation takes a lot of disk space and time to complete (depending on inte
 To update your local PDB directory based on the weekly status list of new, modified and obsolete PDB files from the RCSB server:
 
 ```julia
-updatelocalpdb(pdb_dir="path/to/pdb/directory", file_format=MMTF)
+updatelocalpdb(dir="path/to/pdb/directory", format=MMTF)
 ```
 
 Obsolete PDB files are stored in the auto-generated `obsolete` directory inside the specified local PDB directory.

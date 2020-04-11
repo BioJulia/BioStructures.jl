@@ -189,20 +189,20 @@ downloaded filepath(s) as an argument then removes the file(s).
 Requires an internet connection.
 
 # Arguments
-- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is
+- `dir::AbstractString=pwd()`: the directory to which the PDB file is
     downloaded; defaults to the current working directory.
-- `file_format::Type=PDB`: the format of the PDB file; options are PDB, PDBXML,
+- `format::Type=PDB`: the format of the PDB file; options are PDB, PDBXML,
     MMCIF and MMTF.
 - `obsolete::Bool=false`: if set `true`, the PDB file is downloaded in the
-    auto-generated "obsolete" directory inside the specified `pdb_dir`.
+    auto-generated "obsolete" directory inside the specified `dir`.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
-    in `pdb_dir`; by default skips downloading the PDB file if it exists.
+    in `dir`; by default skips downloading the PDB file if it exists.
 - `ba_number::Integer=0`: if set > 0 downloads the respective biological
     assembly; by default downloads the PDB file.
 """
 function downloadpdb(pdbid::AbstractString;
-                pdb_dir::AbstractString=pwd(),
-                file_format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB,
+                dir::AbstractString=pwd(),
+                format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB,
                 obsolete::Bool=false,
                 overwrite::Bool=false,
                 ba_number::Integer=0)
@@ -213,21 +213,21 @@ function downloadpdb(pdbid::AbstractString;
     end
     # Check if the PDB file is marked as obsolete
     if obsolete
-        # Set the download path to obsolete directory inside the "pdb_dir"
-        pdb_dir = joinpath(pdb_dir, "obsolete")
+        # Set the download path to obsolete directory inside dir
+        dir = joinpath(dir, "obsolete")
     end
     # Check and create directory if it does not exists in filesystem
-    if !isdir(pdb_dir)
-        @info "Creating directory: $pdb_dir"
-        mkpath(pdb_dir)
+    if !isdir(dir)
+        @info "Creating directory: $dir"
+        mkpath(dir)
     end
     # Standard file name format for PDB and biological assembly
     if ba_number==0
-        pdbpath = joinpath(pdb_dir, "$pdbid.$(pdbextension[file_format])")
+        pdbpath = joinpath(dir, "$pdbid.$(pdbextension[format])")
     else
-        pdbpath = joinpath(pdb_dir, "$(pdbid)_ba$ba_number.$(pdbextension[file_format])")
+        pdbpath = joinpath(dir, "$(pdbid)_ba$ba_number.$(pdbextension[format])")
     end
-    # Download the PDB file only if it does not exist in the "pdb_dir" and when "overwrite" is true
+    # Download the PDB file only if it does not exist in the "dir" and when "overwrite" is true
     if isfile(pdbpath) && !overwrite
         @info "File exists: $pdbid"
     else
@@ -237,16 +237,16 @@ function downloadpdb(pdbid::AbstractString;
             # Download the compressed PDB file to the temporary location
             @info "Downloading file from PDB: $pdbid"
             if ba_number == 0
-                if file_format == MMTF
+                if format == MMTF
                     download("http://mmtf.rcsb.org/v1.0/full/$pdbid.mmtf.gz", archivefilepath)
                 else
-                    download("http://files.rcsb.org/download/$pdbid.$(pdbextension[file_format]).gz", archivefilepath)
+                    download("http://files.rcsb.org/download/$pdbid.$(pdbextension[format]).gz", archivefilepath)
                 end
             else
-                if file_format == PDB
-                    download("http://files.rcsb.org/download/$pdbid.$(pdbextension[file_format])$ba_number.gz", archivefilepath)
-                elseif file_format == MMCIF
-                    download("http://files.rcsb.org/download/$pdbid-assembly$ba_number.$(pdbextension[file_format]).gz", archivefilepath)
+                if format == PDB
+                    download("http://files.rcsb.org/download/$pdbid.$(pdbextension[format])$ba_number.gz", archivefilepath)
+                elseif format == MMCIF
+                    download("http://files.rcsb.org/download/$pdbid-assembly$ba_number.$(pdbextension[format]).gz", archivefilepath)
                 else
                     throw(ArgumentError("Biological assemblies are available in the PDB and mmCIF formats only"))
                 end
@@ -261,7 +261,7 @@ function downloadpdb(pdbid::AbstractString;
             end
             # Verify if the PDB file is downloaded and extracted without any error
             if !isfile(pdbpath) || filesize(pdbpath) == 0
-                if file_format == PDB
+                if format == PDB
                     throw(ErrorException("Error downloading file: $pdbid; some PDB entries are not available as PDB format files, consider downloading the mmCIF file or MMTF file instead"))
                 else
                     throw(ErrorException("Error downloading file: $pdbid"))
@@ -314,43 +314,43 @@ The function can be stopped any time and called again to resume downloading.
 Requires an internet connection.
 
 # Arguments
-- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB files are
+- `dir::AbstractString=pwd()`: the directory to which the PDB files are
     downloaded; defaults to the current working directory.
-- `file_format::Type=PDB`: the format of the PDB file; options are PDB, PDBXML,
+- `format::Type=PDB`: the format of the PDB file; options are PDB, PDBXML,
     MMCIF and MMTF.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
-    in `pdb_dir`; by default skips downloading the PDB file if it exists.
+    in `dir`; by default skips downloading the PDB file if it exists.
 """
-function downloadentirepdb(; pdb_dir::AbstractString=pwd(),
-                    file_format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB,
+function downloadentirepdb(; dir::AbstractString=pwd(),
+                    format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB,
                     overwrite::Bool=false)
     pdblist = pdbentrylist()
     @info "About to download $(length(pdblist)) PDB files, make sure you have enough disk space and time"
     @info "The function can be stopped any time and called again to resume downloading"
-    downloadpdb(pdblist, pdb_dir=pdb_dir, overwrite=overwrite, file_format=file_format)
+    downloadpdb(pdblist, dir=dir, overwrite=overwrite, format=format)
 end
 
 """
-    updatelocalpdb(; pdb_dir::AbstractString=pwd(), file_format::Type=PDB)
+    updatelocalpdb(; dir::AbstractString=pwd(), format::Type=PDB)
 
 Update a local copy of the Protein Data Bank (PDB).
 
 Obtains the recent weekly lists of new, modified and obsolete PDB entries and
-automatically updates the PDB files of the given `file_format` inside the local
-`pdb_dir` directory.
+automatically updates the PDB files of the given `format` inside the local
+`dir` directory.
 Requires an internet connection.
 """
-function updatelocalpdb(; pdb_dir::AbstractString=pwd(),
-                    file_format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB)
+function updatelocalpdb(; dir::AbstractString=pwd(),
+                    format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB)
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
     # Download the newly added and modified pdb files
-    downloadpdb(vcat(addedlist, modifiedlist), pdb_dir=pdb_dir, overwrite=true, file_format=file_format)
-    # Set the obsolete directory to be inside pdb_dir
-    obsolete_dir=joinpath(pdb_dir, "obsolete")
+    downloadpdb(vcat(addedlist, modifiedlist), dir=dir, overwrite=true, format=format)
+    # Set the obsolete directory to be inside dir
+    obsolete_dir=joinpath(dir, "obsolete")
     for pdbid in obsoletelist
-        oldfile = joinpath(pdb_dir, "$pdbid.$(pdbextension[file_format])")
-        newfile = joinpath(obsolete_dir, "$pdbid.$(pdbextension[file_format])")
-        # if obsolete pdb is in the "pdb_dir", move it to "obsolete" directory inside "pdb_dir"
+        oldfile = joinpath(dir, "$pdbid.$(pdbextension[format])")
+        newfile = joinpath(obsolete_dir, "$pdbid.$(pdbextension[format])")
+        # if obsolete pdb is in the "dir", move it to "obsolete" directory inside "dir"
         if isfile(oldfile)
             if !isdir(obsolete_dir)
                 mkpath(obsolete_dir)
@@ -359,7 +359,7 @@ function updatelocalpdb(; pdb_dir::AbstractString=pwd(),
         # If obsolete pdb is already in the obsolete directory, inform the user and skip
         elseif isfile(newfile)
             @info "PDB $pdbid is already moved to the obsolete directory"
-        # If obsolete pdb not available in both pdb_dir and obsolete, inform the user and skip
+        # If obsolete pdb not available in both dir and obsolete, inform the user and skip
         else
             @info "Obsolete PDB $pdbid is missing"
         end
@@ -377,16 +377,16 @@ Requires an internet connection.
 # Arguments
 - `obsolete_dir::AbstractString=pwd()`: the directory where the PDB files are
     downloaded; defaults to the current working directory.
-- `file_format::Type=PDB`: the format of the PDB file; options are PDB, PDBXML,
+- `format::Type=PDB`: the format of the PDB file; options are PDB, PDBXML,
     MMCIF and MMTF.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
-    in `pdb_dir`; by default skips downloading the PDB file if it exists.
+    in `dir`; by default skips downloading the PDB file if it exists.
 """
 function downloadallobsoletepdb(; obsolete_dir::AbstractString=pwd(),
-                    file_format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB,
+                    format::Type{<:Union{PDB, PDBXML, MMCIF, MMTF}}=PDB,
                     overwrite::Bool=false)
     obsoletelist = pdbobsoletelist()
-    downloadpdb(obsoletelist, pdb_dir=obsolete_dir, file_format=file_format, overwrite=overwrite)
+    downloadpdb(obsoletelist, dir=obsolete_dir, format=format, overwrite=overwrite)
 end
 
 """
@@ -399,12 +399,12 @@ Requires an internet connection.
 
 # Arguments
 - `pdbid::AbstractString`: the PDB ID to be downloaded and read.
-- `pdb_dir::AbstractString=pwd()`: the directory to which the PDB file is
+- `dir::AbstractString=pwd()`: the directory to which the PDB file is
     downloaded; defaults to the current working directory.
 - `obsolete::Bool=false`: if set `true`, the PDB file is downloaded in the
-    auto-generated "obsolete" directory inside the specified `pdb_dir`.
+    auto-generated "obsolete" directory inside the specified `dir`.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
-    in `pdb_dir`; by default skips downloading the PDB file if it exists.
+    in `dir`; by default skips downloading the PDB file if it exists.
 - `ba_number::Integer=0`: if set > 0 downloads the respective biological
     assembly; by default downloads the PDB file.
 - `structure_name::AbstractString="\$pdbid.pdb"`: the name given to the returned
@@ -415,18 +415,18 @@ Requires an internet connection.
 - `read_het_atoms::Bool=true`: whether to read HETATOM records.
 """
 function retrievepdb(pdbid::AbstractString;
-            pdb_dir::AbstractString=pwd(),
+            dir::AbstractString=pwd(),
             obsolete::Bool=false,
             overwrite::Bool=false,
             ba_number::Integer=0,
             structure_name::AbstractString="$(uppercase(pdbid)).pdb",
             kwargs...)
-    downloadpdb(pdbid, pdb_dir=pdb_dir, obsolete=obsolete, overwrite=overwrite, ba_number=ba_number)
+    downloadpdb(pdbid, dir=dir, obsolete=obsolete, overwrite=overwrite, ba_number=ba_number)
     if obsolete
-        # If obsolete is set true, the PDB file is present in the obsolete directory inside "pdb_dir"
-        pdb_dir = joinpath(pdb_dir, "obsolete")
+        # If obsolete is set true, the PDB file is present in the obsolete directory inside dir
+        dir = joinpath(dir, "obsolete")
     end
-    readpdb(pdbid; pdb_dir=pdb_dir, ba_number=ba_number, structure_name=structure_name, kwargs...)
+    readpdb(pdbid; dir=dir, ba_number=ba_number, structure_name=structure_name, kwargs...)
 end
 
 """
@@ -434,12 +434,12 @@ end
 
 Read a Protein Data Bank (PDB) file and return a `ProteinStructure`.
 
-This is an alternative to `read("\$pdb_dir/\$pdbid.pdb", PDB)` but is
+This is an alternative to `read("\$dir/\$pdbid.pdb", PDB)` but is
 effectively the same.
 
 # Arguments
 - `pdbid::AbstractString`: the PDB ID to be read.
-- `pdb_dir::AbstractString=pwd()`: the directory from which the PDB file is
+- `dir::AbstractString=pwd()`: the directory from which the PDB file is
     read; defaults to the current working directory.
 - `ba_number::Integer=0`: if set > 0 reads the respective biological
     assembly; by default reads the PDB file.
@@ -451,16 +451,16 @@ effectively the same.
 - `read_het_atoms::Bool=true`: whether to read HETATOM records.
 """
 function readpdb(pdbid::AbstractString;
-            pdb_dir::AbstractString=pwd(),
+            dir::AbstractString=pwd(),
             ba_number::Integer=0,
             structure_name::AbstractString="$pdbid.pdb",
             kwargs...)
     pdbid = uppercase(pdbid)
     # Standard file name format for PDB and biological assembly
     if ba_number==0
-        pdbpath = joinpath(pdb_dir, "$pdbid.pdb")
+        pdbpath = joinpath(dir, "$pdbid.pdb")
     else
-        pdbpath = joinpath(pdb_dir, "$(pdbid)_ba$ba_number.pdb")
+        pdbpath = joinpath(dir, "$(pdbid)_ba$ba_number.pdb")
     end
     read(pdbpath, PDB; structure_name=structure_name, kwargs...)
 end

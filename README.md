@@ -21,6 +21,8 @@ macromolecular structures, in particular proteins.
 [Protein Data Bank](https://www.rcsb.org/pdb/home/home.do) (PDB), mmCIF and MMTF
 format files can be read in to a hierarchical data structure. Spatial
 calculations and functions to access the PDB are also provided.
+It compares favourably in terms of performance to other PDB parsers -
+see some [benchmarks online](https://github.com/jgreener64/pdb-benchmarks).
 
 ## Installation
 
@@ -30,9 +32,6 @@ pressing `]`:
 ```
 add BioStructures
 ```
-
-If you are interested in the cutting edge of the development, please check out
-the master branch to try new features before release.
 
 ## Contributing and questions
 
