@@ -463,15 +463,6 @@ Various options can be set through optional keyword arguments when parsing PDB/m
 | `read_het_atoms::Bool=true`      | Whether to read HETATOM records                                              |
 | `gzip::Bool=false`               | Whether the file is gzipped (MMTF files only)                                |
 
-The function `readpdb` provides an alternative way to read PDB files with a similar interface to `downloadpdb`.
-To parse a PDB file by specifying the PDB ID and PDB directory:
-
-```julia
-struc = readpdb("1EN2", dir="/path/to/pdb/directory")
-```
-
-The same keyword arguments are taken as `read` above, plus `dir` and `ba_number`.
-
 Use `retrievepdb` to download and parse a PDB file into a Structure-Model-Chain-Residue-Atom framework in a single line:
 
 ```julia

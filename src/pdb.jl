@@ -14,7 +14,6 @@ export
     updatelocalpdb,
     downloadallobsoletepdb,
     retrievepdb,
-    readpdb,
     spaceatomname,
     pdbline,
     writepdb
@@ -174,8 +173,8 @@ function pdbobsoletelist()
 end
 
 """
-    downloadpdb(pdbid::AbstractString; <keyword arguments>)
-    downloadpdb(pdbid::Array{<:AbstractString, 1}; <keyword arguments>)
+    downloadpdb(pdbid::AbstractString; kwargs...)
+    downloadpdb(pdbid::Array{<:AbstractString, 1}; kwargs...)
     downloadpdb(f::Function, args...)
 
 Download files from the Protein Data Bank (PDB) via RCSB.
@@ -222,7 +221,7 @@ function downloadpdb(pdbid::AbstractString;
         mkpath(dir)
     end
     # Standard file name format for PDB and biological assembly
-    if ba_number==0
+    if ba_number == 0
         pdbpath = joinpath(dir, "$pdbid.$(pdbextension[format])")
     else
         pdbpath = joinpath(dir, "$(pdbid)_ba$ba_number.$(pdbextension[format])")
@@ -304,7 +303,7 @@ function downloadpdb(f::Function, args...; kwargs...)
 end
 
 """
-    downloadentirepdb(; <keyword arguments>)
+    downloadentirepdb(; kwargs...)
 
 Download the entire Protein Data Bank (PDB) from the RCSB server.
 
@@ -367,7 +366,7 @@ function updatelocalpdb(; dir::AbstractString=pwd(),
 end
 
 """
-    downloadallobsoletepdb(; <keyword arguments>)
+    downloadallobsoletepdb(; kwargs...)
 
 Download all obsolete Protein Data Bank (PDB) files from the RCSB server.
 
@@ -390,7 +389,7 @@ function downloadallobsoletepdb(; obsolete_dir::AbstractString=pwd(),
 end
 
 """
-    retrievepdb(pdbid::AbstractString; <keyword arguments>)
+    retrievepdb(pdbid::AbstractString; kwargs...)
 
 Download and read a Protein Data Bank (PDB) file or biological assembly from the
 RCSB server, returning a `ProteinStructure`.
@@ -426,38 +425,8 @@ function retrievepdb(pdbid::AbstractString;
         # If obsolete is set true, the PDB file is present in the obsolete directory inside dir
         dir = joinpath(dir, "obsolete")
     end
-    readpdb(pdbid; dir=dir, ba_number=ba_number, structure_name=structure_name, kwargs...)
-end
-
-"""
-    readpdb(pdbid::AbstractString; <keyword arguments>)
-
-Read a Protein Data Bank (PDB) file and return a `ProteinStructure`.
-
-This is an alternative to `read("\$dir/\$pdbid.pdb", PDB)` but is
-effectively the same.
-
-# Arguments
-- `pdbid::AbstractString`: the PDB ID to be read.
-- `dir::AbstractString=pwd()`: the directory from which the PDB file is
-    read; defaults to the current working directory.
-- `ba_number::Integer=0`: if set > 0 reads the respective biological
-    assembly; by default reads the PDB file.
-- `structure_name::AbstractString="\$pdbid.pdb"`: the name given to the returned
-    `ProteinStructure`; defaults to the PDB ID.
-- `remove_disorder::Bool=false`: whether to remove atoms with alt loc ID not ' '
-    or 'A'.
-- `read_std_atoms::Bool=true`: whether to read standard ATOM records.
-- `read_het_atoms::Bool=true`: whether to read HETATOM records.
-"""
-function readpdb(pdbid::AbstractString;
-            dir::AbstractString=pwd(),
-            ba_number::Integer=0,
-            structure_name::AbstractString="$pdbid.pdb",
-            kwargs...)
     pdbid = uppercase(pdbid)
-    # Standard file name format for PDB and biological assembly
-    if ba_number==0
+    if ba_number == 0
         pdbpath = joinpath(dir, "$pdbid.pdb")
     else
         pdbpath = joinpath(dir, "$(pdbid)_ba$ba_number.pdb")

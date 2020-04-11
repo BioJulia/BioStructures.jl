@@ -1,6 +1,11 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.10.0 - Apr 2020
+
+* Change keyword argument names `pdb_dir` to `dir` and `file_format` to `format` for `downloadpdb`, `downloadentirepdb`, `updatelocalpdb`, `downloadallobsoletepdb` and `retrievepdb`.
+* Remove `readpdb`, which has the same functionality as `read`.
+
 ## v0.9.4 - Apr 2020
 
 * Change compatibility bounds for new RecipesBase.jl and CodecZlib.jl releases.

@@ -134,7 +134,7 @@ close(io)
             return n_chains
         end == [5, 1]
 
-        # Test retrievepdb and readpdb
+        # Test retrievepdb
         struc = retrievepdb("1AKE", dir=dir, structure_name="New name")
         @test structurename(struc) == "New name"
         @test countatoms(struc) == 3804
@@ -149,16 +149,6 @@ close(io)
         @test countresidues(struc) == 0
         @test countchains(struc) == 0
         @test countmodels(struc) == 0
-
-        struc = readpdb("1AKE", dir=dir, read_std_atoms=false)
-        @test countatoms(struc) == 492
-        @test serial(collectatoms(struc)[400]) == 3726
-        @test sum(ishetero, collectatoms(struc)) == 492
-
-        struc = readpdb("1AKE", dir=dir, ba_number=1, remove_disorder=true)
-        @test countatoms(struc) == 1954
-        @test sum(isdisorderedatom, collectatoms(struc)) == 0
-        @test tempfactor(struc['A'][167]["NE"]) == 23.32
 
         # Delete temporary directory
         rm(dir, recursive=true, force=true)
