@@ -31,7 +31,7 @@ struc_nmr = read(&quot;1SSU.pdb&quot;, PDB)
 rmsd(struc_nmr[5], struc_nmr[10], superimpose=false, rmsdatoms=heavyatomselector)
 displacements(struc_nmr[5], struc_nmr[10], superimpose=false, rmsdatoms=heavyatomselector)</code></pre><p><strong>F)</strong> Calculate the cysteine fraction of every structure in the PDB:</p><pre><code class="language-julia">l = pdbentrylist()
 for p in l
-    downloadpdb(p, file_format=MMCIF) do fp
+    downloadpdb(p, format=MMCIF) do fp
         s = read(fp, MMCIF)
         nres = countresidues(s, standardselector)
         if nres &gt; 0
