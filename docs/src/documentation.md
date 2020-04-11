@@ -605,3 +605,12 @@ viewstruc(struc['A'], surface=Surface(Dict("colorscheme"=> "greenCarbon")))
 
 Here they are shown as static images but they are interactive when using Bio3DView.jl.
 See the [Bio3DView.jl tutorial](http://nbviewer.jupyter.org/github/jgreener64/Bio3DView.jl/blob/master/examples/tutorial.ipynb) for more information.
+
+## Related software
+
+Other packages in the Julia ecosystem that deal with structural bioinformatics or related fields include:
+- [MIToS.jl](https://github.com/diegozea/MIToS.jl) - protein sequence and structure analysis.
+- [Bio3DView.jl](https://github.com/jgreener64/Bio3DView.jl) - view molecular structures (see [Visualising structures](#Visualising-structures-1)).
+- [MMTF.jl](https://github.com/BioJulia/MMTF.jl) - read and write MMTF files. BioStructures.jl builds on top of MMTF.jl.
+- [ProteinEnsembles.jl](https://github.com/jgreener64/ProteinEnsembles.jl) - modelling ensembles of protein structures.
+- [Molly.jl](https://github.com/jgreener64/Molly.jl) - proof of concept molecular dynamics.
