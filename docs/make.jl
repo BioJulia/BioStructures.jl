@@ -7,6 +7,7 @@ makedocs(
         "Home"         => "index.md",
         "Documentation"=> "documentation.md",
         "Examples"     => "examples.md",
+        "API"          => "api.md",
     ],
     authors = "Joe G Greener, The BioJulia Organisation and other contributors."
 )
