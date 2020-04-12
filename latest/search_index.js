@@ -157,7 +157,15 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.BioStructures",
     "category": "module",
-    "text": "Read, write and manipulate macromolecular structures\n\n\n\n\n\n"
+    "text": "Read, write and manipulate macromolecular structures.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#BioSequences.AminoAcidSequence-Tuple{Union{StructuralElement, Array{Chain,1}, Array{Model,1}, Array{#s19,1} where #s19<:AbstractAtom},Vararg{Function,N} where N}",
+    "page": "API",
+    "title": "BioSequences.AminoAcidSequence",
+    "category": "method",
+    "text": "AminoAcidSequence(el)\n\nReturn the amino acid sequence of a protein.\n\nAdditional arguments are residue selector functions - only residues that return true from all the functions are retained. The gaps keyword argument determines whether to add gaps to the sequence based on missing residue numbers (default true). See BioSequences.jl for more on how to use sequences.\n\n\n\n\n\n"
 },
 
 {
@@ -333,7 +341,23 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.Transformation",
     "category": "type",
-    "text": "Transformation(el1, el2, residue_selectors...)\nTransformation(coords1, coords2)\nTransformation(trans1, trans2, rot)\n\nA 3D transformation to map one set of coordinates onto another. Found using the Kabsch algorithm. When called with structural elements, carries out a pairwise alignment and superimposes on atoms from aligned residues. In this case, keyword arguments for pairwise alignment can be given, see pairalign. The residue selectors determine which residues to do the pairwise alignment on. The keyword argument alignatoms is an atom selector that selects the atoms to calculate the superimposition on (default calphaselector). Can also be called with two sets of coordinates of the same size, with the number of dimensions in the first axis and the number of points in the second axis.\n\nThe returned Transformation object consists of the mean coordinates of the first set, the mean coordinates of the second set, the rotation to map the first centred set onto the second centred set, and the indices of the aligned residues in the first and second elements if relevant.\n\n\n\n\n\n"
+    "text": "Transformation(el1, el2, residue_selectors...)\nTransformation(coords1, coords2)\nTransformation(trans1, trans2, rot)\n\nA 3D transformation to map one set of coordinates onto another, found using the Kabsch algorithm.\n\nWhen called with structural elements, carries out a pairwise alignment and superimposes on atoms from aligned residues. In this case, keyword arguments for pairwise alignment can be given, see pairalign. The residue selectors determine which residues to do the pairwise alignment on. The keyword argument alignatoms is an atom selector that selects the atoms to calculate the superimposition on (default calphaselector). Can also be called with two sets of coordinates of the same size, with the number of dimensions in the first axis and the number of points in the second axis.\n\nThe returned Transformation object consists of the mean coordinates of the first set, the mean coordinates of the second set, the rotation to map the first centred set onto the second centred set, and the indices of the aligned residues in the first and second elements if relevant.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#DataFrames.DataFrame-Tuple{Array{#s18,1} where #s18<:AbstractAtom,Vararg{Function,N} where N}",
+    "page": "API",
+    "title": "DataFrames.DataFrame",
+    "category": "method",
+    "text": "DataFrame(atom_list, atom_selectors...)\nDataFrame(residue_list, residue_selectors...)\n\nConstruct a DataFrame from a list of atoms or residues.\n\nAdditional arguments are selector functions - only atoms or residues that return true from all the functions are retained. The keyword argument expand_disordered (default true) determines whether to return all copies of disordered atoms or residues separately. See DataFrames.jl for more on how to use DataFrames.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#MetaGraphs.MetaGraph-Tuple{Union{StructuralElement, Array{Chain,1}, Array{Model,1}, Array{#s23,1} where #s23<:AbstractResidue, Array{#s22,1} where #s22<:AbstractAtom},Real}",
+    "page": "API",
+    "title": "MetaGraphs.MetaGraph",
+    "category": "method",
+    "text": "MetaGraph(element, contact_distance)\n\nConstruct a graph of atoms where edges are contacts.\n\nSee LightGraphs.jl and MetaGraphs.jl for more on how to use graphs.\n\n\n\n\n\n"
 },
 
 {
@@ -382,6 +406,14 @@ var documenterSearchIndex = {"docs": [
     "title": "BioStructures.waterresnames",
     "category": "constant",
     "text": "Set of residue names corresponding to water.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#BioAlignments.pairalign-Tuple{Union{StructuralElement, Array{Chain,1}, Array{Model,1}, Array{#s23,1} where #s23<:AbstractResidue, Array{#s22,1} where #s22<:AbstractAtom},Union{StructuralElement, Array{Chain,1}, Array{Model,1}, Array{#s23,1} where #s23<:AbstractResidue, Array{#s22,1} where #s22<:AbstractAtom},Vararg{Function,N} where N}",
+    "page": "API",
+    "title": "BioAlignments.pairalign",
+    "category": "method",
+    "text": "pairalign(el1, el2, residue_selectors...)\n\nCarries out a pairwise sequence alignment between the sequences of two structural elements.\n\nAdditional arguments are residue selector functions - only residues that return true from all the functions are retained. The keyword arguments scoremodel (default AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1)) and aligntype (default GlobalAlignment()) determine the properties of the alignment.\n\n\n\n\n\n"
 },
 
 {
@@ -473,7 +505,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api.html#BioStructures.atomnameselector-Tuple{AbstractAtom,Set{String}}",
+    "location": "api.html#BioStructures.atomnameselector-Tuple{AbstractAtom,Union{Set{String}, Array{String,1}}}",
     "page": "API",
     "title": "BioStructures.atomnameselector",
     "category": "method",
@@ -565,7 +597,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.choosedefaultaltlocid",
     "category": "method",
-    "text": "choosedefaultaltlocid(at_one, at_two)\n\nDetermine which of two Atoms representing a disorered atom better qualifies as the default location. The Atom with the highest occupancy is chosen; in the case of ties the Atom with the lowest alternative location ID in alphabetical order is chosen.\n\n\n\n\n\n"
+    "text": "choosedefaultaltlocid(at_one, at_two)\n\nDetermine which of two Atoms representing a disorered atom better qualifies as the default location.\n\nThe Atom with the highest occupancy is chosen; in the case of ties the Atom with the lowest alternative location ID in alphabetical order is chosen.\n\n\n\n\n\n"
 },
 
 {
@@ -573,7 +605,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.collectatoms",
     "category": "method",
-    "text": "collectatoms(el)\n\nReturns a Vector of the atoms in a StructuralElementOrList. Additional arguments are atom selector functions - only atoms that return true from all the functions are retained. The keyword argument expand_disordered (default false) determines whether to return all copies of disordered atoms separately.\n\n\n\n\n\n"
+    "text": "collectatoms(el)\n\nReturns a Vector of the atoms in a StructuralElementOrList.\n\nAdditional arguments are atom selector functions - only atoms that return true from all the functions are retained. The keyword argument expand_disordered (default false) determines whether to return all copies of disordered atoms separately.\n\n\n\n\n\n"
 },
 
 {
@@ -581,7 +613,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.collectchains",
     "category": "method",
-    "text": "collectchains(el)\n\nReturns a Vector of the chains in a StructuralElementOrList. Additional arguments are chain selector functions - only chains that return true from all the functions are retained.\n\n\n\n\n\n"
+    "text": "collectchains(el)\n\nReturns a Vector of the chains in a StructuralElementOrList.\n\nAdditional arguments are chain selector functions - only chains that return true from all the functions are retained.\n\n\n\n\n\n"
 },
 
 {
@@ -589,7 +621,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.collectmodels",
     "category": "method",
-    "text": "collectmodels(el)\n\nReturns a Vector of the models in a StructuralElementOrList. Additional arguments are model selector functions - only models that return true from all the functions are retained.\n\n\n\n\n\n"
+    "text": "collectmodels(el)\n\nReturns a Vector of the models in a StructuralElementOrList.\n\nAdditional arguments are model selector functions - only models that return true from all the functions are retained.\n\n\n\n\n\n"
 },
 
 {
@@ -597,7 +629,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.collectresidues",
     "category": "method",
-    "text": "collectresidues(el)\n\nReturns a Vector of the residues in a StructuralElementOrList. Additional arguments are residue selector functions - only residues that return true from all the functions are retained. The keyword argument expand_disordered (default false) determines whether to return all copies of disordered residues separately.\n\n\n\n\n\n"
+    "text": "collectresidues(el)\n\nReturns a Vector of the residues in a StructuralElementOrList.\n\nAdditional arguments are residue selector functions - only residues that return true from all the functions are retained. The keyword argument expand_disordered (default false) determines whether to return all copies of disordered residues separately.\n\n\n\n\n\n"
 },
 
 {
@@ -605,7 +637,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.coordarray",
     "category": "method",
-    "text": "coordarray(element, atom_selectors...)\n\nGet the atomic coordinates in Å of a StructuralElementOrList as a 2D Array with each column corresponding to one atom.\n\nAdditional arguments are atom selector functions - only atoms that return true from all the functions are retained. The keyword argument expand_disordered (default false) determines whether to return coordinates for all copies of disordered atoms separately.\n\n\n\n\n\n"
+    "text": "coordarray(element, atom_selectors...)\n\nGet the atomic coordinates in Å of a StructuralElementOrList as a 2D Array.\n\nEach column corresponds to one atom, so the size is (3, natoms). Additional arguments are atom selector functions - only atoms that return true from all the functions are retained. The keyword argument `expanddisordered(defaultfalse`) determines whether to return coordinates for all copies of disordered atoms separately.\n\n\n\n\n\n"
 },
 
 {
@@ -613,7 +645,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.coords!",
     "category": "method",
-    "text": "coords!(at, new_coords)\n\nSet the coordinates of an AbstractAtom to a Vector of 3 numbers. For DisorderedAtoms only the default atom is updated.\n\n\n\n\n\n"
+    "text": "coords!(at, new_coords)\n\nSet the coordinates of an AbstractAtom to a Vector of 3 numbers.\n\nFor DisorderedAtoms only the default atom is updated.\n\n\n\n\n\n"
 },
 
 {
@@ -629,7 +661,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.countatoms",
     "category": "method",
-    "text": "countatoms(el)\n\nReturn the number of atoms in a StructuralElementOrList as an Int. Additional arguments are atom selector functions - only atoms that return true from all the functions are counted. The keyword argument expand_disordered (default false) determines whether to return all copies of disordered atoms separately.\n\n\n\n\n\n"
+    "text": "countatoms(el)\n\nReturn the number of atoms in a StructuralElementOrList as an Int.\n\nAdditional arguments are atom selector functions - only atoms that return true from all the functions are counted. The keyword argument expand_disordered (default false) determines whether to return all copies of disordered atoms separately.\n\n\n\n\n\n"
 },
 
 {
@@ -637,7 +669,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.countchains",
     "category": "method",
-    "text": "countchains(el)\n\nReturn the number of Chains in a StructuralElementOrList as an Int. Additional arguments are chain selector functions - only chains that return true from all the functions are counted.\n\n\n\n\n\n"
+    "text": "countchains(el)\n\nReturn the number of Chains in a StructuralElementOrList as an Int.\n\nAdditional arguments are chain selector functions - only chains that return true from all the functions are counted.\n\n\n\n\n\n"
 },
 
 {
@@ -645,7 +677,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.countmodels",
     "category": "method",
-    "text": "countmodels(el)\n\nReturn the number of Models in a StructuralElementOrList as an Int. Additional arguments are model selector functions - only models that return true from all the functions are counted.\n\n\n\n\n\n"
+    "text": "countmodels(el)\n\nReturn the number of Models in a StructuralElementOrList as an Int.\n\nAdditional arguments are model selector functions - only models that return true from all the functions are counted.\n\n\n\n\n\n"
 },
 
 {
@@ -653,7 +685,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.countresidues",
     "category": "method",
-    "text": "countresidues(el)\n\nReturn the number of residues in a StructuralElementOrList as an Int. Additional arguments are residue selector functions - only residues that return true from all the functions are counted. The keyword argument expand_disordered (default false) determines whether to return all copies of disordered residues separately.\n\n\n\n\n\n"
+    "text": "countresidues(el)\n\nReturn the number of residues in a StructuralElementOrList as an Int.\n\nAdditional arguments are residue selector functions - only residues that return true from all the functions are counted. The keyword argument expand_disordered (default false) determines whether to return all copies of disordered residues separately.\n\n\n\n\n\n"
 },
 
 {
@@ -661,7 +693,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.defaultaltlocid",
     "category": "method",
-    "text": "defaultaltlocid(dis_at)\n\nGet the alternative location ID of the default Atom in a DisorderedAtom as a Char. The default is the highest occupancy, or lowest character alternative location ID for ties (i.e. \'A\' beats \'B\').\n\n\n\n\n\n"
+    "text": "defaultaltlocid(dis_at)\n\nGet the alternative location ID of the default Atom in a DisorderedAtom as a Char.\n\nThe default is the highest occupancy, or lowest character alternative location ID for ties (i.e. \'A\' beats \'B\').\n\n\n\n\n\n"
 },
 
 {
@@ -669,7 +701,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.defaultatom",
     "category": "method",
-    "text": "defaultatom(dis_at)\n\nReturn the default Atom in a DisorderedAtom. The default is the highest occupancy, or lowest character alternative location ID for ties (i.e. \'A\' beats \'B\').\n\n\n\n\n\n"
+    "text": "defaultatom(dis_at)\n\nReturn the default Atom in a DisorderedAtom.\n\nThe default is the highest occupancy, or lowest character alternative location ID for ties (i.e. \'A\' beats \'B\').\n\n\n\n\n\n"
 },
 
 {
@@ -677,7 +709,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.defaultmodel",
     "category": "method",
-    "text": "defaultmodel(struc)\n\nGet the default Model in a ProteinStructure. This is the Model with the lowest model number.\n\n\n\n\n\n"
+    "text": "defaultmodel(struc)\n\nGet the default Model in a ProteinStructure.\n\nThis is the Model with the lowest model number.\n\n\n\n\n\n"
 },
 
 {
@@ -685,7 +717,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.defaultresidue",
     "category": "method",
-    "text": "defaultresidue(dis_res)\n\nReturn the default Residue in a DisorderedResidue. The default is the first name read in.\n\n\n\n\n\n"
+    "text": "defaultresidue(dis_res)\n\nReturn the default Residue in a DisorderedResidue.\n\nThe default is the first name read in.\n\n\n\n\n\n"
 },
 
 {
@@ -693,7 +725,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.defaultresname",
     "category": "method",
-    "text": "defaultresname(dis_res)\n\nGet the name of the default Residue in a DisorderedResidue as a String. The default is the first name read in.\n\n\n\n\n\n"
+    "text": "defaultresname(dis_res)\n\nGet the name of the default Residue in a DisorderedResidue as a String.\n\nThe default is the first name read in.\n\n\n\n\n\n"
 },
 
 {
@@ -757,7 +789,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.element",
     "category": "method",
-    "text": "element(at; strip=true)\n\nGet the element of an AbstractAtom as a String. The element is set to \"  \" if not specified during atom creation. strip determines whether surrounding whitespace is stripped.\n\n\n\n\n\n"
+    "text": "element(at; strip=true)\n\nGet the element of an AbstractAtom as a String.\n\nThe element is set to \"  \" if not specified during atom creation. strip determines whether surrounding whitespace is stripped.\n\n\n\n\n\n"
 },
 
 {
@@ -765,7 +797,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.generatechainid",
     "category": "method",
-    "text": "generatechainid(entity_id)\n\nConvert a positive Integer into a chain ID. Goes A to Z, then AA to ZA, AB to ZB etc. This is in line with PDB conventions.\n\n\n\n\n\n"
+    "text": "generatechainid(entity_id)\n\nConvert a positive Integer into a chain ID.\n\nGoes A to Z, then AA to ZA, AB to ZB etc. This is in line with Protein Data Bank (PDB) conventions.\n\n\n\n\n\n"
 },
 
 {
@@ -789,7 +821,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.hydrogenselector",
     "category": "method",
-    "text": "hydrogenselector(at)\n\nDetermines if an AbstractAtom represents hydrogen. Uses the element field where possible, otherwise uses the atom name.\n\n\n\n\n\n"
+    "text": "hydrogenselector(at)\n\nDetermines if an AbstractAtom represents hydrogen.\n\nUses the element field where possible, otherwise uses the atom name.\n\n\n\n\n\n"
 },
 
 {
@@ -869,7 +901,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.occupancy",
     "category": "method",
-    "text": "occupancy(at)\n\nGet the occupancy of an AbstractAtom as a Float64. The occupancy is set to 1.0 if not specified during atom creation.\n\n\n\n\n\n"
+    "text": "occupancy(at)\n\nGet the occupancy of an AbstractAtom as a Float64.\n\nThe occupancy is set to 1.0 if not specified during atom creation.\n\n\n\n\n\n"
 },
 
 {
@@ -973,7 +1005,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.resid",
     "category": "method",
-    "text": "resid(res; full=true)\n\nGet a descriptive residue ID String for an AbstractAtom or AbstractResidue. Format is residue number then insertion code with \"H\" in front for hetero residues. If full equals true the chain ID is also added after a colon. Examples are \"50A\", \"H20\" and \"10:A\".\n\n\n\n\n\n"
+    "text": "resid(res; full=true)\n\nGet a descriptive residue ID String for an AbstractAtom or AbstractResidue.\n\nFormat is residue number then insertion code with \"H\" in front for hetero residues. If full equals true the chain ID is also added after a colon. Examples are \"50A\", \"H20\" and \"10:A\".\n\n\n\n\n\n"
 },
 
 {
@@ -1005,7 +1037,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.resname",
     "category": "method",
-    "text": "resname(at; strip=true)\nresname(res; strip=true)\n\nGet the residue name of an AbstractAtom or AbstractResidue as a String. strip determines whether surrounding whitespace is stripped.\n\n\n\n\n\n"
+    "text": "resname(at; strip=true)\nresname(res; strip=true)\n\nGet the residue name of an AbstractAtom or AbstractResidue as a String.\n\nstrip determines whether surrounding whitespace is stripped.\n\n\n\n\n\n"
 },
 
 {
@@ -1013,11 +1045,11 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.resnames",
     "category": "method",
-    "text": "resnames(dis_res)\n\nGet the residue names in an AbstractResidue as a Vector{String}. For a DisorderedResidue there will be multiple residue names - in this case the default residue name is placed first, then the others are ordered alphabetically.\n\n\n\n\n\n"
+    "text": "resnames(dis_res)\n\nGet the residue names in an AbstractResidue as a Vector{String}.\n\nFor a DisorderedResidue there will be multiple residue names - in this case the default residue name is placed first, then the others are ordered alphabetically.\n\n\n\n\n\n"
 },
 
 {
-    "location": "api.html#BioStructures.resnameselector-Tuple{Union{AbstractAtom, AbstractResidue},Set{String}}",
+    "location": "api.html#BioStructures.resnameselector-Tuple{Union{AbstractAtom, AbstractResidue},Union{Set{String}, Array{String,1}}}",
     "page": "API",
     "title": "BioStructures.resnameselector",
     "category": "method",
@@ -1053,7 +1085,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.sequentialresidues",
     "category": "method",
-    "text": "sequentialresidues(res_first, res_second)\n\nDetermine if the second residue follows the first in sequence. For this to be true the residues need to have the same chain ID, both need to be standard/hetero residues and the residue number of the second needs to be one greater than that of the first (or the residue numbers the same and the insertion code of the second greater than the first).\n\n\n\n\n\n"
+    "text": "sequentialresidues(res_first, res_second)\n\nDetermine if the second residue follows the first in sequence.\n\nFor this to be true the residues need to have the same chain ID, both need to be standard/hetero residues and the residue number of the second needs to be one greater than that of the first (or the residue numbers the same and the insertion code of the second greater than the first).\n\n\n\n\n\n"
 },
 
 {
@@ -1069,7 +1101,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.showcontactmap",
     "category": "method",
-    "text": "showcontactmap(contact_map)\nshowcontactmap(io, contact_map)\n\nPrint a representation of a ContactMap to stdout, or a specified IO instance. A fully plotted version can be obtained with plot(contact_map) but that requires Plots.jl; showcontactmap works without that dependency.\n\n\n\n\n\n"
+    "text": "showcontactmap(contact_map)\nshowcontactmap(io, contact_map)\n\nPrint a representation of a ContactMap to stdout, or a specified IO instance.\n\nA fully plotted version can be obtained with plot(contact_map) but that requires Plots.jl; showcontactmap works without that dependency.\n\n\n\n\n\n"
 },
 
 {
@@ -1117,7 +1149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.superimpose!",
     "category": "method",
-    "text": "superimpose!(el1, el2, residue_selectors...)\n\nCalculate the Transformation that maps the first element onto the second, and modify all coordinates in the first element according to the transformation. See Transformation for keyword arguments.\n\n\n\n\n\n"
+    "text": "superimpose!(el1, el2, residue_selectors...)\n\nCalculate the Transformation that maps the first element onto the second, and modify all coordinates in the first element according to the transformation.\n\nSee Transformation for keyword arguments.\n\n\n\n\n\n"
 },
 
 {
@@ -1125,7 +1157,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.tempfactor",
     "category": "method",
-    "text": "tempfactor(at)\n\nGet the temperature factor of an AbstractAtom as a Float64. The temperature factor is set to 0.0 if not specified during atom creation.\n\n\n\n\n\n"
+    "text": "tempfactor(at)\n\nGet the temperature factor of an AbstractAtom as a Float64.\n\nThe temperature factor is set to 0.0 if not specified during atom creation.\n\n\n\n\n\n"
 },
 
 {
@@ -1165,7 +1197,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.x!",
     "category": "method",
-    "text": "x!(at, val)\n\nSet the x coordinate of an AbstractAtom to val. For DisorderedAtoms only the default atom is updated.\n\n\n\n\n\n"
+    "text": "x!(at, val)\n\nSet the x coordinate of an AbstractAtom to val.\n\nFor DisorderedAtoms only the default atom is updated.\n\n\n\n\n\n"
 },
 
 {
@@ -1181,7 +1213,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.y!",
     "category": "method",
-    "text": "y!(at, val)\n\nSet the y coordinate of an AbstractAtom to val. For DisorderedAtoms only the default atom is updated.\n\n\n\n\n\n"
+    "text": "y!(at, val)\n\nSet the y coordinate of an AbstractAtom to val.\n\nFor DisorderedAtoms only the default atom is updated.\n\n\n\n\n\n"
 },
 
 {
@@ -1197,7 +1229,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures.z!",
     "category": "method",
-    "text": "z!(at, val)\n\nSet the z coordinate of an AbstractAtom to val. For DisorderedAtoms only the default atom is updated.\n\n\n\n\n\n"
+    "text": "z!(at, val)\n\nSet the z coordinate of an AbstractAtom to val.\n\nFor DisorderedAtoms only the default atom is updated.\n\n\n\n\n\n"
 },
 
 {
