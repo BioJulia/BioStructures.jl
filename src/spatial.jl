@@ -28,8 +28,9 @@ export
     Transformation(coords1, coords2)
     Transformation(trans1, trans2, rot)
 
-A 3D transformation to map one set of coordinates onto another.
-Found using the Kabsch algorithm.
+A 3D transformation to map one set of coordinates onto another, found using the
+Kabsch algorithm.
+
 When called with structural elements, carries out a pairwise alignment and
 superimposes on atoms from aligned residues.
 In this case, keyword arguments for pairwise alignment can be given, see
@@ -67,9 +68,9 @@ Base.show(io::IO, trans::Transformation) = print("3D transformation with ",
 """
     coordarray(element, atom_selectors...)
 
-Get the atomic coordinates in Å of a `StructuralElementOrList` as a 2D
-`Array` with each column corresponding to one atom.
+Get the atomic coordinates in Å of a `StructuralElementOrList` as a 2D `Array`.
 
+Each column corresponds to one atom, so the size is (3, n_atoms).
 Additional arguments are atom selector functions - only atoms that return
 `true` from all the functions are retained.
 The keyword argument `expand_disordered` (default `false`) determines whether to
@@ -122,6 +123,7 @@ end
 
 Calculate the `Transformation` that maps the first element onto the second,
 and modify all coordinates in the first element according to the transformation.
+
 See `Transformation` for keyword arguments.
 """
 function superimpose!(el1::StructuralElementOrList,
@@ -811,6 +813,7 @@ end
 
 Print a representation of a `ContactMap` to `stdout`, or a specified `IO`
 instance.
+
 A fully plotted version can be obtained with `plot(contact_map)` but that
 requires Plots.jl; `showcontactmap` works without that dependency.
 """

@@ -397,6 +397,7 @@ x(dis_at::DisorderedAtom) = x(defaultatom(dis_at))
     x!(at, val)
 
 Set the x coordinate of an `AbstractAtom` to `val`.
+
 For `DisorderedAtom`s only the default atom is updated.
 """
 x!(at::Atom, x::Real) = (at.coords[1] = x; at)
@@ -414,6 +415,7 @@ y(dis_at::DisorderedAtom) = y(defaultatom(dis_at))
     y!(at, val)
 
 Set the y coordinate of an `AbstractAtom` to `val`.
+
 For `DisorderedAtom`s only the default atom is updated.
 """
 y!(at::Atom, y::Real) = (at.coords[2] = y; at)
@@ -431,6 +433,7 @@ z(dis_at::DisorderedAtom) = z(defaultatom(dis_at))
     z!(at, val)
 
 Set the z coordinate of an `AbstractAtom` to `val`.
+
 For `DisorderedAtom`s only the default atom is updated.
 """
 z!(at::Atom, z::Real) = (at.coords[3] = z; at)
@@ -448,6 +451,7 @@ coords(dis_at::DisorderedAtom) = coords(defaultatom(dis_at))
     coords!(at, new_coords)
 
 Set the coordinates of an `AbstractAtom` to a `Vector` of 3 numbers.
+
 For `DisorderedAtom`s only the default atom is updated.
 """
 function coords!(at::Atom, new_coords::Vector{<:Real})
@@ -468,6 +472,7 @@ end
     occupancy(at)
 
 Get the occupancy of an `AbstractAtom` as a `Float64`.
+
 The occupancy is set to `1.0` if not specified during atom creation.
 """
 occupancy(at::Atom) = at.occupancy
@@ -477,6 +482,7 @@ occupancy(dis_at::DisorderedAtom) = occupancy(defaultatom(dis_at))
     tempfactor(at)
 
 Get the temperature factor of an `AbstractAtom` as a `Float64`.
+
 The temperature factor is set to `0.0` if not specified during atom creation.
 """
 tempfactor(at::Atom) = at.temp_factor
@@ -486,6 +492,7 @@ tempfactor(dis_at::DisorderedAtom) = tempfactor(defaultatom(dis_at))
     element(at; strip=true)
 
 Get the element of an `AbstractAtom` as a `String`.
+
 The element is set to `"  "` if not specified during atom creation.
 `strip` determines whether surrounding whitespace is stripped.
 """
@@ -551,6 +558,7 @@ isdisorderedatom(::DisorderedAtom) = true
 
 Get the alternative location ID of the default `Atom` in a `DisorderedAtom` as a
 `Char`.
+
 The default is the highest occupancy, or lowest character alternative location
 ID for ties (i.e. 'A' beats 'B').
 """
@@ -568,6 +576,7 @@ end
     defaultatom(dis_at)
 
 Return the default `Atom` in a `DisorderedAtom`.
+
 The default is the highest occupancy, or lowest character alternative location
 ID for ties (i.e. 'A' beats 'B').
 """
@@ -600,6 +609,7 @@ atomid(dis_at::DisorderedAtom) = atomid(defaultatom(dis_at))
     resname(res; strip=true)
 
 Get the residue name of an `AbstractAtom` or `AbstractResidue` as a `String`.
+
 `strip` determines whether surrounding whitespace is stripped.
 """
 function resname(res::Residue; strip::Bool=true)
@@ -641,6 +651,7 @@ inscode(dis_res::DisorderedResidue) = inscode(defaultresidue(dis_res))
 
 Get a descriptive residue ID `String` for an `AbstractAtom` or
 `AbstractResidue`.
+
 Format is residue number then insertion code with "H_" in front for hetero
 residues.
 If `full` equals `true` the chain ID is also added after a colon.
@@ -741,6 +752,7 @@ disorderedres(dis_res::DisorderedResidue, res_name::AbstractString) = dis_res.na
     defaultresname(dis_res)
 
 Get the name of the default `Residue` in a `DisorderedResidue` as a `String`.
+
 The default is the first name read in.
 """
 defaultresname(dis_res::DisorderedResidue) = dis_res.default
@@ -749,6 +761,7 @@ defaultresname(dis_res::DisorderedResidue) = dis_res.default
     defaultresidue(dis_res)
 
 Return the default `Residue` in a `DisorderedResidue`.
+
 The default is the first name read in.
 """
 defaultresidue(dis_res::DisorderedResidue) = dis_res.names[defaultresname(dis_res)]
@@ -757,6 +770,7 @@ defaultresidue(dis_res::DisorderedResidue) = dis_res.names[defaultresname(dis_re
     resnames(dis_res)
 
 Get the residue names in an `AbstractResidue` as a `Vector{String}`.
+
 For a `DisorderedResidue` there will be multiple residue names - in this case
 the default residue name is placed first, then the others are ordered
 alphabetically.
@@ -913,6 +927,7 @@ models(struc::ProteinStructure) = struc.models
     defaultmodel(struc)
 
 Get the default `Model` in a `ProteinStructure`.
+
 This is the `Model` with the lowest model number.
 """
 defaultmodel(struc::ProteinStructure) = first(sort(collect(values(models(struc)))))
@@ -981,6 +996,7 @@ end
     sequentialresidues(res_first, res_second)
 
 Determine if the second residue follows the first in sequence.
+
 For this to be `true` the residues need to have the same chain ID, both need to
 be standard/hetero residues and the residue number of the second needs to be one
 greater than that of the first (or the residue numbers the same and the
@@ -1101,6 +1117,7 @@ end
     collectmodels(el)
 
 Returns a `Vector` of the models in a `StructuralElementOrList`.
+
 Additional arguments are model selector functions - only models that return
 `true` from all the functions are retained.
 """
@@ -1133,6 +1150,7 @@ end
     countmodels(el)
 
 Return the number of `Model`s in a `StructuralElementOrList` as an `Int`.
+
 Additional arguments are model selector functions - only models that return
 `true` from all the functions are counted.
 """
@@ -1146,6 +1164,7 @@ countmodels(struc::ProteinStructure) = length(struc)
     collectchains(el)
 
 Returns a `Vector` of the chains in a `StructuralElementOrList`.
+
 Additional arguments are chain selector functions - only chains that return
 `true` from all the functions are retained.
 """
@@ -1193,6 +1212,7 @@ end
     countchains(el)
 
 Return the number of `Chain`s in a `StructuralElementOrList` as an `Int`.
+
 Additional arguments are chain selector functions - only chains that return
 `true` from all the functions are counted.
 """
@@ -1206,6 +1226,7 @@ countchains(mod::Model) = length(mod)
     collectresidues(el)
 
 Returns a `Vector` of the residues in a `StructuralElementOrList`.
+
 Additional arguments are residue selector functions - only residues that
 return `true` from all the functions are retained.
 The keyword argument `expand_disordered` (default `false`) determines whether to
@@ -1282,6 +1303,7 @@ end
     countresidues(el)
 
 Return the number of residues in a `StructuralElementOrList` as an `Int`.
+
 Additional arguments are residue selector functions - only residues that
 return `true` from all the functions are counted.
 The keyword argument `expand_disordered` (default `false`) determines whether to
@@ -1298,6 +1320,7 @@ end
     collectatoms(el)
 
 Returns a `Vector` of the atoms in a `StructuralElementOrList`.
+
 Additional arguments are atom selector functions - only atoms that return
 `true` from all the functions are retained.
 The keyword argument `expand_disordered` (default `false`) determines whether to
@@ -1371,6 +1394,7 @@ end
     countatoms(el)
 
 Return the number of atoms in a `StructuralElementOrList` as an `Int`.
+
 Additional arguments are atom selector functions - only atoms that return
 `true` from all the functions are counted.
 The keyword argument `expand_disordered` (default `false`) determines whether to
@@ -1516,6 +1540,7 @@ fullatomname(dis_at::DisorderedAtom) = defaultatom(dis_at).name
 
 Determine which of two `Atom`s representing a disorered atom better
 qualifies as the default location.
+
 The `Atom` with the highest occupancy is chosen; in the case of ties the
 `Atom` with the lowest alternative location ID in alphabetical order is
 chosen.
@@ -1684,6 +1709,7 @@ disorderselector(res::AbstractResidue) = isdisorderedres(res)
     hydrogenselector(at)
 
 Determines if an `AbstractAtom` represents hydrogen.
+
 Uses the element field where possible, otherwise uses the atom name.
 """
 function hydrogenselector(at::AbstractAtom)

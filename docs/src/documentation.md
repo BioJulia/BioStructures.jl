@@ -152,21 +152,21 @@ For example:
 
 The selectors available are:
 
-| Function                  | Acts on                             | Selects for                                         |
-| :------------------------ | :---------------------------------- | :-------------------------------------------------- |
-| [standardselector](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from standard (ATOM) records |
-| [heteroselector](@ref)    | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from hetero (HETATM) records |
-| [atomnameselector](@ref)  | `AbstractAtom`                      | Atoms with atom name in a given list                |
-| [calphaselector](@ref)    | `AbstractAtom`                      | Cα atoms                                            |
-| [cbetaselector](@ref)     | `AbstractAtom`                      | Cβ atoms, or Cα atoms for glycine residues          |
-| [backboneselector](@ref)  | `AbstractAtom`                      | Atoms in the protein backbone (CA, N, C and O)      |
-| [heavyatomselector](@ref) | `AbstractAtom`                      | Non-hydrogen atoms                                  |
-| [hydrogenselector](@ref)  | `AbstractAtom`                      | Hydrogen atoms                                      |
-| [resnameselector](@ref)   | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name in a given list    |
-| [waterselector](@ref)     | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name HOH                |
-| [notwaterselector](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name not HOH            |
-| [disorderselector](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with alternative locations           |
-| [allselector](@ref)       | `AbstractAtom` or `AbstractResidue` | All atoms/residues                                  |
+| Function                    | Acts on                             | Selects for                                         |
+| :-------------------------- | :---------------------------------- | :-------------------------------------------------- |
+| [`standardselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from standard (ATOM) records |
+| [`heteroselector`](@ref)    | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from hetero (HETATM) records |
+| [`atomnameselector`](@ref)  | `AbstractAtom`                      | Atoms with atom name in a given list                |
+| [`calphaselector`](@ref)    | `AbstractAtom`                      | Cα atoms                                            |
+| [`cbetaselector`](@ref)     | `AbstractAtom`                      | Cβ atoms, or Cα atoms for glycine residues          |
+| [`backboneselector`](@ref)  | `AbstractAtom`                      | Atoms in the protein backbone (CA, N, C and O)      |
+| [`heavyatomselector`](@ref) | `AbstractAtom`                      | Non-hydrogen atoms                                  |
+| [`hydrogenselector`](@ref)  | `AbstractAtom`                      | Hydrogen atoms                                      |
+| [`resnameselector`](@ref)   | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name in a given list    |
+| [`waterselector`](@ref)     | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name HOH                |
+| [`notwaterselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name not HOH            |
+| [`disorderselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with alternative locations           |
+| [`allselector`](@ref)       | `AbstractAtom` or `AbstractResidue` | All atoms/residues                                  |
 
 To create a new [`atomnameselector`](@ref) or [`resnameselector`](@ref):
 ```julia

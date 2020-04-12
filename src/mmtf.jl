@@ -169,8 +169,9 @@ end
     generatechainid(entity_id)
 
 Convert a positive `Integer` into a chain ID.
+
 Goes A to Z, then AA to ZA, AB to ZB etc.
-This is in line with PDB conventions.
+This is in line with Protein Data Bank (PDB) conventions.
 """
 function generatechainid(entity_id::Integer)
     entity_id > 0 || throw(ArgumentError("Entity ID $entity_id is not positive"))
