@@ -173,8 +173,8 @@ function pdbobsoletelist()
 end
 
 """
-    downloadpdb(pdbid::AbstractString; kwargs...)
-    downloadpdb(pdbid::Array{<:AbstractString, 1}; kwargs...)
+    downloadpdb(pdbid::AbstractString; <keyword arguments>)
+    downloadpdb(pdbid::Array{<:AbstractString, 1}; <keyword arguments>)
     downloadpdb(f::Function, args...)
 
 Download files from the Protein Data Bank (PDB) via RCSB.
@@ -303,7 +303,7 @@ function downloadpdb(f::Function, args...; kwargs...)
 end
 
 """
-    downloadentirepdb(; kwargs...)
+    downloadentirepdb(; <keyword arguments>)
 
 Download the entire Protein Data Bank (PDB) from the RCSB server.
 
@@ -366,7 +366,7 @@ function updatelocalpdb(; dir::AbstractString=pwd(),
 end
 
 """
-    downloadallobsoletepdb(; kwargs...)
+    downloadallobsoletepdb(; <keyword arguments>)
 
 Download all obsolete Protein Data Bank (PDB) files from the RCSB server.
 
@@ -389,7 +389,7 @@ function downloadallobsoletepdb(; obsolete_dir::AbstractString=pwd(),
 end
 
 """
-    retrievepdb(pdbid::AbstractString; kwargs...)
+    retrievepdb(pdbid::AbstractString; <keyword arguments>)
 
 Download and read a Protein Data Bank (PDB) file or biological assembly from the
 RCSB server, returning a `ProteinStructure`.

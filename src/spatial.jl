@@ -655,17 +655,21 @@ Calculate the contact map for a `StructuralElementOrList`, or between two
 This returns a `ContactMap` type containing a `BitArray{2}` with `true` where
 the sub-elements are no further than the contact distance and `false` otherwise.
 When one element is given as input this returns a symmetric square matrix.
+To directly access the underlying data of `ContactMap` `cm`, use `cm.data`.
 
 # Examples
 ```julia
 cbetas_A = collectatoms(struc["A"], cbetaselector)
 cbetas_B = collectatoms(struc["B"], cbetaselector)
 
-# Contact map of chain A using standard C-beta and 8.0 Å definitions
-ContactMap(cbetas_A, 8.0)
+# Contact map of chain A using conventional Cβ and 8 Å definitions
+cm = ContactMap(cbetas_A, 8.0)
+
+# Returns true if a contact is present between the tenth and twentieth element
+cm[10, 20]
 
 # Rectangular contact map of chains A and B
-ContactMap(cbetas_A, cbetas_B, 8.0)
+cm = ContactMap(cbetas_A, cbetas_B, 8.0)
 ```
 """
 struct ContactMap <: SpatialMap
@@ -683,17 +687,21 @@ Calculate the distance map for a `StructuralElementOrList`, or between two
 This returns a `DistanceMap` type containing a `Array{Float64, 2}` with minimum
 distances between the sub-elements.
 When one element is given as input this returns a symmetric square matrix.
+To directly access the underlying data of `DistanceMap` `dm`, use `dm.data`.
 
 # Examples
 ```julia
 cbetas_A = collectatoms(struc["A"], cbetaselector)
 cbetas_B = collectatoms(struc["B"], cbetaselector)
 
-# Distance map of chain A showing how far each residue is from the others
-DistanceMap(cbetas_A)
+# Distance map of chain A showing how far each Cβ atom is from the others
+dm = DistanceMap(cbetas_A)
+
+# Returns the distance between the tenth and twentieth element
+dm[10, 20]
 
 # Rectangular distance map of chains A and B
-DistanceMap(cbetas_A, cbetas_B)
+dm = DistanceMap(cbetas_A, cbetas_B)
 ```
 """
 struct DistanceMap <: SpatialMap
