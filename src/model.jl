@@ -1588,14 +1588,7 @@ Determines if an `AbstractAtom` has its atom name in the given `Set` or
 name before it is checked in the list.
 """
 function atomnameselector(at::AbstractAtom,
-                    atom_names::Set{String};
-                    strip::Bool=true)
-    return atomname(at, strip=strip) in atom_names
-end
-
-# Set is faster but Vector method is retained for ease of use
-function atomnameselector(at::AbstractAtom,
-                    atom_names::Vector{String};
+                    atom_names::Union{Set{String}, Vector{String}};
                     strip::Bool=true)
     return atomname(at, strip=strip) in atom_names
 end
@@ -1657,12 +1650,7 @@ Determines if an `AbstractResidue` or `AbstractAtom` has its residue name
 in the given `Set` or `Vector`.
 """
 function resnameselector(el::Union{AbstractResidue, AbstractAtom},
-                    res_names::Set{String})
-    return resname(el, strip=false) in res_names
-end
-
-function resnameselector(el::Union{AbstractResidue, AbstractAtom},
-                    res_names::Vector{String})
+                    res_names::Union{Set{String}, Vector{String}})
     return resname(el, strip=false) in res_names
 end
 
