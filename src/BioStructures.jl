@@ -8,8 +8,8 @@
 
 module BioStructures
 
-using LinearAlgebra: dot, cross, norm, svd
-using Statistics: mean
+using LinearAlgebra
+using Statistics
 
 using CodecZlib
 using Format
@@ -17,12 +17,11 @@ using RecipesBase
 using LightGraphs
 using MetaGraphs
 using DataFrames
-import BioCore
-import BioCore.distance
-import BioSymbols
-import BioSequences.AminoAcidSequence
+using BioCore
+using BioSymbols
+using BioSequences
 using BioAlignments
-import MMTF: parsemmtf, writemmtf
+import MMTF: parsemmtf, writemmtf # Imported to avoid clash with MMTF name
 
 include("model.jl")
 include("pdb.jl")

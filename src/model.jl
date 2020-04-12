@@ -1705,24 +1705,24 @@ Use it to select all atoms or residues.
 allselector(at::AbstractAtom) = true
 allselector(res::AbstractResidue) = true
 
-function AminoAcidSequence(el::Union{StructuralElement, Vector{Model},
+function BioSequences.AminoAcidSequence(el::Union{StructuralElement, Vector{Model},
                                     Vector{Chain}, Vector{<:AbstractAtom}},
                         residue_selectors::Function...;
                         gaps::Bool=true)
     return AminoAcidSequence(collectresidues(el, residue_selectors...); gaps=gaps)
 end
 
-function AminoAcidSequence(res::Vector{<:AbstractResidue}; gaps::Bool=true)
-    seq = BioSymbols.AminoAcid[]
+function BioSequences.AminoAcidSequence(res::Vector{<:AbstractResidue}; gaps::Bool=true)
+    seq = AminoAcid[]
     for i in 1:length(res)
         if haskey(BioSymbols.threeletter_to_aa, resname(res[i], strip=false))
             push!(seq, BioSymbols.threeletter_to_aa[resname(res[i], strip=false)])
         else
-            push!(seq, BioSymbols.AA_X)
+            push!(seq, AA_X)
         end
         # Add gaps based on missing residue numbers
         if gaps && i + 1 <= length(res) && resnumber(res[i + 1]) - resnumber(res[i]) > 1 && chainid(res[i]) == chainid(res[i + 1])
-            append!(seq, [BioSymbols.AA_Gap for _ in 1:(resnumber(res[i + 1]) - resnumber(res[i]) - 1)])
+            append!(seq, [AA_Gap for _ in 1:(resnumber(res[i + 1]) - resnumber(res[i]) - 1)])
         end
     end
     return AminoAcidSequence(seq)

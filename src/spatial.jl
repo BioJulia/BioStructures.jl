@@ -155,13 +155,13 @@ function Transformation(el1::StructuralElementOrList,
         counter2 = first_anchor.refpos
         # Obtain indices of residues used in alignment
         for (v1, v2) in al
-            if v1 != BioSymbols.AA_Gap
+            if v1 != AA_Gap
                 counter1 += 1
             end
-            if v2 != BioSymbols.AA_Gap
+            if v2 != AA_Gap
                 counter2 += 1
             end
-            if v1 != BioSymbols.AA_Gap && v2 != BioSymbols.AA_Gap
+            if v1 != AA_Gap && v2 != AA_Gap
                 push!(inds1, counter1)
                 push!(inds2, counter2)
             end
@@ -328,13 +328,13 @@ Get the minimum distance in Å between two `StructuralElementOrList`s.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
-function distance(el1::StructuralElementOrList,
+function BioCore.distance(el1::StructuralElementOrList,
                       el2::StructuralElementOrList,
                       atom_selectors::Function...)
     return sqrt(sqdistance(el1, el2, atom_selectors...))
 end
 
-function distance(at_one::AbstractAtom, at_two::AbstractAtom)
+function BioCore.distance(at_one::AbstractAtom, at_two::AbstractAtom)
     return sqrt(sqdistance(at_one, at_two))
 end
 
