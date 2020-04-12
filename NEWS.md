@@ -5,7 +5,7 @@ BioStructures.jl release notes
 
 * Change keyword argument names `pdb_dir` to `dir` and `file_format` to `format` for `downloadpdb`, `downloadentirepdb`, `updatelocalpdb`, `downloadallobsoletepdb` and `retrievepdb`.
 * Remove `readpdb`, which has the same functionality as `read`.
-* API reference section, links to related software and interactive Bio3DView.jl examples in documentation.
+* API reference section, more docstrings, links to related software and interactive Bio3DView.jl examples in documentation.
 
 ## v0.9.4 - Apr 2020
 
