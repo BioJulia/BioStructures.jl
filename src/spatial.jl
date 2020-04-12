@@ -842,7 +842,13 @@ end
 
 showcontactmap(cm::ContactMap) = showcontactmap(stdout, cm)
 
-# Construct a graph of atoms where edges are contacts
+"""
+    MetaGraph(element, contact_distance)
+
+Construct a graph of atoms where edges are contacts.
+
+See LightGraphs.jl and MetaGraphs.jl for more on how to use graphs.
+"""
 function MetaGraphs.MetaGraph(el::StructuralElementOrList, contact_dist::Real)
     sq_contact_dist = contact_dist ^ 2
     el_list = collect(el)

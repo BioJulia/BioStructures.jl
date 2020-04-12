@@ -133,7 +133,7 @@ For example `first(struc[1])` gets the first chain in model 1.
 Since the ordering of elements is defined you can use the `sort` function.
 For example `sort(res)` sorts a list of residues as described above, or `sort(res, by=resname)` will sort them alphabetically by residue name.
 
-`collect` can be used to get arrays of sub-elements.
+[`collect`](@ref) can be used to get arrays of sub-elements.
 [`collectatoms`](@ref), [`collectresidues`](@ref), [`collectchains`](@ref) and [`collectmodels`](@ref) return arrays of a particular type from a structural element or element array.
 Since most operations should use a single version of an atom or residue, disordered entities are not expanded by default and only one entity is present in the array.
 This can be changed by setting `expand_disordered` to `true` in [`collectatoms`](@ref) or [`collectresidues`](@ref).

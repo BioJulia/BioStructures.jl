@@ -6,7 +6,7 @@
 # This file is a part of BioJulia.
 # License is MIT: https://github.com/BioJulia/BioStructures.jl/blob/master/LICENSE.md
 
-"Read, write and manipulate macromolecular structures"
+"Read, write and manipulate macromolecular structures."
 module BioStructures
 
 using LinearAlgebra

@@ -1077,6 +1077,12 @@ function Base.iterate(dis_at::DisorderedAtom, state=1)
 end
 
 # Collection methods defined separately to iteration for speed
+"""
+    collect(el)
+
+Returns a `Vector` of the sub-elements in a `StructuralElementOrList`, e.g.
+`AbstractAtom`s in a `Residue` or `AbstractResidue`s in a `Chain`.
+"""
 Base.collect(struc::ProteinStructure) = [struc[mn] for mn in modelnumbers(struc)]
 Base.collect(mod::Model) = [mod[cn] for cn in chainids(mod)]
 Base.collect(ch::Chain) = AbstractResidue[ch[rn] for rn in resids(ch)]
@@ -1719,6 +1725,17 @@ Use it to select all atoms or residues.
 allselector(at::AbstractAtom) = true
 allselector(res::AbstractResidue) = true
 
+"""
+    AminoAcidSequence(el)
+
+Return the amino acid sequence of a protein.
+
+Additional arguments are residue selector functions - only residues that
+return `true` from all the functions are retained.
+The `gaps` keyword argument determines whether to add gaps to the sequence
+based on missing residue numbers (default `true`).
+See BioSequences.jl for more on how to use sequences.
+"""
 function BioSequences.AminoAcidSequence(el::Union{StructuralElement, Vector{Model},
                                     Vector{Chain}, Vector{<:AbstractAtom}},
                         residue_selectors::Function...;
@@ -1742,6 +1759,18 @@ function BioSequences.AminoAcidSequence(res::Vector{<:AbstractResidue}; gaps::Bo
     return AminoAcidSequence(seq)
 end
 
+"""
+    pairalign(el1, el2, residue_selectors...)
+
+Carries out a pairwise sequence alignment between the sequences of two
+structural elements.
+
+Additional arguments are residue selector functions - only residues that return
+`true` from all the functions are retained.
+The keyword arguments `scoremodel` (default
+`AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1)`) and `aligntype`
+(default `GlobalAlignment()`) determine the properties of the alignment.
+"""
 function BioAlignments.pairalign(el1::StructuralElementOrList,
                             el2::StructuralElementOrList,
                             residue_selectors::Function...;
@@ -1753,6 +1782,18 @@ function BioAlignments.pairalign(el1::StructuralElementOrList,
 end
 
 # DataFrame constructors for interoperability
+"""
+    DataFrame(atom_list, atom_selectors...)
+    DataFrame(residue_list, residue_selectors...)
+
+Construct a `DataFrame` from a list of atoms or residues.
+
+Additional arguments are selector functions - only atoms or residues that return
+`true` from all the functions are retained.
+The keyword argument `expand_disordered` (default `true`) determines whether to
+return all copies of disordered atoms or residues separately.
+See DataFrames.jl for more on how to use `DataFrame`s.
+"""
 function DataFrames.DataFrame(ats::Vector{<:AbstractAtom},
                     atom_selectors::Function...;
                     expand_disordered::Bool=true)
