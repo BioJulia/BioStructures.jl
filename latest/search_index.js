@@ -125,7 +125,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Documentation",
     "title": "Related software",
     "category": "section",
-    "text": "Other packages in the Julia ecosystem that deal with structural bioinformatics or related fields include:MIToS.jl - protein sequence and structure analysis.\nBio3DView.jl - view molecular structures (see Visualising structures).\nMMTF.jl - read and write MMTF files. BioStructures.jl builds on top of MMTF.jl.\nProteinEnsembles.jl - modelling ensembles of protein structures.\nMolly.jl - proof of concept molecular dynamics."
+    "text": "Other packages in the Julia ecosystem that deal with structural bioinformatics or related fields include:MIToS.jl - protein sequence and structure analysis.\nBio3DView.jl - view molecular structures (see Visualising structures).\nMMTF.jl - read and write MMTF files. BioStructures.jl builds on top of MMTF.jl.\nProteinEnsembles.jl - model ensembles of protein structures.\nMolly.jl - proof of concept molecular dynamics."
 },
 
 {
@@ -150,54 +150,6 @@ var documenterSearchIndex = {"docs": [
     "title": "API",
     "category": "page",
     "text": ""
-},
-
-{
-    "location": "api.html#BioStructures.StructuralElementOrList",
-    "page": "API",
-    "title": "BioStructures.StructuralElementOrList",
-    "category": "constant",
-    "text": "A StructuralElement or Vector of StructuralElements up to a Vector{Model}.\n\n\n\n\n\n"
-},
-
-{
-    "location": "api.html#BioStructures.backboneatomnames",
-    "page": "API",
-    "title": "BioStructures.backboneatomnames",
-    "category": "constant",
-    "text": "Set of protein backbone atom names.\n\n\n\n\n\n"
-},
-
-{
-    "location": "api.html#BioStructures.calphaatomnames",
-    "page": "API",
-    "title": "BioStructures.calphaatomnames",
-    "category": "constant",
-    "text": "Set of Cα atom names.\n\n\n\n\n\n"
-},
-
-{
-    "location": "api.html#BioStructures.cbetaatomnames",
-    "page": "API",
-    "title": "BioStructures.cbetaatomnames",
-    "category": "constant",
-    "text": "Set of Cβ atom names.\n\n\n\n\n\n"
-},
-
-{
-    "location": "api.html#BioStructures.pdbextension",
-    "page": "API",
-    "title": "BioStructures.pdbextension",
-    "category": "constant",
-    "text": "Mapping of Protein Data Bank (PDB) formats to their file extensions.\n\n\n\n\n\n"
-},
-
-{
-    "location": "api.html#BioStructures.waterresnames",
-    "page": "API",
-    "title": "BioStructures.waterresnames",
-    "category": "constant",
-    "text": "Set of residue names corresponding to water.\n\n\n\n\n\n"
 },
 
 {
@@ -374,6 +326,54 @@ var documenterSearchIndex = {"docs": [
     "title": "BioStructures.Transformation",
     "category": "type",
     "text": "Transformation(el1, el2, residue_selectors...)\nTransformation(coords1, coords2)\nTransformation(trans1, trans2, rot)\n\nA 3D transformation to map one set of coordinates onto another. Found using the Kabsch algorithm. When called with structural elements, carries out a pairwise alignment and superimposes on atoms from aligned residues. In this case, keyword arguments for pairwise alignment can be given, see pairalign. The residue selectors determine which residues to do the pairwise alignment on. The keyword argument alignatoms is an atom selector that selects the atoms to calculate the superimposition on (default calphaselector). Can also be called with two sets of coordinates of the same size, with the number of dimensions in the first axis and the number of points in the second axis.\n\nThe returned Transformation object consists of the mean coordinates of the first set, the mean coordinates of the second set, the rotation to map the first centred set onto the second centred set, and the indices of the aligned residues in the first and second elements if relevant.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#BioStructures.StructuralElementOrList",
+    "page": "API",
+    "title": "BioStructures.StructuralElementOrList",
+    "category": "constant",
+    "text": "A StructuralElement or Vector of StructuralElements up to a Vector{Model}.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#BioStructures.backboneatomnames",
+    "page": "API",
+    "title": "BioStructures.backboneatomnames",
+    "category": "constant",
+    "text": "Set of protein backbone atom names.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#BioStructures.calphaatomnames",
+    "page": "API",
+    "title": "BioStructures.calphaatomnames",
+    "category": "constant",
+    "text": "Set of Cα atom names.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#BioStructures.cbetaatomnames",
+    "page": "API",
+    "title": "BioStructures.cbetaatomnames",
+    "category": "constant",
+    "text": "Set of Cβ atom names.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#BioStructures.pdbextension",
+    "page": "API",
+    "title": "BioStructures.pdbextension",
+    "category": "constant",
+    "text": "Mapping of Protein Data Bank (PDB) formats to their file extensions.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api.html#BioStructures.waterresnames",
+    "page": "API",
+    "title": "BioStructures.waterresnames",
+    "category": "constant",
+    "text": "Set of residue names corresponding to water.\n\n\n\n\n\n"
 },
 
 {
@@ -1213,7 +1213,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioStructures API",
     "category": "section",
-    "text": "Modules = [BioStructures]\nPrivate = false"
+    "text": "Modules = [BioStructures]\nPrivate = false\nOrder   = [:module, :type, :constant, :function, :macro]"
 },
 
 ]}
