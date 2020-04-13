@@ -1729,7 +1729,7 @@ allselector(res::AbstractResidue) = true
 """
     AminoAcidSequence(el)
 
-Return the amino acid sequence of a protein.
+Return the amino acid sequence of a structural element.
 
 Additional arguments are residue selector functions - only residues that
 return `true` from all the functions are retained.

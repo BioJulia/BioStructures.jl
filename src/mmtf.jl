@@ -86,7 +86,6 @@ function Base.show(io::IO, mmtf_dict::MMTFDict)
     print(io, "MMTF dictionary with $(length(keys(mmtf_dict))) fields")
 end
 
-
 function Base.read(input::IO,
             ::Type{MMTF};
             structure_name::AbstractString="",
@@ -164,7 +163,6 @@ function Base.read(input::IO,
     return struc
 end
 
-
 """
     generatechainid(entity_id)
 
@@ -184,7 +182,6 @@ function generatechainid(entity_id::Integer)
     end
     return out_string
 end
-
 
 """
     writemmtf(output, element, atom_selectors...)
