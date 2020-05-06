@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.10.1 - May 2020
+
+* Change compatibility bounds for new DataFrames.jl release.
+
 ## v0.10.0 - Apr 2020
 
 * Change keyword argument names `pdb_dir` to `dir` and `file_format` to `format` for `downloadpdb`, `downloadentirepdb`, `updatelocalpdb`, `downloadallobsoletepdb` and `retrievepdb`.
