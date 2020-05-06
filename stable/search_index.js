@@ -125,7 +125,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Documentation",
     "title": "Related software",
     "category": "section",
-    "text": "Other packages in the Julia ecosystem that deal with structural bioinformatics or related fields include:MIToS.jl - protein sequence and structure analysis.\nBio3DView.jl - view molecular structures (see Visualising structures).\nMMTF.jl - read and write MMTF files. BioStructures.jl builds on top of MMTF.jl.\nProteinEnsembles.jl - model ensembles of protein structures.\nMolly.jl - proof of concept molecular dynamics."
+    "text": "Other packages in the Julia ecosystem that deal with structural bioinformatics or related fields include:MIToS.jl - protein sequence and structure analysis.\nPdbTool.jl - read and work with PDB files.\nBio3DView.jl - view molecular structures (see Visualising structures).\nMMTF.jl - read and write MMTF files. BioStructures.jl builds on top of MMTF.jl.\nProteinEnsembles.jl - model ensembles of protein structures.\nMolly.jl - proof of concept molecular dynamics."
 },
 
 {
@@ -165,7 +165,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "BioSequences.AminoAcidSequence",
     "category": "method",
-    "text": "AminoAcidSequence(el)\n\nReturn the amino acid sequence of a protein.\n\nAdditional arguments are residue selector functions - only residues that return true from all the functions are retained. The gaps keyword argument determines whether to add gaps to the sequence based on missing residue numbers (default true). See BioSequences.jl for more on how to use sequences.\n\n\n\n\n\n"
+    "text": "AminoAcidSequence(el)\n\nReturn the amino acid sequence of a structural element.\n\nAdditional arguments are residue selector functions - only residues that return true from all the functions are retained. The gaps keyword argument determines whether to add gaps to the sequence based on missing residue numbers (default true). See BioSequences.jl for more on how to use sequences.\n\n\n\n\n\n"
 },
 
 {
