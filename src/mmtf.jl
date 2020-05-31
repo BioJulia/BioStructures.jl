@@ -267,7 +267,7 @@ function writemmtf(output::Union{AbstractString, IO},
                 ))
             end
             if !ishetero(res)
-                sequence *= string(AminoAcidSequence(res; gaps=false))
+                sequence *= string(LongAminoAcidSeq(res; gaps=false))
             end
             group_count += 1
 

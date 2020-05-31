@@ -87,7 +87,8 @@ export
     disorderselector,
     hydrogenselector,
     allselector,
-    AminoAcidSequence,
+    LongAminoAcidSeq,
+    threeletter_to_aa,
     pairalign,
     DataFrame
 
@@ -1726,8 +1727,11 @@ Use it to select all atoms or residues.
 allselector(at::AbstractAtom) = true
 allselector(res::AbstractResidue) = true
 
+"Lookup table of amino acids, re-exported from BioSymbols."
+const threeletter_to_aa = BioSymbols.threeletter_to_aa
+
 """
-    AminoAcidSequence(el)
+    LongAminoAcidSeq(el)
 
 Return the amino acid sequence of a structural element.
 
@@ -1737,18 +1741,18 @@ The `gaps` keyword argument determines whether to add gaps to the sequence
 based on missing residue numbers (default `true`).
 See BioSequences.jl for more on how to use sequences.
 """
-function BioSequences.AminoAcidSequence(el::Union{StructuralElement, Vector{Model},
+function BioSequences.LongAminoAcidSeq(el::Union{StructuralElement, Vector{Model},
                                     Vector{Chain}, Vector{<:AbstractAtom}},
                         residue_selectors::Function...;
                         gaps::Bool=true)
-    return AminoAcidSequence(collectresidues(el, residue_selectors...); gaps=gaps)
+    return LongAminoAcidSeq(collectresidues(el, residue_selectors...); gaps=gaps)
 end
 
-function BioSequences.AminoAcidSequence(res::Vector{<:AbstractResidue}; gaps::Bool=true)
+function BioSequences.LongAminoAcidSeq(res::Vector{<:AbstractResidue}; gaps::Bool=true)
     seq = AminoAcid[]
     for i in 1:length(res)
-        if haskey(BioSymbols.threeletter_to_aa, resname(res[i], strip=false))
-            push!(seq, BioSymbols.threeletter_to_aa[resname(res[i], strip=false)])
+        if haskey(threeletter_to_aa, resname(res[i], strip=false))
+            push!(seq, threeletter_to_aa[resname(res[i], strip=false)])
         else
             push!(seq, AA_X)
         end
@@ -1757,7 +1761,7 @@ function BioSequences.AminoAcidSequence(res::Vector{<:AbstractResidue}; gaps::Bo
             append!(seq, [AA_Gap for _ in 1:(resnumber(res[i + 1]) - resnumber(res[i]) - 1)])
         end
     end
-    return AminoAcidSequence(seq)
+    return LongAminoAcidSeq(seq)
 end
 
 """
@@ -1771,14 +1775,15 @@ Additional arguments are residue selector functions - only residues that return
 The keyword arguments `scoremodel` (default
 `AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1)`) and `aligntype`
 (default `GlobalAlignment()`) determine the properties of the alignment.
+See BioAlignments.jl for more on how to use alignments.
 """
 function BioAlignments.pairalign(el1::StructuralElementOrList,
                             el2::StructuralElementOrList,
                             residue_selectors::Function...;
                             scoremodel::AbstractScoreModel=AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1),
                             aligntype::BioAlignments.AbstractAlignment=GlobalAlignment())
-    seq1 = AminoAcidSequence(el1, residue_selectors...; gaps=false)
-    seq2 = AminoAcidSequence(el2, residue_selectors...; gaps=false)
+    seq1 = LongAminoAcidSeq(el1, residue_selectors...; gaps=false)
+    seq2 = LongAminoAcidSeq(el2, residue_selectors...; gaps=false)
     return pairalign(aligntype, seq1, seq2, scoremodel)
 end
 

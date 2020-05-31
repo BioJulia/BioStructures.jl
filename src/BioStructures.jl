@@ -12,17 +12,18 @@ module BioStructures
 using LinearAlgebra
 using Statistics
 
+using BioAlignments
+import BioCore # Imported to avoid clash with BioGenerics distance
+using BioGenerics
+using BioSequences
+using BioSymbols
 using CodecZlib
+using DataFrames
 using Format
-using RecipesBase
 using LightGraphs
 using MetaGraphs
-using DataFrames
-using BioCore
-using BioSymbols
-using BioSequences
-using BioAlignments
 import MMTF: parsemmtf, writemmtf # Imported to avoid clash with MMTF name
+using RecipesBase
 
 include("model.jl")
 include("pdb.jl")

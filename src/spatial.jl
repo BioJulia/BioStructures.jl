@@ -144,7 +144,7 @@ function Transformation(el1::StructuralElementOrList,
     res1 = collectresidues(el1, residue_selectors...)
     res2 = collectresidues(el2, residue_selectors...)
     # Shortcut if the sequences are the same
-    if AminoAcidSequence(res1; gaps=false) == AminoAcidSequence(res2; gaps=false)
+    if LongAminoAcidSeq(res1; gaps=false) == LongAminoAcidSeq(res2; gaps=false)
         inds1 = collect(1:length(res1))
         inds2 = collect(1:length(res2))
     else
@@ -330,13 +330,13 @@ Get the minimum distance in Å between two `StructuralElementOrList`s.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
-function BioCore.distance(el1::StructuralElementOrList,
+function BioGenerics.distance(el1::StructuralElementOrList,
                       el2::StructuralElementOrList,
                       atom_selectors::Function...)
     return sqrt(sqdistance(el1, el2, atom_selectors...))
 end
 
-function BioCore.distance(at_one::AbstractAtom, at_two::AbstractAtom)
+function BioGenerics.distance(at_one::AbstractAtom, at_two::AbstractAtom)
     return sqrt(sqdistance(at_one, at_two))
 end
 

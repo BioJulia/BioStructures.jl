@@ -204,15 +204,16 @@ julia> countatoms(struc, expand_disordered=true)
 819
 ```
 
-The amino acid sequence of a protein can be retrieved by passing an element to [`AminoAcidSequence`](@ref) with optional residue selectors:
+The amino acid sequence of a protein can be retrieved by passing an element to [`LongAminoAcidSeq`](@ref) with optional residue selectors:
 
 ```julia
-julia> AminoAcidSequence(struc['A'], standardselector)
+julia> LongAminoAcidSeq(struc['A'], standardselector)
 85aa Amino Acid Sequence:
-RCGSQGGGSTCPGLRCCSIWGWCGDSEPYCGRTCENKCWSGERSDHRCGAAVGNPPCGQDRCCSVHGWCGGGNDYCSGGNCQYRC
+RCGSQGGGSTCPGLRCCSIWGWCGDSEPYCGRTCENKCW…RCGAAVGNPPCGQDRCCSVHGWCGGGNDYCSGGNCQYRC
 ```
 
 The `gaps` keyword argument determines whether to add gaps to the sequence based on missing residue numbers (default `true`).
+[`threeletter_to_aa`](@ref) provides a lookup table of amino acid codes should that be required.
 See [BioSequences.jl](https://github.com/BioJulia/BioSequences.jl) and [BioAlignments.jl](https://github.com/BioJulia/BioAlignments.jl) for more on how to deal with sequences.
 For example, to see the alignment of CDK1 and CDK2 (this example also makes use of Julia's [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/#Broadcasting-1)):
 
@@ -222,8 +223,8 @@ julia> struc1, struc2 = retrievepdb.(["4YC6", "1HCL"])
  ProteinStructure 4YC6.pdb with 1 models, 8 chains (A,B,C,D,E,F,G,H), 1420 residues, 12271 atoms
  ProteinStructure 1HCL.pdb with 1 models, 1 chains (A), 294 residues, 2546 atoms
 
-julia> seq1, seq2 = AminoAcidSequence.([struc1["A"], struc2["A"]], standardselector, gaps=false)
-2-element Array{BioSequences.BioSequence{BioSequences.AminoAcidAlphabet},1}:
+julia> seq1, seq2 = LongAminoAcidSeq.([struc1["A"], struc2["A"]], standardselector, gaps=false)
+2-element Array{BioSequences.LongSequence{BioSequences.AminoAcidAlphabet},1}:
  MEDYTKIEKIGEGTYGVVYKGRHKTTGQVVAMKKIRLES…SHVKNLDENGLDLLSKMLIYDPAKRISGKMALNHPYFND
  MENFQKVEKIGEGTYGVVYKARNKLTGEVVALKKIRTEG…RSLLSQMLHYDPNKRISAKAALAHPFFQDVTKPVPHLRL
 
@@ -232,7 +233,7 @@ julia> using BioAlignments
 julia> scoremodel = AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1);
 
 julia> alres = pairalign(GlobalAlignment(), seq1, seq2, scoremodel)
-PairwiseAlignmentResult{Int64,BioSequences.BioSequence{BioSequences.AminoAcidAlphabet},BioSequences.BioSequence{BioSequences.AminoAcidAlphabet}}:
+PairwiseAlignmentResult{Int64,BioSequences.LongSequence{BioSequences.AminoAcidAlphabet},BioSequences.LongSequence{BioSequences.AminoAcidAlphabet}}:
   score: 945
   seq:   1 MEDYTKIEKIGEGTYGVVYKGRHKTTGQVVAMKKIRLESEEEGVPSTAIREISLLKELRH  60
            ||   | ||||||||||||| | | || ||| |||| |    |||||||||||||||| |
@@ -1244,6 +1245,7 @@ viewer.render();
 </script>
 ```
 
+Use the mouse to move and zoom the images.
 You can view BioStructures data types:
 
 ```julia
@@ -3869,7 +3871,6 @@ viewer.render();
 </script>
 ```
 
-Use the mouse to move and zoom the images.
 See the [Bio3DView.jl tutorial](http://nbviewer.jupyter.org/github/jgreener64/Bio3DView.jl/blob/master/examples/tutorial.ipynb) for more information.
 
 ## Related software

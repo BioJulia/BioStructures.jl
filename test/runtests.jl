@@ -1,13 +1,16 @@
 module TestBioStructures
 
 using Test
+
+using BioAlignments
+using BioSequences
+import BioCore # Imported to avoid clash with BioGenerics distance
+using DataFrames
 using Format
-using RecipesBase
 using LightGraphs
 using MetaGraphs
-using DataFrames
-using BioCore
-using BioAlignments
+using RecipesBase
+
 using BioStructures
 using BioStructures:
     fixlists!,
@@ -682,9 +685,10 @@ end
     @test chainids(mod_ord) == ["1", "A", "X", "a", "AB", "AC", "BC", "AAA", " "]
 
     # Test sequence extraction
+    @test threeletter_to_aa["ALA"] == AA_A
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
-    seq = AminoAcidSequence(struc['B'])
-    @test seq == AminoAcidSequence(
+    seq = LongAminoAcidSeq(struc['B'])
+    @test seq == LongAminoAcidSeq(
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILGX-------------------------" *
@@ -696,22 +700,22 @@ end
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" *
         "XXXXXXXXXXXXXXX"
     )
-    seq = AminoAcidSequence(struc['B'], gaps=false)
-    @test seq == AminoAcidSequence(
+    seq = LongAminoAcidSeq(struc['B'], gaps=false)
+    @test seq == LongAminoAcidSeq(
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILGXXXXXXXXXXXXXXXXXXXXXXXXXX" *
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" *
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     )
-    seq = AminoAcidSequence(struc['B'], standardselector)
-    @test seq == AminoAcidSequence(
+    seq = LongAminoAcidSeq(struc['B'], standardselector)
+    @test seq == LongAminoAcidSeq(
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG"
     )
-    seq = AminoAcidSequence(struc, standardselector)
-    @test seq == AminoAcidSequence(
+    seq = LongAminoAcidSeq(struc, standardselector)
+    @test seq == LongAminoAcidSeq(
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG" *
@@ -719,11 +723,11 @@ end
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG"
     )
-    seq = AminoAcidSequence(AbstractResidue[
+    seq = LongAminoAcidSeq(AbstractResidue[
         Residue("VAL", 20, 'B', true, Chain('B')),
         Residue("ALA", 10, 'A', false, Chain('A')),
     ])
-    @test seq == AminoAcidSequence("VA")
+    @test seq == LongAminoAcidSeq("VA")
 
     # Test pairwise alignment
     res = collectresidues(struc["A"], standardselector)

@@ -27,11 +27,14 @@ see some [benchmarks online](https://github.com/jgreener64/pdb-benchmarks).
 ## Installation
 
 Install BioStructures from the Julia package REPL, which can be accessed by
-pressing `]`:
+pressing `]` from the Julia REPL:
 
 ```
 add BioStructures
 ```
+
+See the [documentation](https://biojulia.github.io/BioStructures.jl/stable) for information on how
+to use BioStructures.
 
 ## Contributing and questions
 
