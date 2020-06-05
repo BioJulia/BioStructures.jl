@@ -1,9 +1,9 @@
 BioStructures.jl release notes
 ==============================
 
-## v0.11.0 - May 2020
+## v0.11.0 - Jun 2020
 
-* The required versions of BioSequences and BioAlignments are updated to version 2 of each, with support for earlier versions being dropped. `AminoAcidSequence` is hence renamed to `LongAminoAcidSeq`.
+* The required versions of BioSequences.jl and BioAlignments.jl are updated to v2 of each, with support for earlier versions being dropped. `AminoAcidSequence` is hence renamed to `LongAminoAcidSeq`.
 * `threeletter_to_aa`, a lookup table of amino acids, is re-exported from BioSymbols.
 
 ## v0.10.1 - May 2020
