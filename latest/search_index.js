@@ -33,6 +33,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "index.html#Citation-1",
+    "page": "Home",
+    "title": "Citation",
+    "category": "section",
+    "text": "If you use BioStructures, please cite the paper:Greener JG, Selvaraj J and Ward BJ. BioStructures.jl: read, write and manipulate macromolecular structures in Julia, Bioinformatics (2020) - link"
+},
+
+{
     "location": "index.html#Contributing-and-questions-1",
     "page": "Home",
     "title": "Contributing and questions",
