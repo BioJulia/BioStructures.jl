@@ -104,7 +104,7 @@ function splitline(s::AbstractString)
                 in_token = false
                 push!(tokens, s[start_i:(i - 1)])
             end
-        elseif c == '#' && quote_open_char == ' '
+        elseif c == '#' && !in_token
             return tokens
         elseif !in_token
             in_token = true

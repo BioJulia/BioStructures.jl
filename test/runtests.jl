@@ -1717,6 +1717,8 @@ end
     @test splitline("foo 'bar'a' b") == ["foo", "bar'a", "b"]
     @test splitline("foo \"bar' a\" b") == ["foo", "bar' a", "b"]
     @test splitline("foo '' b") == ["foo", "", "b"]
+    @test splitline("foo #bar") == ["foo"]
+    @test splitline("foo b#ar") == ["foo", "b#ar"]
     @test_throws ArgumentError splitline("foo 'bar")
     @test_throws ArgumentError splitline("foo 'ba'r  ")
     @test_throws ArgumentError splitline("foo \"bar'")
