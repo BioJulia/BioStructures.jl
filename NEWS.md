@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.11.1 - Sep 2020
+
+* Fix bug in reading mmCIF data values containing a comment character.
+
 ## v0.11.0 - Jun 2020
 
 * The required versions of BioSequences.jl and BioAlignments.jl are updated to v2 of each, with support for earlier versions being dropped. `AminoAcidSequence` is hence renamed to `LongAminoAcidSeq`.
