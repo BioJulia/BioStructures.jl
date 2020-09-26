@@ -72,6 +72,7 @@ end
 Base.keys(mmcif_dict::MMCIFDict) = keys(mmcif_dict.dict)
 Base.values(mmcif_dict::MMCIFDict) = values(mmcif_dict.dict)
 Base.haskey(mmcif_dict::MMCIFDict, key) = haskey(mmcif_dict.dict, key)
+Base.get(mmcif_dict::MMCIFDict, key, default) = get(mmcif_dict.dict, key, default)
 
 function Base.show(io::IO, mmcif_dict::MMCIFDict)
     print(io, "mmCIF dictionary with $(length(keys(mmcif_dict))) fields")
