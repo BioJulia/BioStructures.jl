@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.11.2 - Sep 2020
+
+* Add `get` method for `MMCIFDict`.
+
 ## v0.11.1 - Sep 2020
 
 * Fix bug in reading mmCIF data values containing a comment character.
