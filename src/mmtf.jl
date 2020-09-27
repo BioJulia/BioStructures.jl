@@ -4,8 +4,8 @@ export
     writemmtf
 
 """
-    MMTFDict(filepath)
-    MMTFDict(io)
+    MMTFDict(filepath; gzip=false)
+    MMTFDict(io; gzip=false)
     MMTFDict()
 
 A Macromolecular Transmission Format (MMTF) dictionary.
@@ -184,8 +184,8 @@ function generatechainid(entity_id::Integer)
 end
 
 """
-    writemmtf(output, element, atom_selectors...)
-    writemmtf(output, mmtf_dict)
+    writemmtf(output, element, atom_selectors...; gzip=false)
+    writemmtf(output, mmtf_dict; gzip=false)
 
 Write a `StructuralElementOrList` or a `MMTFDict` to a MMTF file or output
 stream.
