@@ -1594,6 +1594,9 @@ end
     @test length(values(dic)) == 610
     @test haskey(dic, "_cell.entry_id")
     @test !haskey(dic, "nokey")
+    @test get(dic, "_cell.entry_id", ["default"]) == ["1AKE"]
+    @test get(dic, "nokey", ["default"]) == ["default"]
+    @test ismissing(get(dic, "nokey", missing))
     show(devnull, dic)
 
     multiline_str = """
