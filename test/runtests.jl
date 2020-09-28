@@ -220,6 +220,10 @@ end
     # Test alternate constructors
     ProteinStructure("struc", Dict(1=> Model()))
     ProteinStructure()
+    mmcif_dict = MMCIFDict(testfilepath("mmCIF", "1AKE.cif"))
+    struc_mmcif_1ake = ProteinStructure(mmcif_dict)
+    mmtf_dict = MMTFDict(testfilepath("MMTF", "1AKE.mmtf"))
+    struc_mmtf_1ake = ProteinStructure(mmtf_dict)
 
     Model(1, Dict("A"=> Chain('A')), ProteinStructure())
     Model(1, ProteinStructure())
