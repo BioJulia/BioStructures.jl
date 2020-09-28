@@ -34,14 +34,3 @@ _(Please tick any or all of the following that are applicable)_
   - If you are implementing changes that are intended to increase performance, you
     should provide the results of a simple performance benchmark exercise
     demonstrating the improvement. Especially if the changes make code less legible.
-
-## :ballot_box_with_check: Checklist
-
-- [ ] :art: The changes implemented is consistent with the [julia style guide](https://docs.julialang.org/en/stable/manual/style-guide/).
-- [ ] :blue_book: I have updated and added relevant docstrings, in a manner consistent with the [documentation styleguide](https://docs.julialang.org/en/stable/manual/documentation/).
-- [ ] :blue_book: I have added or updated relevant user and developer manuals/documentation in `docs/src/`.
-- [ ] :ok: There are unit tests that cover the code changes I have made.
-- [ ] :ok: The unit tests cover my code changes AND they pass.
-- [ ] :pencil: I have added an entry to the `[UNRELEASED]` section of the manually curated `CHANGELOG.md` file for this repository.
-- [ ] :ok: All changes should be compatible with the latest stable version of Julia.
-- [ ] :thought_balloon: I have commented liberally for any complex pieces of internal code.

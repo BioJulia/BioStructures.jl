@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.11.3 - Sep 2020
+
+* Gzip support is added for reading and writing mmCIF files via the `gzip` keyword argument.
+
 ## v0.11.2 - Sep 2020
 
 * Add `get` method for `MMCIFDict`.

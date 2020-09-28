@@ -5,12 +5,12 @@ using Test
 using BioAlignments
 using BioSequences
 import BioCore # Imported to avoid clash with BioGenerics distance
+using CodecZlib
 using DataFrames
 using Format
 using LightGraphs
 using MetaGraphs
 using RecipesBase
-using CodecZlib
 
 using BioStructures
 using BioStructures:

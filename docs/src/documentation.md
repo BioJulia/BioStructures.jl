@@ -461,7 +461,7 @@ Various options can be set through optional keyword arguments when parsing PDB/m
 | `remove_disorder::Bool=false`    | Whether to remove atoms with alt loc ID not ' ' or 'A'                       |
 | `read_std_atoms::Bool=true`      | Whether to read standard ATOM records                                        |
 | `read_het_atoms::Bool=true`      | Whether to read HETATOM records                                              |
-| `gzip::Bool=false`               | Whether the file is gzipped (MMTF and MMCIF files only)                                |
+| `gzip::Bool=false`               | Whether the file is gzipped (MMTF and mmCIF files only)                      |
 
 Use [`retrievepdb`](@ref) to download and parse a PDB file into a Structure-Model-Chain-Residue-Atom framework in a single line:
 
@@ -517,8 +517,8 @@ writepdb("1EN2_out.pdb", struc, backboneselector)
 ```
 
 To write mmCIF format files, use the [`writemmcif`](@ref) function with similar arguments.
-A [`MMCIFDict`](@ref) can also be written using [`writemmcif`](@ref):
 The `gzip` keyword argument, default `false`, determines whether to gzip the written file.
+A [`MMCIFDict`](@ref) can also be written using [`writemmcif`](@ref):
 
 ```julia
 writemmcif("1EN2_out.dic", mmcif_dict)
