@@ -40,8 +40,8 @@ const mmciforder = Dict(
 )
 
 """
-    MMCIFDict(filepath)
-    MMCIFDict(io)
+    MMCIFDict(filepath; gzip=false)
+    MMCIFDict(io; gzip=false)
     MMCIFDict()
 
 A macromolecular Crystallographic Information File (mmCIF) dictionary.
@@ -53,6 +53,7 @@ To directly access the underlying dictionary of `MMCIFDict` `d`, use
 `d.dict`.
 Call `MMCIFDict` with a filepath or stream to read the dictionary from that
 source.
+The keyword argument `gzip` (default `false`) determines if the input is gzipped.
 """
 struct MMCIFDict
     dict::Dict{String, Vector{String}}
@@ -180,16 +181,22 @@ function tokenizecifstructure(f::IO)
     return tokens
 end
 
-function MMCIFDict(mmcif_filepath::AbstractString)
+function MMCIFDict(mmcif_filepath::AbstractString; gzip::Bool=false)
     open(mmcif_filepath) do f
-        MMCIFDict(f)
+        MMCIFDict(f; gzip=gzip)
     end
 end
 
 # Read a mmCIF file into a MMCIFDict
-function MMCIFDict(f::IO)
+function MMCIFDict(f::IO; gzip::Bool=false)
     mmcif_dict = MMCIFDict()
-    tokens = tokenizecif(f)
+    if gzip
+        gz = GzipDecompressorStream(f)
+        tokens = tokenizecif(gz)
+        close(gz)
+    else
+        tokens = tokenizecif(f)
+    end
     # Data label token is read first
     if length(tokens) == 0
         return mmcif_dict
@@ -258,9 +265,17 @@ function Base.read(input::IO,
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
-            read_het_atoms::Bool=true)
+            read_het_atoms::Bool=true,
+            gzip::Bool=false)
     mmcif_dict = MMCIFDict()
-    populatedict!(mmcif_dict, tokenizecifstructure(input))
+    if gzip
+        gz = GzipDecompressorStream(input)
+        tokens = tokenizecifstructure(gz)
+        close(gz)
+    else
+        tokens = tokenizecifstructure(input)
+    end
+    populatedict!(mmcif_dict, tokens)
     # Define ProteinStructure and add to it incrementally
     struc = ProteinStructure(structure_name)
     if haskey(mmcif_dict, "_atom_site.id")
@@ -339,8 +354,8 @@ function requiresquote(val)
 end
 
 """
-    writemmcif(output, element, atom_selectors...)
-    writemmcif(output, mmcif_dict)
+    writemmcif(output, element, atom_selectors...; gzip=false)
+    writemmcif(output, mmcif_dict; gzip=false)
 
 Write a `StructuralElementOrList` or a `MMCIFDict` to a mmCIF format file or
 output stream.
@@ -349,14 +364,18 @@ Atom selector functions can be given as additional arguments - only atoms
 that return `true` from all the functions are retained.
 The keyword argument `expand_disordered` (default `true`) determines whether to
 return all copies of disordered residues and atoms.
+The keyword argument `gzip` (default `false`) determines if the output is gzipped.
 """
-function writemmcif(filepath::AbstractString, mmcif_dict::MMCIFDict)
+function writemmcif(filepath::AbstractString, mmcif_dict::MMCIFDict; gzip::Bool=false)
     open(filepath, "w") do output
-        writemmcif(output, mmcif_dict)
+        writemmcif(output, mmcif_dict; gzip=gzip)
     end
 end
 
-function writemmcif(output::IO, mmcif_dict::MMCIFDict)
+function writemmcif(output::IO, mmcif_dict::MMCIFDict; gzip::Bool=false)
+    if gzip
+        output = GzipCompressorStream(output)
+    end
     # Form dictionary where key is first part of mmCIF key and value is list
     #   of corresponding second parts
     key_lists = Dict{String, Vector{String}}()
@@ -450,22 +469,25 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict)
         end
         println(output, "#")
     end
+    if gzip
+        close(output)
+    end
 end
 
 function writemmcif(filepath::AbstractString,
                 el::StructuralElementOrList,
                 atom_selectors::Function...;
-                expand_disordered::Bool=true)
+                expand_disordered::Bool=true, gzip::Bool=false)
     open(filepath, "w") do output
         writemmcif(output, el, atom_selectors...;
-                    expand_disordered=expand_disordered)
+                   expand_disordered=expand_disordered, gzip=gzip)
     end
 end
 
 function writemmcif(output::IO,
                 el::StructuralElementOrList,
                 atom_selectors::Function...;
-                expand_disordered::Bool=true)
+                expand_disordered::Bool=true, gzip::Bool=false)
     # Ensure multiple models get written out correctly
     loop_el = isa(el, ProteinStructure) ? collectmodels(el) : el
     ats = collectatoms(loop_el, atom_selectors...;
@@ -488,7 +510,7 @@ function writemmcif(output::IO,
     end
 
     # Now the MMCIFDict has been generated, write it out to the file
-    return writemmcif(output, MMCIFDict(atom_dict))
+    return writemmcif(output, MMCIFDict(atom_dict); gzip=gzip)
 end
 
 # Add an atom record to a growing atom dictionary
