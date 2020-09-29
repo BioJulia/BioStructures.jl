@@ -222,8 +222,10 @@ end
     ProteinStructure()
     mmcif_dict = MMCIFDict(testfilepath("mmCIF", "1AKE.cif"))
     struc_mmcif_1ake = ProteinStructure(mmcif_dict)
+    @test countatoms(struc_mmcif_1ake) == 3804
     mmtf_dict = MMTFDict(testfilepath("MMTF", "1AKE.mmtf"))
     struc_mmtf_1ake = ProteinStructure(mmtf_dict)
+    @test countatoms(struc_mmtf_1ake) == 3804
 
     Model(1, Dict("A"=> Chain('A')), ProteinStructure())
     Model(1, ProteinStructure())
@@ -2229,6 +2231,9 @@ end
     @test length(values(dic)) == 39
     @test haskey(dic, "chainNameList")
     @test !haskey(dic, "nokey")
+    @test get(dic, "chainNameList", ["default"]) == ["A", "B", "A", "B", "A", "B"]
+    @test get(dic, "nokey", ["default"]) == ["default"]
+    @test ismissing(get(dic, "nokey", missing))
     show(devnull, dic)
     dic_gzip = MMTFDict(testfilepath("MMTF", "1AKE.mmtf.gz"), gzip=true)
     @test dic.dict == dic_gzip.dict

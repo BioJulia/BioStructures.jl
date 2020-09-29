@@ -81,6 +81,7 @@ end
 Base.keys(mmtf_dict::MMTFDict) = keys(mmtf_dict.dict)
 Base.values(mmtf_dict::MMTFDict) = values(mmtf_dict.dict)
 Base.haskey(mmtf_dict::MMTFDict, key) = haskey(mmtf_dict.dict, key)
+Base.get(mmtf_dict::MMTFDict, key, default) = get(mmtf_dict.dict, key, default)
 
 function Base.show(io::IO, mmtf_dict::MMTFDict)
     print(io, "MMTF dictionary with $(length(keys(mmtf_dict))) fields")
