@@ -45,7 +45,7 @@ MMTF files can be read into the same data structure with `read("/path/to/mmtf/fi
 The keyword argument `gzip`, default `false`, determines if the file is gzipped.
 In a similar manner to mmCIF dictionaries, a MMTF file can be read into a dictionary with [`MMTFDict`](@ref).
 The values of the dictionary are a variety of types depending on the [MMTF specification](https://github.com/rcsb/mmtf/blob/master/spec.md).
-To convert a [`MMCIFDict`](@ref) or [`MMTFDict`](@ref) to the Structure-Model-Chain-Residue-Atom framework, use the `ProteinStructure` constructor, e.g. `ProteinStructure(mmcif_dict)`.
+To convert a [`MMCIFDict`](@ref) or [`MMTFDict`](@ref) to the Structure-Model-Chain-Residue-Atom framework, use the [`ProteinStructure`](@ref) constructor, e.g. `ProteinStructure(mmcif_dict)`.
 
 The elements of `struc` can be accessed as follows:
 
@@ -456,13 +456,13 @@ ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 Read a mmCIF/MMTF file instead by replacing [`PDB`](@ref) with [`MMCIF`](@ref)/[`MMTF`](@ref).
 Various options can be set through optional keyword arguments when parsing PDB/mmCIF/MMTF files:
 
-| Keyword Argument                 | Description                                                                  |
-| :------------------------------- | :--------------------------------------------------------------------------- |
-| `structure_name::AbstractString` | The name given to the returned `ProteinStructure`; defaults to the file name |
-| `remove_disorder::Bool=false`    | Whether to remove atoms with alt loc ID not ' ' or 'A'                       |
-| `read_std_atoms::Bool=true`      | Whether to read standard ATOM records                                        |
-| `read_het_atoms::Bool=true`      | Whether to read HETATOM records                                              |
-| `gzip::Bool=false`               | Whether the file is gzipped (MMTF and mmCIF files only)                      |
+| Keyword Argument                 | Description                                                                          |
+| :------------------------------- | :----------------------------------------------------------------------------------- |
+| `structure_name::AbstractString` | The name given to the returned [`ProteinStructure`](@ref); defaults to the file name |
+| `remove_disorder::Bool=false`    | Whether to remove atoms with alt loc ID not ' ' or 'A'                               |
+| `read_std_atoms::Bool=true`      | Whether to read standard ATOM records                                                |
+| `read_het_atoms::Bool=true`      | Whether to read HETATOM records                                                      |
+| `gzip::Bool=false`               | Whether the file is gzipped (MMTF and mmCIF files only)                              |
 
 Use [`retrievepdb`](@ref) to download and parse a PDB file into a Structure-Model-Chain-Residue-Atom framework in a single line:
 

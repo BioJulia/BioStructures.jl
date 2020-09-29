@@ -1,6 +1,11 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.11.4 - Sep 2020
+
+* A `ProteinStructure` can now be obtained from a `MMCIFDict` or `MMTFDict` by passing them to the `ProteinStructure` constructor. This saves having to read the file twice when both the dictionary and the structure object are required.
+* Add `get` method for `MMTFDict`.
+
 ## v0.11.3 - Sep 2020
 
 * Gzip support is added for reading and writing mmCIF files via the `gzip` keyword argument.
