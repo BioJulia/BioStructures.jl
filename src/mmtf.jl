@@ -93,7 +93,19 @@ function Base.read(input::IO,
             read_std_atoms::Bool=true,
             read_het_atoms::Bool=true,
             gzip::Bool=false)
-    d = parsemmtf(input; gzip=gzip)
+    d = MMTFDict(parsemmtf(input; gzip=gzip))
+    ProteinStructure(d;
+                     structure_name=structure_name,
+                     remove_disorder=remove_disorder,
+                     read_std_atoms=read_std_atoms,
+                     read_het_atoms=read_het_atoms)
+end
+
+function ProteinStructure(d::MMTFDict;
+            structure_name::AbstractString="",
+            remove_disorder::Bool=false,
+            read_std_atoms::Bool=true,
+            read_het_atoms::Bool=true)
     struc = ProteinStructure(structure_name)
     # Extract hetero atom information from entity list
     hets = trues(length(d["chainIdList"]))

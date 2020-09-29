@@ -276,6 +276,18 @@ function Base.read(input::IO,
         tokens = tokenizecifstructure(input)
     end
     populatedict!(mmcif_dict, tokens)
+    ProteinStructure(mmcif_dict;
+                     structure_name=structure_name,
+                     remove_disorder=remove_disorder,
+                     read_std_atoms=read_std_atoms,
+                     read_het_atoms=read_het_atoms)
+end
+
+function ProteinStructure(mmcif_dict::MMCIFDict;
+            structure_name::AbstractString="",
+            remove_disorder::Bool=false,
+            read_std_atoms::Bool=true,
+            read_het_atoms::Bool=true)
     # Define ProteinStructure and add to it incrementally
     struc = ProteinStructure(structure_name)
     if haskey(mmcif_dict, "_atom_site.id")

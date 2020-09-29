@@ -46,6 +46,18 @@ The keyword argument `gzip`, default `false`, determines if the file is gzipped.
 In a similar manner to mmCIF dictionaries, a MMTF file can be read into a dictionary with [`MMTFDict`](@ref).
 The values of the dictionary are a variety of types depending on the [MMTF specification](https://github.com/rcsb/mmtf/blob/master/spec.md).
 
+To convert a [`MMCIFDict`](@ref) or [`MMTFDict`](@ref) to the
+Structure-Model-Chain-Residue-Atom framework, use the
+`ProteinStructure` constructor:
+
+```julia
+julia> struc = ProteinStructure(mmcif_dict)
+ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
+
+julia> struc = ProteinStructure(mmtf_dict)
+ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
+```
+
 The elements of `struc` can be accessed as follows:
 
 | Command                     | Returns                                                                         | Return type       |
