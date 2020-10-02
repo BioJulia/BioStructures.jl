@@ -2216,6 +2216,148 @@ end
         struc_back = read(temp_filename, MMCIF; kwargs...)
         @test chainids(struc_back) == ["A1", "A2"]
     end
+
+    # Test readmultimmcif
+    # read from string
+    comment_str = """
+        data_test
+        _test_single foo # Ignore this comment
+        loop_
+        _test_loop_1
+        _test_loop_2
+        a b # Ignore this comment
+        c d
+        """
+    underscore_str = """
+        data_4Q9R
+        loop_
+        _pdbx_audit_revision_item.ordinal
+        _pdbx_audit_revision_item.revision_ordinal
+        _pdbx_audit_revision_item.data_content_type
+        _pdbx_audit_revision_item.item
+        1  5 'Structure model' '_atom_site.B_iso_or_equiv'
+        2  5 'Structure model' '_atom_site.Cartn_x'
+        3  5 'Structure model' '_atom_site.Cartn_y'
+        4 5 'Structure model' '_atom_site.Cartn_z'
+        """
+    cifs = readmultimmcif(IOBuffer(comment_str * underscore_str))
+    dic = MMCIFDict(IOBuffer(comment_str))
+    @test cifs["test"]["_test_single"] == ["foo"]
+    @test cifs["test"]["_test_loop_1"] == ["a", "c"]
+    @test cifs["test"]["_test_loop_2"] == ["b", "d"]
+    @test length(keys(cifs["4Q9R"])) == 5
+    @test cifs["4Q9R"]["_pdbx_audit_revision_item.item"] == [
+        "_atom_site.B_iso_or_equiv", "_atom_site.Cartn_x",
+        "_atom_site.Cartn_y", "_atom_site.Cartn_z"
+    ]
+    # read from file: write a small multicif manually and read it back
+    for gzip in (false, true)
+        transcoder = gzip ? (GzipCompressorStream,) : ()
+        open(transcoder..., temp_filename, "w") do f_out
+            open(testfilepath("mmCIF", "1AKE.cif")) do f_in
+                write(f_out, f_in)
+            end
+            open(testfilepath("mmCIF", "1EN2.cif")) do f_in
+                write(f_out, f_in)
+            end
+        end
+        cifs = readmultimmcif(temp_filename; gzip=gzip)
+        # tests for 1AKE
+        dic = cifs["1AKE"]
+        @test isa(dic.dict, Dict{String, Vector{String}})
+        @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == ["1991-11-08"]
+        @test dic["_audit_author.name"] == ["Mueller, C.W.", "Schulz, G.E."]
+        @test length(dic["_atom_site.group_PDB"]) == 3816
+        dic["_pdbx_database_status.recvd_initial_deposition_date"] = ["changed"]
+        @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == ["changed"]
+        @test length(keys(dic)) == 610
+        @test length(values(dic)) == 610
+        @test haskey(dic, "_cell.entry_id")
+        @test !haskey(dic, "nokey")
+        @test get(dic, "_cell.entry_id", ["default"]) == ["1AKE"]
+        @test get(dic, "nokey", ["default"]) == ["default"]
+        @test ismissing(get(dic, "nokey", missing))
+        # tests for 1EN2
+        struc = ProteinStructure(cifs["1EN2"])
+        @test modelnumbers(struc) == [1]
+        @test chainids(struc[1]) == ["A"]
+        @test serial(struc['A'][48]["CA"]) == 394
+        @test isdisorderedres(struc['A'][10])
+        @test defaultresname(struc['A'][10]) == "SER"
+        @test resname(disorderedres(struc['A'][10], "SER")) == "SER"
+        @test resname(disorderedres(struc['A'][10], "GLY")) == "GLY"
+        @test !isdisorderedatom(struc['A'][10]["CA"])
+        @test altlocid(struc['A'][10]["CA"]) == 'A'
+        @test isdisorderedres(struc['A'][16])
+        @test defaultresname(struc['A'][16]) == "ARG"
+        @test resname(disorderedres(struc['A'][16], "ARG")) == "ARG"
+        @test resname(disorderedres(struc['A'][16], "TRP")) == "TRP"
+        @test !isdisorderedatom(disorderedres(struc['A'][16], "TRP")["CA"])
+        @test altlocid(disorderedres(struc['A'][16], "TRP")["CA"]) == 'C'
+        @test isdisorderedatom(struc['A'][16]["CA"])
+        @test altlocids(struc['A'][16]["CA"]) == ['A', 'B']
+        @test defaultaltlocid(struc['A'][16]["CA"]) == 'A'
+        @test occupancy(struc['A'][16]["CA"]) == 0.22
+        ats = collectatoms(DisorderedResidue[struc['A'][10], struc['A'][16]])
+        @test length(ats) == 17
+        @test isa(ats, Vector{AbstractAtom})
+        @test serial(ats[10]) == 113
+        @test isa(ats[10], DisorderedAtom)
+        @test countatoms(DisorderedResidue[struc['A'][10], struc['A'][16]]) == 17
+        res = collectresidues(DisorderedResidue[struc['A'][16], struc['A'][10]])
+        @test length(res) == 2
+        @test isa(res, Vector{DisorderedResidue})
+        @test resnumber(res[1]) == 16
+        @test countresidues(DisorderedResidue[struc['A'][16], struc['A'][10]]) == 2
+    end
+    # test for throw on duplicate data_ entry
+    # somewhere in the middle
+    test_multicif = """
+        data_test
+        _test_single foo # Ignore this comment
+        data_test
+        _test_single foo # Ignore this comment
+        data_foo
+        _test_single foo # Ignore this comment
+    """
+    @test_throws ErrorException readmultimmcif(IOBuffer(test_multicif))
+    # at the end
+    test_multicif = """
+        data_test
+        _test_single foo # Ignore this comment
+        data_test
+        _test_single foo # Ignore this comment
+    """
+    @test_throws ErrorException readmultimmcif(IOBuffer(test_multicif))
+
+    # Test writemultimmcif
+    test_multicif = Dict{String,MMCIFDict}()
+    for pdbid in ("1AKE", "1SSU")
+        cif = MMCIFDict(testfilepath("mmCIF", "$pdbid.cif"))
+        test_multicif[pdbid] = cif
+    end
+    # write to io
+    for gzip in (false, true)
+        open(temp_filename, "w") do io
+            writemultimmcif(io, test_multicif; gzip=gzip)
+        end
+        cifs = readmultimmcif(temp_filename; gzip=gzip)
+        for k in keys(cifs)
+            @test cifs[k].dict == test_multicif[k].dict
+        end
+    end
+    # write to filepath
+    for gzip in (false, true)
+        writemultimmcif(temp_filename, test_multicif; gzip=gzip)
+        cifs = readmultimmcif(temp_filename; gzip=gzip)
+        for k in keys(cifs)
+            @test cifs[k].dict == test_multicif[k].dict
+        end
+    end
+    # test warning
+    @test_logs (:warn,
+                "writemultimmcif: MMCIFDict for key \"not_1AKE\" has different \"data_\" key (\"1AKE\")"
+                ) writemultimmcif(temp_filename, Dict("not_1AKE" => test_multicif["1AKE"]))
 end
 
 @testset "MMTF" begin
