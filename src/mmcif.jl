@@ -55,7 +55,7 @@ Call `MMCIFDict` with a filepath or stream to read the dictionary from that
 source.
 The keyword argument `gzip` (default `false`) determines if the input is gzipped.
 """
-struct MMCIFDict
+struct MMCIFDict <: AbstractDict{String,Vector{String}}
     dict::Dict{String, Vector{String}}
 end
 
@@ -74,9 +74,12 @@ Base.keys(mmcif_dict::MMCIFDict) = keys(mmcif_dict.dict)
 Base.values(mmcif_dict::MMCIFDict) = values(mmcif_dict.dict)
 Base.haskey(mmcif_dict::MMCIFDict, key) = haskey(mmcif_dict.dict, key)
 Base.get(mmcif_dict::MMCIFDict, key, default) = get(mmcif_dict.dict, key, default)
+Base.length(mmcif_dict::MMCIFDict) = length(mmcif_dict.dict)
+Base.iterate(mmcif_dict::MMCIFDict) = iterate(mmcif_dict.dict)
+Base.iterate(mmcif_dict::MMCIFDict, i) = iterate(mmcif_dict.dict, i)
 
 function Base.show(io::IO, mmcif_dict::MMCIFDict)
-    print(io, "mmCIF dictionary with $(length(keys(mmcif_dict))) fields")
+    print(io, "mmCIF dictionary with $(length(mmcif_dict)) fields")
 end
 
 # Split a mmCIF line into tokens
