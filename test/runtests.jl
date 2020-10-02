@@ -2226,6 +2226,10 @@ end
     # Test MMTF dictionary
     dic = MMTF()
     dic = MMTFDict(Dict())
+    # Test Base.show
+    show(IOBuffer(), MIME("text/plain"), MMTFDict())
+    show(IOBuffer(), MIME("text/plain"), MMTFDict(Dict("a" => "b")))
+
     dic = MMTFDict(testfilepath("MMTF", "1AKE.mmtf"))
     @test isa(dic.dict, Dict{String, Any})
     @test dic["rWork"] == 0.196f0
