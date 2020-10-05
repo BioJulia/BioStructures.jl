@@ -18,7 +18,7 @@ Call `MMTFDict` with a filepath or stream to read the dictionary from that
 source.
 The keyword argument `gzip` (default `false`) determines if the file is gzipped.
 """
-struct MMTFDict
+struct MMTFDict <: AbstractDict{String,Any}
     dict::Dict{String, Any}
 end
 
@@ -82,9 +82,12 @@ Base.keys(mmtf_dict::MMTFDict) = keys(mmtf_dict.dict)
 Base.values(mmtf_dict::MMTFDict) = values(mmtf_dict.dict)
 Base.haskey(mmtf_dict::MMTFDict, key) = haskey(mmtf_dict.dict, key)
 Base.get(mmtf_dict::MMTFDict, key, default) = get(mmtf_dict.dict, key, default)
+Base.length(mmtf_dict::MMTFDict) = length(mmtf_dict.dict)
+Base.iterate(mmtf_dict::MMTFDict) = iterate(mmtf_dict.dict)
+Base.iterate(mmtf_dict::MMTFDict, i) = iterate(mmtf_dict.dict, i)
 
 function Base.show(io::IO, mmtf_dict::MMTFDict)
-    print(io, "MMTF dictionary with $(length(keys(mmtf_dict))) fields")
+    print(io, "MMTF dictionary with $(length(mmtf_dict)) fields")
 end
 
 function Base.read(input::IO,

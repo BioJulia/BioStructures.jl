@@ -1613,6 +1613,10 @@ end
     dic = MMCIFDict()
     dic = MMCIFDict(Dict())
 
+    # Test Base.show
+    show(IOBuffer(), MIME("text/plain"), MMCIFDict())
+    show(IOBuffer(), MIME("text/plain"), MMCIFDict(Dict("a" => ["b"])))
+
     mmcif_1ake = testfilepath("mmCIF", "1AKE.cif")
     gzip_file(mmcif_1ake, temp_filename)
     for dic in (MMCIFDict(mmcif_1ake), MMCIFDict(temp_filename; gzip=true))
@@ -2222,6 +2226,10 @@ end
     # Test MMTF dictionary
     dic = MMTF()
     dic = MMTFDict(Dict())
+    # Test Base.show
+    show(IOBuffer(), MIME("text/plain"), MMTFDict())
+    show(IOBuffer(), MIME("text/plain"), MMTFDict(Dict("a" => "b")))
+
     dic = MMTFDict(testfilepath("MMTF", "1AKE.mmtf"))
     @test isa(dic.dict, Dict{String, Any})
     @test dic["rWork"] == 0.196f0
