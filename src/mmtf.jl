@@ -18,7 +18,7 @@ Call `MMTFDict` with a filepath or stream to read the dictionary from that
 source.
 The keyword argument `gzip` (default `false`) determines if the file is gzipped.
 """
-struct MMTFDict <: AbstractDict{String,Any}
+struct MMTFDict <: AbstractDict{String, Any}
     dict::Dict{String, Any}
 end
 

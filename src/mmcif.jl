@@ -55,7 +55,7 @@ Call `MMCIFDict` with a filepath or stream to read the dictionary from that
 source.
 The keyword argument `gzip` (default `false`) determines if the input is gzipped.
 """
-struct MMCIFDict <: AbstractDict{String,Vector{String}}
+struct MMCIFDict <: AbstractDict{String, Vector{String}}
     dict::Dict{String, Vector{String}}
 end
 
