@@ -1,6 +1,11 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.11.5 - Oct 2020
+
+* Some mmCIF files, such as the chemical component dictionary from the PDB, contain multiple data blocks. These can now be read in to a `Dict{String, MMCIFDict}` with `readmultimmcif` and written out with `writemultimmcif`.
+* Tab completion and an improved REPL display are added for `MMCIFDict` and `MMTFDict`.
+
 ## v0.11.4 - Sep 2020
 
 * A `ProteinStructure` can now be obtained from a `MMCIFDict` or `MMTFDict` by passing them to the `ProteinStructure` constructor. This saves having to read the file twice when both the dictionary and the structure object are required.
