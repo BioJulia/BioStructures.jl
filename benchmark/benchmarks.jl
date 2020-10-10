@@ -6,8 +6,8 @@
 #   export_markdown(out_file, results)
 
 using BioStructures
-using BioCore
 using BenchmarkTools
+import BioCore # Imported to avoid clash with BioGenerics distance
 using Random
 
 # Use files in BioFmtSpecimens
