@@ -2220,7 +2220,7 @@ end
     end
 
     # Test readmultimmcif
-    # read from string
+    # Read from string
     comment_str = """
         data_test
         _test_single foo # Ignore this comment
@@ -2252,7 +2252,7 @@ end
         "_atom_site.B_iso_or_equiv", "_atom_site.Cartn_x",
         "_atom_site.Cartn_y", "_atom_site.Cartn_z"
     ]
-    # read from file: write a small multicif manually and read it back
+    # Read from file - write a small multicif manually and read it back
     for gzip in (false, true)
         transcoder = gzip ? (GzipCompressorStream,) : ()
         open(transcoder..., temp_filename, "w") do f_out
@@ -2264,7 +2264,7 @@ end
             end
         end
         cifs = readmultimmcif(temp_filename; gzip=gzip)
-        # tests for 1AKE
+        # Tests for 1AKE
         dic = cifs["1AKE"]
         @test isa(dic.dict, Dict{String, Vector{String}})
         @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == ["1991-11-08"]
@@ -2279,7 +2279,7 @@ end
         @test get(dic, "_cell.entry_id", ["default"]) == ["1AKE"]
         @test get(dic, "nokey", ["default"]) == ["default"]
         @test ismissing(get(dic, "nokey", missing))
-        # tests for 1EN2
+        # Tests for 1EN2
         struc = ProteinStructure(cifs["1EN2"])
         @test modelnumbers(struc) == [1]
         @test chainids(struc[1]) == ["A"]
@@ -2312,8 +2312,7 @@ end
         @test resnumber(res[1]) == 16
         @test countresidues(DisorderedResidue[struc['A'][16], struc['A'][10]]) == 2
     end
-    # test for throw on duplicate data_ entry
-    # somewhere in the middle
+    # Test error on duplicate data_ entry somewhere in the middle
     test_multicif = """
         data_test
         _test_single foo # Ignore this comment
@@ -2323,7 +2322,7 @@ end
         _test_single foo # Ignore this comment
     """
     @test_throws ErrorException readmultimmcif(IOBuffer(test_multicif))
-    # at the end
+    # Test error on duplicate data_ entry at the end
     test_multicif = """
         data_test
         _test_single foo # Ignore this comment
@@ -2333,12 +2332,12 @@ end
     @test_throws ErrorException readmultimmcif(IOBuffer(test_multicif))
 
     # Test writemultimmcif
-    test_multicif = Dict{String,MMCIFDict}()
+    test_multicif = Dict{String, MMCIFDict}()
     for pdbid in ("1AKE", "1SSU")
         cif = MMCIFDict(testfilepath("mmCIF", "$pdbid.cif"))
         test_multicif[pdbid] = cif
     end
-    # write to io
+    # Write to buffer
     for gzip in (false, true)
         open(temp_filename, "w") do io
             writemultimmcif(io, test_multicif; gzip=gzip)
@@ -2348,7 +2347,7 @@ end
             @test cifs[k].dict == test_multicif[k].dict
         end
     end
-    # write to filepath
+    # Write to filepath
     for gzip in (false, true)
         writemultimmcif(temp_filename, test_multicif; gzip=gzip)
         cifs = readmultimmcif(temp_filename; gzip=gzip)

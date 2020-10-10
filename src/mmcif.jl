@@ -556,12 +556,13 @@ function appendatom!(atom_dict, at, model_n, chain_id, res_n, res_name, het)
 end
 
 """
-    readmultimmcif(io::IO; gzip=false) -> Dict{String,MMCIFDict}
-    readmultimmcif(filepath::AbstractString; gzip=false) -> Dict{String,MMCIFDict}
+    readmultimmcif(filepath; gzip=false)
+    readmultimmcif(io; gzip=false)
 
-Read multiple `MMCIFDict`s from a filepath or stream.  Each `MMCIFDict` in the returned dictionary
-corresponds to an mmCIF data block from the input.
-An example of such a file is the Chemical Component Dictionary from the Protein Data Bank.
+Read multiple `MMCIFDict`s from a filepath or stream.
+Each `MMCIFDict` in the returned `Dict{String, MMCIFDict}` corresponds to an mmCIF data block from
+the input.
+An example of such a file is the chemical component dictionary from the Protein Data Bank.
 The keyword argument `gzip` (default `false`) determines if the input is gzipped.
 """
 function readmultimmcif(filepath::AbstractString; gzip::Bool=false)
@@ -579,42 +580,42 @@ function readmultimmcif(io::IO; gzip::Bool=false)
         tokens = tokenizecif(io)
     end
     idx = findall(t -> startswith(t, "data_"), tokens)
-    multicif = Dict{String,MMCIFDict}()
-    push!(idx, length(tokens) + 1)  # add end index for last block
-    for i = 1:length(idx)-1
+    multicif = Dict{String, MMCIFDict}()
+    push!(idx, length(tokens) + 1) # Add end index for last block
+    for i in 1:(length(idx) - 1)
         idx_start = idx[i]
-        idx_end = idx[i+1] - 1
+        idx_end = idx[i + 1] - 1
         data_token = tokens[idx_start]
         cif = MMCIFDict()
         cif_name = data_token[6:end]
         if haskey(multicif, cif_name)
-            throw(ErrorException("more than one mmCIF data block for data_$cif_name"))
+            throw(ErrorException("More than one mmCIF data block for data_$cif_name"))
         end
         cif["data_"] = [cif_name]
-        populatedict!(cif, tokens[idx_start+1:idx_end])
+        populatedict!(cif, tokens[(idx_start + 1):idx_end])
         multicif[cif_name] = cif
     end
     return multicif
 end
 
 """
-    writemultimmcif(io::IO; cifs::Dict{String,MMCIFDict}; gzip=false)
-    writemultimmcif(filepath::AbstractString, cifs::Dict{String,MMCIFDict}; gzip=false)
+    writemultimmcif(filepath, cifs; gzip=false)
+    writemultimmcif(io, cifs; gzip=false)
 
-Write multiple `MMCIFDict`s to a filepath or stream.
+Write multiple `MMCIFDict`s as a `Dict{String, MMCIFDict}` to a filepath or stream.
 The keyword argument `gzip` (default `false`) determines if the output is gzipped.
 """
-function writemultimmcif(filepath::AbstractString, cifs::Dict{String,MMCIFDict}; gzip::Bool=false)
-    open(filepath,"w") do f
+function writemultimmcif(filepath::AbstractString, cifs::Dict{String, MMCIFDict}; gzip::Bool=false)
+    open(filepath, "w") do f
         writemultimmcif(f, cifs; gzip=gzip)
     end
 end
 
-function writemultimmcif(io::IO, cifs::Dict{String,MMCIFDict}; gzip::Bool=false)
+function writemultimmcif(io::IO, cifs::Dict{String, MMCIFDict}; gzip::Bool=false)
     if gzip
         io = GzipCompressorStream(io)
     end
-    for (k,c) in cifs
+    for (k, c) in cifs
         c_key = c["data_"][1]
         if k != c_key
             @warn "writemultimmcif: MMCIFDict for key \"$k\" has different \"data_\" key (\"$c_key\")"

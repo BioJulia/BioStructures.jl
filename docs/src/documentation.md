@@ -500,6 +500,18 @@ julia> first(df, 3)
 
 As with file writing disordered entities are expanded by default but this can be changed by setting `expand_disordered` to `false`.
 
+### Reading multiple mmCIF data blocks
+
+You can read and write files containing multiple mmCIF data blocks (equivalent to a `MMCIFDict` in this package) with the [`readmultimmcif`](@ref) and [`writemultimmcif`](@ref) functions.
+An example of such a file is the PDB's [chemical component dictionary](https://www.wwpdb.org/data/ccd).
+
+```julia
+julia> ccd = readmultimmcif("components.cif.gz"; gzip=true);
+
+julia> ccd["2W4"]
+mmCIF dictionary with 64 fields
+```
+
 ## Writing PDB files
 
 PDB format files can be written:
@@ -549,21 +561,6 @@ julia> pdbline(AtomRecord(false, 669, "CA", ' ', "ILE", "A", 90, ' ', [31.743, 3
 ```
 
 This can be useful when writing PDB files from your own data structures.
-
-## Reading multiple mmCIF data blocks
-
-You can read and write files containing multiple mmCIF
-data blocks (equivalent to an `MMCIFDict` in this package) with the
-[`readmultimmcif`](@ref) and [`writemultimmcif`](@ref)
-functions.  An example of such a file is the PDB's
-[Chemical component dictionary](https://www.wwpdb.org/data/ccd).
-
-```julia
-julia> ccd = readmultimmcif("components.cif.gz"; gzip=true);
-
-julia> ccd["2W4"]
-mmCIF dictionary with 64 fields
-```
 
 ## RCSB PDB utility functions
 

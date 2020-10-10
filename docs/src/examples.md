@@ -1,6 +1,7 @@
 # BioStructures examples
 
-Further examples of BioStructures usage are given below.
+The best way to learn how to use the package is to read the [BioStructures documentation](@ref).
+Here we give further examples, showing what you can do with the package.
 
 **A)** Plot the temperature factors of a protein:
 
