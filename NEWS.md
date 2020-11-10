@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.11.6 - Nov 2020
+
+* Change compatibility bounds for new Format.jl release.
+
 ## v0.11.5 - Oct 2020
 
 * Some mmCIF files, such as the chemical component dictionary from the PDB, contain multiple data blocks. These can now be read in to a `Dict{String, MMCIFDict}` with `readmultimmcif` and written out with `writemultimmcif`.
