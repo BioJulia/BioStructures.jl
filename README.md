@@ -9,8 +9,7 @@
 
 **Development status:**
 
-[![Build status](https://travis-ci.org/BioJulia/BioStructures.jl.svg?branch=master)](https://travis-ci.org/BioJulia/BioStructures.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/ltynlacyj689ei1u/branch/master?svg=true)](https://ci.appveyor.com/project/jgreener64/biostructures-jl/branch/master)
+[![Build status](https://github.com/BioJulia/BioStructures.jl/workflows/CI/badge.svg)](https://github.com/BioJulia/BioStructures.jl/actions)
 [![codecov.io](http://codecov.io/github/BioJulia/BioStructures.jl/coverage.svg?branch=master)](http://codecov.io/github/BioJulia/BioStructures.jl?branch=master)
 [![Documentation dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://biojulia.github.io/BioStructures.jl/dev)
 
