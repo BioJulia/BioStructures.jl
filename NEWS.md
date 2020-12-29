@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.11.7 - Dec 2020
+
+* Change compatibility bounds for new DataFrames.jl release.
+
 ## v0.11.6 - Nov 2020
 
 * Change compatibility bounds for new Format.jl release.
