@@ -3,7 +3,30 @@
 The best way to learn how to use the package is to read the [BioStructures documentation](@ref).
 Here we give further examples, showing what you can do with the package.
 
-**A)** Plot the temperature factors of a protein:
+**A)** Print the centroid coordinate of the sidechain heavy atoms for each residue in a protein:
+
+```julia
+using Statistics
+
+struc = read("1AKE.pdb", PDB)
+res_list = collectresidues(struc, standardselector)
+
+function sidechainheavyselector(a::AbstractAtom)
+    return !hydrogenselector(a) && !atomnameselector(a, backboneatomnames)
+end
+
+for res in res_list
+    print(resid(res, full=true), "  ")
+    if resname(res) == "GLY"
+        println("no sidechain")
+    else
+        coord_array = coordarray(res, sidechainheavyselector)
+        println(join(mean(coord_array, dims=2), "  "))
+    end
+end
+```
+
+**B)** Plot the temperature factors of a protein:
 
 ```julia
 using Plots
@@ -15,7 +38,7 @@ plot(resnumber.(calphas),
      label="")
 ```
 
-**B)** Print the PDB records for all Cα atoms within 5 Å of residue 38:
+**C)** Print the PDB records for all Cα atoms within 5 Å of residue 38:
 
 ```julia
 for at in calphas
@@ -25,7 +48,7 @@ for at in calphas
 end
 ```
 
-**C)** Find the residues at the interface of a protein-protein interaction:
+**D)** Find the residues at the interface of a protein-protein interaction:
 
 ```julia
 for res_a in collectresidues(struc["A"], standardselector)
@@ -37,7 +60,7 @@ for res_a in collectresidues(struc["A"], standardselector)
 end
 ```
 
-**D)** Show the Ramachandran phi/psi angle plot of a structure:
+**E)** Show the Ramachandran phi/psi angle plot of a protein structure:
 
 ```julia
 using Plots
@@ -54,7 +77,7 @@ scatter(rad2deg.(phi_angles),
      ylims=(-180, 180))
 ```
 
-**E)** Calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:
+**F)** Calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:
 
 ```julia
 downloadpdb("1SSU")
@@ -63,7 +86,7 @@ rmsd(struc_nmr[5], struc_nmr[10], superimpose=false, rmsdatoms=heavyatomselector
 displacements(struc_nmr[5], struc_nmr[10], superimpose=false, rmsdatoms=heavyatomselector)
 ```
 
-**F)** Calculate the cysteine fraction of every structure in the PDB:
+**G)** Calculate the cysteine fraction of every protein in the PDB:
 
 ```julia
 l = pdbentrylist()
@@ -79,7 +102,7 @@ for p in l
 end
 ```
 
-**G)** Interoperability is possible with other packages in the [Julia ecosystem](https://pkg.julialang.org/docs).
+**H)** Interoperability is possible with other packages in the [Julia ecosystem](https://pkg.julialang.org/docs).
 For example, use [NearestNeighbors.jl](https://github.com/KristofferC/NearestNeighbors.jl) to find the 10 nearest residues to each residue:
 
 ```julia
@@ -90,7 +113,7 @@ kdtree = KDTree(ca; leafsize=10)
 idxs, dists = knn(kdtree, ca, 10, true)
 ```
 
-**H)** Interoperability with [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) gives access to filtering, sorting, summary statistics and other writing options:
+**I)** Interoperability with [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) gives access to filtering, sorting, summary statistics and other writing options:
 
 ```julia
 using DataFrames
