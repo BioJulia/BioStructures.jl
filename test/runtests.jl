@@ -45,7 +45,7 @@ using BioStructures:
 skip_linux_download = true
 
 # Get the path to BioFmtSpecimens and download it if required
-fmtdir = BioCore.Testing.get_bio_fmt_specimens()
+fmtdir = BioCore.Testing.get_bio_fmt_specimens(auto_checkout=false)
 
 # Access files in BioFmtSpecimens to test against
 testfilepath(path::AbstractString...) = joinpath(fmtdir, path...)
