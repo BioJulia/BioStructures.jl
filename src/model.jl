@@ -1394,8 +1394,8 @@ function collectatoms(el::StructuralElementOrList,
                         atom_selector::Function,
                         atom_selectors::Function...;
                         expand_disordered::Bool=false)
-    return applyselectors(collectatoms(el; expand_disordered=expand_disordered),
-                            atom_selector, atom_selectors...)
+    return collectatoms(applyselectors(collectatoms(el), atom_selector, atom_selectors...);
+                        expand_disordered=expand_disordered)
 end
 
 """

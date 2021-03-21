@@ -1125,6 +1125,10 @@ end
     @test all(isa.(ats, Atom))
     ats = collectatoms(struc, standardselector, expand_disordered=true)
     @test length(ats) == 3317
+    ats = collectatoms(struc, disorderselector, expand_disordered=true)
+    @test length(ats) == 24
+    @test isa(ats, Vector{AbstractAtom})
+    @test all(isa.(ats, Atom))
 
     # Test countatoms
     @test countatoms(struc) == 3804
