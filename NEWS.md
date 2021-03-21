@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v0.11.8 - Mar 2021
+
+* Fix bug in expanding disordered atoms before applying atom selectors.
+
 ## v0.11.7 - Dec 2020
 
 * Change compatibility bounds for new DataFrames.jl release.
