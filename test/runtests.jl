@@ -1077,6 +1077,7 @@ end
     ats = collectatoms(struc, disorderselector)
     @test length(ats) == 12
     @test serial(ats[10]) == 3338
+    @test all(isa.(ats, DisorderedAtom))
     ats = collectatoms(struc, standardselector, disorderselector)
     @test length(ats) == 5
     @test serial(ats[4]) == 1294
@@ -1219,6 +1220,14 @@ end
     @test all(isa.(res, Residue))
     res = collectresidues(struc, standardselector, expand_disordered=true)
     @test length(res) == 90
+    res = collectresidues(struc, disorderselector)
+    @test length(res) == 5
+    @test isa(res, Vector{AbstractResidue})
+    @test all(isa.(res, DisorderedResidue))
+    res = collectresidues(struc, disorderselector, expand_disordered=true)
+    @test length(res) == 10
+    @test isa(res, Vector{AbstractResidue})
+    @test all(isa.(res, Residue))
 
     # Test countresidues
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)

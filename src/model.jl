@@ -1303,8 +1303,8 @@ function collectresidues(el::StructuralElementOrList,
                     residue_selector::Function,
                     residue_selectors::Function...;
                     expand_disordered::Bool=false)
-    return applyselectors(collectresidues(el; expand_disordered=expand_disordered),
-                            residue_selector, residue_selectors...)
+    return collectresidues(applyselectors(collectresidues(el), residue_selector,
+                            residue_selectors...); expand_disordered=expand_disordered)
 end
 
 """
