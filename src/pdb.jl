@@ -14,6 +14,7 @@ export
     updatelocalpdb,
     downloadallobsoletepdb,
     retrievepdb,
+    read,
     spaceatomname,
     pdbline,
     writepdb
