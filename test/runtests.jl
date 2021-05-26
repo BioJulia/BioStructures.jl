@@ -647,8 +647,8 @@ end
     sort!(at_list_ord)
     @test atomname.(at_list_ord) == ["CB", "CG", "CA"]
 
-    # Order when sorting a residue list is chain ID, then stdres/hetres,
-    # then residue number, then insertion code
+    # Order when sorting a residue list is chain ID, then residue number,
+    # then insertion code, then stdres/hetres
     res_ord = AbstractResidue[
         Residue("ALA", 201, 'A', false, Chain('A')),
         Residue("ALA", 203, ' ', false, Chain('A')),
@@ -672,16 +672,16 @@ end
     @test resid.(res_ord) == [
         "201A", "203", "H_200", "201B", "202", "300", "H_201", "201", "H_201A",
         "100", "H_203", "200"]
-    @test map(res -> resid(res, full=true), res_ord) == [
+    @test resid.(res_ord; full=true) == [
         "201A:A", "203:A", "H_200:A", "201B:A", "202:A", "300:B", "H_201:A",
         "201:A", "H_201A:A", "100:B", "H_203:A", "200:A"]
-    @test map(res -> resid(res, full=true), sort(res_ord)) == [
-        "200:A", "201:A", "201A:A", "201B:A", "202:A", "203:A", "H_200:A",
-        "H_201:A", "H_201A:A", "H_203:A", "100:B", "300:B"]
+    @test resid.(sort(res_ord); full=true) == [
+        "200:A", "H_200:A", "201:A", "H_201:A", "201A:A", "H_201A:A", "201B:A",
+        "202:A", "203:A", "H_203:A", "100:B", "300:B"]
     sort!(res_ord)
-    @test map(res -> resid(res, full=true), res_ord) == [
-        "200:A", "201:A", "201A:A", "201B:A", "202:A", "203:A", "H_200:A",
-        "H_201:A", "H_201A:A", "H_203:A", "100:B", "300:B"]
+    @test resid.(res_ord; full=true) == [
+        "200:A", "H_200:A", "201:A", "H_201:A", "201A:A", "H_201A:A", "201B:A",
+        "202:A", "203:A", "H_203:A", "100:B", "300:B"]
 
     # Order of listing residue names in a DisorderedResidue is default then alphabetical
     dis_res_ord = DisorderedResidue(Dict(
@@ -696,15 +696,15 @@ end
 
     # Order when sorting chain IDs is character ordering with the empty chain ID at the end
     mod_ord = Model(1, Dict(
-        "AB" => Chain("AB"),
-        "A" => Chain("A"),
-        " " => Chain(" "),
-        "1" => Chain("1"),
+        "AB"  => Chain("AB"),
+        "A"   => Chain("A"),
+        " "   => Chain(" "),
+        "1"   => Chain("1"),
         "AAA" => Chain("AAA"),
-        "BC" => Chain("BC"),
-        "a" => Chain("a"),
-        "X" => Chain("X"),
-        "AC" => Chain("AC"),
+        "BC"  => Chain("BC"),
+        "a"   => Chain("a"),
+        "X"   => Chain("X"),
+        "AC"  => Chain("AC"),
     ), ProteinStructure())
     @test chainids(mod_ord) == ["1", "A", "X", "a", "AB", "AC", "BC", "AAA", " "]
 
@@ -944,10 +944,10 @@ end
     res = collectresidues(struc)
     res_min = applyselectors(res)
     @test length(res_min) == length(res)
-    @test map(res -> resid(res, full=true), res_min) == map(res -> resid(res, full=true), res)
+    @test resid.(res_min; full=true) == resid.(res; full=true)
     applyselectors!(res_min)
     @test length(res_min) == length(res)
-    @test map(res -> resid(res, full=true), res_min) == map(res -> resid(res, full=true), res)
+    @test resid.(res_min; full=true) == resid.(res; full=true)
     res_min = applyselectors(res, waterselector)
     @test length(res_min) == 378
     @test resid(res_min[300], full=true) == "H_657:B"
@@ -1216,7 +1216,7 @@ end
     struc = read(testfilepath("PDB", "1EN2.pdb"), PDB)
     res = collectresidues(struc)
     @test length(res) == 166
-    @test isa(res[9], DisorderedResidue)
+    @test isa(res[10], DisorderedResidue)
     res = collectresidues(struc, expand_disordered=true)
     @test length(res) == 171
     @test isa(res, Vector{AbstractResidue})

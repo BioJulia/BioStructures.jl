@@ -941,18 +941,18 @@ function Base.isless(at_one::AbstractAtom, at_two::AbstractAtom)
     return isless(serial(at_one), serial(at_two))
 end
 
-# Sort residues by chain, then hetero, then resnumber, then ins code
+# Sort residues by chain, then resnumber, then ins code, then hetero
 function Base.isless(res_one::AbstractResidue, res_two::AbstractResidue)
     if isless(chain(res_one), chain(res_two))
         return true
     elseif chainid(res_one) == chainid(res_two)
-        if !ishetero(res_one) && ishetero(res_two)
+        if isless(resnumber(res_one), resnumber(res_two))
             return true
-        elseif ishetero(res_one) == ishetero(res_two)
-            if isless(resnumber(res_one), resnumber(res_two))
+        elseif resnumber(res_one) == resnumber(res_two)
+            if isless(inscode(res_one), inscode(res_two))
                 return true
-            elseif resnumber(res_one) == resnumber(res_two)
-                if isless(inscode(res_one), inscode(res_two))
+            elseif inscode(res_one) == inscode(res_two)
+                if !ishetero(res_one) && ishetero(res_two)
                     return true
                 end
             end
