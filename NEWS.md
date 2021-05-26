@@ -1,6 +1,11 @@
 BioStructures.jl release notes
 ==============================
 
+## v1.0.0 - May 2021
+
+* The ordering when sorting residues in a chain is changed from standard/hetero residue then residue number then insertion code to residue number then insertion code then standard/hetero residue. This makes in-chain hetero residues appear in the correct place in written PDB files.
+* Support for Julia versions before 1.3 is dropped.
+
 ## v0.11.9 - Apr 2021
 
 * Fix bug in expanding disordered residues before applying residue selectors.
