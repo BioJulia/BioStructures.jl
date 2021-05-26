@@ -648,7 +648,7 @@ end
     @test atomname.(at_list_ord) == ["CB", "CG", "CA"]
 
     # Order when sorting a residue list is chain ID, then residue number,
-    # then insertion code, then stdres/hetres
+    #   then insertion code, then stdres/hetres
     res_ord = AbstractResidue[
         Residue("ALA", 201, 'A', false, Chain('A')),
         Residue("ALA", 203, ' ', false, Chain('A')),

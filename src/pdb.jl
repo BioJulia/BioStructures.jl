@@ -434,6 +434,24 @@ function retrievepdb(pdbid::AbstractString;
     read(pdbpath, PDB; structure_name=structure_name, kwargs...)
 end
 
+"""
+    read(filepath::AbstractString, filetype::Type; <keyword arguments>)
+    read(input::IO, filetype::Type; <keyword arguments>)
+
+Read a Protein Data Bank (PDB) file in PDB, mmCIF or MMTF format and return a
+`ProteinStructure`.
+
+# Arguments
+- `filetype::Type`: either `PDB`, `MMCIF` or `MMTF`.
+- `structure_name::AbstractString`: the name given to the returned
+    `ProteinStructure`; defaults to the file name.
+- `remove_disorder::Bool=false`: whether to remove atoms with alt loc ID not ' '
+    or 'A'.
+- `read_std_atoms::Bool=true`: whether to read standard ATOM records.
+- `read_het_atoms::Bool=true`: whether to read HETATOM records.
+- `gzip::Bool=false`: whether the input is gzipped, not available for `PDB`
+    type.
+"""
 function Base.read(input::IO,
             ::Type{PDB};
             structure_name::AbstractString="",

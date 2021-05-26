@@ -58,7 +58,6 @@ export
     models,
     defaultmodel,
     sequentialresidues,
-    collect,
     applyselectors,
     applyselectors!,
     collectmodels,
