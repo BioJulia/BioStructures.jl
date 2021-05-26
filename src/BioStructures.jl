@@ -19,6 +19,7 @@ using BioSequences
 using BioSymbols
 using CodecZlib
 using DataFrames
+using Downloads
 using Format
 using LightGraphs
 using MetaGraphs

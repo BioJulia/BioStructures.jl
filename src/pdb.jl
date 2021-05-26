@@ -64,7 +64,7 @@ function pdbentrylist()
     @info "Fetching the list of all PDB entries from the RCSB server"
     tempfilepath = tempname()
     try
-        download("ftp://ftp.wwpdb.org/pub/pdb/derived_data/index/entries.idx", tempfilepath)
+        Downloads.download("ftp://ftp.wwpdb.org/pub/pdb/derived_data/index/entries.idx", tempfilepath)
         open(tempfilepath) do input
             # Skips the first two lines as it contains headers
             linecount = 1
@@ -102,7 +102,7 @@ function pdbstatuslist(url::AbstractString)
     @info "Fetching weekly status file $filename from the RCSB server"
     tempfilepath = tempname()
     try
-        download(url, tempfilepath)
+        Downloads.download(url, tempfilepath)
         # Some operating systems don't create a file if the download is empty
         if isfile(tempfilepath)
             open(tempfilepath) do input
@@ -151,7 +151,7 @@ function pdbobsoletelist()
     @info "Fetching the list of all obsolete PDB entries from the RCSB server"
     tempfilepath = tempname()
     try
-        download("ftp://ftp.wwpdb.org/pub/pdb/data/status/obsolete.dat", tempfilepath)
+        Downloads.download("ftp://ftp.wwpdb.org/pub/pdb/data/status/obsolete.dat", tempfilepath)
         open(tempfilepath) do input
             for line in eachline(input)
                 # Check if its an obsolete pdb entry and not headers
@@ -237,15 +237,15 @@ function downloadpdb(pdbid::AbstractString;
             @info "Downloading file from PDB: $pdbid"
             if ba_number == 0
                 if format == MMTF
-                    download("http://mmtf.rcsb.org/v1.0/full/$pdbid.mmtf.gz", archivefilepath)
+                    Downloads.download("http://mmtf.rcsb.org/v1.0/full/$pdbid.mmtf.gz", archivefilepath)
                 else
-                    download("http://files.rcsb.org/download/$pdbid.$(pdbextension[format]).gz", archivefilepath)
+                    Downloads.download("http://files.rcsb.org/download/$pdbid.$(pdbextension[format]).gz", archivefilepath)
                 end
             else
                 if format == PDB
-                    download("http://files.rcsb.org/download/$pdbid.$(pdbextension[format])$ba_number.gz", archivefilepath)
+                    Downloads.download("http://files.rcsb.org/download/$pdbid.$(pdbextension[format])$ba_number.gz", archivefilepath)
                 elseif format == MMCIF
-                    download("http://files.rcsb.org/download/$pdbid-assembly$ba_number.$(pdbextension[format]).gz", archivefilepath)
+                    Downloads.download("http://files.rcsb.org/download/$pdbid-assembly$ba_number.$(pdbextension[format]).gz", archivefilepath)
                 else
                     throw(ArgumentError("Biological assemblies are available in the PDB and mmCIF formats only"))
                 end
