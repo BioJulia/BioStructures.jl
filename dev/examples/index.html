@@ -18,11 +18,13 @@ for res in res_list
     end
 end</code></pre><p><strong>B)</strong> Plot the temperature factors of a protein:</p><pre><code class="language-julia">using Plots
 calphas = collectatoms(struc, calphaselector)
-plot(resnumber.(calphas),
-     tempfactor.(calphas),
-     xlabel=&quot;Residue number&quot;,
-     ylabel=&quot;Temperature factor&quot;,
-     label=&quot;&quot;)</code></pre><p><strong>C)</strong> Print the PDB records for all Cα atoms within 5 Å of residue 38:</p><pre><code class="language-julia">for at in calphas
+plot(
+    resnumber.(calphas),
+    tempfactor.(calphas),
+    xlabel=&quot;Residue number&quot;,
+    ylabel=&quot;Temperature factor&quot;,
+    label=&quot;&quot;,
+)</code></pre><p><strong>C)</strong> Print the PDB records for all Cα atoms within 5 Å of residue 38:</p><pre><code class="language-julia">for at in calphas
     if distance(struc[&#39;A&#39;][38], at) &lt; 5.0 &amp;&amp; resnumber(at) != 38
         println(pdbline(at))
     end
@@ -34,16 +36,18 @@ end</code></pre><p><strong>D)</strong> Find the residues at the interface of a p
     end
 end</code></pre><p><strong>E)</strong> Show the Ramachandran phi/psi angle plot of a protein structure:</p><pre><code class="language-julia">using Plots
 phi_angles, psi_angles = ramachandranangles(struc, standardselector)
-scatter(rad2deg.(phi_angles),
-     rad2deg.(psi_angles),
-     title=&quot;Ramachandran plot&quot;,
-     xlabel=&quot;Phi / degrees&quot;,
-     ylabel=&quot;Psi / degrees&quot;,
-     label=&quot;&quot;,
-     xticks=[-180, -90, 0, 90, 180],
-     yticks=[-180, -90, 0, 90, 180],
-     xlims=(-180, 180),
-     ylims=(-180, 180))</code></pre><p><strong>F)</strong> Calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:</p><pre><code class="language-julia">downloadpdb(&quot;1SSU&quot;)
+scatter(
+    rad2deg.(phi_angles),
+    rad2deg.(psi_angles),
+    title=&quot;Ramachandran plot&quot;,
+    xlabel=&quot;Phi / degrees&quot;,
+    ylabel=&quot;Psi / degrees&quot;,
+    label=&quot;&quot;,
+    xticks=[-180, -90, 0, 90, 180],
+    yticks=[-180, -90, 0, 90, 180],
+    xlims=(-180, 180),
+    ylims=(-180, 180),
+)</code></pre><p><strong>F)</strong> Calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:</p><pre><code class="language-julia">downloadpdb(&quot;1SSU&quot;)
 struc_nmr = read(&quot;1SSU.pdb&quot;, PDB)
 rmsd(struc_nmr[5], struc_nmr[10], superimpose=false, rmsdatoms=heavyatomselector)
 displacements(struc_nmr[5], struc_nmr[10], superimpose=false, rmsdatoms=heavyatomselector)</code></pre><p><strong>G)</strong> Calculate the cysteine fraction of every protein in the PDB:</p><pre><code class="language-julia">l = pdbentrylist()
@@ -68,4 +72,4 @@ df = DataFrame(collectatoms(struc))
 describe(df) # Show summary
 mean(df.tempfactor) # Column-wise operations
 sort(df, :x) # Sorting
-CSV.write(&quot;1ALW.csv&quot;, df) # CSV file writing</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../documentation/">« Documentation</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 22 April 2021 10:22">Thursday 22 April 2021</span>. Using Julia version 1.6.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+CSV.write(&quot;1ALW.csv&quot;, df) # CSV file writing</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../documentation/">« Documentation</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 26 May 2021 13:13">Wednesday 26 May 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
