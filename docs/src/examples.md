@@ -31,11 +31,13 @@ end
 ```julia
 using Plots
 calphas = collectatoms(struc, calphaselector)
-plot(resnumber.(calphas),
-     tempfactor.(calphas),
-     xlabel="Residue number",
-     ylabel="Temperature factor",
-     label="")
+plot(
+    resnumber.(calphas),
+    tempfactor.(calphas),
+    xlabel="Residue number",
+    ylabel="Temperature factor",
+    label="",
+)
 ```
 
 **C)** Print the PDB records for all Cα atoms within 5 Å of residue 38:
@@ -65,16 +67,18 @@ end
 ```julia
 using Plots
 phi_angles, psi_angles = ramachandranangles(struc, standardselector)
-scatter(rad2deg.(phi_angles),
-     rad2deg.(psi_angles),
-     title="Ramachandran plot",
-     xlabel="Phi / degrees",
-     ylabel="Psi / degrees",
-     label="",
-     xticks=[-180, -90, 0, 90, 180],
-     yticks=[-180, -90, 0, 90, 180],
-     xlims=(-180, 180),
-     ylims=(-180, 180))
+scatter(
+    rad2deg.(phi_angles),
+    rad2deg.(psi_angles),
+    title="Ramachandran plot",
+    xlabel="Phi / degrees",
+    ylabel="Psi / degrees",
+    label="",
+    xticks=[-180, -90, 0, 90, 180],
+    yticks=[-180, -90, 0, 90, 180],
+    xlims=(-180, 180),
+    ylims=(-180, 180),
+)
 ```
 
 **F)** Calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:

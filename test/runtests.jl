@@ -2,6 +2,7 @@ module TestBioStructures
 
 using Test
 
+using Aqua
 using BioAlignments
 using BioSequences
 import BioCore # Imported to avoid clash with BioGenerics distance
@@ -71,6 +72,8 @@ function countlines_gzip(filename::AbstractString; gzip=false)
         return countlines(filename)
     end
 end
+
+Aqua.test_all(BioStructures; ambiguities=false) # Ambiguities fails on dependencies
 
 # This is the only test set that requires an internet connection
 @testset "PDB interface" begin
