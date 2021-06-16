@@ -787,7 +787,7 @@ end
 @recipe function plot(cm::ContactMap)
     seriestype := :heatmap
     fillcolor --> :dense
-    aspectratio --> 1
+    aspect_ratio --> 1
     xmirror --> true
     colorbar --> false
     xs = string.(1:size(cm, 2))
@@ -799,7 +799,7 @@ end
 @recipe function plot(dm::DistanceMap)
     seriestype := :heatmap
     fillcolor --> :inferno
-    aspectratio --> 1
+    aspect_ratio --> 1
     xmirror --> true
     colorbar --> true
     xs = string.(1:size(dm, 2))
