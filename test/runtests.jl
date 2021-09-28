@@ -73,7 +73,7 @@ function countlines_gzip(filename::AbstractString; gzip=false)
     end
 end
 
-Aqua.test_all(BioStructures; ambiguities=false) # Ambiguities fails on dependencies
+Aqua.test_all(BioStructures; ambiguities=(recursive=false))
 
 # This is the only test set that requires an internet connection
 @testset "PDB interface" begin
