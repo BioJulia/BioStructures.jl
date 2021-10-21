@@ -46,6 +46,7 @@ export
     resnames,
     chain,
     chainid,
+    chainid!,
     resids,
     residues,
     model,
@@ -127,7 +128,7 @@ A residue (amino acid) or other molecule - either a `Residue` or a
 abstract type AbstractResidue <: StructuralElement end
 
 "A residue (amino acid) or other molecule."
-struct Residue <: AbstractResidue
+mutable struct Residue <: AbstractResidue
     name::String
     number::Int
     ins_code::Char
@@ -147,7 +148,7 @@ struct DisorderedResidue <: AbstractResidue
 end
 
 "A chain (molecule) from a macromolecular structure."
-struct Chain <: StructuralElement
+mutable struct Chain <: StructuralElement
     id::String # mmCIF files can have multi-character chain IDs
     res_list::Vector{String}
     residues::Dict{String, AbstractResidue}
@@ -815,6 +816,48 @@ Get the chain ID of an `AbstractAtom`, `AbstractResidue` or `Chain` as a
 """
 chainid(el::Union{AbstractResidue, AbstractAtom}) = chainid(chain(el))
 chainid(ch::Chain) = ch.id
+
+"""
+    chainid!(ch, id)
+
+Set the chain ID of an `Chain` to a new `String`.
+"""
+chainid!(ch::Chain, id::String) = ch.id = id
+
+"""
+    chainid!(res, id)
+
+Set the chain ID of an `AbstractResidue` to a new `String`.
+
+If a chain with this ID already exists, it will be removed from its current
+chain and added to that chain. If a chain with this ID does not exist, a new
+chain will be added to the model and this residue will be added to it. If
+moving this residue from a chain to a new chain renders the old chain without
+residues, the old chain will be removed from the `Model`.
+"""
+function chainid!(res::AbstractResidue, id::String)
+    current_chain = res.chain
+    model_chains = current_chain.model.chains
+
+    # find the currently-assigned resid, which may not have been created from the resid function
+    current_resid = first(filter(el -> el.second == res, current_chain.residues)).first
+
+    if id in keys(model_chains)
+        model_chains[id].residues[resid(res)] = res
+    else
+        model_chains[id] = Chain(id, [], Dict(current_resid => res), current_chain.model)
+    end
+    res.chain = model_chains[id]
+
+    # remove the residue from its current chain
+    delete!(current_chain.residues, current_resid)
+    if isempty(current_chain.residues)
+        delete!(model_chains, current_chain.id)
+    end
+
+    fixlists!(structure(res))
+end
+
 
 """
     resids(ch)
@@ -1522,7 +1565,7 @@ fullresname(res::Residue) = res.name
 function fixlists!(struc::ProteinStructure)
     for mod in struc
         for ch in mod
-            append!(ch.res_list, resid.(sort(collect(values(residues(ch))))))
+            ch.res_list = resid.(sort(collect(values(residues(ch)))))
             for res in ch
                 if isa(res, Residue)
                     fixlists!(res)
@@ -1537,7 +1580,7 @@ function fixlists!(struc::ProteinStructure)
 end
 
 function fixlists!(res::Residue)
-    append!(res.atom_list, fullatomname.(sort(collect(values(atoms(res))))))
+    res.atom_list = fullatomname.(sort(collect(values(atoms(res)))))
 end
 
 fullatomname(at::Atom) = at.name
