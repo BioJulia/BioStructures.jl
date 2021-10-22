@@ -11,6 +11,7 @@ export
     ProteinStructure,
     AtomRecord,
     StructuralElementOrList,
+    PDBConsistencyException,
     serial,
     atomname,
     altlocid,
@@ -93,6 +94,7 @@ export
     pairalign,
     DataFrame
 
+
 "A macromolecular structural element."
 abstract type StructuralElement end
 
@@ -101,6 +103,14 @@ An atom that is part of a macromolecule - either an `Atom` or a
 `DisorderedAtom`.
 """
 abstract type AbstractAtom <: StructuralElement end
+
+"""
+Exception indicating something is inconsistent in the structure's
+state.
+"""
+struct PDBConsistencyException <: Exception
+    msg::AbstractString
+end
 
 "An atom that is part of a macromolecule."
 struct Atom <: AbstractAtom
@@ -822,7 +832,16 @@ chainid(ch::Chain) = ch.id
 
 Set the chain ID of an `Chain` to a new `String`.
 """
-chainid!(ch::Chain, id::String) = ch.id = id
+function chainid!(ch::Chain, id::String)
+    if haskey(ch.model.chains, id)
+        throw(PDBConsistencyException("Invalid ID ($(id)). The model already has a chain with this ID."))
+    end
+
+    old_id = ch.id
+    ch.id = id
+    ch.model.chains[id] = ch
+    delete!(ch.model.chains, old_id)
+end
 
 """
     chainid!(res, id)
@@ -836,6 +855,7 @@ moving this residue from a chain to a new chain renders the old chain without
 residues, the old chain will be removed from the `Model`.
 """
 function chainid!(res::AbstractResidue, id::String)
+
     current_chain = res.chain
     model_chains = current_chain.model.chains
 
@@ -843,6 +863,10 @@ function chainid!(res::AbstractResidue, id::String)
     current_resid = first(filter(el -> el.second == res, current_chain.residues)).first
 
     if id in keys(model_chains)
+        if haskey(model_chains[id].residues, current_resid) && model_chains[id].residues[current_resid] != res
+            throw(PDBConsistencyException("A residue with id ($(current_resid)) already exists in chain $(id). Cannot copy this residue there"))
+        end
+
         model_chains[id].residues[resid(res)] = res
     else
         model_chains[id] = Chain(id, [], Dict(current_resid => res), current_chain.model)
