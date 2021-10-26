@@ -415,6 +415,41 @@ end
     @test chainid(dis_res) == "A"
     @test chainid(ch) == "A"
 
+    # test modifying the chain ids
+    chainid!(ch, "C")
+    @test chainid(at) == "C"
+    @test chainid(dis_at) == "C"
+    @test chainid(res) == "C"
+    @test chainid(dis_res) == "C"
+    @test chainid(ch) == "C"
+    @test mod["C"] == ch
+    @test_throws KeyError mod["A"]
+
+    @test chainids(mod) == ["B", "C"]
+    chainid!(ch, "A")
+
+    # move one of the residues to a new chain and StructuralElements below it
+    # should identify on the new chain
+    chainid!(res, "C")
+    @test chainid(res) == "C"
+    @test chainid(at) == "C"
+    @test chainid(dis_at) == "C"
+    @test chainid(dis_res) == "A"
+    @test chainid(ch) == "A"
+
+    @test chainids(mod) == ["A", "B", "C"]
+
+    # Emptying a chain of residues by moving its residues deletes the chain
+    chainid!(res, "A")
+
+    @test chainids(mod) == ["A", "B"]
+
+    # reassigning a chainid to one that already exists throws an exception
+    @test_throws PDBConsistencyError chainid!(ch, "B")
+    struc['B'][10] = Residue("ALA", 10, ' ', false, struc['B'])
+    # reassigning a residue with a number to a chain that already has one of that number throws
+    @test_throws PDBConsistencyError chainid!(struc['B'][10], "A")
+
     @test resids(ch) == ["10", "H_20A"]
 
     @test isa(residues(ch), Dict{String, AbstractResidue})
