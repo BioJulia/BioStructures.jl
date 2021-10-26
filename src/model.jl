@@ -11,7 +11,7 @@ export
     ProteinStructure,
     AtomRecord,
     StructuralElementOrList,
-    PDBConsistencyException,
+    PDBConsistencyError,
     serial,
     atomname,
     altlocid,
@@ -108,8 +108,8 @@ abstract type AbstractAtom <: StructuralElement end
 Exception indicating something is inconsistent in the structure's
 state.
 """
-struct PDBConsistencyException <: Exception
-    msg::AbstractString
+struct PDBConsistencyError <: Exception
+    msg::String
 end
 
 "An atom that is part of a macromolecule."
@@ -834,7 +834,7 @@ Set the chain ID of an `Chain` to a new `String`.
 """
 function chainid!(ch::Chain, id::String)
     if haskey(ch.model.chains, id)
-        throw(PDBConsistencyException("Invalid ID ($(id)). The model already has a chain with this ID."))
+        throw(PDBConsistencyError("Invalid ID ($(id)). The model already has a chain with this ID."))
     end
 
     old_id = ch.id
@@ -860,11 +860,11 @@ function chainid!(res::AbstractResidue, id::String)
     model_chains = current_chain.model.chains
 
     # find the currently-assigned resid, which may not have been created from the resid function
-    current_resid = first(filter(el -> el.second == res, current_chain.residues)).first
+    current_resid = findfirst(isequal(res), current_chain.residues)
 
     if id in keys(model_chains)
         if haskey(model_chains[id].residues, current_resid) && model_chains[id].residues[current_resid] != res
-            throw(PDBConsistencyException("A residue with id ($(current_resid)) already exists in chain $(id). Cannot copy this residue there"))
+            throw(PDBConsistencyError("A residue with id ($(current_resid)) already exists in chain $(id). Cannot copy this residue there"))
         end
 
         model_chains[id].residues[resid(res)] = res

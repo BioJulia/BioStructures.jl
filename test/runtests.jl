@@ -423,6 +423,7 @@ end
     @test chainid(dis_res) == "C"
     @test chainid(ch) == "C"
     @test mod["C"] == ch
+    @test_throws KeyError mod["A"]
 
     @test chainids(mod) == ["B", "C"]
     chainid!(ch, "A")
@@ -444,10 +445,10 @@ end
     @test chainids(mod) == ["A", "B"]
 
     # reassigning a chainid to one that already exists throws an exception
-    @test_throws PDBConsistencyException chainid!(ch, "B")
+    @test_throws PDBConsistencyError chainid!(ch, "B")
     struc['B'][10] = Residue("ALA", 10, ' ', false, struc['B'])
     # reassigning a residue with a number to a chain that already has one of that number throws
-    @test_throws PDBConsistencyException chainid!(struc['B'][10], "A")
+    @test_throws PDBConsistencyError chainid!(struc['B'][10], "A")
 
     @test resids(ch) == ["10", "H_20A"]
 
