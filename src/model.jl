@@ -1730,14 +1730,14 @@ function resnameselector(el::Union{AbstractResidue, AbstractAtom},
 end
 
 "`Set` of residue names corresponding to water."
-const waterresnames = Set(["HOH"])
+const waterresnames = Set(["HOH", "WAT"])
 
 """
     waterselector(res)
     waterselector(at)
 
 Determines if an `AbstractResidue` or `AbstractAtom` represents a water
-molecule.
+molecule, i.e. whether the residue name is in `waterresnames`.
 """
 function waterselector(el::Union{AbstractResidue, AbstractAtom})
     return resnameselector(el, waterresnames)
@@ -1748,7 +1748,7 @@ end
     notwaterselector(at)
 
 Determines if an `AbstractResidue` or `AbstractAtom` does not represent a
-water molecule.
+water molecule, i.e. whether the residue name is not in `waterresnames`.
 """
 function notwaterselector(el::Union{AbstractResidue, AbstractAtom})
     return !waterselector(el)
