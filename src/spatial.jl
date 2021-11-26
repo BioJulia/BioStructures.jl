@@ -672,6 +672,10 @@ cm[10, 20]
 
 # Rectangular contact map of chains A and B
 cm = ContactMap(cbetas_A, cbetas_B, 8.0)
+
+# Write the contact map to file
+using DelimitedFiles
+writedlm("contacts.out", Int64.(cm.data), " ")
 ```
 """
 struct ContactMap <: SpatialMap
@@ -704,6 +708,10 @@ dm[10, 20]
 
 # Rectangular distance map of chains A and B
 dm = DistanceMap(cbetas_A, cbetas_B)
+
+# Write the distance map to file
+using DelimitedFiles
+writedlm("distances.out", dm.data, " ")
 ```
 """
 struct DistanceMap <: SpatialMap
