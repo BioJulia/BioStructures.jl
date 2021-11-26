@@ -1,6 +1,12 @@
 BioStructures.jl release notes
 ==============================
 
+## v1.1.0 - Nov 2021
+
+* The `chainid!` function is added, allowing the chain ID of a chain or residue to be changed. The new `PDBConsistencyError` is thrown when this would give an inconsistent structural state.
+* "WAT" is added to `waterresnames` and is hence used in `waterselector` and `notwaterselector`.
+* Switch from using LightGraphs.jl to using Graphs.jl.
+
 ## v1.0.0 - May 2021
 
 * The ordering when sorting residues in a chain is changed from standard/hetero residue then residue number then insertion code to residue number then insertion code then standard/hetero residue. This makes in-chain hetero residues appear in the correct place in written PDB files.
