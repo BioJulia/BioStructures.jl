@@ -32,7 +32,7 @@ pressing `]` from the Julia REPL:
 add BioStructures
 ```
 
-See the [documentation](https://biojulia.github.io/BioStructures.jl/stable) for information on how
+See the [documentation](https://biojulia.github.io/BioStructures.jl/stable/documentation) for information on how
 to use BioStructures.
 
 ## Citation

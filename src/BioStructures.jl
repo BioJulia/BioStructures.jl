@@ -21,7 +21,7 @@ using CodecZlib
 using DataFrames
 using Downloads
 using Format
-using LightGraphs
+using Graphs
 using MetaGraphs
 import MMTF: parsemmtf, writemmtf # Imported to avoid clash with MMTF name
 using RecipesBase

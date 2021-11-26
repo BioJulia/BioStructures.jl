@@ -9,7 +9,7 @@ import BioCore # Imported to avoid clash with BioGenerics distance
 using CodecZlib
 using DataFrames
 using Format
-using LightGraphs
+using Graphs
 using MetaGraphs
 using RecipesBase
 

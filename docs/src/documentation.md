@@ -376,14 +376,14 @@ For example, `Transformation(c1, c2)` calculates the transformation to map one s
 The coordinate sets must be the same size and have the number of dimensions in the first axis and the number of points in the second axis.
 
 The contacting elements in a molecular structure form a graph, and this can be retrieved using [`MetaGraph`](@ref).
-This extends [`MetaGraph`](@ref) from [MetaGraphs.jl](https://github.com/JuliaGraphs/MetaGraphs.jl), allowing you to use all the graph analysis tools in [LightGraphs.jl](https://github.com/JuliaGraphs/LightGraphs.jl).
+This extends [`MetaGraph`](@ref) from [MetaGraphs.jl](https://github.com/JuliaGraphs/MetaGraphs.jl), allowing you to use all the graph analysis tools in [Graphs.jl](https://github.com/JuliaGraphs/Graphs.jl).
 For example:
 
 ```julia
 julia> mg = MetaGraph(collectatoms(struc["A"], cbetaselector), 8.0)
 {85, 423} undirected Int64 metagraph with Float64 weights defined by :weight (default weight 1.0)
 
-julia> using LightGraphs, MetaGraphs
+julia> using Graphs, MetaGraphs
 
 julia> nv(mg)
 85
@@ -398,7 +398,7 @@ julia> mg[10, :element]
 Atom CB with serial 71, coordinates [-3.766, 4.031, 23.526]
 ```
 
-See the [LightGraphs docs](https://juliagraphs.github.io/LightGraphs.jl/latest) for details on how to calculate properties such as shortest paths, centrality measures, community detection and more.
+See the [Graphs docs](https://juliagraphs.org/Graphs.jl/dev) for details on how to calculate properties such as shortest paths, centrality measures, community detection and more.
 Similar to [`ContactMap`](@ref), contacts are found between any element type passed in.
 So if you wanted the graph of chain contacts in a protein complex you could give a [`Model`](@ref) as the first argument.
 
