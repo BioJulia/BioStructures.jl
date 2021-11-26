@@ -111,7 +111,9 @@ Properties can be retrieved as follows:
 
 The `strip` keyword argument determines whether surrounding whitespace is stripped for [`atomname`](@ref), [`element`](@ref), [`charge`](@ref), [`resname`](@ref) and [`atomnames`](@ref) (default `true`).
 
-The coordinates of an atom can be set using [`x!`](@ref), [`y!`](@ref), [`z!`](@ref) and [`coords!`](@ref).
+The coordinates of an atom can be changed using [`x!`](@ref), [`y!`](@ref), [`z!`](@ref) and [`coords!`](@ref).
+The chain ID of a chain or residue can be changed using [`chainid!`](@ref).
+Currently these are the only setter functions available.
 
 ## Manipulating structures
 
