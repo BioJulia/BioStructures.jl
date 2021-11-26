@@ -46,6 +46,7 @@ end
 
 function Base.showerror(io::IO, e::PDBParseError)
     return print(io,
+            "PDBParseError: ",
             e.message,
             " at line ",
             e.line_number,
@@ -478,7 +479,7 @@ function Base.read(input::IO,
                 curr_model = parse(Int, line[11:min(14, end)])
             catch
                 throw(PDBParseError(
-                    "Could not read model serial number", line_n, line))
+                    "could not read model serial number", line_n, line))
             end
             # Create model if required
             if !haskey(models(struc), curr_model)
@@ -534,7 +535,7 @@ function parseserial(line::String, line_n::Integer=1)
     try
         return parse(Int, line[7:11])
     catch
-        throw(PDBParseError("Could not read atom serial number", line_n, line))
+        throw(PDBParseError("could not read atom serial number", line_n, line))
     end
 end
 
@@ -542,7 +543,7 @@ function parseatomname(line::String, line_n::Integer=1)
     try
         return line[13:16]
     catch
-        throw(PDBParseError("Could not read atom name", line_n, line))
+        throw(PDBParseError("could not read atom name", line_n, line))
     end
 end
 
@@ -550,7 +551,7 @@ function parsealtloc(line::String, line_n::Integer=1)
     try
         return line[17]
     catch
-        throw(PDBParseError("Could not read alt loc identifier", line_n, line))
+        throw(PDBParseError("could not read alt loc identifier", line_n, line))
     end
 end
 
@@ -558,7 +559,7 @@ function parseresname(line::String, line_n::Integer=1)
     try
         return line[18:20]
     catch
-        throw(PDBParseError("Could not read residue name", line_n, line))
+        throw(PDBParseError("could not read residue name", line_n, line))
     end
 end
 
@@ -566,7 +567,7 @@ function parsechainid(line::String, line_n::Integer=1)
     try
         return string(line[22])
     catch
-        throw(PDBParseError("Could not read chain ID", line_n, line))
+        throw(PDBParseError("could not read chain ID", line_n, line))
     end
 end
 
@@ -574,7 +575,7 @@ function parseresnumber(line::String, line_n::Integer=1)
     try
         return parse(Int, line[23:26])
     catch
-        throw(PDBParseError("Could not read residue number", line_n, line))
+        throw(PDBParseError("could not read residue number", line_n, line))
     end
 end
 
@@ -582,7 +583,7 @@ function parseinscode(line::String, line_n::Integer=1)
     try
         return line[27]
     catch
-        throw(PDBParseError("Could not read insertion code", line_n, line))
+        throw(PDBParseError("could not read insertion code", line_n, line))
     end
 end
 
@@ -590,7 +591,7 @@ function parsecoordx(line::String, line_n::Integer=1)
     try
         return parse(Float64, line[31:38])
     catch
-        throw(PDBParseError("Could not read x coordinate", line_n, line))
+        throw(PDBParseError("could not read x coordinate", line_n, line))
     end
 end
 
@@ -598,7 +599,7 @@ function parsecoordy(line::String, line_n::Integer=1)
     try
         return parse(Float64, line[39:46])
     catch
-        throw(PDBParseError("Could not read y coordinate", line_n, line))
+        throw(PDBParseError("could not read y coordinate", line_n, line))
     end
 end
 
@@ -606,7 +607,7 @@ function parsecoordz(line::String, line_n::Integer=1)
     try
         return parse(Float64, line[47:54])
     catch
-        throw(PDBParseError("Could not read z coordinate", line_n, line))
+        throw(PDBParseError("could not read z coordinate", line_n, line))
     end
 end
 

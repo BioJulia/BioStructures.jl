@@ -415,7 +415,7 @@ end
     @test chainid(dis_res) == "A"
     @test chainid(ch) == "A"
 
-    # test modifying the chain ids
+    # Test modifying the chain ID
     chainid!(ch, "C")
     @test chainid(at) == "C"
     @test chainid(dis_at) == "C"
@@ -428,8 +428,8 @@ end
     @test chainids(mod) == ["B", "C"]
     chainid!(ch, "A")
 
-    # move one of the residues to a new chain and StructuralElements below it
-    # should identify on the new chain
+    # Move one of the residues to a new chain and StructuralElements below it
+    #   should identify with the new chain
     chainid!(res, "C")
     @test chainid(res) == "C"
     @test chainid(at) == "C"
@@ -444,11 +444,14 @@ end
 
     @test chainids(mod) == ["A", "B"]
 
-    # reassigning a chainid to one that already exists throws an exception
+    # Reassigning a chain ID to one that already exists errors
     @test_throws PDBConsistencyError chainid!(ch, "B")
     struc['B'][10] = Residue("ALA", 10, ' ', false, struc['B'])
-    # reassigning a residue with a number to a chain that already has one of that number throws
+    # Reassigning a residue with a number to a chain that already has one of that number errors
     @test_throws PDBConsistencyError chainid!(struc['B'][10], "A")
+
+    error = PDBConsistencyError("message")
+    showerror(devnull, error)
 
     @test resids(ch) == ["10", "H_20A"]
 

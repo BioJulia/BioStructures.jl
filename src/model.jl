@@ -1,6 +1,7 @@
 export
     StructuralElement,
     AbstractAtom,
+    PDBConsistencyError,
     Atom,
     DisorderedAtom,
     AbstractResidue,
@@ -11,7 +12,6 @@ export
     ProteinStructure,
     AtomRecord,
     StructuralElementOrList,
-    PDBConsistencyError,
     serial,
     atomname,
     altlocid,
@@ -94,7 +94,6 @@ export
     pairalign,
     DataFrame
 
-
 "A macromolecular structural element."
 abstract type StructuralElement end
 
@@ -105,12 +104,13 @@ An atom that is part of a macromolecule - either an `Atom` or a
 abstract type AbstractAtom <: StructuralElement end
 
 """
-Exception indicating something is inconsistent in the structure's
-state.
+Error arising from an attempt to make an inconsistent structural state.
 """
 struct PDBConsistencyError <: Exception
-    msg::String
+    message::String
 end
+
+Base.showerror(io::IO, e::PDBConsistencyError) = print(io, "PDBConsistencyError: ", e.message)
 
 "An atom that is part of a macromolecule."
 struct Atom <: AbstractAtom
@@ -829,12 +829,19 @@ chainid(ch::Chain) = ch.id
 
 """
     chainid!(ch, id)
+    chainid!(res, id)
 
-Set the chain ID of an `Chain` to a new `String`.
+Set the chain ID of a `Chain` or an `AbstractResidue` to a new `String`.
+
+If a chain with this ID already exists, it will be removed from its current
+chain and added to that chain. If a chain with this ID does not exist, a new
+chain will be added to the model and this residue will be added to it. If
+moving this residue from a chain to a new chain leaves the old chain without
+residues, the old chain will be removed from the `Model`.
 """
 function chainid!(ch::Chain, id::String)
     if haskey(ch.model.chains, id)
-        throw(PDBConsistencyError("Invalid ID ($(id)). The model already has a chain with this ID."))
+        throw(PDBConsistencyError("invalid ID $id, the model already has a chain with this ID"))
     end
 
     old_id = ch.id
@@ -843,37 +850,24 @@ function chainid!(ch::Chain, id::String)
     delete!(ch.model.chains, old_id)
 end
 
-"""
-    chainid!(res, id)
-
-Set the chain ID of an `AbstractResidue` to a new `String`.
-
-If a chain with this ID already exists, it will be removed from its current
-chain and added to that chain. If a chain with this ID does not exist, a new
-chain will be added to the model and this residue will be added to it. If
-moving this residue from a chain to a new chain renders the old chain without
-residues, the old chain will be removed from the `Model`.
-"""
 function chainid!(res::AbstractResidue, id::String)
-
     current_chain = res.chain
     model_chains = current_chain.model.chains
 
-    # find the currently-assigned resid, which may not have been created from the resid function
+    # Find the currently-assigned resid, which may not have been created from the resid function
     current_resid = findfirst(isequal(res), current_chain.residues)
 
     if id in keys(model_chains)
         if haskey(model_chains[id].residues, current_resid) && model_chains[id].residues[current_resid] != res
-            throw(PDBConsistencyError("A residue with id ($(current_resid)) already exists in chain $(id). Cannot copy this residue there"))
+            throw(PDBConsistencyError("a residue with ID $current_resid already exists in chain $id, cannot copy this residue there"))
         end
-
         model_chains[id].residues[resid(res)] = res
     else
         model_chains[id] = Chain(id, [], Dict(current_resid => res), current_chain.model)
     end
     res.chain = model_chains[id]
 
-    # remove the residue from its current chain
+    # Remove the residue from its current chain
     delete!(current_chain.residues, current_resid)
     if isempty(current_chain.residues)
         delete!(model_chains, current_chain.id)
