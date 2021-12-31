@@ -1,6 +1,11 @@
 BioStructures.jl release notes
 ==============================
 
+## v1.2.0 - Dec 2021
+
+* `firstindex` and `lastindex` are defined for structural elements, contact maps and distance maps. This allows `begin` and `end` to be used in indexing expressions.
+* Support for Julia versions before 1.6 is dropped.
+
 ## v1.1.0 - Nov 2021
 
 * The `chainid!` function is added, allowing the chain ID of a chain or residue to be changed. The new `PDBConsistencyError` is thrown when this would give an inconsistent structural state.
