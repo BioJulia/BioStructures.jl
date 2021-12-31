@@ -253,6 +253,9 @@ function Base.setindex!(dis_at::DisorderedAtom, at::Atom, alt_loc_id::Char)
     return dis_at
 end
 
+Base.firstindex(dis_at::DisorderedAtom) = first(altlocids(dis_at))
+Base.lastindex(dis_at::DisorderedAtom) = last(altlocids(dis_at))
+
 # Accessing a Residue with an AbstractString returns the AbstractAtom with that
 #   atom name
 Base.getindex(res::Residue, atom_name::AbstractString) = findatombyname(res, atom_name)
@@ -261,6 +264,9 @@ function Base.setindex!(res::Residue, at::AbstractAtom, atom_name::AbstractStrin
     res.atoms[atom_name] = at
     return res
 end
+
+Base.firstindex(res::Residue) = first(atomnames(res, strip=false))
+Base.lastindex(res::Residue) = last(atomnames(res, strip=false))
 
 # Accessing a DisorderedResidue with an AbstractString returns the AbstractAtom
 #   in the default Residue with that atom name
@@ -273,6 +279,9 @@ function Base.setindex!(dis_res::DisorderedResidue, at::AbstractAtom, atom_name:
     defaultresidue(dis_res)[atom_name] = at
     return dis_res
 end
+
+Base.firstindex(dis_res::DisorderedResidue) = first(atomnames(defaultresidue(dis_res), strip=false))
+Base.lastindex(dis_res::DisorderedResidue) = last(atomnames(defaultresidue(dis_res), strip=false))
 
 # Accessing a Chain with an AbstractString returns the AbstractResidue with that
 #   residue ID
@@ -292,6 +301,9 @@ function Base.setindex!(ch::Chain, res::AbstractResidue, res_n::Integer)
     return ch
 end
 
+Base.firstindex(ch::Chain) = first(resids(ch))
+Base.lastindex(ch::Chain) = last(resids(ch))
+
 # Accessing a Model with a Char or AbstractString returns the Chain with that
 #   chain ID
 Base.getindex(mod::Model, ch_id::AbstractString) = mod.chains[ch_id]
@@ -303,8 +315,11 @@ function Base.setindex!(mod::Model, ch::Chain, ch_id::AbstractString)
 end
 
 function Base.setindex!(mod::Model, ch::Chain, ch_id::Char)
-    return Base.setindex!(mod, ch, string(ch_id))
+    return setindex!(mod, ch, string(ch_id))
 end
+
+Base.firstindex(mod::Model) = first(chainids(mod))
+Base.lastindex(mod::Model) = last(chainids(mod))
 
 # Accessing a ProteinStructure with an Integer returns the Model with that model
 #   number
@@ -326,8 +341,11 @@ function Base.setindex!(struc::ProteinStructure, ch::Chain, ch_id::AbstractStrin
 end
 
 function Base.setindex!(struc::ProteinStructure, ch::Chain, ch_id::Char)
-    return Base.setindex!(struc, ch, string(ch_id))
+    return setindex!(struc, ch, string(ch_id))
 end
+
+Base.firstindex(struc::ProteinStructure) = first(modelnumbers(struc))
+Base.lastindex(struc::ProteinStructure) = last(modelnumbers(struc))
 
 # Check if an atom name exists in a residue as a whitespace-padded version
 function findatombyname(res::Residue, atom_name::AbstractString)

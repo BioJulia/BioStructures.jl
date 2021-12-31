@@ -718,6 +718,9 @@ struct DistanceMap <: SpatialMap
     data::Array{Float64, 2}
 end
 
+Base.size(m::SpatialMap) = size(m.data)
+Base.size(m::SpatialMap, dim::Integer) = size(m.data, dim)
+
 Base.getindex(m::SpatialMap, args::Integer...) = m.data[args...]
 
 function Base.setindex!(m::SpatialMap, v, args::Integer...)
@@ -725,8 +728,10 @@ function Base.setindex!(m::SpatialMap, v, args::Integer...)
     return m
 end
 
-Base.size(m::SpatialMap) = size(m.data)
-Base.size(m::SpatialMap, dim::Integer) = size(m.data, dim)
+Base.firstindex(::SpatialMap) = 1
+Base.firstindex(::SpatialMap, dim) = 1
+Base.lastindex(m::SpatialMap) = reduce(*, size(m))
+Base.lastindex(m::SpatialMap, dim) = size(m, dim)
 
 function Base.show(io::IO, cm::ContactMap)
     print(io, "Contact map of size $(size(cm))")

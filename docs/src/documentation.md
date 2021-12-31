@@ -61,6 +61,7 @@ The elements of `struc` can be accessed as follows:
 | `struc["A"][50]["CA"]`      | Model 1, chain A, residue 50, atom name CA                                      | `AbstractAtom`    |
 | `struc["A"][15]["CG"]['A']` | For disordered atoms, access a specific location                                | `Atom`            |
 
+You can use `begin` and `end` to access the first and last elements, for example `struc[1][begin]` gets the first chain in model 1.
 Disordered atoms are stored in a [`DisorderedAtom`](@ref) container but calls fall back to the default atom, so disorder can be ignored if you are not interested in it.
 Disordered residues (i.e. point mutations with different residue names) are stored in a [`DisorderedResidue`](@ref) container.
 The idea is that disorder will only bother you if you want it to.
@@ -132,8 +133,6 @@ end
 ```
 
 Models are ordered numerically; chains are ordered by chain ID character ordering, except the empty chain is last; residues are ordered by residue number and insertion code with hetero residues after standard residues; atoms are ordered by atom serial.
-If you want the first sub-element you can use `first`.
-For example `first(struc[1])` gets the first chain in model 1.
 Since the ordering of elements is defined you can use the `sort` function.
 For example `sort(res)` sorts a list of residues as described above, or `sort(res, by=resname)` will sort them alphabetically by residue name.
 

@@ -944,6 +944,14 @@ end
     ats = collect(res[20])
     @test length(ats) == 8
     @test atomname.(ats) == ["N", "CA", "C", "O", "CB", "CG1", "CG2", "CD1"]
+    @test chainid(struc[1][begin]) == "A"
+    @test chainid(struc[1][end  ]) == "B"
+    @test resnumber(struc[1]["A"][begin]) == 1
+    @test resnumber(struc[1]["A"][end  ]) == 543
+    @test serial(struc[1]["A"][10][begin]) == 68
+    @test serial(struc[1]["A"][10][end  ]) == 71
+    @test serial(struc[1]["A"][167]["CD"][begin]) == 1288
+    @test serial(struc[1]["A"][167]["CD"][end  ]) == 1289
 
     # Test choosedefaultaltlocid
     res = Residue("ALA", 1, ' ', false, Chain('A'))
@@ -1069,6 +1077,8 @@ end
     @test countresidues(DisorderedResidue[struc['A'][16], struc['A'][10]]) == 2
     sort!(res)
     @test resnumber(res[1]) == 10
+    @test serial(struc[1]["A"][10][begin]) == 57
+    @test serial(struc[1]["A"][10][end  ]) == 62
 
     # Test parsing 1SSU (multiple models)
     struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)
@@ -1103,6 +1113,8 @@ end
     @test modelnumber.(mods) == [10, 5]
     @test z(mods[2]['A'][5]["CA"]) == -5.837
     @test countmodels(Model[struc[10], struc[5]]) == 2
+    @test modelnumber(struc[begin]) == 1
+    @test modelnumber(struc[end  ]) == 20
 
     # Test collectatoms
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
@@ -3108,6 +3120,10 @@ end
     @test isapprox(dmap[196, 110], 3.01887, atol=1e-5)
     dmap[196, 110] = 10.0
     @test dmap[196, 110] == 10.0
+    @test isapprox(dmap[begin + 1], 1.3405938982406227, atol=1e-5)
+    @test isapprox(dmap[end   - 1], 18.716774962583695, atol=1e-5)
+    @test isapprox(dmap[2, begin + 2], 1.329450262326499 , atol=1e-5)
+    @test isapprox(dmap[2, end   - 2], 18.595504483611087, atol=1e-5)
     show(devnull, dmap)
 
     @test isapprox(DistanceMap(struc_1AKE['A'][10], struc_1AKE['A'][11]).data, [
