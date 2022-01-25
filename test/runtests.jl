@@ -1,5 +1,6 @@
 module TestBioStructures
 
+using LinearAlgebra
 using Test
 
 using Aqua
@@ -10,7 +11,6 @@ using CodecZlib
 using DataFrames
 using Format
 using Graphs
-using LinearAlgebra
 using MetaGraphs
 using RecipesBase
 

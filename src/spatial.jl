@@ -200,10 +200,11 @@ function Transformation(coords1::Array{<:Real, 2},
     # Find the rotation that maps the coordinates
     cov = p * transpose(q)
     svd_res = svd(cov)
+    Ut = transpose(svd_res.U)
     # Check sign of determinant
-    d = sign(det(svd_res.V * transpose(svd_res.U)))
-    @view(svd_res.V[:,end]) .*= d
-    rot = svd_res.V * transpose(svd_res.U)
+    d = sign(det(svd_res.V * Ut))
+    @view(svd_res.V[:, end]) .*= d
+    rot = svd_res.V * Ut
     return Transformation(trans1, trans2, rot, inds1, inds2)
 end
 

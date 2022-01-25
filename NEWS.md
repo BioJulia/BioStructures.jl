@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v1.2.1 - Jan 2022
+
+* Fix bug allowing reflections during structural superimposition.
+
 ## v1.2.0 - Dec 2021
 
 * `firstindex` and `lastindex` are defined for structural elements, contact maps and distance maps. This allows `begin` and `end` to be used in indexing expressions.
