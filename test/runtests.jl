@@ -10,6 +10,7 @@ using CodecZlib
 using DataFrames
 using Format
 using Graphs
+using LinearAlgebra
 using MetaGraphs
 using RecipesBase
 
@@ -2827,6 +2828,28 @@ end
         0.0 -1.0 0.0
         1.0  0.0 0.0
         0.0  0.0 1.0
+    ]
+    @test isapprox(trans.rot, rot_real)
+
+    # Test rot isn't a reflection
+    cs_one = Float64[
+        1 -1  0  0  0  0
+        0  0  2 -2  0  0
+        0  0  0  0  2 -2
+    ]
+    cs_two = Float64[
+        -1  1  0  0  0  0
+         0  0  2 -2  0  0
+         0  0  0  0  2 -2
+    ]
+    trans = Transformation(cs_one, cs_two)
+    @test isapprox(trans.trans1, [0.0, 0.0, 0.0])
+    @test isapprox(trans.trans2, [0.0, 0.0, 0.0])
+    @test isapprox(det(trans.rot), 1.0)
+    rot_real = [
+        1.0 0.0 0.0
+        0.0 1.0 0.0
+        0.0 0.0 1.0
     ]
     @test isapprox(trans.rot, rot_real)
 
