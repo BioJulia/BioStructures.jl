@@ -89,7 +89,7 @@ export
     disorderselector,
     hydrogenselector,
     allselector,
-    LongSequence{AminoAcidAlphabet},
+    LongSequence,
     threeletter_to_aa,
     pairalign,
     DataFrame
