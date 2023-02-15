@@ -89,7 +89,7 @@ export
     disorderselector,
     hydrogenselector,
     allselector,
-    LongAminoAcidSeq,
+    LongSequence{AminoAcidAlphabet},
     threeletter_to_aa,
     pairalign,
     DataFrame
@@ -1861,8 +1861,8 @@ function BioAlignments.pairalign(el1::StructuralElementOrList,
                             residue_selectors::Function...;
                             scoremodel::AbstractScoreModel=AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1),
                             aligntype::BioAlignments.AbstractAlignment=GlobalAlignment())
-    seq1 = LongAminoAcidSeq(el1, residue_selectors...; gaps=false)
-    seq2 = LongAminoAcidSeq(el2, residue_selectors...; gaps=false)
+    seq1 = LongSequence{AminoAcidAlphabet}(el1, residue_selectors...; gaps=false)
+    seq2 = LongSequence{AminoAcidAlphabet}(el2, residue_selectors...; gaps=false)
     return pairalign(aligntype, seq1, seq2, scoremodel)
 end
 
