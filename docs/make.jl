@@ -11,4 +11,7 @@ makedocs(
     ]
 )
 
-deploydocs(repo="github.com/BioJulia/BioStructures.jl.git")
+deploydocs(
+    repo="github.com/BioJulia/BioStructures.jl.git",
+    push_preview=true,
+)

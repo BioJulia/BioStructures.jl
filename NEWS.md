@@ -1,6 +1,11 @@
 BioStructures.jl release notes
 ==============================
 
+## v2.0.0 - Feb 2023
+
+* The required versions of BioSequences.jl and BioAlignments.jl are updated to v3 of each, with support for earlier versions being dropped. `LongAminoAcidSeq` is hence renamed to `LongAA`, an alias for `LongSequence{AminoAcidAlphabet}`.
+* Fix bug in `pdbentrylist`.
+
 ## v1.2.1 - Jan 2022
 
 * Fix bug allowing reflections during structural superimposition.
