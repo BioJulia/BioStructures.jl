@@ -144,7 +144,7 @@ function Transformation(el1::StructuralElementOrList,
     res1 = collectresidues(el1, residue_selectors...)
     res2 = collectresidues(el2, residue_selectors...)
     # Shortcut if the sequences are the same
-    if LongSequence{AminoAcidAlphabet}(res1; gaps=false) == LongSequence{AminoAcidAlphabet}(res2; gaps=false)
+    if LongAA(res1; gaps=false) == LongAA(res2; gaps=false)
         inds1 = collect(1:length(res1))
         inds2 = collect(1:length(res2))
     else

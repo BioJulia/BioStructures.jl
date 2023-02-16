@@ -207,10 +207,10 @@ julia> countatoms(struc, expand_disordered=true)
 819
 ```
 
-The amino acid sequence of a protein can be retrieved by passing an element to [`LongAminoAcidSeq`](@ref) with optional residue selectors:
+The amino acid sequence of a protein can be retrieved by passing an element to [`LongAA`](@ref) with optional residue selectors:
 
 ```julia
-julia> LongAminoAcidSeq(struc['A'], standardselector)
+julia> LongAA(struc['A'], standardselector)
 85aa Amino Acid Sequence:
 RCGSQGGGSTCPGLRCCSIWGWCGDSEPYCGRTCENKCW…RCGAAVGNPPCGQDRCCSVHGWCGGGNDYCSGGNCQYRC
 ```
@@ -218,6 +218,7 @@ RCGSQGGGSTCPGLRCCSIWGWCGDSEPYCGRTCENKCW…RCGAAVGNPPCGQDRCCSVHGWCGGGNDYCSGGNCQYR
 The `gaps` keyword argument determines whether to add gaps to the sequence based on missing residue numbers (default `true`).
 [`threeletter_to_aa`](@ref) provides a lookup table of amino acid codes should that be required.
 See [BioSequences.jl](https://github.com/BioJulia/BioSequences.jl) and [BioAlignments.jl](https://github.com/BioJulia/BioAlignments.jl) for more on how to deal with sequences.
+[`LongAA`](@ref) is an alias for `LongSequence{AminoAcidAlphabet}`.
 For example, to see the alignment of CDK1 and CDK2 (this example also makes use of Julia's [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/#Broadcasting-1)):
 
 ```julia
@@ -226,7 +227,7 @@ julia> struc1, struc2 = retrievepdb.(["4YC6", "1HCL"])
  ProteinStructure 4YC6.pdb with 1 models, 8 chains (A,B,C,D,E,F,G,H), 1420 residues, 12271 atoms
  ProteinStructure 1HCL.pdb with 1 models, 1 chains (A), 294 residues, 2546 atoms
 
-julia> seq1, seq2 = LongAminoAcidSeq.([struc1["A"], struc2["A"]], standardselector, gaps=false)
+julia> seq1, seq2 = LongAA.([struc1["A"], struc2["A"]], standardselector, gaps=false)
 2-element Array{BioSequences.LongSequence{BioSequences.AminoAcidAlphabet},1}:
  MEDYTKIEKIGEGTYGVVYKGRHKTTGQVVAMKKIRLES…SHVKNLDENGLDLLSKMLIYDPAKRISGKMALNHPYFND
  MENFQKVEKIGEGTYGVVYKARNKLTGEVVALKKIRTEG…RSLLSQMLHYDPNKRISAKAALAHPFFQDVTKPVPHLRL
