@@ -228,7 +228,7 @@ julia> struc1, struc2 = retrievepdb.(["4YC6", "1HCL"])
  ProteinStructure 1HCL.pdb with 1 models, 1 chains (A), 294 residues, 2546 atoms
 
 julia> seq1, seq2 = LongAA.([struc1["A"], struc2["A"]], standardselector, gaps=false)
-2-element Array{BioSequences.LongSequence{BioSequences.AminoAcidAlphabet},1}:
+2-element Vector{LongAA}:
  MEDYTKIEKIGEGTYGVVYKGRHKTTGQVVAMKKIRLES…SHVKNLDENGLDLLSKMLIYDPAKRISGKMALNHPYFND
  MENFQKVEKIGEGTYGVVYKARNKLTGEVVALKKIRTEG…RSLLSQMLHYDPNKRISAKAALAHPFFQDVTKPVPHLRL
 
@@ -237,7 +237,7 @@ julia> using BioAlignments
 julia> scoremodel = AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1);
 
 julia> alres = pairalign(GlobalAlignment(), seq1, seq2, scoremodel)
-PairwiseAlignmentResult{Int64,BioSequences.LongSequence{BioSequences.AminoAcidAlphabet},BioSequences.LongSequence{BioSequences.AminoAcidAlphabet}}:
+PairwiseAlignmentResult{Int64, LongAA, LongAA}:
   score: 945
   seq:   1 MEDYTKIEKIGEGTYGVVYKGRHKTTGQVVAMKKIRLESEEEGVPSTAIREISLLKELRH  60
            ||   | ||||||||||||| | | || ||| |||| |    |||||||||||||||| |
@@ -248,15 +248,15 @@ PairwiseAlignmentResult{Int64,BioSequences.LongSequence{BioSequences.AminoAcidAl
   ref:  57 PNIVKLLDVIHTENKLYLVFEFLHQDLKKFMDASALTG--IPLPLIKSYLFQLLQGLAFC 114
 
   seq: 120 HSRRVLHRDLKPQNLLIDDKGTIKLADFGLARAFGV----YTHEVVTLWYRSPEVLLGSA 175
-           || ||||||||||||||   | ||||||||||||||    ||||||||||| || |||
+           || ||||||||||||||   | ||||||||||||||    ||||||||||| || |||  
   ref: 115 HSHRVLHRDLKPQNLLINTEGAIKLADFGLARAFGVPVRTYTHEVVTLWYRAPEILLGCK 174
 
   seq: 176 RYSTPVDIWSIGTIFAELATKKPLFHGDSEIDQLFRIFRALGTPNNEVWPEVESLQDYKN 235
-            ||| ||||| | ||||  |   || ||||||||||||| ||||   ||| | |  |||
+            ||| ||||| | ||||  |   || ||||||||||||| ||||   ||| | |  ||| 
   ref: 175 YYSTAVDIWSLGCIFAEMVTRRALFPGDSEIDQLFRIFRTLGTPDEVVWPGVTSMPDYKP 234
 
   seq: 236 TFPKWKPGSLASHVKNLDENGLDLLSKMLIYDPAKRISGKMALNHPYFND---------- 285
-            ||||        |  ||| |  ||| || ||| |||| | || || | |
+            ||||        |  ||| |  ||| || ||| |||| | || || | |          
   ref: 235 SFPKWARQDFSKVVPPLDEDGRSLLSQMLHYDPNKRISAKAALAHPFFQDVTKPVPHLRL 294
 
 ```
