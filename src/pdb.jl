@@ -68,10 +68,14 @@ function pdbentrylist()
     try
         Downloads.download("ftp://ftp.wwpdb.org/pub/pdb/derived_data/index/entries.idx", tempfilepath)
         open(tempfilepath) do input
-            # Skips the first two lines as it contains headers
-            linecount = 1
+            reading = false
             for line in eachline(input)
-                if linecount > 3
+                # Skip the header lines
+                if !reading && !(startswith(line, "IDCODE") || startswith(line, "------") ||
+                                 startswith(line, "\t"))
+                    reading = true
+                end
+                if reading
                     # The first 4 characters in the line is the PDB ID
                     pdbid = uppercase(line[1:4])
                     # Check PDB ID is 4 characters long and only consits of alphanumeric characters
@@ -80,7 +84,6 @@ function pdbentrylist()
                     end
                     push!(pdbidlist, pdbid)
                 end
-                linecount +=1
             end
         end
     finally
