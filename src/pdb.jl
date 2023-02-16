@@ -71,7 +71,7 @@ function pdbentrylist()
             # Skips the first two lines as it contains headers
             linecount = 1
             for line in eachline(input)
-                if linecount > 2
+                if linecount > 3
                     # The first 4 characters in the line is the PDB ID
                     pdbid = uppercase(line[1:4])
                     # Check PDB ID is 4 characters long and only consits of alphanumeric characters

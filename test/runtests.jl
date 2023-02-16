@@ -750,8 +750,8 @@ end
     # Test sequence extraction
     @test threeletter_to_aa["ALA"] == AA_A
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
-    seq = LongAminoAcidSeq(struc['B'])
-    @test seq == LongAminoAcidSeq(
+    seq = LongSequence{AminoAcidAlphabet}(struc['B'])
+    @test seq == LongSequence{AminoAcidAlphabet}(
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILGX-------------------------" *
@@ -763,22 +763,22 @@ end
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" *
         "XXXXXXXXXXXXXXX"
     )
-    seq = LongAminoAcidSeq(struc['B'], gaps=false)
-    @test seq == LongAminoAcidSeq(
+    seq = LongSequence{AminoAcidAlphabet}(struc['B'], gaps=false)
+    @test seq == LongSequence{AminoAcidAlphabet}(
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILGXXXXXXXXXXXXXXXXXXXXXXXXXX" *
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" *
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     )
-    seq = LongAminoAcidSeq(struc['B'], standardselector)
-    @test seq == LongAminoAcidSeq(
+    seq = LongSequence{AminoAcidAlphabet}(struc['B'], standardselector)
+    @test seq == LongSequence{AminoAcidAlphabet}(
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG"
     )
-    seq = LongAminoAcidSeq(struc, standardselector)
-    @test seq == LongAminoAcidSeq(
+    seq = LongSequence{AminoAcidAlphabet}(struc, standardselector)
+    @test seq == LongSequence{AminoAcidAlphabet}(
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG" *
@@ -786,11 +786,11 @@ end
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG"
     )
-    seq = LongAminoAcidSeq(AbstractResidue[
+    seq = LongSequence{AminoAcidAlphabet}(AbstractResidue[
         Residue("VAL", 20, 'B', true, Chain('B')),
         Residue("ALA", 10, 'A', false, Chain('A')),
     ])
-    @test seq == LongAminoAcidSeq("VA")
+    @test seq == LongSequence{AminoAcidAlphabet}("VA")
 
     # Test pairwise alignment
     res = collectresidues(struc["A"], standardselector)
