@@ -3547,7 +3547,7 @@ end
         )
         @test ss_code(res) == "T"
 
-        for at in atoms(res)
+        for at in collect(res)
             @test ss_code(at) == "T"
         end
     end
