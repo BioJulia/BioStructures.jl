@@ -132,7 +132,7 @@ ss_code!(res::Residue, ss_code::String) = (res.ss_code = ss_code)
 Get the secondary structure code of a residue/atom.
 """
 ss_code(res::Residue) = res.ss_code
-ss_code(at::Atom) = ss_code(at.residue)
+ss_code(at::AbstractAtom) = ss_code(residue(at))
 
 """
     helixselector(el)
