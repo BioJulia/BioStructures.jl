@@ -296,6 +296,7 @@ end
             ),
         ),
         Chain('A'),
+        ""
     )
     Residue("ALA", 1, ' ', false, Chain('A'))
 
@@ -1839,7 +1840,7 @@ end
 
     checkchainerror(Chain("A"))
     @test_throws ArgumentError checkchainerror(Chain("AA"))
-    res = Residue("ALA", 10, ' ', false, [], Dict(), Chain("AA"))
+    res = Residue("ALA", 10, ' ', false, [], Dict(), Chain("AA"), "")
     res["CA"] = Atom(100, " CA ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res)
     push!(res.atom_list, "CA")
     @test_throws ArgumentError writepdb(temp_filename, res)
