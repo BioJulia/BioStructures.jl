@@ -92,6 +92,7 @@ Properties can be retrieved as follows:
 | [`resnumber`](@ref)          | Residue number of a residue or atom                           | `Int`                           |
 | [`sequentialresidues`](@ref) | Determine if the second residue follows the first in sequence | `Bool`                          |
 | [`inscode`](@ref)            | Insertion code of a residue or atom                           | `Char`                          |
+| [`ss_code`](@ref)            | Secondary Structure code of a residue or atom                 | `String`                        |
 | [`resid`](@ref)              | Residue ID of an atom or residue (`full=true` includes chain) | `String`                        |
 | [`atomnames`](@ref)          | Atom names of the atoms in a residue, sorted by serial        | `Array{String,1}`               |
 | [`atoms`](@ref)              | Dictionary of atoms in a residue                              | `Dict{String,AbstractAtom}`    |
@@ -170,6 +171,9 @@ The selectors available are:
 | [`notwaterselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name not HOH            |
 | [`disorderselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with alternative locations           |
 | [`allselector`](@ref)       | `AbstractAtom` or `AbstractResidue` | All atoms/residues                                  |
+| [`helixselector`](@ref)     | `Atom` or `Residue`                 | Atoms/residues arising from Helix                   |
+| [`sheetselector`](@ref)     | `Atom` or `Residue`                 | Atoms/residues arising from Sheet                   |
+| [`coilselector`](@ref)      | `Atom` or `Residue`                 | Atoms/residues arising from Coil                    |
 
 To create a new [`atomnameselector`](@ref) or [`resnameselector`](@ref):
 ```julia

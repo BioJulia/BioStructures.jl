@@ -64,7 +64,7 @@ function gzip_file(infile, outfile)
 end
 
 # countlines with optional gzip
-function countlines_gzip(filename::AbstractString; gzip=false)
+function countlines_gzip(filename::AbstractString; gzip = false)
     if gzip
         open(GzipDecompressorStream, filename) do f
             return countlines(f)
@@ -74,19 +74,24 @@ function countlines_gzip(filename::AbstractString; gzip=false)
     end
 end
 
-Aqua.test_all(BioStructures; ambiguities=(recursive=false))
+Aqua.test_all(BioStructures; ambiguities = (recursive = false))
 
 # This is the only test set that requires an internet connection
 @testset "PDB interface" begin
     @test length(pdbentrylist()) > 100000
 
     # This may be empty on a given date so we just check it has the correct type
-    @test isa(pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb"), Vector{String})
+    @test isa(
+        pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb"),
+        Vector{String},
+    )
     # Invalid URL
     # The error type changes from ErrorException to ProcessFailedException in Julia v1.2
     #   therefore we check for the more general Exception type
     # This also applies to two examples below
-    @test_throws Exception pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/dummy.pdb")
+    @test_throws Exception pdbstatuslist(
+        "ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/dummy.pdb",
+    )
 
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
 
@@ -96,47 +101,52 @@ Aqua.test_all(BioStructures; ambiguities=(recursive=false))
     # Invalid PDB ID format
     @test_throws ArgumentError downloadpdb("1a df")
     # Valid PDB ID format but PDB does not exist
-    @test_throws Exception downloadpdb("no1e", dir=dir)
+    @test_throws Exception downloadpdb("no1e", dir = dir)
     # Invalid file format
-    @test_throws TypeError downloadpdb("1alw", dir=dir, format=String)
+    @test_throws TypeError downloadpdb("1alw", dir = dir, format = String)
     # Biological assembly not available in PDBXML and MMTF
-    @test_throws ArgumentError downloadpdb("1alw", dir=dir, format=PDBXML, ba_number=1)
+    @test_throws ArgumentError downloadpdb(
+        "1alw",
+        dir = dir,
+        format = PDBXML,
+        ba_number = 1,
+    )
     # Invalid BA number for this PDB entry
-    @test_throws Exception downloadpdb("1alw", dir=dir, format=MMCIF, ba_number=10)
+    @test_throws Exception downloadpdb("1alw", dir = dir, format = MMCIF, ba_number = 10)
     # Test if downloadpdb returns the path to the downloaded file
-    @test isfile(downloadpdb("1crn", dir=dir))
+    @test isfile(downloadpdb("1crn", dir = dir))
 
     # PDB format
-    downloadpdb("1alw", dir=dir, format=PDB)
+    downloadpdb("1alw", dir = dir, format = PDB)
     pdbpath = joinpath(dir, "1ALW.$(pdbextension[PDB])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # PDBXML format
-    downloadpdb("1alw", dir=dir, format=PDBXML)
+    downloadpdb("1alw", dir = dir, format = PDBXML)
     pdbpath = joinpath(dir, "1ALW.$(pdbextension[PDBXML])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # mmCIF format
-    downloadpdb("1alw", dir=dir, format=MMCIF)
+    downloadpdb("1alw", dir = dir, format = MMCIF)
     pdbpath = joinpath(dir, "1ALW.$(pdbextension[MMCIF])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # MMTF format
-    downloadpdb("1alw", dir=dir, format=MMTF)
+    downloadpdb("1alw", dir = dir, format = MMTF)
     pdbpath = joinpath(dir, "1ALW.$(pdbextension[MMTF])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Obsolete PDB
-    downloadpdb("116l", dir=dir, format=PDB, obsolete=true)
+    downloadpdb("116l", dir = dir, format = PDB, obsolete = true)
     pdbpath = joinpath(dir, "obsolete", "116L.$(pdbextension[PDB])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Biological assembly - PDB format
-    downloadpdb("1alw", dir=dir, format=PDB, ba_number=1)
+    downloadpdb("1alw", dir = dir, format = PDB, ba_number = 1)
     pdbpath = joinpath(dir, "1ALW_ba1.$(pdbextension[PDB])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Biological assembly - mmCIF format
-    downloadpdb("5a9z", dir=dir, format=MMCIF, ba_number=1)
+    downloadpdb("5a9z", dir = dir, format = MMCIF, ba_number = 1)
     pdbpath = joinpath(dir, "5A9Z_ba1.$(pdbextension[MMCIF])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Download multiple PDB files
     pdbidlist = ["1ent", "1en2"]
-    downloadpdb(pdbidlist, dir=dir, format=PDB)
+    downloadpdb(pdbidlist, dir = dir, format = PDB)
     for pdbid in pdbidlist
         pdbpath = joinpath(dir, "$(uppercase(pdbid)).$(pdbextension[PDB])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
@@ -158,23 +168,29 @@ Aqua.test_all(BioStructures; ambiguities=(recursive=false))
     end == [5, 1]
 
     # Test retrievepdb
-    struc = retrievepdb("1AKE", dir=dir, structure_name="New name")
+    struc = retrievepdb("1AKE", dir = dir, structure_name = "New name")
     @test structurename(struc) == "New name"
     @test countatoms(struc) == 3804
 
-    struc = retrievepdb("1AKE", dir=dir, obsolete=true, read_het_atoms=false)
+    struc = retrievepdb("1AKE", dir = dir, obsolete = true, read_het_atoms = false)
     @test countatoms(struc) == 3312
     @test serial(collectatoms(struc)[2000]) == 2006
     @test sum(ishetero, collectatoms(struc)) == 0
 
-    struc = retrievepdb("1AKE", dir=dir, ba_number=1, read_het_atoms=false, read_std_atoms=false)
+    struc = retrievepdb(
+        "1AKE",
+        dir = dir,
+        ba_number = 1,
+        read_het_atoms = false,
+        read_std_atoms = false,
+    )
     @test countatoms(struc) == 0
     @test countresidues(struc) == 0
     @test countchains(struc) == 0
     @test countmodels(struc) == 0
 
     # Delete temporary directory
-    rm(dir, recursive=true, force=true)
+    rm(dir, recursive = true, force = true)
 end
 
 @testset "Types" begin
@@ -191,30 +207,56 @@ end
     struc['A'][10] = Residue("ALA", 10, ' ', false, ch)
     res = struc['A'][10]
     @test isa(res, Residue)
-    struc['A']["H_20A"] = DisorderedResidue(Dict(
-        " VA"=> Residue(" VA", 20, 'A', true, ch),
-        "ILE"=> Residue("ILE", 20, 'A', true, ch)
-    ), " VA")
+    struc['A']["H_20A"] = DisorderedResidue(
+        Dict(
+            " VA" => Residue(" VA", 20, 'A', true, ch),
+            "ILE" => Residue("ILE", 20, 'A', true, ch),
+        ),
+        " VA",
+    )
     dis_res = struc['A']["H_20A"]
     @test isa(dis_res, DisorderedResidue)
-    struc['A'][10][" CA "] = Atom(
-        100, " CA ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res)
+    struc['A'][10][" CA "] =
+        Atom(100, " CA ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res)
     at = struc['A'][10]["CA"]
     @test isa(at, Atom)
-    struc['A'][10][" CB "] = DisorderedAtom(Dict(
-        'A'=> Atom(200, " CB ", 'A', [10.0, 20.0, 30.0], 0.6, 20.0, " C", "1+", res),
-        'B'=> Atom(201, " CB ", 'B', [11.0, 21.0, 31.0], 0.4, 30.0, " C", "1+", res)
-    ), 'A')
+    struc['A'][10][" CB "] = DisorderedAtom(
+        Dict(
+            'A' =>
+                Atom(200, " CB ", 'A', [10.0, 20.0, 30.0], 0.6, 20.0, " C", "1+", res),
+            'B' =>
+                Atom(201, " CB ", 'B', [11.0, 21.0, 31.0], 0.4, 30.0, " C", "1+", res),
+        ),
+        'A',
+    )
     dis_at = struc['A'][10]["CB"]
     @test isa(dis_at, DisorderedAtom)
     struc['A']["H_20A"][" CG "] = Atom(
-        300, " CG ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", defaultresidue(dis_res))
+        300,
+        " CG ",
+        ' ',
+        [1.0, 2.0, 3.0],
+        1.0,
+        10.0,
+        " C",
+        "  ",
+        defaultresidue(dis_res),
+    )
     disorderedres(dis_res, "ILE")[" O  "] = Atom(
-        400, " O  ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " O", "  ", disorderedres(dis_res, "ILE"))
+        400,
+        " O  ",
+        ' ',
+        [1.0, 2.0, 3.0],
+        1.0,
+        10.0,
+        " O",
+        "  ",
+        disorderedres(dis_res, "ILE"),
+    )
     fixlists!(struc)
 
     # Test alternate constructors
-    ProteinStructure("struc", Dict(1=> Model()))
+    ProteinStructure("struc", Dict(1 => Model()))
     ProteinStructure()
     mmcif_dict = MMCIFDict(testfilepath("mmCIF", "1AKE.cif"))
     struc_mmcif_1ake = ProteinStructure(mmcif_dict)
@@ -223,20 +265,38 @@ end
     struc_mmtf_1ake = ProteinStructure(mmtf_dict)
     @test countatoms(struc_mmtf_1ake) == 3804
 
-    Model(1, Dict("A"=> Chain('A')), ProteinStructure())
+    Model(1, Dict("A" => Chain('A')), ProteinStructure())
     Model(1, ProteinStructure())
     Model(1)
     Model()
 
-    Chain("A", ["1"], Dict("1"=> Residue("ALA", 1, ' ', false, Chain('A'))), Model())
+    Chain("A", ["1"], Dict("1" => Residue("ALA", 1, ' ', false, Chain('A'))), Model())
     Chain("A", Model())
     Chain('A', Model())
     Chain("A")
     Chain('A')
 
-    Residue("ALA", 1, ' ', false, ["CA"], Dict("CA"=>
-        Atom(1, "CA", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "  ", "  ",
-        Residue("ALA", 1, ' ', false, Chain('A')))), Chain('A'))
+    Residue(
+        "ALA",
+        1,
+        ' ',
+        false,
+        ["CA"],
+        Dict(
+            "CA" => Atom(
+                1,
+                "CA",
+                ' ',
+                [0.0, 0.0, 0.0],
+                1.0,
+                0.0,
+                "  ",
+                "  ",
+                Residue("ALA", 1, ' ', false, Chain('A')),
+            ),
+        ),
+        Chain('A'),
+    )
     Residue("ALA", 1, ' ', false, Chain('A'))
 
     # Test show
@@ -256,8 +316,8 @@ end
 
     @test atomname(at) == "CA"
     @test atomname(dis_at) == "CB"
-    @test atomname(at, strip=false) == " CA "
-    @test atomname(dis_at, strip=false) == " CB "
+    @test atomname(at, strip = false) == " CA "
+    @test atomname(dis_at, strip = false) == " CB "
 
     @test altlocid(at) == ' '
     @test altlocid(dis_at) == 'A'
@@ -311,13 +371,13 @@ end
 
     @test element(at) == "C"
     @test element(dis_at) == "C"
-    @test element(at, strip=false) == " C"
-    @test element(dis_at, strip=false) == " C"
+    @test element(at, strip = false) == " C"
+    @test element(dis_at, strip = false) == " C"
 
     @test charge(at) == ""
     @test charge(dis_at) == "1+"
-    @test charge(at, strip=false) == "  "
-    @test charge(dis_at, strip=false) == "1+"
+    @test charge(at, strip = false) == "  "
+    @test charge(dis_at, strip = false) == "1+"
 
     @test residue(at) == res
     @test residue(dis_at) == res
@@ -352,7 +412,7 @@ end
     @test resname(at) == "ALA"
     @test resname(dis_at) == "ALA"
     @test resname(dis_res) == "VA"
-    @test resname(dis_res, strip=false) == " VA"
+    @test resname(dis_res, strip = false) == " VA"
 
     @test resnumber(res) == 10
     @test resnumber(at) == 10
@@ -366,22 +426,22 @@ end
 
     @test resid(at) == "10"
     @test resid(dis_at) == "10"
-    @test resid(at, full=true) == "10:A"
-    @test resid(dis_at, full=true) == "10:A"
+    @test resid(at, full = true) == "10:A"
+    @test resid(dis_at, full = true) == "10:A"
     @test resid(res) == "10"
-    @test resid(res, full=true) == "10:A"
+    @test resid(res, full = true) == "10:A"
     @test resid(dis_res) == "H_20A"
-    @test resid(dis_res, full=true) == "H_20A:A"
+    @test resid(dis_res, full = true) == "H_20A:A"
 
     @test atomnames(res) == ["CA", "CB"]
     @test atomnames(dis_res) == ["CG"]
-    @test atomnames(res, strip=false) == [" CA ", " CB "]
-    @test atomnames(dis_res, strip=false) == [" CG "]
+    @test atomnames(res, strip = false) == [" CA ", " CB "]
+    @test atomnames(dis_res, strip = false) == [" CG "]
 
-    @test isa(atoms(res), Dict{String, AbstractAtom})
+    @test isa(atoms(res), Dict{String,AbstractAtom})
     @test length(atoms(res)) == 2
     @test serial(atoms(res)[" CA "]) == 100
-    @test isa(atoms(dis_res), Dict{String, AbstractAtom})
+    @test isa(atoms(dis_res), Dict{String,AbstractAtom})
     @test length(atoms(dis_res)) == 1
     @test serial(atoms(dis_res)[" CG "]) == 300
 
@@ -456,7 +516,7 @@ end
 
     @test resids(ch) == ["10", "H_20A"]
 
-    @test isa(residues(ch), Dict{String, AbstractResidue})
+    @test isa(residues(ch), Dict{String,AbstractResidue})
     @test length(residues(ch)) == 2
     @test serial(residues(ch)["10"]["CA"]) == 100
 
@@ -479,13 +539,13 @@ end
     @test chainids(ProteinStructure()) == String[]
     @test chainids(Model()) == String[]
 
-    @test isa(chains(mod), Dict{String, Chain})
+    @test isa(chains(mod), Dict{String,Chain})
     @test length(chains(mod)) == 2
     @test resname(chains(mod)["A"]["H_20A"]) == "VA"
-    @test isa(chains(Model()), Dict{String, Chain})
-    @test isa(chains(struc), Dict{String, Chain})
+    @test isa(chains(Model()), Dict{String,Chain})
+    @test isa(chains(struc), Dict{String,Chain})
     @test length(chains(struc)) == 2
-    @test isa(chains(ProteinStructure()), Dict{String, Chain})
+    @test isa(chains(ProteinStructure()), Dict{String,Chain})
 
     @test structure(at) == struc
     @test structure(dis_at) == struc
@@ -505,7 +565,7 @@ end
 
     @test modelnumbers(struc) == [1, 3]
 
-    @test isa(models(struc), Dict{Int, Model})
+    @test isa(models(struc), Dict{Int,Model})
     @test length(models(struc)) == 2
     @test resids(models(struc)[1]['A']) == ["10", "H_20A"]
 
@@ -601,11 +661,9 @@ end
     res_b = ch_a["H_11"]
     ch_a["H_100"] = Residue("HOH", 100, ' ', true, ch_a)
     res_c = ch_a["H_100"]
-    ch_a["10"]["CA"] = Atom(
-        100, " CA ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res_a)
+    ch_a["10"]["CA"] = Atom(100, " CA ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res_a)
     at_a = ch_a["10"]["CA"]
-    ch_a["H_11"]["MG"] = Atom(
-        110, "MG", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res_b)
+    ch_a["H_11"]["MG"] = Atom(110, "MG", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res_b)
     at_b = ch_a["H_11"]["MG"]
 
     @test standardselector(at_a)
@@ -619,22 +677,24 @@ end
     @test atomnameselector(at_a, Set(["CA", "N", "C"]))
     @test atomnameselector(at_a, ["CA", "N", "C"])
     @test !atomnameselector(at_b, Set(["CA", "N", "C"]))
-    @test !atomnameselector(at_a, ["CA", "N", "C"], strip=false)
+    @test !atomnameselector(at_a, ["CA", "N", "C"], strip = false)
     @test calphaselector(at_a)
     @test !calphaselector(at_b)
-    @test !calphaselector(Atom(
-        100, "CA", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res_b))
+    @test !calphaselector(
+        Atom(100, "CA", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res_b),
+    )
     @test !cbetaselector(at_a)
-    @test cbetaselector(Atom(
-        100, "CB", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " H", "  ", res_a))
+    @test cbetaselector(Atom(100, "CB", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " H", "  ", res_a))
     @test backboneselector(at_a)
     @test !backboneselector(at_b)
-    @test !backboneselector(Atom(
-        100, "CA", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res_b))
+    @test !backboneselector(
+        Atom(100, "CA", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res_b),
+    )
     @test heavyatomselector(at_a)
     @test !heavyatomselector(at_b)
-    @test !heavyatomselector(Atom(
-        100, "H1", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " H", "  ", res_a))
+    @test !heavyatomselector(
+        Atom(100, "H1", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " H", "  ", res_a),
+    )
     @test resnameselector(at_a, Set(["ALA"]))
     @test resnameselector(at_a, ["ALA"])
     @test !resnameselector(at_b, Set(["ALA"]))
@@ -650,37 +710,48 @@ end
     @test disorderselector(dis_at)
     @test !disorderselector(res_a)
     @test disorderselector(dis_res)
-    @test hydrogenselector(Atom(
-        100, "H", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " H", "  ", res_a))
-    @test !hydrogenselector(Atom(
-        100, "H", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res_a))
-    @test hydrogenselector(Atom(
-        100, "H1", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "  ", "  ", res_a))
-    @test hydrogenselector(Atom(
-        100, "1H", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "  ", "  ", res_a))
-    @test !hydrogenselector(Atom(
-        100, "NH1", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "  ", "  ", res_a))
+    @test hydrogenselector(
+        Atom(100, "H", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " H", "  ", res_a),
+    )
+    @test !hydrogenselector(
+        Atom(100, "H", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res_a),
+    )
+    @test hydrogenselector(
+        Atom(100, "H1", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "  ", "  ", res_a),
+    )
+    @test hydrogenselector(
+        Atom(100, "1H", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "  ", "  ", res_a),
+    )
+    @test !hydrogenselector(
+        Atom(100, "NH1", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "  ", "  ", res_a),
+    )
     @test allselector(at_a)
     @test allselector(res_a)
 
     # Further tests for structural element ordering
     # Order when looping over a DisorderedAtom is the atom serial
     res = Residue("ALA", 1, ' ', false, Chain('A'))
-    dis_at_ord = DisorderedAtom(Dict(
-        'A' => Atom(102, "CA", 'A', [1.0, 2.0, 3.0], 0.3, 10.0, "C", "", res),
-        'B' => Atom(101, "CA", 'B', [1.0, 2.0, 3.0], 0.4, 10.0, "C", "", res),
-        'C' => Atom(100, "CA", 'C', [1.0, 2.0, 3.0], 0.3, 10.0, "C", "", res),
-    ), 'B')
+    dis_at_ord = DisorderedAtom(
+        Dict(
+            'A' => Atom(102, "CA", 'A', [1.0, 2.0, 3.0], 0.3, 10.0, "C", "", res),
+            'B' => Atom(101, "CA", 'B', [1.0, 2.0, 3.0], 0.4, 10.0, "C", "", res),
+            'C' => Atom(100, "CA", 'C', [1.0, 2.0, 3.0], 0.3, 10.0, "C", "", res),
+        ),
+        'B',
+    )
     @test altlocids(dis_at_ord) == ['C', 'B', 'A']
 
     # Order when sorting an atom list is the atom serial
     at_list_ord = AbstractAtom[
-        DisorderedAtom(Dict(
-            'A' => Atom(100, "CA", 'A', [1.0, 2.0, 3.0], 0.4, 10.0, "C", "", res),
-            'B' => Atom(104, "CA", 'B', [1.0, 2.0, 3.0], 0.6, 10.0, "C", "", res)
-        ), 'B'),
+        DisorderedAtom(
+            Dict(
+                'A' => Atom(100, "CA", 'A', [1.0, 2.0, 3.0], 0.4, 10.0, "C", "", res),
+                'B' => Atom(104, "CA", 'B', [1.0, 2.0, 3.0], 0.6, 10.0, "C", "", res),
+            ),
+            'B',
+        ),
         Atom(102, "CB", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "C", "", res),
-        Atom(103, "CG", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "C", "", res)
+        Atom(103, "CG", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, "C", "", res),
     ]
     @test atomname.(sort(at_list_ord)) == ["CB", "CG", "CA"]
     sort!(at_list_ord)
@@ -691,15 +762,15 @@ end
     res_ord = AbstractResidue[
         Residue("ALA", 201, 'A', false, Chain('A')),
         Residue("ALA", 203, ' ', false, Chain('A')),
-        Residue("ALA", 200, ' ', true,  Chain('A')),
+        Residue("ALA", 200, ' ', true, Chain('A')),
         Residue("ALA", 201, 'B', false, Chain('A')),
         Residue("ALA", 202, ' ', false, Chain('A')),
         Residue("ALA", 300, ' ', false, Chain('B')),
-        Residue("ALA", 201, ' ', true,  Chain('A')),
+        Residue("ALA", 201, ' ', true, Chain('A')),
         Residue("ALA", 201, ' ', false, Chain('A')),
-        Residue("ALA", 201, 'A', true,  Chain('A')),
+        Residue("ALA", 201, 'A', true, Chain('A')),
         Residue("ALA", 100, ' ', false, Chain('B')),
-        Residue("ALA", 203, ' ', true,  Chain('A')),
+        Residue("ALA", 203, ' ', true, Chain('A')),
         Residue("ALA", 200, ' ', false, Chain('A')),
     ]
 
@@ -709,42 +780,93 @@ end
     @test sequentialresidues(res_ord[7], res_ord[9])
 
     @test resid.(res_ord) == [
-        "201A", "203", "H_200", "201B", "202", "300", "H_201", "201", "H_201A",
-        "100", "H_203", "200"]
-    @test resid.(res_ord; full=true) == [
-        "201A:A", "203:A", "H_200:A", "201B:A", "202:A", "300:B", "H_201:A",
-        "201:A", "H_201A:A", "100:B", "H_203:A", "200:A"]
-    @test resid.(sort(res_ord); full=true) == [
-        "200:A", "H_200:A", "201:A", "H_201:A", "201A:A", "H_201A:A", "201B:A",
-        "202:A", "203:A", "H_203:A", "100:B", "300:B"]
+        "201A",
+        "203",
+        "H_200",
+        "201B",
+        "202",
+        "300",
+        "H_201",
+        "201",
+        "H_201A",
+        "100",
+        "H_203",
+        "200",
+    ]
+    @test resid.(res_ord; full = true) == [
+        "201A:A",
+        "203:A",
+        "H_200:A",
+        "201B:A",
+        "202:A",
+        "300:B",
+        "H_201:A",
+        "201:A",
+        "H_201A:A",
+        "100:B",
+        "H_203:A",
+        "200:A",
+    ]
+    @test resid.(sort(res_ord); full = true) == [
+        "200:A",
+        "H_200:A",
+        "201:A",
+        "H_201:A",
+        "201A:A",
+        "H_201A:A",
+        "201B:A",
+        "202:A",
+        "203:A",
+        "H_203:A",
+        "100:B",
+        "300:B",
+    ]
     sort!(res_ord)
-    @test resid.(res_ord; full=true) == [
-        "200:A", "H_200:A", "201:A", "H_201:A", "201A:A", "H_201A:A", "201B:A",
-        "202:A", "203:A", "H_203:A", "100:B", "300:B"]
+    @test resid.(res_ord; full = true) == [
+        "200:A",
+        "H_200:A",
+        "201:A",
+        "H_201:A",
+        "201A:A",
+        "H_201A:A",
+        "201B:A",
+        "202:A",
+        "203:A",
+        "H_203:A",
+        "100:B",
+        "300:B",
+    ]
 
     # Order of listing residue names in a DisorderedResidue is default then alphabetical
-    dis_res_ord = DisorderedResidue(Dict(
-        "THR" => Residue("THR", 201, ' ', false, Chain('A')),
-        "ALA" => Residue("ALA", 201, ' ', false, Chain('A')),
-        "ILE" => Residue("ILE", 201, ' ', false, Chain('A')),
-        "SER" => Residue("SER", 201, ' ', false, Chain('A')),
-        "VAL" => Residue("VAL", 201, ' ', false, Chain('A'))
-    ), "SER")
+    dis_res_ord = DisorderedResidue(
+        Dict(
+            "THR" => Residue("THR", 201, ' ', false, Chain('A')),
+            "ALA" => Residue("ALA", 201, ' ', false, Chain('A')),
+            "ILE" => Residue("ILE", 201, ' ', false, Chain('A')),
+            "SER" => Residue("SER", 201, ' ', false, Chain('A')),
+            "VAL" => Residue("VAL", 201, ' ', false, Chain('A')),
+        ),
+        "SER",
+    )
     @test defaultresname(dis_res_ord) == "SER"
     @test resnames(dis_res_ord) == ["SER", "ALA", "ILE", "THR", "VAL"]
 
     # Order when sorting chain IDs is character ordering with the empty chain ID at the end
-    mod_ord = Model(1, Dict(
-        "AB"  => Chain("AB"),
-        "A"   => Chain("A"),
-        " "   => Chain(" "),
-        "1"   => Chain("1"),
-        "AAA" => Chain("AAA"),
-        "BC"  => Chain("BC"),
-        "a"   => Chain("a"),
-        "X"   => Chain("X"),
-        "AC"  => Chain("AC"),
-    ), ProteinStructure())
+    mod_ord = Model(
+        1,
+        Dict(
+            "AB" => Chain("AB"),
+            "A" => Chain("A"),
+            " " => Chain(" "),
+            "1" => Chain("1"),
+            "AAA" => Chain("AAA"),
+            "BC" => Chain("BC"),
+            "a" => Chain("a"),
+            "X" => Chain("X"),
+            "AC" => Chain("AC"),
+        ),
+        ProteinStructure(),
+    )
     @test chainids(mod_ord) == ["1", "A", "X", "a", "AB", "AC", "BC", "AAA", " "]
 
     # Test sequence extraction
@@ -761,21 +883,21 @@ end
         "---------------------------------------------------XX---------------------------" *
         "----------------------------------------XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" *
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" *
-        "XXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXXXXX",
     )
-    seq = LongAA(struc['B'], gaps=false)
+    seq = LongAA(struc['B'], gaps = false)
     @test seq == LongAA(
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILGXXXXXXXXXXXXXXXXXXXXXXXXXX" *
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" *
-        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     )
     seq = LongAA(struc['B'], standardselector)
     @test seq == LongAA(
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
-        "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG"
+        "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG",
     )
     seq = LongAA(struc, standardselector)
     @test seq == LongAA(
@@ -784,12 +906,14 @@ end
         "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG" *
         "MRIILLGAPGAGKGTQAQFIMEKYGIPQISTGDMLRAAVKSGSELGKQAKDIMDAGKLVTDELVIALVKERIAQEDCRNG" *
         "FLLDGFPRTIPQADAMKEAGINVDYVLEFDVPDELIVDRIVGRRVHAPSGRVYHVKFNPPKVEGKDDVTGEELTTRKDDQ" *
-        "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG"
+        "EETVRKRLVEYHQMTAPLIGYYSKEAEAGNTKYAKVDGTKPVAEVRADLEKILG",
     )
-    seq = LongAA(AbstractResidue[
-        Residue("VAL", 20, 'B', true, Chain('B')),
-        Residue("ALA", 10, 'A', false, Chain('A')),
-    ])
+    seq = LongAA(
+        AbstractResidue[
+            Residue("VAL", 20, 'B', true, Chain('B')),
+            Residue("ALA", 10, 'A', false, Chain('A')),
+        ],
+    )
     @test seq == LongAA("VA")
 
     # Test pairwise alignment
@@ -800,14 +924,17 @@ end
     @test count_matches(al) == 20
     @test count_insertions(al) == 20
     @test length(al) == 60
-    alres = pairalign(res[1:40], res[21:60], aligntype=LocalAlignment())
+    alres = pairalign(res[1:40], res[21:60], aligntype = LocalAlignment())
     al = alignment(alres)
     @test score(alres) == 100
     @test count_matches(al) == 20
     @test count_insertions(al) == 0
     @test length(al) == 20
-    alres = pairalign(res[1:40], res[21:60],
-            scoremodel=AffineGapScoreModel(BLOSUM62, gap_open=-50, gap_extend=-1))
+    alres = pairalign(
+        res[1:40],
+        res[21:60],
+        scoremodel = AffineGapScoreModel(BLOSUM62, gap_open = -50, gap_extend = -1),
+    )
     al = alignment(alres)
     @test score(alres) == -29
     @test count_matches(al) == 5
@@ -822,26 +949,26 @@ end
     @test size(describe(df), 1) == 17
     @test isapprox(sum(df.tempfactor), 165121.99)
     @test first(sort(df, :x))[:x] == -7.668
-    df = DataFrame(collectatoms(struc), expand_disordered=false)
+    df = DataFrame(collectatoms(struc), expand_disordered = false)
     @test size(df) == (3804, 17)
     df = DataFrame(collectresidues(struc))
     @test size(df) == (808, 8)
     @test first(df)[:resname] == "MET"
     @test size(describe(df), 1) == 8
     @test sum(df.countatoms) == 3816
-    @test first(sort(df, :resnumber, rev=true))[:resnumber] == 735
-    df = DataFrame(collectresidues(struc), expand_disordered=false)
+    @test first(sort(df, :resnumber, rev = true))[:resnumber] == 735
+    df = DataFrame(collectresidues(struc), expand_disordered = false)
     @test size(df) == (808, 8)
     @test sum(df.countatoms) == 3804
     struc = read(testfilepath("PDB", "1EN2.pdb"), PDB)
     # Residues need expanding first or you miss disordered residues
-    df = DataFrame(collectatoms(collectresidues(struc; expand_disordered=true)))
+    df = DataFrame(collectatoms(collectresidues(struc; expand_disordered = true)))
     @test size(df) == (819, 17)
-    df = DataFrame(collectatoms(struc), expand_disordered=false)
+    df = DataFrame(collectatoms(struc), expand_disordered = false)
     @test size(df) == (754, 17)
     df = DataFrame(collectresidues(struc))
     @test size(df) == (171, 8)
-    df = DataFrame(collectresidues(struc), expand_disordered=false)
+    df = DataFrame(collectresidues(struc), expand_disordered = false)
     @test size(df) == (166, 8)
 end
 
@@ -864,16 +991,26 @@ end
     @test parsecharge(line) == "1+"
 
     line_short = "ATOM    591  C"
-    @test_throws PDBParseError    parseserial("ATOM         C   GLY A  80      29.876  54.131  35.806  1.00 40.97           C1+")
-    @test_throws PDBParseError  parseatomname(line_short)
-    @test_throws PDBParseError    parsealtloc(line_short)
-    @test_throws PDBParseError   parseresname(line_short)
-    @test_throws PDBParseError   parsechainid(line_short)
-    @test_throws PDBParseError parseresnumber("ATOM    591  C   GLY A          29.876  54.131  35.806  1.00 40.97           C1+")
-    @test_throws PDBParseError   parseinscode(line_short)
-    @test_throws PDBParseError    parsecoordx("ATOM    591  C   GLY A  80      xxxxxx  54.131  35.806  1.00 40.97           C1+")
-    @test_throws PDBParseError    parsecoordy("ATOM    591  C   GLY A  80      29.876  xxxxxx  35.806  1.00 40.97           C1+")
-    @test_throws PDBParseError    parsecoordz("ATOM    591  C   GLY A  80      29.876  54.131  xxxxxx  1.00 40.97           C1+")
+    @test_throws PDBParseError parseserial(
+        "ATOM         C   GLY A  80      29.876  54.131  35.806  1.00 40.97           C1+",
+    )
+    @test_throws PDBParseError parseatomname(line_short)
+    @test_throws PDBParseError parsealtloc(line_short)
+    @test_throws PDBParseError parseresname(line_short)
+    @test_throws PDBParseError parsechainid(line_short)
+    @test_throws PDBParseError parseresnumber(
+        "ATOM    591  C   GLY A          29.876  54.131  35.806  1.00 40.97           C1+",
+    )
+    @test_throws PDBParseError parseinscode(line_short)
+    @test_throws PDBParseError parsecoordx(
+        "ATOM    591  C   GLY A  80      xxxxxx  54.131  35.806  1.00 40.97           C1+",
+    )
+    @test_throws PDBParseError parsecoordy(
+        "ATOM    591  C   GLY A  80      29.876  xxxxxx  35.806  1.00 40.97           C1+",
+    )
+    @test_throws PDBParseError parsecoordz(
+        "ATOM    591  C   GLY A  80      29.876  54.131  xxxxxx  1.00 40.97           C1+",
+    )
     @test parseoccupancy(line_short) == 1.0
     @test parsetempfac(line_short) == 0.0
     @test parseelement(line_short) == "  "
@@ -946,13 +1083,13 @@ end
     @test length(ats) == 8
     @test atomname.(ats) == ["N", "CA", "C", "O", "CB", "CG1", "CG2", "CD1"]
     @test chainid(struc[1][begin]) == "A"
-    @test chainid(struc[1][end  ]) == "B"
+    @test chainid(struc[1][end]) == "B"
     @test resnumber(struc[1]["A"][begin]) == 1
-    @test resnumber(struc[1]["A"][end  ]) == 543
+    @test resnumber(struc[1]["A"][end]) == 543
     @test serial(struc[1]["A"][10][begin]) == 68
-    @test serial(struc[1]["A"][10][end  ]) == 71
+    @test serial(struc[1]["A"][10][end]) == 71
     @test serial(struc[1]["A"][167]["CD"][begin]) == 1288
-    @test serial(struc[1]["A"][167]["CD"][end  ]) == 1289
+    @test serial(struc[1]["A"][167]["CD"][end]) == 1289
 
     # Test choosedefaultaltlocid
     res = Residue("ALA", 1, ' ', false, Chain('A'))
@@ -991,47 +1128,52 @@ end
     res = collectresidues(struc)
     res_min = applyselectors(res)
     @test length(res_min) == length(res)
-    @test resid.(res_min; full=true) == resid.(res; full=true)
+    @test resid.(res_min; full = true) == resid.(res; full = true)
     applyselectors!(res_min)
     @test length(res_min) == length(res)
-    @test resid.(res_min; full=true) == resid.(res; full=true)
+    @test resid.(res_min; full = true) == resid.(res; full = true)
     res_min = applyselectors(res, waterselector)
     @test length(res_min) == 378
-    @test resid(res_min[300], full=true) == "H_657:B"
+    @test resid(res_min[300], full = true) == "H_657:B"
     applyselectors!(res, waterselector)
     @test length(res) == 378
-    @test resid(res[300], full=true) == "H_657:B"
+    @test resid(res[300], full = true) == "H_657:B"
     res = collectresidues(struc)
     # Test anonymous selector function
     res_min = applyselectors(res, standardselector, res -> chainid(res) == "A")
     @test length(res_min) == 214
-    @test resid(res_min[200], full=true) == "200:A"
+    @test resid(res_min[200], full = true) == "200:A"
     applyselectors!(res, standardselector, res -> chainid(res) == "A")
     @test length(res) == 214
-    @test resid(res[200], full=true) == "200:A"
+    @test resid(res[200], full = true) == "200:A"
 
     # Test parsing options
-    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, structure_name="New name")
+    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, structure_name = "New name")
     @test structurename(struc) == "New name"
     @test countatoms(struc) == 3804
 
-    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, read_het_atoms=false)
+    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, read_het_atoms = false)
     @test countatoms(struc) == 3312
     @test serial(collectatoms(struc)[2000]) == 2006
     @test sum(ishetero, collectatoms(struc)) == 0
 
-    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, read_std_atoms=false)
+    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, read_std_atoms = false)
     @test countatoms(struc) == 492
     @test serial(collectatoms(struc)[400]) == 3726
     @test sum(ishetero, collectatoms(struc)) == 492
 
-    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, read_het_atoms=false, read_std_atoms=false)
+    struc = read(
+        testfilepath("PDB", "1AKE.pdb"),
+        PDB,
+        read_het_atoms = false,
+        read_std_atoms = false,
+    )
     @test countatoms(struc) == 0
     @test countresidues(struc) == 0
     @test countchains(struc) == 0
     @test countmodels(struc) == 0
 
-    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, remove_disorder=true)
+    struc = read(testfilepath("PDB", "1AKE.pdb"), PDB, remove_disorder = true)
     @test countatoms(struc) == 3804
     @test sum(isdisorderedatom, collectatoms(struc)) == 0
     @test tempfactor(struc['A'][167]["NE"]) == 23.32
@@ -1079,7 +1221,7 @@ end
     sort!(res)
     @test resnumber(res[1]) == 10
     @test serial(struc[1]["A"][10][begin]) == 57
-    @test serial(struc[1]["A"][10][end  ]) == 62
+    @test serial(struc[1]["A"][10][end]) == 62
 
     # Test parsing 1SSU (multiple models)
     struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)
@@ -1115,7 +1257,7 @@ end
     @test z(mods[2]['A'][5]["CA"]) == -5.837
     @test countmodels(Model[struc[10], struc[5]]) == 2
     @test modelnumber(struc[begin]) == 1
-    @test modelnumber(struc[end  ]) == 20
+    @test modelnumber(struc[end]) == 20
 
     # Test collectatoms
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
@@ -1174,13 +1316,13 @@ end
     @test length(ats) == 2
     @test isa(ats, Vector{AbstractAtom})
     @test serial(ats[2]) == 1292
-    ats = collectatoms(struc, expand_disordered=true)
+    ats = collectatoms(struc, expand_disordered = true)
     @test length(ats) == 3816
     @test isa(ats, Vector{AbstractAtom})
     @test all(isa.(ats, Atom))
-    ats = collectatoms(struc, standardselector, expand_disordered=true)
+    ats = collectatoms(struc, standardselector, expand_disordered = true)
     @test length(ats) == 3317
-    ats = collectatoms(struc, disorderselector, expand_disordered=true)
+    ats = collectatoms(struc, disorderselector, expand_disordered = true)
     @test length(ats) == 24
     @test isa(ats, Vector{AbstractAtom})
     @test all(isa.(ats, Atom))
@@ -1201,8 +1343,8 @@ end
     @test countatoms(struc['A'], standardselector) == 1656
     @test countatoms(struc['A'], heteroselector) == 298
     @test countatoms(struc['A'], standardselector, disorderselector) == 5
-    @test countatoms(struc, expand_disordered=true) == 3816
-    @test countatoms(struc, standardselector, expand_disordered=true) == 3317
+    @test countatoms(struc, expand_disordered = true) == 3816
+    @test countatoms(struc, standardselector, expand_disordered = true) == 3317
 
     @test countatoms(ProteinStructure()) == 0
     @test countatoms(Model()) == 0
@@ -1243,7 +1385,7 @@ end
     @test resnumber(res[1]) == 167
     res = collectresidues(Chain[struc['B'], struc['A']])
     @test length(res) == 808
-    @test resid(res[5], full=true) == "5:B"
+    @test resid(res[5], full = true) == "5:B"
     res = collectresidues(Residue[struc['A'][51], struc['A'][50]])
     @test length(res) == 2
     @test isa(res, Vector{Residue})
@@ -1259,7 +1401,8 @@ end
     res = collectresidues(DisorderedAtom[struc['A'][167]["CZ"], struc['A'][167]["CD"]])
     @test length(res) == 1
     @test isa(res, Vector{AbstractResidue})
-    @test atomnames(res[1]) == ["N", "CA", "C", "O", "CB", "CG", "CD", "NE", "CZ", "NH1", "NH2"]
+    @test atomnames(res[1]) ==
+          ["N", "CA", "C", "O", "CB", "CG", "CD", "NE", "CZ", "NH1", "NH2"]
     res = collectresidues(AbstractAtom[struc['A'][50]["CA"], struc['A'][167]["CZ"]])
     @test length(res) == 2
     @test isa(res, Vector{AbstractResidue})
@@ -1268,17 +1411,17 @@ end
     res = collectresidues(struc)
     @test length(res) == 166
     @test isa(res[10], DisorderedResidue)
-    res = collectresidues(struc, expand_disordered=true)
+    res = collectresidues(struc, expand_disordered = true)
     @test length(res) == 171
     @test isa(res, Vector{AbstractResidue})
     @test all(isa.(res, Residue))
-    res = collectresidues(struc, standardselector, expand_disordered=true)
+    res = collectresidues(struc, standardselector, expand_disordered = true)
     @test length(res) == 90
     res = collectresidues(struc, disorderselector)
     @test length(res) == 5
     @test isa(res, Vector{AbstractResidue})
     @test all(isa.(res, DisorderedResidue))
-    res = collectresidues(struc, disorderselector, expand_disordered=true)
+    res = collectresidues(struc, disorderselector, expand_disordered = true)
     @test length(res) == 10
     @test isa(res, Vector{AbstractResidue})
     @test all(isa.(res, Residue))
@@ -1301,8 +1444,8 @@ end
     @test countresidues(struc['A'], heteroselector) == 242
     @test countresidues(struc, standardselector, res -> chainid(res) == "A") == 214
     struc = read(testfilepath("PDB", "1EN2.pdb"), PDB)
-    @test countresidues(struc, expand_disordered=true) == 171
-    @test countresidues(struc, standardselector, expand_disordered=true) == 90
+    @test countresidues(struc, expand_disordered = true) == 171
+    @test countresidues(struc, standardselector, expand_disordered = true) == 90
 
     @test countresidues(ProteinStructure()) == 0
     @test countresidues(Model()) == 0
@@ -1464,19 +1607,35 @@ end
 
     # Test spaceatomname
     res = Residue("ALA", 1, ' ', false, Chain('A'))
-    @test spaceatomname(Atom(1, " CA ", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " C", "  ", res)) == " CA "
-    @test spaceatomname(Atom(1, "N",    ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " N", "  ", res)) == " N  "
-    @test spaceatomname(Atom(1, "N",    ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "  ", "  ", res)) == " N  "
-    @test spaceatomname(Atom(1, "CA",   ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " C", "  ", res)) == " CA "
-    @test spaceatomname(Atom(1, "NE1",  ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " N", "  ", res)) == " NE1"
-    @test spaceatomname(Atom(1, "2HD1", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res)) == "2HD1"
-    @test spaceatomname(Atom(1, "HH11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res)) == "HH11"
-    @test spaceatomname(Atom(1, "1H",   ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res)) == "1H  "
-    @test spaceatomname(Atom(1, "MG",   ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "MG", "  ", res)) == "MG  "
-    @test spaceatomname(Atom(1, "MG",   ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "  ", "  ", res)) == " MG "
-    @test_throws ArgumentError spaceatomname(Atom(1, "11H",   ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res))
-    @test_throws ArgumentError spaceatomname(Atom(1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res))
-    @test_throws ArgumentError spaceatomname(Atom(1, "1MG",   ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "MG", "  ", res))
+    @test spaceatomname(Atom(1, " CA ", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " C", "  ", res)) ==
+          " CA "
+    @test spaceatomname(Atom(1, "N", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " N", "  ", res)) ==
+          " N  "
+    @test spaceatomname(Atom(1, "N", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "  ", "  ", res)) ==
+          " N  "
+    @test spaceatomname(Atom(1, "CA", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " C", "  ", res)) ==
+          " CA "
+    @test spaceatomname(Atom(1, "NE1", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " N", "  ", res)) ==
+          " NE1"
+    @test spaceatomname(Atom(1, "2HD1", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res)) ==
+          "2HD1"
+    @test spaceatomname(Atom(1, "HH11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res)) ==
+          "HH11"
+    @test spaceatomname(Atom(1, "1H", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res)) ==
+          "1H  "
+    @test spaceatomname(Atom(1, "MG", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "MG", "  ", res)) ==
+          "MG  "
+    @test spaceatomname(Atom(1, "MG", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "  ", "  ", res)) ==
+          " MG "
+    @test_throws ArgumentError spaceatomname(
+        Atom(1, "11H", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res),
+    )
+    @test_throws ArgumentError spaceatomname(
+        Atom(1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res),
+    )
+    @test_throws ArgumentError spaceatomname(
+        Atom(1, "1MG", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "MG", "  ", res),
+    )
 
     # Test output formatting
     @test pyfmt(coordspec, 5.0) == "5.000"
@@ -1485,28 +1644,46 @@ end
     # Test pdbline
     ch_a = Chain('A')
     ch_a["1"] = Residue("ALA", 1, ' ', false, ch_a)
-    ch_a["1"][" N  "] = Atom(10, " N  ", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " N", "  ", ch_a["1"])
+    ch_a["1"][" N  "] =
+        Atom(10, " N  ", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " N", "  ", ch_a["1"])
     line = pdbline(ch_a["1"][" N  "])
-    @test line == "ATOM     10  N   ALA A   1       0.000   0.000   0.000  1.00  0.00           N  "
+    @test line ==
+          "ATOM     10  N   ALA A   1       0.000   0.000   0.000  1.00  0.00           N  "
     ch_b = Chain('B')
     ch_b["H_20"] = Residue("X", 20, ' ', true, ch_b)
-    ch_b["H_20"]["C"] = Atom(101, "C", 'A', [10.5, 20.12345, -5.1227], 0.50, 50.126, "C", "1+", ch_b["H_20"])
+    ch_b["H_20"]["C"] = Atom(
+        101,
+        "C",
+        'A',
+        [10.5, 20.12345, -5.1227],
+        0.50,
+        50.126,
+        "C",
+        "1+",
+        ch_b["H_20"],
+    )
     line = pdbline(ch_b["H_20"]["C"])
-    @test line == "HETATM  101  C  A  X B  20      10.500  20.123  -5.123  0.50 50.13           C1+"
-    ch_b["H_20"]["11H11"] = Atom(1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", ch_b["H_20"])
+    @test line ==
+          "HETATM  101  C  A  X B  20      10.500  20.123  -5.123  0.50 50.13           C1+"
+    ch_b["H_20"]["11H11"] =
+        Atom(1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", ch_b["H_20"])
     @test_throws ArgumentError pdbline(ch_b["H_20"]["11H11"])
-    ch_b["H_20"]["H1"] = Atom(1, "H1", ' ', [-1000.123, 0.0, 0.0], 1.0, 0.0, " H", "  ", ch_b["H_20"])
+    ch_b["H_20"]["H1"] =
+        Atom(1, "H1", ' ', [-1000.123, 0.0, 0.0], 1.0, 0.0, " H", "  ", ch_b["H_20"])
     @test_throws ArgumentError pdbline(ch_b["H_20"]["H1"])
 
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
-    @test pdbline(struc["A"][167]["NH1"]) == "ATOM   1294  NH1AARG A 167      24.181  40.144  13.699  0.50 27.31           N  "
+    @test pdbline(struc["A"][167]["NH1"]) ==
+          "ATOM   1294  NH1AARG A 167      24.181  40.144  13.699  0.50 27.31           N  "
 
     line_a = "ATOM    669  CA  ILE A  90      31.743  33.110  31.221  1.00 25.76           C  "
     line_b = "HETATM 3474  O  B XX A 334A      8.802  62.000   8.672  1.00 39.15           O1-"
     at_rec = AtomRecord(line_a)
-    @test pdbline(at_rec) == "ATOM    669  CA  ILE A  90      31.743  33.110  31.221  1.00 25.76           C  "
+    @test pdbline(at_rec) ==
+          "ATOM    669  CA  ILE A  90      31.743  33.110  31.221  1.00 25.76           C  "
     at_rec = AtomRecord(line_b)
-    @test pdbline(at_rec) == "HETATM 3474  O  B XX A 334A      8.802  62.000   8.672  1.00 39.15           O1-"
+    @test pdbline(at_rec) ==
+          "HETATM 3474  O  B XX A 334A      8.802  62.000   8.672  1.00 39.15           O1-"
 
     # Test writepdb
     struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)
@@ -1517,8 +1694,8 @@ end
     @test modelnumbers(struc_written) == collect(1:20)
     @test countatoms(struc_written) == 756
     @test z(struc_written[4]['A']["30"]["OG"]) == -2.177
-    @test atomnames(struc_written[15]['A']["39"]) == [
-        "N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
+    @test atomnames(struc_written[15]['A']["39"]) ==
+          ["N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
 
     # Test writing to stream
     open(temp_filename, "w") do file
@@ -1529,8 +1706,8 @@ end
     @test modelnumbers(struc_written) == collect(1:20)
     @test countatoms(struc_written) == 756
     @test z(struc_written[4]['A']["30"]["OG"]) == -2.177
-    @test atomnames(struc_written[15]['A']["39"]) == [
-        "N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
+    @test atomnames(struc_written[15]['A']["39"]) ==
+          ["N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
 
     # Test selectors
     struc = read(testfilepath("PDB", "1AKE.pdb"), PDB)
@@ -1541,8 +1718,7 @@ end
     @test countatoms(struc_written) == 492
     @test chainids(struc_written) == ["A", "B"]
     @test tempfactor(struc_written['B']["H_705"]["O"]) == 64.17
-    writepdb(temp_filename, collectatoms(struc, standardselector,
-                                            disorderselector))
+    writepdb(temp_filename, collectatoms(struc, standardselector, disorderselector))
     @test countlines(temp_filename) == 10
     struc_written = read(temp_filename, PDB)
     @test countatoms(struc_written) == 5
@@ -1550,7 +1726,7 @@ end
     @test defaultaltlocid(struc_written['A'][167]["NH1"]) == 'A'
     writepdb(temp_filename, struc)
     @test countlines(temp_filename) == 3816
-    writepdb(temp_filename, struc, expand_disordered=false)
+    writepdb(temp_filename, struc, expand_disordered = false)
     @test countlines(temp_filename) == 3804
     struc_written = read(temp_filename, PDB)
     @test !any(isdisorderedatom.(collectatoms(struc_written)))
@@ -1570,8 +1746,8 @@ end
     struc_written = read(temp_filename, PDB)
     @test chainids(struc_written) == ["A"]
     @test countresidues(struc_written) == 1
-    @test atomnames(struc_written['A'][50]) == [
-        "N", "CA", "C", "O", "CB", "CG", "CD", "CE", "NZ"]
+    @test atomnames(struc_written['A'][50]) ==
+          ["N", "CA", "C", "O", "CB", "CG", "CD", "CE", "NZ"]
     writepdb(temp_filename, struc['A'][50]["CA"])
     @test countlines(temp_filename) == 1
     struc_written = read(temp_filename, PDB)
@@ -1648,16 +1824,18 @@ end
     @test altlocid(disorderedres(struc_written['A'][10], "GLY")["O"]) == 'B'
     @test countatoms(struc_written['A'][10]) == 6
     @test countatoms(struc_written['A'][16]) == 11
-    writepdb(temp_filename, struc, expand_disordered=false)
+    writepdb(temp_filename, struc, expand_disordered = false)
     @test countlines(temp_filename) == 754
     struc_written = read(temp_filename, PDB)
     @test !any(isdisorderedres.(collectresidues(struc_written)))
     @test !any(isdisorderedatom.(collectatoms(struc_written)))
-    @test countresidues(struc_written, expand_disordered=true) == 166
-    @test countatoms(struc_written, expand_disordered=true) == 754
+    @test countresidues(struc_written, expand_disordered = true) == 166
+    @test countatoms(struc_written, expand_disordered = true) == 754
 
-    @test_throws ArgumentError writepdb(temp_filename, Atom(
-        1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res))
+    @test_throws ArgumentError writepdb(
+        temp_filename,
+        Atom(1, "11H11", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, " H", "  ", res),
+    )
 
     checkchainerror(Chain("A"))
     @test_throws ArgumentError checkchainerror(Chain("AA"))
@@ -1672,12 +1850,12 @@ end
     dic = MMCIFDict()
     dic = MMCIFDict(Dict())
     show(IOBuffer(), MIME("text/plain"), MMCIFDict())
-    show(IOBuffer(), MIME("text/plain"), MMCIFDict(Dict("a"=> ["b"])))
+    show(IOBuffer(), MIME("text/plain"), MMCIFDict(Dict("a" => ["b"])))
 
     mmcif_1ake = testfilepath("mmCIF", "1AKE.cif")
     gzip_file(mmcif_1ake, temp_filename)
-    for dic in (MMCIFDict(mmcif_1ake), MMCIFDict(temp_filename; gzip=true))
-        @test isa(dic.dict, Dict{String, Vector{String}})
+    for dic in (MMCIFDict(mmcif_1ake), MMCIFDict(temp_filename; gzip = true))
+        @test isa(dic.dict, Dict{String,Vector{String}})
         @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == ["1991-11-08"]
         @test dic["_audit_author.name"] == ["Mueller, C.W.", "Schulz, G.E."]
         @test length(dic["_atom_site.group_PDB"]) == 3816
@@ -1706,7 +1884,7 @@ end
     @test dic["_test_value"] == ["first line\n    second line\nthird line"]
 
     gz = GzipCompressorStream(IOBuffer(multiline_str))
-    dic = MMCIFDict(gz; gzip=true)
+    dic = MMCIFDict(gz; gzip = true)
     @test dic["data_"] == ["test"]
     @test dic["_test_value"] == ["first line\n    second line\nthird line"]
     close(gz)
@@ -1774,12 +1952,42 @@ end
         """
     dic = MMCIFDict(IOBuffer(quote_str))
     @test dic["_struct_conf.pdbx_PDB_helix_id"] == [
-        "A", "A'", "B", "C", "B'", "D", "E", "C'",
-        "F", "G", "H", "D'", "E'", "A'\"", "BC", "CD", "DE"
+        "A",
+        "A'",
+        "B",
+        "C",
+        "B'",
+        "D",
+        "E",
+        "C'",
+        "F",
+        "G",
+        "H",
+        "D'",
+        "E'",
+        "A'\"",
+        "BC",
+        "CD",
+        "DE",
     ]
     @test dic["_struct_conf.details"] == [
-        "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?",
-        "TYPE I'", "TYPE I", "TYPE I (H-BOND O65-N69)", "TYPE II'"
+        "?",
+        "?",
+        "?",
+        "?",
+        "?",
+        "?",
+        "?",
+        "?",
+        "?",
+        "?",
+        "?",
+        "?",
+        "?",
+        "TYPE I'",
+        "TYPE I",
+        "TYPE I (H-BOND O65-N69)",
+        "TYPE II'",
     ]
 
     underscore_str = """
@@ -1797,8 +2005,10 @@ end
     dic = MMCIFDict(IOBuffer(underscore_str))
     @test length(keys(dic)) == 5
     @test dic["_pdbx_audit_revision_item.item"] == [
-        "_atom_site.B_iso_or_equiv", "_atom_site.Cartn_x",
-        "_atom_site.Cartn_y", "_atom_site.Cartn_z"
+        "_atom_site.B_iso_or_equiv",
+        "_atom_site.Cartn_x",
+        "_atom_site.Cartn_y",
+        "_atom_site.Cartn_z",
     ]
 
     keyerr_str = """
@@ -1895,29 +2105,33 @@ end
     @test atomname.(ats) == ["N", "CA", "C", "O", "CB", "CG1", "CG2", "CD1"]
 
     # Test parsing options
-    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, structure_name="New name")
+    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, structure_name = "New name")
     @test structurename(struc) == "New name"
     @test countatoms(struc) == 3804
 
-    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, read_het_atoms=false)
+    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, read_het_atoms = false)
     @test countatoms(struc) == 3312
     # Different to the PDB file due to the lack of TER label serial
     @test serial(collectatoms(struc)[2000]) == 2005
     @test sum(ishetero, collectatoms(struc)) == 0
 
-    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, read_std_atoms=false)
+    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, read_std_atoms = false)
     @test countatoms(struc) == 492
     @test serial(collectatoms(struc)[400]) == 3724
     @test sum(ishetero, collectatoms(struc)) == 492
 
-    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, read_het_atoms=false,
-                read_std_atoms=false)
+    struc = read(
+        testfilepath("mmCIF", "1AKE.cif"),
+        MMCIF,
+        read_het_atoms = false,
+        read_std_atoms = false,
+    )
     @test countatoms(struc) == 0
     @test countresidues(struc) == 0
     @test countchains(struc) == 0
     @test countmodels(struc) == 0
 
-    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, remove_disorder=true)
+    struc = read(testfilepath("mmCIF", "1AKE.cif"), MMCIF, remove_disorder = true)
     @test countatoms(struc) == 3804
     @test sum(isdisorderedatom, collectatoms(struc)) == 0
     @test tempfactor(struc['A'][167]["NE"]) == 23.32
@@ -2101,7 +2315,7 @@ end
     # functions has a trailing `; kwargs...`.  We also have to use a
     # custom `countlines_gzip(filename; gzip=false)` function that
     # handles the case that `filename` is compressed.
-    for kwargs in [(), (gzip=true,)]
+    for kwargs in [(), (gzip = true,)]
         dic_one = MMCIFDict(testfilepath("mmCIF", "1AKE.cif"))
         writemmcif(temp_filename, dic_one; kwargs...)
         dic_two = MMCIFDict(temp_filename; kwargs...)
@@ -2109,15 +2323,22 @@ end
         @test all([haskey(dic_two, k) for k in keys(dic_one)])
         @test all([dic_one[k] == dic_two[k] for k in keys(dic_one)])
 
-        writemmcif(temp_filename, MMCIFDict(Dict("key.key"=> ["value"])); kwargs...)
-        @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict("key"=> ["value"]));
-                                              kwargs...)
-        @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict("key.key.key"=> ["value"]));
-                                              kwargs...)
-        @test_throws ArgumentError writemmcif(temp_filename, MMCIFDict(Dict(
-            "key.one"=> ["value"],
-            "key.two"=> ["value1", "value2"],
-        )); kwargs...)
+        writemmcif(temp_filename, MMCIFDict(Dict("key.key" => ["value"])); kwargs...)
+        @test_throws ArgumentError writemmcif(
+            temp_filename,
+            MMCIFDict(Dict("key" => ["value"]));
+            kwargs...,
+        )
+        @test_throws ArgumentError writemmcif(
+            temp_filename,
+            MMCIFDict(Dict("key.key.key" => ["value"]));
+            kwargs...,
+        )
+        @test_throws ArgumentError writemmcif(
+            temp_filename,
+            MMCIFDict(Dict("key.one" => ["value"], "key.two" => ["value1", "value2"]));
+            kwargs...,
+        )
 
         struc = read(testfilepath("PDB", "1SSU.pdb"), PDB)
         writemmcif(temp_filename, struc; kwargs...)
@@ -2130,8 +2351,8 @@ end
         @test modelnumbers(struc_written) == collect(1:20)
         @test countatoms(struc_written) == 756
         @test z(struc_written[4]['A']["30"]["OG"]) == -2.177
-        @test atomnames(struc_written[15]['A']["39"]) == [
-            "N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
+        @test atomnames(struc_written[15]['A']["39"]) ==
+              ["N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
 
         writemmcif(temp_filename, MMCIFDict(); kwargs...)
         dic_written = MMCIFDict(temp_filename; kwargs...)
@@ -2154,9 +2375,11 @@ end
         @test countatoms(struc_written) == 492
         @test chainids(struc_written) == ["A", "B"]
         @test tempfactor(struc_written['B']["H_705"]["O"]) == 64.17
-        writemmcif(temp_filename, collectatoms(struc, standardselector,
-                                               disorderselector);
-                   kwargs...)
+        writemmcif(
+            temp_filename,
+            collectatoms(struc, standardselector, disorderselector);
+            kwargs...,
+        )
         @test countlines_gzip(temp_filename; kwargs...) == 35
         struc_written = read(temp_filename, MMCIF; kwargs...)
         @test countatoms(struc_written) == 5
@@ -2164,8 +2387,7 @@ end
         @test defaultaltlocid(struc_written['A'][167]["NH1"]) == 'A'
         writemmcif(temp_filename, struc; kwargs...)
         @test countlines_gzip(temp_filename; kwargs...) == 3841
-        writemmcif(temp_filename, struc, expand_disordered=false;
-                   kwargs...)
+        writemmcif(temp_filename, struc, expand_disordered = false; kwargs...)
         @test countlines_gzip(temp_filename; kwargs...) == 3829
         struc_written = read(temp_filename, MMCIF; kwargs...)
         @test !any(isdisorderedatom.(collectatoms(struc_written)))
@@ -2185,8 +2407,8 @@ end
         struc_written = read(temp_filename, MMCIF; kwargs...)
         @test chainids(struc_written) == ["A"]
         @test countresidues(struc_written) == 1
-        @test atomnames(struc_written['A'][50]) == [
-            "N", "CA", "C", "O", "CB", "CG", "CD", "CE", "NZ"]
+        @test atomnames(struc_written['A'][50]) ==
+              ["N", "CA", "C", "O", "CB", "CG", "CD", "CE", "NZ"]
         writemmcif(temp_filename, struc['A'][50]["CA"]; kwargs...)
         @test countlines_gzip(temp_filename; kwargs...) == 24
         writemmcif(temp_filename, struc['A'][167]["CZ"]; kwargs...)
@@ -2196,27 +2418,33 @@ end
         @test isdisorderedatom(collectatoms(struc_written)[1])
         @test length(collectatoms(struc_written)[1]) == 2
         @test tempfactor(collectatoms(struc_written)[1]) == 16.77
-        writemmcif(temp_filename, Chain[struc['A'], struc['B']];
-                   kwargs...)
+        writemmcif(temp_filename, Chain[struc['A'], struc['B']]; kwargs...)
         @test countlines_gzip(temp_filename; kwargs...) == 3841
         struc_written = read(temp_filename, MMCIF; kwargs...)
         @test chainids(struc_written) == ["A", "B"]
         @test countatoms(struc_written['A']) == 1954
         @test countatoms(struc_written['B']) == 1850
         @test altlocids(struc_written['A']["H_215"]["O1G"]) == ['A', 'B']
-        writemmcif(temp_filename, AbstractResidue[struc['A'][51], struc['A'][50]]; kwargs...)
+        writemmcif(
+            temp_filename,
+            AbstractResidue[struc['A'][51], struc['A'][50]];
+            kwargs...,
+        )
         @test countlines_gzip(temp_filename; kwargs...) == 42
         struc_written = read(temp_filename, MMCIF; kwargs...)
         @test countresidues(struc_written) == 2
         @test resid.(collectresidues(struc_written)) == ["50", "51"]
         @test countatoms(struc_written) == 17
-        writemmcif(temp_filename, AbstractAtom[struc['A'][51]["CA"], struc['A'][50]["CA"]]; kwargs...)
+        writemmcif(
+            temp_filename,
+            AbstractAtom[struc['A'][51]["CA"], struc['A'][50]["CA"]];
+            kwargs...,
+        )
         @test countlines_gzip(temp_filename; kwargs...) == 27
         struc_written = read(temp_filename, MMCIF; kwargs...)
         @test countatoms(struc_written) == 2
         @test !ishetero(struc_written['A'][51]["CA"])
-        writemmcif(temp_filename, struc['A'][51]["N"], calphaselector;
-                   kwargs...)
+        writemmcif(temp_filename, struc['A'][51]["N"], calphaselector; kwargs...)
         dic_written = MMCIFDict(temp_filename; kwargs...)
         @test length(keys(dic_written)) == 1
         struc_written = read(temp_filename, MMCIF; kwargs...)
@@ -2252,7 +2480,11 @@ end
         @test isa(disorderedres(struc_written['A'][16], "TRP")["N"], Atom)
         @test countatoms(struc_written['A'][16]) == 11
         @test countatoms(disorderedres(struc_written['A'][16], "TRP")) == 14
-        writemmcif(temp_filename, AbstractResidue[struc['A'][16], struc['A'][10]]; kwargs...)
+        writemmcif(
+            temp_filename,
+            AbstractResidue[struc['A'][16], struc['A'][10]];
+            kwargs...,
+        )
         @test countlines_gzip(temp_filename; kwargs...) == 71
         struc_written = read(temp_filename, MMCIF; kwargs...)
         @test countresidues(struc_written) == 2
@@ -2263,13 +2495,13 @@ end
         @test altlocid(disorderedres(struc_written['A'][10], "GLY")["O"]) == 'B'
         @test countatoms(struc_written['A'][10]) == 6
         @test countatoms(struc_written['A'][16]) == 11
-        writemmcif(temp_filename, struc, expand_disordered=false; kwargs...)
+        writemmcif(temp_filename, struc, expand_disordered = false; kwargs...)
         @test countlines_gzip(temp_filename; kwargs...) == 779
         struc_written = read(temp_filename, MMCIF; kwargs...)
         @test !any(isdisorderedres.(collectresidues(struc_written)))
         @test !any(isdisorderedatom.(collectatoms(struc_written)))
-        @test countresidues(struc_written, expand_disordered=true) == 166
-        @test countatoms(struc_written, expand_disordered=true) == 754
+        @test countresidues(struc_written, expand_disordered = true) == 166
+        @test countatoms(struc_written, expand_disordered = true) == 754
 
         # Test writing multi-character chain IDs
         struc = read(IOBuffer(multichar_str), MMCIF)
@@ -2308,8 +2540,10 @@ end
     @test cifs["test"]["_test_loop_2"] == ["b", "d"]
     @test length(keys(cifs["4Q9R"])) == 5
     @test cifs["4Q9R"]["_pdbx_audit_revision_item.item"] == [
-        "_atom_site.B_iso_or_equiv", "_atom_site.Cartn_x",
-        "_atom_site.Cartn_y", "_atom_site.Cartn_z"
+        "_atom_site.B_iso_or_equiv",
+        "_atom_site.Cartn_x",
+        "_atom_site.Cartn_y",
+        "_atom_site.Cartn_z",
     ]
     # Read from file - write a small multicif manually and read it back
     for gzip in (false, true)
@@ -2322,10 +2556,10 @@ end
                 write(f_out, f_in)
             end
         end
-        cifs = readmultimmcif(temp_filename; gzip=gzip)
+        cifs = readmultimmcif(temp_filename; gzip = gzip)
         # Tests for 1AKE
         dic = cifs["1AKE"]
-        @test isa(dic.dict, Dict{String, Vector{String}})
+        @test isa(dic.dict, Dict{String,Vector{String}})
         @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == ["1991-11-08"]
         @test dic["_audit_author.name"] == ["Mueller, C.W.", "Schulz, G.E."]
         @test length(dic["_atom_site.group_PDB"]) == 3816
@@ -2391,7 +2625,7 @@ end
     @test_throws ErrorException readmultimmcif(IOBuffer(test_multicif))
 
     # Test writemultimmcif
-    test_multicif = Dict{String, MMCIFDict}()
+    test_multicif = Dict{String,MMCIFDict}()
     for pdbid in ("1AKE", "1SSU")
         cif = MMCIFDict(testfilepath("mmCIF", "$pdbid.cif"))
         test_multicif[pdbid] = cif
@@ -2399,25 +2633,26 @@ end
     # Write to buffer
     for gzip in (false, true)
         open(temp_filename, "w") do io
-            writemultimmcif(io, test_multicif; gzip=gzip)
+            writemultimmcif(io, test_multicif; gzip = gzip)
         end
-        cifs = readmultimmcif(temp_filename; gzip=gzip)
+        cifs = readmultimmcif(temp_filename; gzip = gzip)
         for k in keys(cifs)
             @test cifs[k].dict == test_multicif[k].dict
         end
     end
     # Write to filepath
     for gzip in (false, true)
-        writemultimmcif(temp_filename, test_multicif; gzip=gzip)
-        cifs = readmultimmcif(temp_filename; gzip=gzip)
+        writemultimmcif(temp_filename, test_multicif; gzip = gzip)
+        cifs = readmultimmcif(temp_filename; gzip = gzip)
         for k in keys(cifs)
             @test cifs[k].dict == test_multicif[k].dict
         end
     end
     # test warning
-    @test_logs (:warn,
-                "writemultimmcif: MMCIFDict for key \"not_1AKE\" has different \"data_\" key (\"1AKE\")"
-                ) writemultimmcif(temp_filename, Dict("not_1AKE" => test_multicif["1AKE"]))
+    @test_logs (
+        :warn,
+        "writemultimmcif: MMCIFDict for key \"not_1AKE\" has different \"data_\" key (\"1AKE\")",
+    ) writemultimmcif(temp_filename, Dict("not_1AKE" => test_multicif["1AKE"]))
 end
 
 @testset "MMTF" begin
@@ -2425,10 +2660,10 @@ end
     dic = MMTF()
     dic = MMTFDict(Dict())
     show(IOBuffer(), MIME("text/plain"), MMTFDict())
-    show(IOBuffer(), MIME("text/plain"), MMTFDict(Dict("a"=> "b")))
+    show(IOBuffer(), MIME("text/plain"), MMTFDict(Dict("a" => "b")))
 
     dic = MMTFDict(testfilepath("MMTF", "1AKE.mmtf"))
-    @test isa(dic.dict, Dict{String, Any})
+    @test isa(dic.dict, Dict{String,Any})
     @test dic["rWork"] == 0.196f0
     @test dic["chainNameList"] == ["A", "B", "A", "B", "A", "B"]
     @test length(dic["groupIdList"]) == 808
@@ -2440,10 +2675,10 @@ end
     @test get(dic, "nokey", ["default"]) == ["default"]
     @test ismissing(get(dic, "nokey", missing))
     show(devnull, dic)
-    dic_gzip = MMTFDict(testfilepath("MMTF", "1AKE.mmtf.gz"), gzip=true)
+    dic_gzip = MMTFDict(testfilepath("MMTF", "1AKE.mmtf.gz"), gzip = true)
     @test dic.dict == dic_gzip.dict
     open(testfilepath("MMTF", "1AKE.mmtf.gz")) do file
-        dic_gzip = MMTFDict(file, gzip=true)
+        dic_gzip = MMTFDict(file, gzip = true)
         @test dic.dict == dic_gzip.dict
     end
     dic_red = MMTFDict(testfilepath("MMTF", "1AKE_reduced.mmtf"))
@@ -2467,9 +2702,9 @@ end
     @test !isdisorderedatom(struc['A'][200]["NZ"])
     @test isdisorderedatom(struc['A'][167]["CD"])
     @test altlocids(struc['A'][167]["CD"]) == ['A', 'B']
-    @test isapprox(x(struc['A'][167]["CD"]), 24.502, atol=1e-5)
-    @test isapprox(x(struc['A'][167]["CD"]['A']), 24.502, atol=1e-5)
-    @test isapprox(x(struc['A'][167]["CD"]['B']), 24.69, atol=1e-5)
+    @test isapprox(x(struc['A'][167]["CD"]), 24.502, atol = 1e-5)
+    @test isapprox(x(struc['A'][167]["CD"]['A']), 24.502, atol = 1e-5)
+    @test isapprox(x(struc['A'][167]["CD"]['B']), 24.69, atol = 1e-5)
     mods = collect(struc)
     @test modelnumber(mods[1]) == 1
     chs = collect(mods[1])
@@ -2485,41 +2720,45 @@ end
     @test countatoms(struc) == 542
     @test countatoms(struc, standardselector, !calphaselector) == 0
     @test chainids(struc) == ["A", "B"]
-    @test isapprox(x(struc['A'][167]["CA"]), 23.859, atol=1e-5)
-    @test isapprox(tempfactor(struc['A'][167]["CA"]), 15.89, atol=1e-5)
+    @test isapprox(x(struc['A'][167]["CA"]), 23.859, atol = 1e-5)
+    @test isapprox(tempfactor(struc['A'][167]["CA"]), 15.89, atol = 1e-5)
 
     # Test parsing options
-    struc = read(testfilepath("MMTF", "1AKE.mmtf"), MMTF, structure_name="New name")
+    struc = read(testfilepath("MMTF", "1AKE.mmtf"), MMTF, structure_name = "New name")
     @test structurename(struc) == "New name"
     @test countatoms(struc) == 3804
 
-    struc = read(testfilepath("MMTF", "1AKE.mmtf"), MMTF, read_het_atoms=false)
+    struc = read(testfilepath("MMTF", "1AKE.mmtf"), MMTF, read_het_atoms = false)
     @test countatoms(struc) == 3312
     # Different to the PDB file due to the lack of TER label serial
     @test serial(collectatoms(struc)[2000]) == 2005
     @test sum(ishetero, collectatoms(struc)) == 0
 
-    struc = read(testfilepath("MMTF", "1AKE.mmtf"), MMTF, read_std_atoms=false)
+    struc = read(testfilepath("MMTF", "1AKE.mmtf"), MMTF, read_std_atoms = false)
     @test countatoms(struc) == 492
     @test serial(collectatoms(struc)[400]) == 3724
     @test sum(ishetero, collectatoms(struc)) == 492
 
-    struc = read(testfilepath("MMTF", "1AKE.mmtf"), MMTF, read_het_atoms=false,
-                read_std_atoms=false)
+    struc = read(
+        testfilepath("MMTF", "1AKE.mmtf"),
+        MMTF,
+        read_het_atoms = false,
+        read_std_atoms = false,
+    )
     @test countatoms(struc) == 0
     @test countresidues(struc) == 0
     @test countchains(struc) == 0
     @test countmodels(struc) == 0
 
-    struc = read(testfilepath("MMTF", "1AKE.mmtf"), MMTF, remove_disorder=true)
+    struc = read(testfilepath("MMTF", "1AKE.mmtf"), MMTF, remove_disorder = true)
     @test countatoms(struc) == 3804
     @test sum(isdisorderedatom, collectatoms(struc)) == 0
-    @test isapprox(tempfactor(struc['A'][167]["NE"]), 23.32, atol=1e-5)
+    @test isapprox(tempfactor(struc['A'][167]["NE"]), 23.32, atol = 1e-5)
 
-    struc = read(testfilepath("MMTF", "1AKE.mmtf.gz"), MMTF, gzip=true)
+    struc = read(testfilepath("MMTF", "1AKE.mmtf.gz"), MMTF, gzip = true)
     @test chainids(struc) == ["A", "B"]
     @test serial(struc['A'][200]["NZ"]) == 1555
-    @test isapprox(x(struc['A'][167]["CD"]['A']), 24.502, atol=1e-5)
+    @test isapprox(x(struc['A'][167]["CD"]['A']), 24.502, atol = 1e-5)
 
     # Test parsing from stream
     open(testfilepath("MMTF", "1AKE.mmtf")) do file
@@ -2528,7 +2767,7 @@ end
         @test countresidues(struc) == 808
     end
     open(testfilepath("MMTF", "1AKE.mmtf.gz")) do file
-        struc = read(file, MMTF, gzip=true)
+        struc = read(file, MMTF, gzip = true)
         @test countatoms(struc) == 3804
         @test countresidues(struc) == 808
     end
@@ -2553,7 +2792,7 @@ end
     @test isdisorderedatom(struc['A'][16]["CA"])
     @test altlocids(struc['A'][16]["CA"]) == ['A', 'B']
     @test defaultaltlocid(struc['A'][16]["CA"]) == 'A'
-    @test isapprox(occupancy(struc['A'][16]["CA"]), 0.22, atol=1e-5)
+    @test isapprox(occupancy(struc['A'][16]["CA"]), 0.22, atol = 1e-5)
     ats = collectatoms(DisorderedResidue[struc['A'][10], struc['A'][16]])
     @test length(ats) == 17
     @test isa(ats, Vector{AbstractAtom})
@@ -2583,23 +2822,23 @@ end
     ats = collectatoms(Model[struc[5], struc[10]])
     @test length(ats) == 1512
     # Due to the changes in atom serial this is also different to the PDB file
-    @test isapprox(z(ats[20]), -14.782, atol=1e-5)
-    @test isapprox(z(ats[1000]), -3.367, atol=1e-5)
+    @test isapprox(z(ats[20]), -14.782, atol = 1e-5)
+    @test isapprox(z(ats[1000]), -3.367, atol = 1e-5)
     @test countatoms(Model[struc[5], struc[10]]) == 1512
     res = collectresidues(Model[struc[5], struc[10]])
     @test length(res) == 102
-    @test isapprox(y(res[10]["O"]), -1.612, atol=1e-5)
-    @test isapprox(y(res[100]["O"]), -13.184, atol=1e-5)
+    @test isapprox(y(res[10]["O"]), -1.612, atol = 1e-5)
+    @test isapprox(y(res[100]["O"]), -13.184, atol = 1e-5)
     @test countresidues(Model[struc[5], struc[10]]) == 102
     chs = collectchains(Model[struc[5], struc[10]])
     @test length(chs) == 2
     @test chainid.(chs) == ["A", "A"]
-    @test isapprox(z(chs[2][5]["CA"]), -5.667, atol=1e-5)
+    @test isapprox(z(chs[2][5]["CA"]), -5.667, atol = 1e-5)
     @test countchains(Model[struc[5], struc[10]]) == 2
     mods = collectmodels(Model[struc[10], struc[5]])
     @test length(mods) == 2
     @test modelnumber.(mods) == [10, 5]
-    @test isapprox(z(mods[2]['A'][5]["CA"]), -5.837, atol=1e-5)
+    @test isapprox(z(mods[2]['A'][5]["CA"]), -5.837, atol = 1e-5)
     @test countmodels(Model[struc[10], struc[5]]) == 2
 
     # Test writemmtf
@@ -2613,12 +2852,23 @@ end
     dic = MMTFDict(testfilepath("MMTF", "1SSU.mmtf"))
     struc = read(testfilepath("MMTF", "1SSU.mmtf"), MMTF)
     for gzip in (false, true)
-        writemmtf(temp_filename, struc, gzip=gzip)
-        dic_written = MMTFDict(temp_filename, gzip=gzip)
-        for k in ["chainsPerModel", "atomIdList", "xCoordList", "yCoordList",
-                    "zCoordList", "altLocList", "occupancyList", "bFactorList",
-                    "insCodeList", "groupIdList", "chainIdList", "chainNameList",
-                    "groupsPerChain"]
+        writemmtf(temp_filename, struc, gzip = gzip)
+        dic_written = MMTFDict(temp_filename, gzip = gzip)
+        for k in [
+            "chainsPerModel",
+            "atomIdList",
+            "xCoordList",
+            "yCoordList",
+            "zCoordList",
+            "altLocList",
+            "occupancyList",
+            "bFactorList",
+            "insCodeList",
+            "groupIdList",
+            "chainIdList",
+            "chainNameList",
+            "groupsPerChain",
+        ]
             @test dic[k] == dic_written[k]
         end
         for k in ["groupTypeList", "groupList"]
@@ -2633,9 +2883,9 @@ end
         @test isa(struc_written, ProteinStructure)
         @test modelnumbers(struc_written) == collect(1:20)
         @test countatoms(struc_written) == 756
-        @test isapprox(z(struc_written[4]['A']["30"]["OG"]), -2.177, atol=1e-5)
-        @test atomnames(struc_written[15]['A']["39"]) == [
-            "N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
+        @test isapprox(z(struc_written[4]['A']["30"]["OG"]), -2.177, atol = 1e-5)
+        @test atomnames(struc_written[15]['A']["39"]) ==
+              ["N", "CA", "C", "O", "CB", "SG", "H", "HA", "HB2", "HB3"]
     end
 
     writemmtf(temp_filename, MMTFDict())
@@ -2652,15 +2902,17 @@ end
     @test chainids(struc_written) == ["A", "B"]
     dic_written = MMTFDict(temp_filename)
     for group in dic_written["groupList"]
-        @test length(group["atomNameList"]) == length(group["elementList"]) == length(group["formalChargeList"])
+        @test length(group["atomNameList"]) ==
+              length(group["elementList"]) ==
+              length(group["formalChargeList"])
     end
 
     # Test writing to stream
     for gzip in (false, true)
         open(temp_filename, "w") do file
-            writemmtf(file, struc, gzip=gzip)
+            writemmtf(file, struc, gzip = gzip)
         end
-        struc_written = read(temp_filename, MMTF, gzip=gzip)
+        struc_written = read(temp_filename, MMTF, gzip = gzip)
         @test countatoms(struc_written) == 756
     end
 
@@ -2671,14 +2923,13 @@ end
     @test modelnumbers(struc_written) == [1]
     @test countatoms(struc_written) == 492
     @test chainids(struc_written) == ["A", "B"]
-    @test isapprox(tempfactor(struc_written['B']["H_705"]["O"]), 64.17, atol=1e-5)
-    writemmtf(temp_filename, collectatoms(struc, standardselector,
-                                                disorderselector))
+    @test isapprox(tempfactor(struc_written['B']["H_705"]["O"]), 64.17, atol = 1e-5)
+    writemmtf(temp_filename, collectatoms(struc, standardselector, disorderselector))
     struc_written = read(temp_filename, MMTF)
     @test countatoms(struc_written) == 5
     @test sum(isdisorderedatom, collectatoms(struc_written)) == 5
     @test defaultaltlocid(struc_written['A'][167]["NH1"]) == 'A'
-    writemmtf(temp_filename, struc, expand_disordered=false)
+    writemmtf(temp_filename, struc, expand_disordered = false)
     struc_written = read(temp_filename, MMTF)
     @test !any(isdisorderedatom.(collectatoms(struc_written)))
     @test countatoms(struc_written) == 3804
@@ -2688,7 +2939,7 @@ end
     struc_written = read(temp_filename, MMTF)
     @test modelnumbers(struc_written) == [1]
     @test countatoms(struc_written) == 3804
-    @test countatoms(struc_written, expand_disordered=true) == 3816
+    @test countatoms(struc_written, expand_disordered = true) == 3816
     writemmtf(temp_filename, struc['A'])
     struc_written = read(temp_filename, MMTF)
     @test countatoms(struc_written) == 1954
@@ -2698,18 +2949,18 @@ end
     @test chainids(struc_written) == ["A"]
     @test countresidues(struc_written) == 1
     @test countatoms(struc_written) == 9
-    @test atomnames(struc_written['A'][50]) == [
-        "N", "CA", "C", "O", "CB", "CG", "CD", "CE", "NZ"]
+    @test atomnames(struc_written['A'][50]) ==
+          ["N", "CA", "C", "O", "CB", "CG", "CD", "CE", "NZ"]
     writemmtf(temp_filename, struc['A'][50]["CA"])
     struc_written = read(temp_filename, MMTF)
     @test countatoms(struc_written) == 1
     writemmtf(temp_filename, struc['A'][167]["CZ"])
     struc_written = read(temp_filename, MMTF)
     @test countatoms(struc_written) == 1
-    @test countatoms(struc_written, expand_disordered=true) == 2
+    @test countatoms(struc_written, expand_disordered = true) == 2
     @test isdisorderedatom(collectatoms(struc_written)[1])
     @test length(collectatoms(struc_written)[1]) == 2
-    @test isapprox(tempfactor(collectatoms(struc_written)[1]), 16.77, atol=1e-5)
+    @test isapprox(tempfactor(collectatoms(struc_written)[1]), 16.77, atol = 1e-5)
     writemmtf(temp_filename, Chain[struc['A'], struc['B']])
     struc_written = read(temp_filename, MMTF)
     @test chainids(struc_written) == ["A", "B"]
@@ -2752,7 +3003,7 @@ end
     writemmtf(temp_filename, struc)
     struc_written = read(temp_filename, MMTF)
     @test countatoms(struc_written) == 754
-    @test countatoms(struc_written, expand_disordered=true) == 819
+    @test countatoms(struc_written, expand_disordered = true) == 819
     @test isa(struc_written['A'][15], Residue)
     @test isa(struc_written['A'][16], DisorderedResidue)
     @test defaultresname(struc_written['A'][16]) == "ARG"
@@ -2764,7 +3015,7 @@ end
     writemmtf(temp_filename, AbstractResidue[struc['A'][16], struc['A'][10]])
     struc_written = read(temp_filename, MMTF)
     @test countresidues(struc_written) == 2
-    @test countresidues(struc_written, expand_disordered=true) == 4
+    @test countresidues(struc_written, expand_disordered = true) == 4
     @test isa(struc_written['A'][10], DisorderedResidue)
     @test isa(struc_written['A'][16], DisorderedResidue)
     @test defaultresname(struc_written['A'][10]) == "SER"
@@ -2772,12 +3023,12 @@ end
     @test altlocid(disorderedres(struc_written['A'][10], "GLY")["O"]) == 'B'
     @test countatoms(struc_written['A'][10]) == 6
     @test countatoms(struc_written['A'][16]) == 11
-    writemmtf(temp_filename, struc, expand_disordered=false)
+    writemmtf(temp_filename, struc, expand_disordered = false)
     struc_written = read(temp_filename, MMTF)
     @test !any(isdisorderedres.(collectresidues(struc_written)))
     @test !any(isdisorderedatom.(collectatoms(struc_written)))
-    @test countresidues(struc_written, expand_disordered=true) == 166
-    @test countatoms(struc_written, expand_disordered=true) == 754
+    @test countresidues(struc_written, expand_disordered = true) == 166
+    @test countatoms(struc_written, expand_disordered = true) == 754
 
     # Test generatechainid
     @test generatechainid.([1, 20, 30, 18283]) == ["A", "T", "DA", "EAAA"]
@@ -2807,7 +3058,7 @@ end
     @test cs[2, 10] == 42.426
     @test cs[3, 10] == 19.756
     @test coordarray(cs) == cs
-    cs = coordarray(struc_1AKE, expand_disordered=true)
+    cs = coordarray(struc_1AKE, expand_disordered = true)
     @test size(cs) == (3, 3816)
 
     # Test superimposition
@@ -2818,29 +3069,29 @@ end
     ]
     cs_two = [
         0.0 -1.0 0.0
-        1.0  0.0 0.0
-        1.0  1.0 1.0
+        1.0 0.0 0.0
+        1.0 1.0 1.0
     ]
     trans = Transformation(cs_one, cs_two)
-    @test isapprox(trans.trans1, [1/3, 1/3, 0])
-    @test isapprox(trans.trans2, [-1/3, 1/3, 1])
+    @test isapprox(trans.trans1, [1 / 3, 1 / 3, 0])
+    @test isapprox(trans.trans2, [-1 / 3, 1 / 3, 1])
     rot_real = [
         0.0 -1.0 0.0
-        1.0  0.0 0.0
-        0.0  0.0 1.0
+        1.0 0.0 0.0
+        0.0 0.0 1.0
     ]
     @test isapprox(trans.rot, rot_real)
 
     # Test rot isn't a reflection
     cs_one = Float64[
-        1 -1  0  0  0  0
-        0  0  2 -2  0  0
-        0  0  0  0  2 -2
+        1 -1 0 0 0 0
+        0 0 2 -2 0 0
+        0 0 0 0 2 -2
     ]
     cs_two = Float64[
-        -1  1  0  0  0  0
-         0  0  2 -2  0  0
-         0  0  0  0  2 -2
+        -1 1 0 0 0 0
+        0 0 2 -2 0 0
+        0 0 0 0 2 -2
     ]
     trans = Transformation(cs_one, cs_two)
     @test isapprox(trans.trans1, [0.0, 0.0, 0.0])
@@ -2854,49 +3105,49 @@ end
     @test isapprox(trans.rot, rot_real)
 
     cs_one = [
-         7.0  5.0  3.0
-         2.0  0.0 -2.0
+        7.0 5.0 3.0
+        2.0 0.0 -2.0
         -1.0 -3.0 -5.0
     ]
     cs_two = [
         -1.5 -0.5 0.5
-        -1.0  0.0 1.0
-         2.0  3.0 4.0
+        -1.0 0.0 1.0
+        2.0 3.0 4.0
     ]
     trans = Transformation(cs_one, cs_two)
     cs = applytransform(cs_one, trans)
     cs_real = [
         -2.5 -0.5 1.5
-        -2.0  0.0 2.0
-         1.0  3.0 5.0
+        -2.0 0.0 2.0
+        1.0 3.0 5.0
     ]
     @test isapprox(cs, cs_real)
 
     ats = [
         Atom(100, "CA", ' ', [8.0, 3.0, 0.0], 1.0, 10.0, " C", "  ", res),
-        Atom(101, "CB", ' ', [4.0, -1.0, -4.0], 1.0, 10.0, " C", "  ", res)
+        Atom(101, "CB", ' ', [4.0, -1.0, -4.0], 1.0, 10.0, " C", "  ", res),
     ]
     applytransform!(ats, trans)
     cs_real = [
         -3.5 0.5
         -3.0 1.0
-         0.0 4.0
+        0.0 4.0
     ]
     @test isapprox(coordarray(ats), cs_real)
 
     cs_one = [
-        0.0 1.0       2.0
+        0.0 1.0 2.0
         0.0 sqrt(3.0) 0.0
     ]
     cs_two = [
-        2.0           4.0 0.0
-        2 * sqrt(3.0) 0.0 0.0
+        2.0 4.0 0.0
+        2*sqrt(3.0) 0.0 0.0
     ]
     trans = Transformation(cs_one, cs_two)
     @test isapprox(trans.trans1, [1.0, sqrt(3.0) / 3])
     @test isapprox(trans.trans2, [2.0, 2 * sqrt(3.0) / 3])
     rot_real = [
-         cos(2 * pi / 3) sin(2 * pi / 3)
+        cos(2 * pi / 3) sin(2 * pi / 3)
         -sin(2 * pi / 3) cos(2 * pi / 3)
     ]
     @test isapprox(trans.rot, rot_real)
@@ -2904,40 +3155,58 @@ end
     struc_1SSU = read(testfilepath("PDB", "1SSU.pdb"), PDB)
     theta = 2 * pi * rand()
     rand_rot = [
-        1.0 0.0         0.0
+        1.0 0.0 0.0
         0.0 cos(theta) -sin(theta)
-        0.0 sin(theta)  cos(theta)
+        0.0 sin(theta) cos(theta)
     ]
     rand_trans = Transformation(100 * randn(3), 100 * randn(3), rand_rot)
     applytransform!(struc_1SSU[1], rand_trans)
     superimpose!(struc_1SSU[1], struc_1SSU[2], standardselector)
-    @test isapprox(coords(struc_1SSU[1]["A"][10]["CA"]),
-                    [2.68601, -2.06401, 3.73024], atol=1e-5)
+    @test isapprox(
+        coords(struc_1SSU[1]["A"][10]["CA"]),
+        [2.68601, -2.06401, 3.73024],
+        atol = 1e-5,
+    )
     @test coords(struc_1SSU[2]["A"][10]["CA"]) == [3.983, -3.252, 2.368]
-    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2], superimpose=false),
-                    2.54859, atol=1e-5)
+    @test isapprox(
+        rmsd(struc_1SSU[1], struc_1SSU[2], superimpose = false),
+        2.54859,
+        atol = 1e-5,
+    )
     applytransform!(struc_1SSU[1], rand_trans)
-    superimpose!(struc_1SSU[1], struc_1SSU[2], standardselector,
-                    alignatoms=cbetaselector)
-    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2], superimpose=false),
-                    2.55015, atol=1e-5)
-    trans = Transformation(collectresidues(struc_1SSU[3])[1:40],
-                    collectresidues(struc_1SSU[2])[11:end],
-                    standardselector)
+    superimpose!(struc_1SSU[1], struc_1SSU[2], standardselector, alignatoms = cbetaselector)
+    @test isapprox(
+        rmsd(struc_1SSU[1], struc_1SSU[2], superimpose = false),
+        2.55015,
+        atol = 1e-5,
+    )
+    trans = Transformation(
+        collectresidues(struc_1SSU[3])[1:40],
+        collectresidues(struc_1SSU[2])[11:end],
+        standardselector,
+    )
     rot_real = [
-        0.999633     0.00144653 -0.02704
-        -0.00108653  0.999911    0.0133232
-        0.0270569   -0.013289    0.999546
+        0.999633 0.00144653 -0.02704
+        -0.00108653 0.999911 0.0133232
+        0.0270569 -0.013289 0.999546
     ]
-    @test isapprox(trans.rot, rot_real, atol=1e-5)
+    @test isapprox(trans.rot, rot_real, atol = 1e-5)
     @test trans.inds1 == collect(11:40)
     @test trans.inds2 == collect(1:30)
-    superimpose!(collectresidues(struc_1SSU[3])[1:40],
-                    collectresidues(struc_1SSU[2])[11:end],
-                    standardselector)
-    @test isapprox(rmsd(collectresidues(struc_1SSU[3])[21:30],
-                    collectresidues(struc_1SSU[2])[21:30],
-                    superimpose=false), 0.365745, atol=1e-5)
+    superimpose!(
+        collectresidues(struc_1SSU[3])[1:40],
+        collectresidues(struc_1SSU[2])[11:end],
+        standardselector,
+    )
+    @test isapprox(
+        rmsd(
+            collectresidues(struc_1SSU[3])[21:30],
+            collectresidues(struc_1SSU[2])[21:30],
+            superimpose = false,
+        ),
+        0.365745,
+        atol = 1e-5,
+    )
 
     # Test rmsd
     cs_one = [
@@ -2951,7 +3220,7 @@ end
         1.0 3.0
     ]
     # This line gives a @simd warning when --inline=no
-    @test isapprox(rmsd(cs_one, cs_two), sqrt(5/2))
+    @test isapprox(rmsd(cs_one, cs_two), sqrt(5 / 2))
     cs_one = [
         0.0 0.0 1.0
         1.0 0.0 2.0
@@ -2965,11 +3234,33 @@ end
     @test_throws ArgumentError rmsd(cs_one, cs_two)
 
     struc_1SSU = read(testfilepath("PDB", "1SSU.pdb"), PDB)
-    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2], superimpose=false), 4.18219, atol=1e-5)
-    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2]), 2.54859, atol=1e-5)
-    @test isapprox(rmsd(struc_1SSU[5], struc_1SSU[6], superimpose=false, rmsdatoms=backboneselector), 5.36997, atol=1e-5)
-    @test isapprox(rmsd(struc_1SSU[5], struc_1SSU[6], rmsdatoms=backboneselector), 3.65486, atol=1e-5)
-    @test_throws ArgumentError rmsd(struc_1SSU[1]['A'][8], struc_1SSU[1]['A'][9], superimpose=false, rmsdatoms=allselector)
+    @test isapprox(
+        rmsd(struc_1SSU[1], struc_1SSU[2], superimpose = false),
+        4.18219,
+        atol = 1e-5,
+    )
+    @test isapprox(rmsd(struc_1SSU[1], struc_1SSU[2]), 2.54859, atol = 1e-5)
+    @test isapprox(
+        rmsd(
+            struc_1SSU[5],
+            struc_1SSU[6],
+            superimpose = false,
+            rmsdatoms = backboneselector,
+        ),
+        5.36997,
+        atol = 1e-5,
+    )
+    @test isapprox(
+        rmsd(struc_1SSU[5], struc_1SSU[6], rmsdatoms = backboneselector),
+        3.65486,
+        atol = 1e-5,
+    )
+    @test_throws ArgumentError rmsd(
+        struc_1SSU[1]['A'][8],
+        struc_1SSU[1]['A'][9],
+        superimpose = false,
+        rmsdatoms = allselector,
+    )
 
     # Test displacements
     cs_one = [
@@ -2996,17 +3287,22 @@ end
     ]
     @test_throws ArgumentError displacements(cs_one, cs_two)
 
-    disps = displacements(struc_1SSU[5], struc_1SSU[10], superimpose=false, dispatoms=allselector)
+    disps = displacements(
+        struc_1SSU[5],
+        struc_1SSU[10],
+        superimpose = false,
+        dispatoms = allselector,
+    )
     @test isa(disps, Vector{Float64})
     @test length(disps) == 756
     @test isapprox(disps[20], sqrt(1.984766))
-    disps = displacements(struc_1SSU[5], struc_1SSU[10], dispatoms=allselector)
-    @test isapprox(disps[20], 3.62754, atol=1e-5)
-    disps = displacements(struc_1SSU[5], struc_1SSU[10], superimpose=false)
+    disps = displacements(struc_1SSU[5], struc_1SSU[10], dispatoms = allselector)
+    @test isapprox(disps[20], 3.62754, atol = 1e-5)
+    disps = displacements(struc_1SSU[5], struc_1SSU[10], superimpose = false)
     @test length(disps) == 51
     @test isapprox(disps[20], sqrt(0.032822))
     disps = displacements(struc_1SSU[5], struc_1SSU[10])
-    @test isapprox(disps[20], 0.717014, atol=1e-5)
+    @test isapprox(disps[20], 0.717014, atol = 1e-5)
 
     # Test sqdistance and distance
     at_a = Atom(100, "CA", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res)
@@ -3017,43 +3313,77 @@ end
     @test isapprox(distance(struc_1AKE['A'], struc_1AKE['B']), sqrt(6.852947))
     @test isapprox(distance(struc_1AKE['A'], struc_1AKE['B'][50]), sqrt(530.645746))
     @test isapprox(distance(struc_1AKE['A'], struc_1AKE['B'][50]["CA"]), sqrt(574.699125))
-    @test isapprox(distance(struc_1AKE['A'], struc_1AKE['B'], backboneselector), sqrt(11.752440))
-    @test isapprox(distance(struc_1AKE['A'], struc_1AKE['B'], standardselector), sqrt(11.252973))
-    @test isapprox(distance(struc_1AKE['A'][50]["CA"], struc_1AKE['B'][50]["CA"]), sqrt(2607.154834))
+    @test isapprox(
+        distance(struc_1AKE['A'], struc_1AKE['B'], backboneselector),
+        sqrt(11.752440),
+    )
+    @test isapprox(
+        distance(struc_1AKE['A'], struc_1AKE['B'], standardselector),
+        sqrt(11.252973),
+    )
+    @test isapprox(
+        distance(struc_1AKE['A'][50]["CA"], struc_1AKE['B'][50]["CA"]),
+        sqrt(2607.154834),
+    )
 
     # Test bondangle
     at_a = Atom(100, "CA", ' ', [1.0, 0.0, 1.0], 1.0, 10.0, " C", "  ", res)
     at_b = Atom(100, "CA", ' ', [0.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
     at_c = Atom(100, "CA", ' ', [3.0, 2.0, 1.0], 1.0, 10.0, " C", "  ", res)
-    @test isapprox(bondangle(at_a, at_b, at_c), 0.713724, atol=1e-5)
+    @test isapprox(bondangle(at_a, at_b, at_c), 0.713724, atol = 1e-5)
     vec_a = [2.0, 0.0, 0.0]
     vec_b = [2.0, 1.0, 1.0]
-    @test isapprox(bondangle(vec_a, vec_b), 0.615480, atol=1e-5)
+    @test isapprox(bondangle(vec_a, vec_b), 0.615480, atol = 1e-5)
 
     # Test dihedral functions
     at_a = Atom(100, "CA", ' ', [-1.0, -1.0, 0.0], 1.0, 10.0, " C", "  ", res)
     at_b = Atom(100, "CA", ' ', [0.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
     at_c = Atom(100, "CA", ' ', [1.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
     at_d = Atom(100, "CA", ' ', [2.0, 1.0, -1.0], 1.0, 10.0, " C", "  ", res)
-    @test isapprox(dihedralangle(at_a, at_b, at_c, at_d), 2.35619, atol=1e-5)
+    @test isapprox(dihedralangle(at_a, at_b, at_c, at_d), 2.35619, atol = 1e-5)
     vec_a = [1.0, 1.0, 0.0]
     vec_b = [1.0, 0.0, 0.0]
     vec_c = [1.0, -1.0, 1.0]
-    @test isapprox(dihedralangle(vec_a, vec_b, vec_c), -0.785398, atol=1e-5)
+    @test isapprox(dihedralangle(vec_a, vec_b, vec_c), -0.785398, atol = 1e-5)
 
-    @test isapprox(omegaangle(struc_1AKE['A'][20], struc_1AKE['A'][19]), -3.09191, atol=1e-5)
-    @test isapprox(phiangle(struc_1AKE['A'][7], struc_1AKE['A'][6]), 2.85115, atol=1e-5)
-    @test isapprox(psiangle(struc_1AKE['A'][8], struc_1AKE['A'][9]), 2.83827, atol=1e-5)
-    @test_throws ArgumentError omegaangle(struc_1AKE['A'][20], Residue("ALA", 19, ' ', false, Chain('A')))
-    @test_throws ArgumentError phiangle(struc_1AKE['A'][7], Residue("ALA", 6, ' ', false, Chain('A')))
-    @test_throws ArgumentError psiangle(struc_1AKE['A'][8], Residue("ALA", 9, ' ', false, Chain('A')))
+    @test isapprox(
+        omegaangle(struc_1AKE['A'][20], struc_1AKE['A'][19]),
+        -3.09191,
+        atol = 1e-5,
+    )
+    @test isapprox(phiangle(struc_1AKE['A'][7], struc_1AKE['A'][6]), 2.85115, atol = 1e-5)
+    @test isapprox(psiangle(struc_1AKE['A'][8], struc_1AKE['A'][9]), 2.83827, atol = 1e-5)
+    @test_throws ArgumentError omegaangle(
+        struc_1AKE['A'][20],
+        Residue("ALA", 19, ' ', false, Chain('A')),
+    )
+    @test_throws ArgumentError phiangle(
+        struc_1AKE['A'][7],
+        Residue("ALA", 6, ' ', false, Chain('A')),
+    )
+    @test_throws ArgumentError psiangle(
+        struc_1AKE['A'][8],
+        Residue("ALA", 9, ' ', false, Chain('A')),
+    )
 
-    @test isapprox(omegaangle(struc_1AKE['A'], 20), omegaangle(struc_1AKE['A'][20], struc_1AKE['A'][19]), atol=1e-5)
-    @test isapprox(phiangle(struc_1AKE['A'], 7), phiangle(struc_1AKE['A'][7], struc_1AKE['A'][6]), atol=1e-5)
-    @test isapprox(psiangle(struc_1AKE['A'], 8), psiangle(struc_1AKE['A'][8], struc_1AKE['A'][9]), atol=1e-5)
-    @test_throws ArgumentError omegaangle(struc_1AKE['A'], -1 )
-    @test_throws ArgumentError phiangle(struc_1AKE['A'], -1 )
-    @test_throws ArgumentError psiangle(struc_1AKE['A'], -1 )
+    @test isapprox(
+        omegaangle(struc_1AKE['A'], 20),
+        omegaangle(struc_1AKE['A'][20], struc_1AKE['A'][19]),
+        atol = 1e-5,
+    )
+    @test isapprox(
+        phiangle(struc_1AKE['A'], 7),
+        phiangle(struc_1AKE['A'][7], struc_1AKE['A'][6]),
+        atol = 1e-5,
+    )
+    @test isapprox(
+        psiangle(struc_1AKE['A'], 8),
+        psiangle(struc_1AKE['A'][8], struc_1AKE['A'][9]),
+        atol = 1e-5,
+    )
+    @test_throws ArgumentError omegaangle(struc_1AKE['A'], -1)
+    @test_throws ArgumentError phiangle(struc_1AKE['A'], -1)
+    @test_throws ArgumentError psiangle(struc_1AKE['A'], -1)
     @test_throws ArgumentError omegaangle(struc_1AKE['A'], 1)
     @test_throws ArgumentError phiangle(struc_1AKE['A'], 1)
     @test_throws ArgumentError psiangle(struc_1AKE['A'], 214)
@@ -3061,8 +3391,8 @@ end
     phis, psis = ramachandranangles(struc_1AKE['A'])
     @test size(phis) == (456,)
     @test size(psis) == (456,)
-    @test isapprox(phis[5], -1.76451, atol=1e-5)
-    @test isapprox(psis[10], 0.442509, atol=1e-5)
+    @test isapprox(phis[5], -1.76451, atol = 1e-5)
+    @test isapprox(psis[10], 0.442509, atol = 1e-5)
     @test isnan(phis[1])
     @test isnan(psis[214])
     @test sum(isnan, phis) == 243
@@ -3075,27 +3405,27 @@ end
     @test length(phis) == countresidues(struc_1AKE['A'], standardselector)
     @test length(phis) == length(psis)
     @test length(phis) == length(omegas)
-    @test isapprox(psis[10], psiangle(struc_1AKE['A'], 10), atol=1e-5)
-    @test isapprox(phis[10], phiangle(struc_1AKE['A'], 10), atol=1e-5)
-    @test isapprox(omegas[10], omegaangle(struc_1AKE['A'], 10), atol=1e-5)
+    @test isapprox(psis[10], psiangle(struc_1AKE['A'], 10), atol = 1e-5)
+    @test isapprox(phis[10], phiangle(struc_1AKE['A'], 10), atol = 1e-5)
+    @test isapprox(omegas[10], omegaangle(struc_1AKE['A'], 10), atol = 1e-5)
 
     # Test ContactMap
     cas = collectatoms(struc_1AKE, calphaselector)[1:10]
     @test isa(ContactMap(cas, 10).data, BitArray{2})
     @test ContactMap(cas, 10).data == [
-        true  true  true  false false false false false false false
-        true  true  true  true  false false false false false false
-        true  true  true  true  true  true  false false false false
-        false true  true  true  true  true  false false false false
-        false false true  true  true  true  true  false false false
-        false false true  true  true  true  true  true  true  false
-        false false false false true  true  true  true  true  true
-        false false false false false true  true  true  true  true
-        false false false false false true  true  true  true  true
-        false false false false false false true  true  true  true
+        true true true false false false false false false false
+        true true true true false false false false false false
+        true true true true true true false false false false
+        false true true true true true false false false false
+        false false true true true true true false false false
+        false false true true true true true true true false
+        false false false false true true true true true true
+        false false false false false true true true true true
+        false false false false false true true true true true
+        false false false false false false true true true true
     ]
     @test ContactMap(struc_1AKE[1], 1.0).data == [
-        true  false
+        true false
         false true
     ]
     cmap = ContactMap(struc_1AKE['A'], 5.0)
@@ -3108,56 +3438,68 @@ end
     show(devnull, cmap)
 
     @test ContactMap(struc_1AKE['A'][10], struc_1AKE['A'][11], 4.0).data == [
-        true  false false false false
-        true  true  false false false
-        true  true  true  false true
-        true  true  true  false false
+        true false false false false
+        true true false false false
+        true true true false true
+        true true true false false
     ]
 
     # Test the plot recipe
-    RecipesBase.apply_recipe(Dict{Symbol, Any}(), cmap)
+    RecipesBase.apply_recipe(Dict{Symbol,Any}(), cmap)
 
     showcontactmap(devnull, cmap)
 
     # Test DistanceMap
-    @test isa(DistanceMap(cas).data, Array{Float64, 2})
-    @test isapprox(DistanceMap(cas).data, [
-        0.0                3.8116564640586357 6.5343511537106735 10.30641673909997  12.934087289020436 16.277628113456824 19.66671792648687  23.24696586653837  24.371038508853083 24.24882335289694
-        3.8116564640586357 0.0                3.8115826109373554 7.075483093047433  10.24737590800689  13.368176240609639 16.959531449895664 20.432823079545326 21.590401316325735 21.931261910797566
-        6.5343511537106735 3.8115826109373554 0.0                3.844083635926775  6.56909392534465   9.783285439973628  13.273855091871388 16.83042189013692  18.152391219891662 18.44135962991883
-        10.30641673909997  7.075483093047433  3.844083635926775  0.0                3.852368622029827  6.369990659333809  10.066898131996766 13.489078471118772 14.9800810411693   15.83387716259034
-        12.934087289020436 10.24737590800689  6.56909392534465   3.852368622029827  0.0                3.8467504468057196 6.845814633774421  10.314890304797236 11.724292217443233 12.19677604943208
-        16.277628113456824 13.368176240609639 9.783285439973628  6.369990659333809  3.8467504468057196 0.0                3.8515559193655755 7.381047825342957  9.702061069690293  11.058714075334438
-        19.66671792648687  16.959531449895664 13.273855091871388 10.066898131996766 6.845814633774421  3.8515559193655755 0.0                3.8486537906130245 6.699431169883006  8.065864739753573
-        23.24696586653837  20.432823079545326 16.83042189013692  13.489078471118772 10.314890304797236 7.381047825342957  3.8486537906130245 0.0                3.86929786912303   6.311746667920065
-        24.371038508853083 21.590401316325735 18.152391219891662 14.9800810411693   11.724292217443233 9.702061069690293  6.699431169883006  3.86929786912303   0.0                3.8548294385095696
-        24.24882335289694  21.931261910797566 18.44135962991883  15.83387716259034  12.19677604943208  11.058714075334438 8.065864739753573  6.311746667920065  3.8548294385095696 0.0
-    ], atol=1e-5)
-    @test isapprox(DistanceMap(struc_1AKE[1]).data, [
-        0.0     2.61781
-        2.61781 0.0
-    ], atol=1e-5)
+    @test isa(DistanceMap(cas).data, Array{Float64,2})
+    @test isapprox(
+        DistanceMap(cas).data,
+        [
+            0.0 3.8116564640586357 6.5343511537106735 10.30641673909997 12.934087289020436 16.277628113456824 19.66671792648687 23.24696586653837 24.371038508853083 24.24882335289694
+            3.8116564640586357 0.0 3.8115826109373554 7.075483093047433 10.24737590800689 13.368176240609639 16.959531449895664 20.432823079545326 21.590401316325735 21.931261910797566
+            6.5343511537106735 3.8115826109373554 0.0 3.844083635926775 6.56909392534465 9.783285439973628 13.273855091871388 16.83042189013692 18.152391219891662 18.44135962991883
+            10.30641673909997 7.075483093047433 3.844083635926775 0.0 3.852368622029827 6.369990659333809 10.066898131996766 13.489078471118772 14.9800810411693 15.83387716259034
+            12.934087289020436 10.24737590800689 6.56909392534465 3.852368622029827 0.0 3.8467504468057196 6.845814633774421 10.314890304797236 11.724292217443233 12.19677604943208
+            16.277628113456824 13.368176240609639 9.783285439973628 6.369990659333809 3.8467504468057196 0.0 3.8515559193655755 7.381047825342957 9.702061069690293 11.058714075334438
+            19.66671792648687 16.959531449895664 13.273855091871388 10.066898131996766 6.845814633774421 3.8515559193655755 0.0 3.8486537906130245 6.699431169883006 8.065864739753573
+            23.24696586653837 20.432823079545326 16.83042189013692 13.489078471118772 10.314890304797236 7.381047825342957 3.8486537906130245 0.0 3.86929786912303 6.311746667920065
+            24.371038508853083 21.590401316325735 18.152391219891662 14.9800810411693 11.724292217443233 9.702061069690293 6.699431169883006 3.86929786912303 0.0 3.8548294385095696
+            24.24882335289694 21.931261910797566 18.44135962991883 15.83387716259034 12.19677604943208 11.058714075334438 8.065864739753573 6.311746667920065 3.8548294385095696 0.0
+        ],
+        atol = 1e-5,
+    )
+    @test isapprox(
+        DistanceMap(struc_1AKE[1]).data,
+        [
+            0.0 2.61781
+            2.61781 0.0
+        ],
+        atol = 1e-5,
+    )
     dmap = DistanceMap(struc_1AKE['A'])
     @test size(dmap) == (456, 456)
     @test size(dmap, 2) == 456
-    @test isapprox(dmap[196, 110], 3.01887, atol=1e-5)
+    @test isapprox(dmap[196, 110], 3.01887, atol = 1e-5)
     dmap[196, 110] = 10.0
     @test dmap[196, 110] == 10.0
-    @test isapprox(dmap[begin + 1], 1.3405938982406227, atol=1e-5)
-    @test isapprox(dmap[end   - 1], 18.716774962583695, atol=1e-5)
-    @test isapprox(dmap[2, begin + 2], 1.329450262326499 , atol=1e-5)
-    @test isapprox(dmap[2, end   - 2], 18.595504483611087, atol=1e-5)
+    @test isapprox(dmap[begin+1], 1.3405938982406227, atol = 1e-5)
+    @test isapprox(dmap[end-1], 18.716774962583695, atol = 1e-5)
+    @test isapprox(dmap[2, begin+2], 1.329450262326499, atol = 1e-5)
+    @test isapprox(dmap[2, end-2], 18.595504483611087, atol = 1e-5)
     show(devnull, dmap)
 
-    @test isapprox(DistanceMap(struc_1AKE['A'][10], struc_1AKE['A'][11]).data, [
-        2.8803883418733673 4.295162278657233  5.211988200293629  6.427722458227334 5.03904008715946
-        2.5066699024801813 3.850861981427013  4.557738913101538  5.762204526047301 5.0027798272560435
-        1.3632875705440877 2.4469166311911783 3.1850982716393537 4.33450689236965  3.799490623754715
-        2.2682515292621335 2.774401016435799  3.235280049702036  4.198412795331114 4.313454647959104
-    ], atol=1e-5)
+    @test isapprox(
+        DistanceMap(struc_1AKE['A'][10], struc_1AKE['A'][11]).data,
+        [
+            2.8803883418733673 4.295162278657233 5.211988200293629 6.427722458227334 5.03904008715946
+            2.5066699024801813 3.850861981427013 4.557738913101538 5.762204526047301 5.0027798272560435
+            1.3632875705440877 2.4469166311911783 3.1850982716393537 4.33450689236965 3.799490623754715
+            2.2682515292621335 2.774401016435799 3.235280049702036 4.198412795331114 4.313454647959104
+        ],
+        atol = 1e-5,
+    )
 
     # Test the plot recipe
-    RecipesBase.apply_recipe(Dict{Symbol, Any}(), dmap)
+    RecipesBase.apply_recipe(Dict{Symbol,Any}(), dmap)
 
     # Test atom graph constructor
     cbetas = collectatoms(struc_1AKE["A"], cbetaselector)
@@ -3175,6 +3517,6 @@ end
 end
 
 # Delete temporary file
-rm(temp_filename, force=true)
+rm(temp_filename, force = true)
 
 end # TestBioStructures
