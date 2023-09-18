@@ -1605,7 +1605,6 @@ function unsafe_addatomtomodel!(
                         atom_rec.ins_code,
                         atom_rec.het_atom,
                         ch,
-                        "",
                     ),
                 ),
                 fullresname(ch[res_id]),
@@ -1626,7 +1625,6 @@ function unsafe_addatomtomodel!(
                 atom_rec.ins_code,
                 atom_rec.het_atom,
                 ch,
-                "",
             )
             res = disorderedres(ch[res_id], atom_rec.res_name)
         end
