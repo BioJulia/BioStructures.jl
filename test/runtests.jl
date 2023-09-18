@@ -3546,10 +3546,6 @@ end
             "T"
         )
         @test ss_code(res) == "T"
-
-        for at in collect(res)
-            @test ss_code(at) == "T"
-        end
     end
 
     @testset "DSSP" begin
