@@ -1,5 +1,4 @@
-export
-    Transformation,
+export Transformation,
     coordarray,
     applytransform!,
     applytransform,
@@ -50,20 +49,24 @@ residues in the first and second elements if relevant.
 struct Transformation
     trans1::Array{Float64}
     trans2::Array{Float64}
-    rot::Array{Float64, 2}
+    rot::Array{Float64,2}
     inds1::Vector{Int}
     inds2::Vector{Int}
 end
 
-function Transformation(trans1::Array{<:Real},
-                        trans2::Array{<:Real},
-                        rot::Array{<:Real, 2})
+function Transformation(trans1::Array{<:Real}, trans2::Array{<:Real}, rot::Array{<:Real,2})
     return Transformation(trans1, trans2, rot, [], [])
 end
 
-Base.show(io::IO, trans::Transformation) = print("3D transformation with ",
-    "translation 1 ", trans.trans1, ", translation 2 ", trans.trans2,
-    ", rotation ", trans.rot)
+Base.show(io::IO, trans::Transformation) = print(
+    "3D transformation with ",
+    "translation 1 ",
+    trans.trans1,
+    ", translation 2 ",
+    trans.trans2,
+    ", rotation ",
+    trans.rot,
+)
 
 """
     coordarray(element, atom_selectors...)
@@ -76,10 +79,12 @@ Additional arguments are atom selector functions - only atoms that return
 The keyword argument `expand_disordered` (default `false`) determines whether to
 return coordinates for all copies of disordered atoms separately.
 """
-function coordarray(el::StructuralElementOrList,
-                    atom_selectors::Function...;
-                    expand_disordered::Bool=false)
-    at_list = collectatoms(el, atom_selectors...; expand_disordered=expand_disordered)
+function coordarray(
+    el::StructuralElementOrList,
+    atom_selectors::Function...;
+    expand_disordered::Bool = false,
+)
+    at_list = collectatoms(el, atom_selectors...; expand_disordered = expand_disordered)
     coords_out = zeros(3, length(at_list))
     for j in eachindex(at_list)
         coords_out[1, j] = x(at_list[j])
@@ -97,9 +102,8 @@ coordarray(coords_in::Array{<:Real}, atom_selectors::Function...) = coords_in
 
 Modify all coordinates in an element according to a transformation.
 """
-function applytransform!(el::StructuralElementOrList,
-                        transformation::Transformation)
-    ats = collectatoms(el; expand_disordered=true)
+function applytransform!(el::StructuralElementOrList, transformation::Transformation)
+    ats = collectatoms(el; expand_disordered = true)
     cs = coordarray(ats)
     new_coords = applytransform(cs, transformation)
     for (i, at) in enumerate(ats)
@@ -113,8 +117,7 @@ end
 
 Modify coordinates according to a transformation.
 """
-function applytransform(cs::Array{<:Real, 2},
-                        t::Transformation)
+function applytransform(cs::Array{<:Real,2}, t::Transformation)
     return t.rot * (cs .- t.trans1) .+ t.trans2
 end
 
@@ -126,29 +129,37 @@ and modify all coordinates in the first element according to the transformation.
 
 See `Transformation` for keyword arguments.
 """
-function superimpose!(el1::StructuralElementOrList,
-                        el2::StructuralElementOrList,
-                        residue_selectors::Function...;
-                        kwargs...)
+function superimpose!(
+    el1::StructuralElementOrList,
+    el2::StructuralElementOrList,
+    residue_selectors::Function...;
+    kwargs...,
+)
     transformation = Transformation(el1, el2, residue_selectors...; kwargs...)
     applytransform!(el1, transformation)
     return el1
 end
 
-function Transformation(el1::StructuralElementOrList,
-                        el2::StructuralElementOrList,
-                        residue_selectors::Function...;
-                        scoremodel::AbstractScoreModel=AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1),
-                        aligntype::BioAlignments.AbstractAlignment=LocalAlignment(),
-                        alignatoms::Function=calphaselector)
+function Transformation(
+    el1::StructuralElementOrList,
+    el2::StructuralElementOrList,
+    residue_selectors::Function...;
+    scoremodel::AbstractScoreModel = AffineGapScoreModel(
+        BLOSUM62,
+        gap_open = -10,
+        gap_extend = -1,
+    ),
+    aligntype::BioAlignments.AbstractAlignment = LocalAlignment(),
+    alignatoms::Function = calphaselector,
+)
     res1 = collectresidues(el1, residue_selectors...)
     res2 = collectresidues(el2, residue_selectors...)
     # Shortcut if the sequences are the same
-    if LongAA(res1; gaps=false) == LongAA(res2; gaps=false)
+    if LongAA(res1; gaps = false) == LongAA(res2; gaps = false)
         inds1 = collect(1:length(res1))
         inds2 = collect(1:length(res2))
     else
-        alres = pairalign(res1, res2; scoremodel=scoremodel, aligntype=aligntype)
+        alres = pairalign(res1, res2; scoremodel = scoremodel, aligntype = aligntype)
         al = alignment(alres)
         inds1, inds2 = Int[], Int[]
         # Offset residue counter based on start of aligned region
@@ -186,15 +197,21 @@ function Transformation(el1::StructuralElementOrList,
     return Transformation(coordarray(atoms1), coordarray(atoms2), inds1, inds2)
 end
 
-function Transformation(coords1::Array{<:Real, 2},
-                        coords2::Array{<:Real, 2},
-                        inds1::Vector{Int}=Int[],
-                        inds2::Vector{Int}=Int[])
+function Transformation(
+    coords1::Array{<:Real,2},
+    coords2::Array{<:Real,2},
+    inds1::Vector{Int} = Int[],
+    inds2::Vector{Int} = Int[],
+)
     if size(coords1) != size(coords2)
-        throw(ArgumentError("Size of coordinate arrays differ: $(size(coords1)) and $(size(coords2))"))
+        throw(
+            ArgumentError(
+                "Size of coordinate arrays differ: $(size(coords1)) and $(size(coords2))",
+            ),
+        )
     end
-    trans1 = mean(coords1, dims=2)
-    trans2 = mean(coords2, dims=2)
+    trans1 = mean(coords1, dims = 2)
+    trans2 = mean(coords2, dims = 2)
     p = coords1 .- trans1
     q = coords2 .- trans2
     # Find the rotation that maps the coordinates
@@ -226,28 +243,35 @@ calculate RMSD on (default `calphaselector`).
 """
 function rmsd(coords_one::Array{<:Real}, coords_two::Array{<:Real})
     if size(coords_one) != size(coords_two)
-        throw(ArgumentError("Coordinate arrays have size $(size(coords_one)) " *
-            "and $(size(coords_two)) but must be the same to calculate RMSD"))
+        throw(
+            ArgumentError(
+                "Coordinate arrays have size $(size(coords_one)) " *
+                "and $(size(coords_two)) but must be the same to calculate RMSD",
+            ),
+        )
     end
     diff = coords_one - coords_two
     return sqrt.(dot(diff, diff) / size(coords_one, 2))
 end
 
-function rmsd(el1::StructuralElementOrList,
-            el2::StructuralElementOrList,
-            residue_selectors::Function...;
-            superimpose::Bool=true,
-            rmsdatoms::Function=calphaselector,
-            kwargs...)
+function rmsd(
+    el1::StructuralElementOrList,
+    el2::StructuralElementOrList,
+    residue_selectors::Function...;
+    superimpose::Bool = true,
+    rmsdatoms::Function = calphaselector,
+    kwargs...,
+)
     if superimpose
         res1 = collectresidues(el1, residue_selectors...)
         res2 = collectresidues(el2, residue_selectors...)
         trans = Transformation(res1, res2; kwargs...)
-        return rmsd(applytransform(coordarray(res1[trans.inds1], rmsdatoms), trans),
-                    coordarray(res2[trans.inds2], rmsdatoms))
+        return rmsd(
+            applytransform(coordarray(res1[trans.inds1], rmsdatoms), trans),
+            coordarray(res2[trans.inds2], rmsdatoms),
+        )
     else
-        return rmsd(coordarray(el1, rmsdatoms),
-                    coordarray(el2, rmsdatoms))
+        return rmsd(coordarray(el1, rmsdatoms), coordarray(el2, rmsdatoms))
     end
 end
 
@@ -269,28 +293,35 @@ calculate displacements on (default `calphaselector`).
 """
 function displacements(coords_one::Array{<:Real}, coords_two::Array{<:Real})
     if size(coords_one) != size(coords_two)
-        throw(ArgumentError("Coordinate arrays have size $(size(coords_one)) " *
-            "and $(size(coords_two)) but must be the same to calculate displacements"))
+        throw(
+            ArgumentError(
+                "Coordinate arrays have size $(size(coords_one)) " *
+                "and $(size(coords_two)) but must be the same to calculate displacements",
+            ),
+        )
     end
     diff = coords_one - coords_two
-    return sqrt.(sum(diff .* diff, dims=1))[:]
+    return sqrt.(sum(diff .* diff, dims = 1))[:]
 end
 
-function displacements(el1::StructuralElementOrList,
-            el2::StructuralElementOrList,
-            residue_selectors::Function...;
-            superimpose::Bool=true,
-            dispatoms::Function=calphaselector,
-            kwargs...)
+function displacements(
+    el1::StructuralElementOrList,
+    el2::StructuralElementOrList,
+    residue_selectors::Function...;
+    superimpose::Bool = true,
+    dispatoms::Function = calphaselector,
+    kwargs...,
+)
     if superimpose
         res1 = collectresidues(el1, residue_selectors...)
         res2 = collectresidues(el2, residue_selectors...)
         trans = Transformation(res1, res2; kwargs...)
-        return displacements(applytransform(coordarray(res1[trans.inds1], dispatoms), trans),
-                    coordarray(res2[trans.inds2], dispatoms))
+        return displacements(
+            applytransform(coordarray(res1[trans.inds1], dispatoms), trans),
+            coordarray(res2[trans.inds2], dispatoms),
+        )
     else
-        return displacements(coordarray(el1, dispatoms),
-                            coordarray(el2, dispatoms))
+        return displacements(coordarray(el1, dispatoms), coordarray(el2, dispatoms))
     end
 end
 
@@ -303,15 +334,20 @@ Get the minimum square distance in Å between two
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
-function sqdistance(el1::StructuralElementOrList,
-                    el2::StructuralElementOrList,
-                    atom_selectors::Function...)
+function sqdistance(
+    el1::StructuralElementOrList,
+    el2::StructuralElementOrList,
+    atom_selectors::Function...,
+)
     coords_one = coordarray(el1, atom_selectors...)
     coords_two = coordarray(el2, atom_selectors...)
     min_sq_dist = Inf
-    for i in 1:size(coords_one, 2)
-        for j in 1:size(coords_two, 2)
-            @inbounds sq_dist = (coords_one[1, i] - coords_two[1, j]) ^ 2 + (coords_one[2, i] - coords_two[2, j]) ^ 2 + (coords_one[3, i] - coords_two[3, j]) ^ 2
+    for i = 1:size(coords_one, 2)
+        for j = 1:size(coords_two, 2)
+            @inbounds sq_dist =
+                (coords_one[1, i] - coords_two[1, j])^2 +
+                (coords_one[2, i] - coords_two[2, j])^2 +
+                (coords_one[3, i] - coords_two[3, j])^2
             if sq_dist < min_sq_dist
                 min_sq_dist = sq_dist
             end
@@ -321,9 +357,7 @@ function sqdistance(el1::StructuralElementOrList,
 end
 
 function sqdistance(at_one::AbstractAtom, at_two::AbstractAtom)
-    return (x(at_one) - x(at_two)) ^ 2 +
-           (y(at_one) - y(at_two)) ^ 2 +
-           (z(at_one) - z(at_two)) ^ 2
+    return (x(at_one) - x(at_two))^2 + (y(at_one) - y(at_two))^2 + (z(at_one) - z(at_two))^2
 end
 
 """
@@ -334,9 +368,11 @@ Get the minimum distance in Å between two `StructuralElementOrList`s.
 Additional arguments are atom selector functions - only atoms that return
 `true` from the functions are retained.
 """
-function BioGenerics.distance(el1::StructuralElementOrList,
-                      el2::StructuralElementOrList,
-                      atom_selectors::Function...)
+function BioGenerics.distance(
+    el1::StructuralElementOrList,
+    el2::StructuralElementOrList,
+    atom_selectors::Function...,
+)
     return sqrt(sqdistance(el1, el2, atom_selectors...))
 end
 
@@ -353,13 +389,8 @@ Calculate the bond or pseudo-bond angle in radians between three
 
 The angle between B→A and B→C is returned in the range 0 to π.
 """
-function bondangle(at_a::AbstractAtom,
-                at_b::AbstractAtom,
-                at_c::AbstractAtom)
-    return bondangle(
-        coords(at_a) - coords(at_b),
-        coords(at_c) - coords(at_b)
-    )
+function bondangle(at_a::AbstractAtom, at_b::AbstractAtom, at_c::AbstractAtom)
+    return bondangle(coords(at_a) - coords(at_b), coords(at_c) - coords(at_b))
 end
 
 function bondangle(vec_a::Vector{<:Real}, vec_b::Vector{<:Real})
@@ -376,22 +407,24 @@ three vectors.
 The angle between the planes defined by atoms (A, B, C) and (B, C, D) is
 returned in the range -π to π.
 """
-function dihedralangle(at_a::AbstractAtom,
-            at_b::AbstractAtom,
-            at_c::AbstractAtom,
-            at_d::AbstractAtom)
+function dihedralangle(
+    at_a::AbstractAtom,
+    at_b::AbstractAtom,
+    at_c::AbstractAtom,
+    at_d::AbstractAtom,
+)
     return dihedralangle(
         coords(at_b) - coords(at_a),
         coords(at_c) - coords(at_b),
-        coords(at_d) - coords(at_c))
+        coords(at_d) - coords(at_c),
+    )
 end
 
-function dihedralangle(vec_a::Vector{<:Real},
-                    vec_b::Vector{<:Real},
-                    vec_c::Vector{<:Real})
+function dihedralangle(vec_a::Vector{<:Real}, vec_b::Vector{<:Real}, vec_c::Vector{<:Real})
     return atan(
         dot(cross(cross(vec_a, vec_b), cross(vec_b, vec_c)), vec_b / norm(vec_b)),
-        dot(cross(vec_a, vec_b), cross(vec_b, vec_c)))
+        dot(cross(vec_a, vec_b), cross(vec_b, vec_c)),
+    )
 end
 
 """
@@ -407,8 +440,8 @@ The first residue (or one at the given index) requires the atoms "N" and
 The angle is in the range -π to π.
 """
 function omegaangle(res::AbstractResidue, res_prev::AbstractResidue)
-    at_names = atomnames(res, strip=false)
-    at_names_prev = atomnames(res_prev, strip=false)
+    at_names = atomnames(res, strip = false)
+    at_names_prev = atomnames(res_prev, strip = false)
     if !("CA" in at_names_prev || " CA " in at_names_prev)
         throw(ArgumentError("Atom with atom name \"CA\" not found in previous residue"))
     elseif !("C" in at_names_prev || " C  " in at_names_prev)
@@ -421,16 +454,20 @@ function omegaangle(res::AbstractResidue, res_prev::AbstractResidue)
     return dihedralangle(res_prev["CA"], res_prev["C"], res["N"], res["CA"])
 end
 
-function omegaangle(chain::Chain, res_id::Union{Integer, AbstractString})
+function omegaangle(chain::Chain, res_id::Union{Integer,AbstractString})
     inds = findall(r -> r == string(res_id), resids(chain))
     if length(inds) != 1
         throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end
     i = inds[1]
-    if i == 1 || !sequentialresidues(chain[resids(chain)[i - 1]], chain[resids(chain)[i]])
-        throw(ArgumentError("Cannot calculate omega angle for residue \"$res_id\" due to a lack of connected residues"))
+    if i == 1 || !sequentialresidues(chain[resids(chain)[i-1]], chain[resids(chain)[i]])
+        throw(
+            ArgumentError(
+                "Cannot calculate omega angle for residue \"$res_id\" due to a lack of connected residues",
+            ),
+        )
     end
-    return omegaangle(chain[resids(chain)[i]], chain[resids(chain)[i - 1]])
+    return omegaangle(chain[resids(chain)[i]], chain[resids(chain)[i-1]])
 end
 
 """
@@ -446,8 +483,8 @@ The first residue (or one at the given index) requires the atoms "N", "CA" and
 The angle is in the range -π to π.
 """
 function phiangle(res::AbstractResidue, res_prev::AbstractResidue)
-    at_names = atomnames(res, strip=false)
-    at_names_prev = atomnames(res_prev, strip=false)
+    at_names = atomnames(res, strip = false)
+    at_names_prev = atomnames(res_prev, strip = false)
     if !("C" in at_names_prev || " C  " in at_names_prev)
         throw(ArgumentError("Atom with atom name \"C\" not found in previous residue"))
     elseif !("N" in at_names || " N  " in at_names)
@@ -460,16 +497,20 @@ function phiangle(res::AbstractResidue, res_prev::AbstractResidue)
     return dihedralangle(res_prev["C"], res["N"], res["CA"], res["C"])
 end
 
-function phiangle(chain::Chain, res_id::Union{Integer, AbstractString})
+function phiangle(chain::Chain, res_id::Union{Integer,AbstractString})
     inds = findall(r -> r == string(res_id), resids(chain))
     if length(inds) != 1
         throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end
     i = inds[1]
-    if i == 1 || !sequentialresidues(chain[resids(chain)[i - 1]], chain[resids(chain)[i]])
-        throw(ArgumentError("Cannot calculate phi angle for residue \"$res_id\" due to a lack of connected residues"))
+    if i == 1 || !sequentialresidues(chain[resids(chain)[i-1]], chain[resids(chain)[i]])
+        throw(
+            ArgumentError(
+                "Cannot calculate phi angle for residue \"$res_id\" due to a lack of connected residues",
+            ),
+        )
     end
-    return phiangle(chain[resids(chain)[i]], chain[resids(chain)[i - 1]])
+    return phiangle(chain[resids(chain)[i]], chain[resids(chain)[i-1]])
 end
 
 """
@@ -485,8 +526,8 @@ The first residue (or one at the given index) requires the atoms "N", "CA" and
 The angle is in the range -π to π.
 """
 function psiangle(res::AbstractResidue, res_next::AbstractResidue)
-    at_names = atomnames(res, strip=false)
-    at_names_next = atomnames(res_next, strip=false)
+    at_names = atomnames(res, strip = false)
+    at_names_next = atomnames(res_next, strip = false)
     if !("N" in at_names || " N  " in at_names)
         throw(ArgumentError("Atom with atom name \"N\" not found in residue"))
     elseif !("CA" in at_names || " CA " in at_names)
@@ -499,16 +540,21 @@ function psiangle(res::AbstractResidue, res_next::AbstractResidue)
     return dihedralangle(res["N"], res["CA"], res["C"], res_next["N"])
 end
 
-function psiangle(chain::Chain, res_id::Union{Integer, AbstractString})
+function psiangle(chain::Chain, res_id::Union{Integer,AbstractString})
     inds = findall(r -> r == string(res_id), resids(chain))
     if length(inds) != 1
         throw(ArgumentError("\"$res_id\" is an invalid residue ID"))
     end
     i = inds[1]
-    if i == length(chain) || !sequentialresidues(chain[resids(chain)[i]], chain[resids(chain)[i + 1]])
-        throw(ArgumentError("Cannot calculate psi angle for residue \"$res_id\" due to a lack of connected residues"))
+    if i == length(chain) ||
+       !sequentialresidues(chain[resids(chain)[i]], chain[resids(chain)[i+1]])
+        throw(
+            ArgumentError(
+                "Cannot calculate psi angle for residue \"$res_id\" due to a lack of connected residues",
+            ),
+        )
     end
-    return psiangle(chain[resids(chain)[i]], chain[resids(chain)[i + 1]])
+    return psiangle(chain[resids(chain)[i]], chain[resids(chain)[i+1]])
 end
 
 """
@@ -522,8 +568,7 @@ The angle is in the range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
-function omegaangles(el::StructuralElementOrList,
-                    residue_selectors::Function...)
+function omegaangles(el::StructuralElementOrList, residue_selectors::Function...)
     res_list = collectresidues(el, residue_selectors...)
     if length(res_list) < 2
         throw(ArgumentError("At least 2 residues required to calculate dihedral angles"))
@@ -531,9 +576,9 @@ function omegaangles(el::StructuralElementOrList,
 
     omega_angles = Float64[NaN]
 
-    for i in 2:length(res_list)
+    for i = 2:length(res_list)
         res = res_list[i]
-        res_prev = res_list[i - 1]
+        res_prev = res_list[i-1]
         if sequentialresidues(res_prev, res)
             try
                 omega_angle = omegaangle(res, res_prev)
@@ -561,8 +606,7 @@ The angle is in the range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
-function phiangles(el::StructuralElementOrList,
-                    residue_selectors::Function...)
+function phiangles(el::StructuralElementOrList, residue_selectors::Function...)
     res_list = collectresidues(el, residue_selectors...)
     if length(res_list) < 2
         throw(ArgumentError("At least 2 residues required to calculate dihedral angles"))
@@ -570,9 +614,9 @@ function phiangles(el::StructuralElementOrList,
 
     phi_angles = Float64[NaN]
 
-    for i in 2:length(res_list)
+    for i = 2:length(res_list)
         res = res_list[i]
-        res_prev = res_list[i - 1]
+        res_prev = res_list[i-1]
         if sequentialresidues(res_prev, res)
             try
                 phi_angle = phiangle(res, res_prev)
@@ -600,8 +644,7 @@ The angle is in the range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
-function psiangles(el::StructuralElementOrList,
-                    residue_selectors::Function...)
+function psiangles(el::StructuralElementOrList, residue_selectors::Function...)
     res_list = collectresidues(el, residue_selectors...)
 
     if length(res_list) < 2
@@ -610,9 +653,9 @@ function psiangles(el::StructuralElementOrList,
 
     psi_angles = Float64[]
 
-    for i in 1:(length(res_list) - 1)
+    for i = 1:(length(res_list)-1)
         res = res_list[i]
-        res_next = res_list[i + 1]
+        res_next = res_list[i+1]
         if sequentialresidues(res, res_next)
             try
                 psi_angle = psiangle(res, res_next)
@@ -642,8 +685,7 @@ The angles are in the range -π to π.
 Additional arguments are residue selector functions - only residues that return
 `true` from the functions are retained.
 """
-function ramachandranangles(el::StructuralElementOrList,
-                    residue_selectors::Function...)
+function ramachandranangles(el::StructuralElementOrList, residue_selectors::Function...)
     return phiangles(el, residue_selectors...), psiangles(el, residue_selectors...)
 end
 
@@ -719,7 +761,7 @@ writedlm("distances.out", dm.data, " ")
 ```
 """
 struct DistanceMap <: SpatialMap
-    data::Array{Float64, 2}
+    data::Array{Float64,2}
 end
 
 Base.size(m::SpatialMap) = size(m.data)
@@ -745,10 +787,12 @@ function Base.show(io::IO, dm::DistanceMap)
     print(io, "Distance map of size $(size(dm))")
 end
 
-function ContactMap(el1::StructuralElementOrList,
-                el2::StructuralElementOrList,
-                contact_dist::Real)
-    sq_contact_dist = contact_dist ^ 2
+function ContactMap(
+    el1::StructuralElementOrList,
+    el2::StructuralElementOrList,
+    contact_dist::Real,
+)
+    sq_contact_dist = contact_dist^2
     contacts = falses(length(el1), length(el2))
     for (i, subel1) in enumerate(el1)
         for (j, subel2) in enumerate(el2)
@@ -761,12 +805,12 @@ function ContactMap(el1::StructuralElementOrList,
 end
 
 function ContactMap(el::StructuralElementOrList, contact_dist::Real)
-    sq_contact_dist = contact_dist ^ 2
+    sq_contact_dist = contact_dist^2
     contacts = falses(length(el), length(el))
     el_list = collect(el)
-    for i in 1:length(el)
+    for i = 1:length(el)
         contacts[i, i] = true
-        for j in 1:(i - 1)
+        for j = 1:(i-1)
             if sqdistance(el_list[i], el_list[j]) <= sq_contact_dist
                 contacts[i, j] = true
                 contacts[j, i] = true
@@ -776,8 +820,7 @@ function ContactMap(el::StructuralElementOrList, contact_dist::Real)
     return ContactMap(contacts)
 end
 
-function DistanceMap(el1::StructuralElementOrList,
-                el2::StructuralElementOrList)
+function DistanceMap(el1::StructuralElementOrList, el2::StructuralElementOrList)
     dists = zeros(length(el1), length(el2))
     for (i, subel1) in enumerate(el1)
         for (j, subel2) in enumerate(el2)
@@ -790,8 +833,8 @@ end
 function DistanceMap(el::StructuralElementOrList)
     dists = zeros(length(el), length(el))
     el_list = collect(el)
-    for i in 1:length(el)
-        for j in 1:(i - 1)
+    for i = 1:length(el)
+        for j = 1:(i-1)
             dist = distance(el_list[i], el_list[j])
             dists[i, j] = dist
             dists[j, i] = dist
@@ -809,7 +852,7 @@ end
     colorbar --> false
     xs = string.(1:size(cm, 2))
     ys = string.(size(cm, 1):-1:1)
-    xs, ys, reverse(cm.data, dims=1)
+    xs, ys, reverse(cm.data, dims = 1)
 end
 
 # Plot recipe to show a DistanceMap
@@ -821,7 +864,7 @@ end
     colorbar --> true
     xs = string.(1:size(dm, 2))
     ys = string.(size(dm, 1):-1:1)
-    xs, ys, reverse(dm.data, dims=1)
+    xs, ys, reverse(dm.data, dims = 1)
 end
 
 """
@@ -837,11 +880,11 @@ requires Plots.jl; `showcontactmap` works without that dependency.
 function showcontactmap(io::IO, cm::ContactMap)
     size1 = size(cm, 1)
     # Print two y values to each line for a nicer output
-    for i in 1:2:size1
-        for j in 1:size(cm, 2)
+    for i = 1:2:size1
+        for j = 1:size(cm, 2)
             cont_one = cm[i, j]
             # Check we aren't going over the end of the map
-            cont_two = i + 1 <= size1 && cm[i + 1, j]
+            cont_two = i + 1 <= size1 && cm[i+1, j]
             if cont_one && cont_two
                 char = "█"
             elseif cont_one
@@ -867,13 +910,13 @@ Construct a graph of atoms where edges are contacts.
 See Graphs.jl and MetaGraphs.jl for more on how to use graphs.
 """
 function MetaGraphs.MetaGraph(el::StructuralElementOrList, contact_dist::Real)
-    sq_contact_dist = contact_dist ^ 2
+    sq_contact_dist = contact_dist^2
     el_list = collect(el)
     mg = MetaGraph(length(el_list))
     set_prop!(mg, :contactdist, Float64(contact_dist))
     for (i, el) in enumerate(el_list)
         set_prop!(mg, i, :element, el)
-        for j in 1:(i - 1)
+        for j = 1:(i-1)
             if sqdistance(el, el_list[j]) <= sq_contact_dist
                 add_edge!(mg, j, i)
             end

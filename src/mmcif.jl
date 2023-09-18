@@ -1,8 +1,4 @@
-export
-    MMCIFDict,
-    readmultimmcif,
-    writemmcif,
-    writemultimmcif
+export MMCIFDict, readmultimmcif, writemmcif, writemultimmcif
 
 # mmCIF special characters
 const quotechars = Set(['\'', '\"'])
@@ -11,12 +7,11 @@ const missingvals = Set([".", "?"])
 const specialchars = Set(['_', '#', '\$', '[', ']', ';'])
 # These are technically case-insensitive at any letter but just checking the
 #   all-upper and all-lower forms is faster; this also appears in code below
-const specialwords = Set(["loop_", "LOOP_", "stop_", "STOP_",
-                            "global_", "GLOBAL_"])
+const specialwords = Set(["loop_", "LOOP_", "stop_", "STOP_", "global_", "GLOBAL_"])
 
 # If certain entries should have a certain order of keys, that is specified here
 const mmciforder = Dict(
-    "_atom_site"=> [
+    "_atom_site" => [
         "group_PDB",
         "id",
         "type_symbol",
@@ -38,7 +33,7 @@ const mmciforder = Dict(
         "auth_asym_id",
         "auth_atom_id",
         "pdbx_PDB_model_num",
-    ]
+    ],
 )
 
 """
@@ -57,17 +52,15 @@ Call `MMCIFDict` with a filepath or stream to read the dictionary from that
 source.
 The keyword argument `gzip` (default `false`) determines if the input is gzipped.
 """
-struct MMCIFDict <: AbstractDict{String, Vector{String}}
-    dict::Dict{String, Vector{String}}
+struct MMCIFDict <: AbstractDict{String,Vector{String}}
+    dict::Dict{String,Vector{String}}
 end
 
 MMCIFDict() = MMCIFDict(Dict())
 
 Base.getindex(mmcif_dict::MMCIFDict, field::AbstractString) = mmcif_dict.dict[field]
 
-function Base.setindex!(mmcif_dict::MMCIFDict,
-                    val::Vector{String},
-                    field::AbstractString)
+function Base.setindex!(mmcif_dict::MMCIFDict, val::Vector{String}, field::AbstractString)
     mmcif_dict.dict[field] = val
     return mmcif_dict
 end
@@ -96,7 +89,7 @@ function splitline(s::AbstractString)
         if c in whitespacechars
             if in_token && quote_open_char == ' '
                 in_token = false
-                push!(tokens, s[start_i:(i - 1)])
+                push!(tokens, s[start_i:(i-1)])
             end
         elseif c in quotechars
             if quote_open_char == ' '
@@ -106,10 +99,10 @@ function splitline(s::AbstractString)
                 quote_open_char = c
                 in_token = true
                 start_i = i + 1
-            elseif c == quote_open_char && (i == length(s) || s[i + 1] in whitespacechars)
+            elseif c == quote_open_char && (i == length(s) || s[i+1] in whitespacechars)
                 quote_open_char = ' '
                 in_token = false
-                push!(tokens, s[start_i:(i - 1)])
+                push!(tokens, s[start_i:(i-1)])
             end
         elseif c == '#' && !in_token
             return tokens
@@ -174,8 +167,9 @@ function tokenizecifstructure(f::IO)
                 push!(token_buffer, inner_strip)
             end
             push!(tokens, join(token_buffer, "\n"))
-        elseif (!in_keys && startswith(line, "_")) || startswith(line, "loop_") ||
-                    startswith(line, "LOOP_")
+        elseif (!in_keys && startswith(line, "_")) ||
+               startswith(line, "loop_") ||
+               startswith(line, "LOOP_")
             break
         else
             in_keys = false
@@ -186,14 +180,14 @@ function tokenizecifstructure(f::IO)
     return tokens
 end
 
-function MMCIFDict(mmcif_filepath::AbstractString; gzip::Bool=false)
+function MMCIFDict(mmcif_filepath::AbstractString; gzip::Bool = false)
     open(mmcif_filepath) do f
-        MMCIFDict(f; gzip=gzip)
+        MMCIFDict(f; gzip = gzip)
     end
 end
 
 # Read a mmCIF file into a MMCIFDict
-function MMCIFDict(f::IO; gzip::Bool=false)
+function MMCIFDict(f::IO; gzip::Bool = false)
     mmcif_dict = MMCIFDict()
     if gzip
         gz = GzipDecompressorStream(f)
@@ -241,7 +235,7 @@ function populatedict!(mmcif_dict::MMCIFDict, tokens::Vector{String})
                 end
             else
                 try
-                    push!(mmcif_dict[keys[i % n + 1]], token)
+                    push!(mmcif_dict[keys[i%n+1]], token)
                 catch ex
                     # A zero division error means we have not found any keys
                     if isa(ex, DivideError)
@@ -265,13 +259,15 @@ function populatedict!(mmcif_dict::MMCIFDict, tokens::Vector{String})
     return mmcif_dict
 end
 
-function Base.read(input::IO,
-            ::Type{MMCIF};
-            structure_name::AbstractString="",
-            remove_disorder::Bool=false,
-            read_std_atoms::Bool=true,
-            read_het_atoms::Bool=true,
-            gzip::Bool=false)
+function Base.read(
+    input::IO,
+    ::Type{MMCIF};
+    structure_name::AbstractString = "",
+    remove_disorder::Bool = false,
+    read_std_atoms::Bool = true,
+    read_het_atoms::Bool = true,
+    gzip::Bool = false,
+)
     mmcif_dict = MMCIFDict()
     if gzip
         gz = GzipDecompressorStream(input)
@@ -281,24 +277,28 @@ function Base.read(input::IO,
         tokens = tokenizecifstructure(input)
     end
     populatedict!(mmcif_dict, tokens)
-    ProteinStructure(mmcif_dict;
-                     structure_name=structure_name,
-                     remove_disorder=remove_disorder,
-                     read_std_atoms=read_std_atoms,
-                     read_het_atoms=read_het_atoms)
+    ProteinStructure(
+        mmcif_dict;
+        structure_name = structure_name,
+        remove_disorder = remove_disorder,
+        read_std_atoms = read_std_atoms,
+        read_het_atoms = read_het_atoms,
+    )
 end
 
-function ProteinStructure(mmcif_dict::MMCIFDict;
-            structure_name::AbstractString="",
-            remove_disorder::Bool=false,
-            read_std_atoms::Bool=true,
-            read_het_atoms::Bool=true)
+function ProteinStructure(
+    mmcif_dict::MMCIFDict;
+    structure_name::AbstractString = "",
+    remove_disorder::Bool = false,
+    read_std_atoms::Bool = true,
+    read_het_atoms::Bool = true,
+)
     # Define ProteinStructure and add to it incrementally
     struc = ProteinStructure(structure_name)
     if haskey(mmcif_dict, "_atom_site.id")
-        for i in 1:length(mmcif_dict["_atom_site.id"])
+        for i = 1:length(mmcif_dict["_atom_site.id"])
             if (read_std_atoms && mmcif_dict["_atom_site.group_PDB"][i] == "ATOM") ||
-                    (read_het_atoms && mmcif_dict["_atom_site.group_PDB"][i] == "HETATM")
+               (read_het_atoms && mmcif_dict["_atom_site.group_PDB"][i] == "HETATM")
                 model_n = parse(Int, mmcif_dict["_atom_site.pdbx_PDB_model_num"][i])
                 # Create model if required
                 if !haskey(models(struc), model_n)
@@ -307,7 +307,8 @@ function ProteinStructure(mmcif_dict::MMCIFDict;
                 unsafe_addatomtomodel!(
                     struc[model_n],
                     AtomRecord(mmcif_dict, i),
-                    remove_disorder=remove_disorder)
+                    remove_disorder = remove_disorder,
+                )
             end
         end
         # Generate lists for iteration
@@ -321,26 +322,31 @@ AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
     d["_atom_site.group_PDB"][i] == "HETATM",
     parse(Int, d["_atom_site.id"][i]),
     d["_atom_site.auth_atom_id"][i],
-    d["_atom_site.label_alt_id"][i] in missingvals ? ' ' : d["_atom_site.label_alt_id"][i][1],
+    d["_atom_site.label_alt_id"][i] in missingvals ? ' ' :
+    d["_atom_site.label_alt_id"][i][1],
     d["_atom_site.auth_comp_id"][i],
     d["_atom_site.auth_asym_id"][i],
     parse(Int, d["_atom_site.auth_seq_id"][i]),
-    d["_atom_site.pdbx_PDB_ins_code"][i] in missingvals ? ' ' : d["_atom_site.pdbx_PDB_ins_code"][i][1],
+    d["_atom_site.pdbx_PDB_ins_code"][i] in missingvals ? ' ' :
+    d["_atom_site.pdbx_PDB_ins_code"][i][1],
     [
         parse(Float64, d["_atom_site.Cartn_x"][i]),
         parse(Float64, d["_atom_site.Cartn_y"][i]),
-        parse(Float64, d["_atom_site.Cartn_z"][i])
+        parse(Float64, d["_atom_site.Cartn_z"][i]),
     ],
-    d["_atom_site.occupancy"][i] in missingvals ? 1.0 : parse(Float64, d["_atom_site.occupancy"][i]),
-    d["_atom_site.B_iso_or_equiv"][i] in missingvals ? 0.0 : parse(Float64, d["_atom_site.B_iso_or_equiv"][i]),
+    d["_atom_site.occupancy"][i] in missingvals ? 1.0 :
+    parse(Float64, d["_atom_site.occupancy"][i]),
+    d["_atom_site.B_iso_or_equiv"][i] in missingvals ? 0.0 :
+    parse(Float64, d["_atom_site.B_iso_or_equiv"][i]),
     d["_atom_site.type_symbol"][i] in missingvals ? "  " : d["_atom_site.type_symbol"][i],
-    d["_atom_site.pdbx_formal_charge"][i] in missingvals ? "  " : d["_atom_site.pdbx_formal_charge"][i],
+    d["_atom_site.pdbx_formal_charge"][i] in missingvals ? "  " :
+    d["_atom_site.pdbx_formal_charge"][i],
 )
 
 # Format a mmCIF data value by enclosing with quotes or semicolon lines where
 #   appropriate. See
 #   https://www.iucr.org/resources/cif/spec/version1.1/cifsyntax for syntax.
-function formatmmcifcol(val::AbstractString, col_width::Integer=length(val))
+function formatmmcifcol(val::AbstractString, col_width::Integer = length(val))
     # If there is a newline or quotes cannot be contained, use semicolon
     #   and newline construct
     if requiresnewline(val)
@@ -352,8 +358,8 @@ function formatmmcifcol(val::AbstractString, col_width::Integer=length(val))
         else
             return rpad("'$val'", col_width)
         end
-    # Safe to not quote
-    # Numbers must not be quoted
+        # Safe to not quote
+        # Numbers must not be quoted
     else
         return rpad(val, col_width)
     end
@@ -364,10 +370,15 @@ function requiresnewline(val)
 end
 
 function requiresquote(val)
-    return occursin(" ", val) || occursin("'", val) || occursin("\"", val) ||
-        val[1] in specialchars || startswith(val, "data_") ||
-        startswith(val, "DATA_") || startswith(val, "save_") ||
-        startswith(val, "SAVE_") || val in specialwords
+    return occursin(" ", val) ||
+           occursin("'", val) ||
+           occursin("\"", val) ||
+           val[1] in specialchars ||
+           startswith(val, "data_") ||
+           startswith(val, "DATA_") ||
+           startswith(val, "save_") ||
+           startswith(val, "SAVE_") ||
+           val in specialwords
 end
 
 """
@@ -383,19 +394,19 @@ The keyword argument `expand_disordered` (default `true`) determines whether to
 return all copies of disordered residues and atoms.
 The keyword argument `gzip` (default `false`) determines if the output is gzipped.
 """
-function writemmcif(filepath::AbstractString, mmcif_dict::MMCIFDict; gzip::Bool=false)
+function writemmcif(filepath::AbstractString, mmcif_dict::MMCIFDict; gzip::Bool = false)
     open(filepath, "w") do output
-        writemmcif(output, mmcif_dict; gzip=gzip)
+        writemmcif(output, mmcif_dict; gzip = gzip)
     end
 end
 
-function writemmcif(output::IO, mmcif_dict::MMCIFDict; gzip::Bool=false)
+function writemmcif(output::IO, mmcif_dict::MMCIFDict; gzip::Bool = false)
     if gzip
         output = GzipCompressorStream(output)
     end
     # Form dictionary where key is first part of mmCIF key and value is list
     #   of corresponding second parts
-    key_lists = Dict{String, Vector{String}}()
+    key_lists = Dict{String,Vector{String}}()
     data_val = String[]
     for key in keys(mmcif_dict)
         if key == "data_" || key == "DATA_"
@@ -453,12 +464,15 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict; gzip::Bool=false)
             # Find the maximum key length
             m = maximum(length.(key_list))
             for i in key_list
-                println(output, "$(rpad("$key.$i", length(key) + m + 4))$(formatmmcifcol(first(mmcif_dict["$key.$i"])))")
+                println(
+                    output,
+                    "$(rpad("$key.$i", length(key) + m + 4))$(formatmmcifcol(first(mmcif_dict["$key.$i"])))",
+                )
             end
-        # If the value has more than one component, write as keys then a value table
+            # If the value has more than one component, write as keys then a value table
         else
             println(output, "loop_")
-            col_widths = Dict{String, Int}()
+            col_widths = Dict{String,Int}()
             # Write keys and find max widths for each set of values
             # Technically the max of the sum of the column widths is 2048
             for i in key_list
@@ -477,9 +491,12 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict; gzip::Bool=false)
             end
 
             # Write the values as rows
-            for i in 1:n_vals
+            for i = 1:n_vals
                 for col in key_list
-                    print(output, formatmmcifcol(mmcif_dict["$key.$col"][i], col_widths[col] + 1))
+                    print(
+                        output,
+                        formatmmcifcol(mmcif_dict["$key.$col"][i], col_widths[col] + 1),
+                    )
                 end
                 println(output)
             end
@@ -491,43 +508,59 @@ function writemmcif(output::IO, mmcif_dict::MMCIFDict; gzip::Bool=false)
     end
 end
 
-function writemmcif(filepath::AbstractString,
-                el::StructuralElementOrList,
-                atom_selectors::Function...;
-                expand_disordered::Bool=true, gzip::Bool=false)
+function writemmcif(
+    filepath::AbstractString,
+    el::StructuralElementOrList,
+    atom_selectors::Function...;
+    expand_disordered::Bool = true,
+    gzip::Bool = false,
+)
     open(filepath, "w") do output
-        writemmcif(output, el, atom_selectors...;
-                   expand_disordered=expand_disordered, gzip=gzip)
+        writemmcif(
+            output,
+            el,
+            atom_selectors...;
+            expand_disordered = expand_disordered,
+            gzip = gzip,
+        )
     end
 end
 
-function writemmcif(output::IO,
-                el::StructuralElementOrList,
-                atom_selectors::Function...;
-                expand_disordered::Bool=true, gzip::Bool=false)
+function writemmcif(
+    output::IO,
+    el::StructuralElementOrList,
+    atom_selectors::Function...;
+    expand_disordered::Bool = true,
+    gzip::Bool = false,
+)
     # Ensure multiple models get written out correctly
     loop_el = isa(el, ProteinStructure) ? collectmodels(el) : el
-    ats = collectatoms(loop_el, atom_selectors...;
-                                        expand_disordered=expand_disordered)
+    ats = collectatoms(loop_el, atom_selectors...; expand_disordered = expand_disordered)
     if length(ats) > 0
         # Create an empty dictionary and add atoms one at a time
-        atom_dict = Dict{String, Vector{String}}(
-                ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
+        atom_dict = Dict{String,Vector{String}}([
+            "_atom_site.$i" => String[] for i in mmciforder["_atom_site"]
+        ])
         atom_dict["data_"] = [structurename(first(el))]
     else
         # If we are not writing any atoms, don't write the dictionary keys
-        atom_dict = Dict{String, Vector{String}}(["data_"=> ["unknown"]])
+        atom_dict = Dict{String,Vector{String}}(["data_" => ["unknown"]])
     end
 
     for at in ats
-        appendatom!(atom_dict, at, string(modelnumber(at)),
+        appendatom!(
+            atom_dict,
+            at,
+            string(modelnumber(at)),
             strip(chainid(at)) == "" ? "." : chainid(at),
-            string(resnumber(at)), resname(at),
-            ishetero(at) ? "HETATM" : "ATOM")
+            string(resnumber(at)),
+            resname(at),
+            ishetero(at) ? "HETATM" : "ATOM",
+        )
     end
 
     # Now the MMCIFDict has been generated, write it out to the file
-    return writemmcif(output, MMCIFDict(atom_dict); gzip=gzip)
+    return writemmcif(output, MMCIFDict(atom_dict); gzip = gzip)
 end
 
 # Add an atom record to a growing atom dictionary
@@ -536,18 +569,27 @@ function appendatom!(atom_dict, at, model_n, chain_id, res_n, res_name, het)
     push!(atom_dict["_atom_site.id"], string(serial(at)))
     push!(atom_dict["_atom_site.type_symbol"], length(element(at)) == 0 ? "?" : element(at))
     push!(atom_dict["_atom_site.label_atom_id"], atomname(at))
-    push!(atom_dict["_atom_site.label_alt_id"], altlocid(at) == ' ' ? "." : string(altlocid(at)))
+    push!(
+        atom_dict["_atom_site.label_alt_id"],
+        altlocid(at) == ' ' ? "." : string(altlocid(at)),
+    )
     push!(atom_dict["_atom_site.label_comp_id"], res_name)
     push!(atom_dict["_atom_site.label_asym_id"], "?")
     push!(atom_dict["_atom_site.label_entity_id"], "?")
     push!(atom_dict["_atom_site.label_seq_id"], "?")
-    push!(atom_dict["_atom_site.pdbx_PDB_ins_code"], inscode(at) == ' ' ? "?" : string(inscode(at)))
-    push!(atom_dict["_atom_site.Cartn_x"], pyfmt(coordspec, round(x(at), digits=3)))
-    push!(atom_dict["_atom_site.Cartn_y"], pyfmt(coordspec, round(y(at), digits=3)))
-    push!(atom_dict["_atom_site.Cartn_z"], pyfmt(coordspec, round(z(at), digits=3)))
+    push!(
+        atom_dict["_atom_site.pdbx_PDB_ins_code"],
+        inscode(at) == ' ' ? "?" : string(inscode(at)),
+    )
+    push!(atom_dict["_atom_site.Cartn_x"], pyfmt(coordspec, round(x(at), digits = 3)))
+    push!(atom_dict["_atom_site.Cartn_y"], pyfmt(coordspec, round(y(at), digits = 3)))
+    push!(atom_dict["_atom_site.Cartn_z"], pyfmt(coordspec, round(z(at), digits = 3)))
     push!(atom_dict["_atom_site.occupancy"], pyfmt(floatspec, occupancy(at)))
     push!(atom_dict["_atom_site.B_iso_or_equiv"], pyfmt(floatspec, tempfactor(at)))
-    push!(atom_dict["_atom_site.pdbx_formal_charge"], length(charge(at)) == 0 ? "?" : charge(at))
+    push!(
+        atom_dict["_atom_site.pdbx_formal_charge"],
+        length(charge(at)) == 0 ? "?" : charge(at),
+    )
     push!(atom_dict["_atom_site.auth_seq_id"], res_n)
     push!(atom_dict["_atom_site.auth_comp_id"], res_name)
     push!(atom_dict["_atom_site.auth_asym_id"], chain_id)
@@ -565,13 +607,13 @@ the input.
 An example of such a file is the chemical component dictionary from the Protein Data Bank.
 The keyword argument `gzip` (default `false`) determines if the input is gzipped.
 """
-function readmultimmcif(filepath::AbstractString; gzip::Bool=false)
+function readmultimmcif(filepath::AbstractString; gzip::Bool = false)
     open(filepath) do io
-        readmultimmcif(io; gzip=gzip)
+        readmultimmcif(io; gzip = gzip)
     end
 end
 
-function readmultimmcif(io::IO; gzip::Bool=false)
+function readmultimmcif(io::IO; gzip::Bool = false)
     if gzip
         gz = GzipDecompressorStream(io)
         tokens = tokenizecif(gz)
@@ -580,11 +622,11 @@ function readmultimmcif(io::IO; gzip::Bool=false)
         tokens = tokenizecif(io)
     end
     idx = findall(t -> startswith(t, "data_"), tokens)
-    multicif = Dict{String, MMCIFDict}()
+    multicif = Dict{String,MMCIFDict}()
     push!(idx, length(tokens) + 1) # Add end index for last block
-    for i in 1:(length(idx) - 1)
+    for i = 1:(length(idx)-1)
         idx_start = idx[i]
-        idx_end = idx[i + 1] - 1
+        idx_end = idx[i+1] - 1
         data_token = tokens[idx_start]
         cif = MMCIFDict()
         cif_name = data_token[6:end]
@@ -592,7 +634,7 @@ function readmultimmcif(io::IO; gzip::Bool=false)
             throw(ErrorException("More than one mmCIF data block for data_$cif_name"))
         end
         cif["data_"] = [cif_name]
-        populatedict!(cif, tokens[(idx_start + 1):idx_end])
+        populatedict!(cif, tokens[(idx_start+1):idx_end])
         multicif[cif_name] = cif
     end
     return multicif
@@ -605,13 +647,17 @@ end
 Write multiple `MMCIFDict`s as a `Dict{String, MMCIFDict}` to a filepath or stream.
 The keyword argument `gzip` (default `false`) determines if the output is gzipped.
 """
-function writemultimmcif(filepath::AbstractString, cifs::Dict{String, MMCIFDict}; gzip::Bool=false)
+function writemultimmcif(
+    filepath::AbstractString,
+    cifs::Dict{String,MMCIFDict};
+    gzip::Bool = false,
+)
     open(filepath, "w") do f
-        writemultimmcif(f, cifs; gzip=gzip)
+        writemultimmcif(f, cifs; gzip = gzip)
     end
 end
 
-function writemultimmcif(io::IO, cifs::Dict{String, MMCIFDict}; gzip::Bool=false)
+function writemultimmcif(io::IO, cifs::Dict{String,MMCIFDict}; gzip::Bool = false)
     if gzip
         io = GzipCompressorStream(io)
     end
