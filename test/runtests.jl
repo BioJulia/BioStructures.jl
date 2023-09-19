@@ -236,7 +236,7 @@ end
 
     Residue("ALA", 1, ' ', false, ["CA"], Dict("CA"=>
         Atom(1, "CA", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "  ", "  ",
-        Residue("ALA", 1, ' ', false, Chain('A')))), Chain('A'))
+        Residue("ALA", 1, ' ', false, Chain('A')))), Chain('A'), "")
     Residue("ALA", 1, ' ', false, Chain('A'))
 
     # Test show
@@ -1661,7 +1661,7 @@ end
 
     checkchainerror(Chain("A"))
     @test_throws ArgumentError checkchainerror(Chain("AA"))
-    res = Residue("ALA", 10, ' ', false, [], Dict(), Chain("AA"))
+    res = Residue("ALA", 10, ' ', false, [], Dict(), Chain("AA"), "")
     res["CA"] = Atom(100, " CA ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res)
     push!(res.atom_list, "CA")
     @test_throws ArgumentError writepdb(temp_filename, res)
@@ -3172,6 +3172,86 @@ end
     @test ne(mg) == 1
     @test get_prop(mg, :contactdist) == 10.0
     @test mg[2, :element] == struc_1AKE["B"]
+end
+
+@testset "Secondary Structure Information" begin
+    @testset "Residue Manipulation 1" begin
+        res = Residue("ALA", 1, ' ', false, Chain('A'))
+        ss_code!(res, "H")
+        @test ss_code(res) == "H"
+
+        res = Residue(
+            "ALA",
+            1,
+            ' ',
+            false,
+            ["CA"],
+            Dict(
+                "CA" => Atom(
+                    1,
+                    "CA",
+                    ' ',
+                    [0.0, 0.0, 0.0],
+                    1.0,
+                    0.0,
+                    "  ",
+                    "  ",
+                    Residue("ALA", 1, ' ', false, Chain('A')),
+                ),
+            ),
+            Chain('A'),
+            "T"
+        )
+        @test ss_code(res) == "T"
+    end
+
+    @testset "DSSP" begin
+        pdb_path = downloadpdb("1BQ0", dir = tempname() * ".cif", format = MMCIF)
+        struc = read(pdb_path, MMCIF)
+        struc = run_dssp(struc)
+
+        helix_atoms = collectatoms(struc, helixselector)
+        sheet_atoms = collectatoms(struc, sheetselector)
+        coil_atoms = collectatoms(struc, coilselector)
+
+        @test length(helix_atoms) > 0
+        @test length(sheet_atoms) == 0
+        @test length(coil_atoms) > 0
+
+        helix_residues = collectresidues(struc, helixselector)
+        sheet_residues = collectresidues(struc, sheetselector)
+        coil_residues = collectresidues(struc, coilselector)
+
+        @test length(helix_residues) > 0
+        @test length(sheet_residues) == 0
+        @test length(coil_residues) > 0
+
+        rm(pdb_path)
+    end
+
+    @testset "STRIDE" begin
+        pdb_path = downloadpdb("1BQ0", dir = tempname() * ".cif", format = MMCIF)
+        struc = read(pdb_path, MMCIF)
+        struc = run_stride(struc)
+
+        helix_atoms = collectatoms(struc, helixselector)
+        sheet_atoms = collectatoms(struc, sheetselector)
+        coil_atoms = collectatoms(struc, coilselector)
+
+        @test length(helix_atoms) > 0
+        @test length(sheet_atoms) == 0
+        @test length(coil_atoms) > 0
+
+        helix_residues = collectresidues(struc, helixselector)
+        sheet_residues = collectresidues(struc, sheetselector)
+        coil_residues = collectresidues(struc, coilselector)
+
+        @test length(helix_residues) > 0
+        @test length(sheet_residues) == 0
+        @test length(coil_residues) > 0
+
+        rm(pdb_path)
+    end
 end
 
 # Delete temporary file
