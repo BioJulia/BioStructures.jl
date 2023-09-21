@@ -461,7 +461,9 @@ function Base.read(input::IO,
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
-            read_het_atoms::Bool=true)
+            read_het_atoms::Bool=true,
+            run_dssp::Bool=false,
+            run_stride::Bool=false,)
     # Define ProteinStructure and add to it incrementally
     struc = ProteinStructure(structure_name)
     struc[1] = Model(1, struc)
@@ -501,6 +503,14 @@ function Base.read(input::IO,
     end
     # Generate lists for iteration
     fixlists!(struc)
+    # Run DSSP and STRIDE if required
+    if run_dssp
+        rundssp!(struc)
+    end
+
+    if run_stride
+        runstride!(struc)
+    end
     return struc
 end
 

@@ -96,20 +96,26 @@ function Base.read(input::IO,
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
             read_het_atoms::Bool=true,
-            gzip::Bool=false)
+            gzip::Bool=false,
+            run_dssp::Bool=false,
+            run_stride::Bool=false,)
     d = MMTFDict(parsemmtf(input; gzip=gzip))
     ProteinStructure(d;
                      structure_name=structure_name,
                      remove_disorder=remove_disorder,
                      read_std_atoms=read_std_atoms,
-                     read_het_atoms=read_het_atoms)
+                     read_het_atoms=read_het_atoms,
+                     run_dssp=run_dssp,
+                     run_stride=run_stride)
 end
 
 function ProteinStructure(d::MMTFDict;
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
-            read_het_atoms::Bool=true)
+            read_het_atoms::Bool=true,
+            run_dssp::Bool=false,
+            run_stride::Bool=false)
     struc = ProteinStructure(structure_name)
     # Extract hetero atom information from entity list
     hets = trues(length(d["chainIdList"]))
@@ -176,6 +182,16 @@ function ProteinStructure(d::MMTFDict;
         end
     end
     fixlists!(struc)
+
+    # Run DSSP and STRIDE if required
+    if run_dssp
+        rundssp!(struc)
+    end
+
+    if run_stride
+        runstride!(struc)
+    end
+
     return struc
 end
 

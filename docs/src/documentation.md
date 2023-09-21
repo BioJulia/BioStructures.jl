@@ -92,7 +92,7 @@ Properties can be retrieved as follows:
 | [`resnumber`](@ref)          | Residue number of a residue or atom                           | `Int`                           |
 | [`sequentialresidues`](@ref) | Determine if the second residue follows the first in sequence | `Bool`                          |
 | [`inscode`](@ref)            | Insertion code of a residue or atom                           | `Char`                          |
-| [`ss_code`](@ref)            | Secondary Structure code of a residue or atom                 | `String`                        |
+| [`sscode`](@ref)             | Secondary Structure code of a residue or atom                 | `String`                        |
 | [`resid`](@ref)              | Residue ID of an atom or residue (`full=true` includes chain) | `String`                        |
 | [`atomnames`](@ref)          | Atom names of the atoms in a residue, sorted by serial        | `Array{String,1}`               |
 | [`atoms`](@ref)              | Dictionary of atoms in a residue                              | `Dict{String,AbstractAtom}`    |
@@ -174,8 +174,9 @@ The selectors available are:
 | [`helixselector`](@ref)     | `Atom` or `Residue`                 | Atoms/residues arising from Helix                   |
 | [`sheetselector`](@ref)     | `Atom` or `Residue`                 | Atoms/residues arising from Sheet                   |
 | [`coilselector`](@ref)      | `Atom` or `Residue`                 | Atoms/residues arising from Coil                    |
+| [`sscodeselector`](@ref)    | `Atom` or `Residue`                 | Atoms/residues with ss_code in a given list         |
 
-To create a new [`atomnameselector`](@ref) or [`resnameselector`](@ref):
+To create a new [`atomnameselector`](@ref), [`resnameselector`](@ref) or [`sscodeselector`](@ref):
 ```julia
 cdeltaselector(at::AbstractAtom) = atomnameselector(at, ["CD"])
 ```
@@ -407,6 +408,39 @@ Atom CB with serial 71, coordinates [-3.766, 4.031, 23.526]
 See the [Graphs docs](https://juliagraphs.org/Graphs.jl/dev) for details on how to calculate properties such as shortest paths, centrality measures, community detection and more.
 Similar to [`ContactMap`](@ref), contacts are found between any element type passed in.
 So if you wanted the graph of chain contacts in a protein complex you could give a [`Model`](@ref) as the first argument.
+
+## Assigning Secondary Structure
+
+The secondary structure code can be accessed after assinging the secodnary structure using [DSSP](https://github.com/PDB-REDO/dssp) or [STRIDE](https://webclu.bio.wzw.tum.de/stride/).
+
+To assign the secondary structure when reading the structure
+```julia
+# Assign secondary structure using DSSP
+read("path/to/pdb", PDB, run_dssp=true)
+
+# Assign secondary structure using STRIDE
+read("path/to/pdb", PDB, run_strude=true)
+```
+
+[`rundssp(struc)`](@ref), [`runstride(struc)`](@ref), [`rundssp!(struc)`](@ref) and [`runstride!(struc)`](@ref) can also be used to assign secondary structure to [`ProteinStructure`](@ref).
+```julia
+struc = rundssp(struc)
+
+struc = runstride(struc)
+
+rundssp!(struc)
+
+rundssp!(struc)
+```
+The assigning process may fail if the structure is too large, since we use an intermediate PDB file whose atom serial number cannot exceeds `99999`.
+
+To get access to the secondary structure code of atom/residue
+```julia
+sscode(at)
+sscode(res)
+```
+
+The sscode of an atom/residue can be changed using [`sscode!`](@ref).
 
 ## Downloading PDB files
 
