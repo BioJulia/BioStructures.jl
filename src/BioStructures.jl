@@ -25,11 +25,16 @@ using Graphs
 using MetaGraphs
 import MMTF: parsemmtf, writemmtf # Imported to avoid clash with MMTF name
 using RecipesBase
+using STRIDE_jll
+# STRIDE_jll # for secondary structure prediction
+using DSSP_jll
+# DSSP_jll # for secondary structure prediction
 
 include("model.jl")
 include("pdb.jl")
 include("mmcif.jl")
 include("mmtf.jl")
 include("spatial.jl")
+include("secondary.jl")
 
 end # BioStructures

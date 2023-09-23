@@ -271,7 +271,9 @@ function Base.read(input::IO,
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
             read_het_atoms::Bool=true,
-            gzip::Bool=false)
+            gzip::Bool=false,
+            run_dssp::Bool=false,
+            run_stride::Bool=false,)
     mmcif_dict = MMCIFDict()
     if gzip
         gz = GzipDecompressorStream(input)
@@ -285,14 +287,18 @@ function Base.read(input::IO,
                      structure_name=structure_name,
                      remove_disorder=remove_disorder,
                      read_std_atoms=read_std_atoms,
-                     read_het_atoms=read_het_atoms)
+                     read_het_atoms=read_het_atoms,
+                     run_dssp=run_dssp,
+                     run_stride=run_stride)
 end
 
 function ProteinStructure(mmcif_dict::MMCIFDict;
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
-            read_het_atoms::Bool=true)
+            read_het_atoms::Bool=true,
+            run_dssp::Bool=false,
+            run_stride::Bool=false,)
     # Define ProteinStructure and add to it incrementally
     struc = ProteinStructure(structure_name)
     if haskey(mmcif_dict, "_atom_site.id")
@@ -312,6 +318,15 @@ function ProteinStructure(mmcif_dict::MMCIFDict;
         end
         # Generate lists for iteration
         fixlists!(struc)
+    end
+
+    # Run DSSP and STRIDE if required
+    if run_dssp
+        rundssp!(struc)
+    end
+
+    if run_stride
+        runstride!(struc)
     end
     return struc
 end

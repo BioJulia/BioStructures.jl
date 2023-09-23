@@ -236,7 +236,7 @@ end
 
     Residue("ALA", 1, ' ', false, ["CA"], Dict("CA"=>
         Atom(1, "CA", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "  ", "  ",
-        Residue("ALA", 1, ' ', false, Chain('A')))), Chain('A'))
+        Residue("ALA", 1, ' ', false, Chain('A')))), Chain('A'), "")
     Residue("ALA", 1, ' ', false, Chain('A'))
 
     # Test show
@@ -1661,7 +1661,7 @@ end
 
     checkchainerror(Chain("A"))
     @test_throws ArgumentError checkchainerror(Chain("AA"))
-    res = Residue("ALA", 10, ' ', false, [], Dict(), Chain("AA"))
+    res = Residue("ALA", 10, ' ', false, [], Dict(), Chain("AA"), "")
     res["CA"] = Atom(100, " CA ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res)
     push!(res.atom_list, "CA")
     @test_throws ArgumentError writepdb(temp_filename, res)
@@ -3172,6 +3172,143 @@ end
     @test ne(mg) == 1
     @test get_prop(mg, :contactdist) == 10.0
     @test mg[2, :element] == struc_1AKE["B"]
+end
+
+@testset "Secondary Structure Information" begin
+    @testset "Residue Manipulation 1" begin
+        res = Residue("ALA", 1, ' ', false, Chain('A'))
+        sscode!(res, "H")
+        @test sscode(res) == "H"
+
+        res = Residue(
+            "ALA",
+            1,
+            ' ',
+            false,
+            ["CA"],
+            Dict(
+                "CA" => Atom(
+                    1,
+                    "CA",
+                    ' ',
+                    [0.0, 0.0, 0.0],
+                    1.0,
+                    0.0,
+                    "  ",
+                    "  ",
+                    Residue("ALA", 1, ' ', false, Chain('A')),
+                ),
+            ),
+            Chain('A'),
+            "T"
+        )
+        @test sscode(res) == "T"
+
+        sscode!(res, "P")
+        @test sscode(res) == "P"
+    end
+
+    pdb_path = downloadpdb("1BQ0", dir = tempdir(), format = PDB)
+    cif_path = downloadpdb("1BQ0", dir = tempdir(), format = MMCIF)
+    mmtf_path = downloadpdb("1BQ0", dir = tempdir(), format = MMTF)
+
+    @testset "sscode" begin
+        struc = read(pdb_path, PDB)
+        for at in collectatoms(struc)[1:5]
+            sscode!(at, "T")
+            @test sscode(at) == "T"
+        end
+    end
+
+    @testset "DSSP" begin
+        struc = read(pdb_path, PDB)
+        struc = rundssp(struc)
+
+        helix_atoms = collectatoms(struc, helixselector)
+        sheet_atoms = collectatoms(struc, sheetselector)
+        coil_atoms = collectatoms(struc, coilselector)
+
+        helixselector2(el::Union{Atom, Residue}) = sscodeselector(el, ["G", "H", "I", "P"])
+        helix_atoms2 = collectatoms(struc, helixselector2)
+        helix_residues2 = collectresidues(struc, helixselector2)
+
+        @test length(helix_atoms) == 441
+        @test length(sheet_atoms) == 0
+        @test length(coil_atoms) == 791
+        @test length(helix_atoms2) == 441
+
+        helix_residues = collectresidues(struc, helixselector)
+        sheet_residues = collectresidues(struc, sheetselector)
+        coil_residues = collectresidues(struc, coilselector)
+
+
+        @test length(helix_residues) == 25
+        @test length(sheet_residues) == 0
+        @test length(coil_residues) == 51 
+        @test length(helix_residues2) == 25
+
+        @test sscode(helix_residues[1]) == "H"
+        @test sscode(helix_residues[11]) == "H"
+        @test sscode(helix_residues[21]) == "H"
+
+        struc2 = read(pdb_path, PDB, run_dssp=true)
+        for (at1, at2) in zip(collectatoms(struc)[1:5], collectatoms(struc2)[1:5])
+            @test sscode(at1) == sscode(at2)
+        end
+
+        struc3 = read(cif_path, MMCIF, run_dssp=true)
+        for (at1, at3) in zip(collectatoms(struc)[1:5], collectatoms(struc3)[1:5])
+            @test sscode(at1) == sscode(at3)
+        end
+
+        struc4 = read(mmtf_path, MMTF, run_dssp=true)
+        for (at1, at4) in zip(collectatoms(struc)[1:5], collectatoms(struc4)[1:5])
+            @test sscode(at1) == sscode(at4)
+        end
+    end
+
+    @testset "STRIDE" begin
+        struc = read(pdb_path, PDB)
+        struc = runstride(struc)
+
+        helix_atoms = collectatoms(struc, helixselector)
+        sheet_atoms = collectatoms(struc, sheetselector)
+        coil_atoms = collectatoms(struc, coilselector)
+
+        @test length(helix_atoms) == 595
+        @test length(sheet_atoms) == 0
+        @test length(coil_atoms) == 649
+
+        helix_residues = collectresidues(struc, helixselector)
+        sheet_residues = collectresidues(struc, sheetselector)
+        coil_residues = collectresidues(struc, coilselector)
+
+        @test length(helix_residues) == 34
+        @test length(sheet_residues) == 0
+        @test length(coil_residues) == 43
+
+        @test sscode(helix_residues[1]) == "H"
+        @test sscode(helix_residues[11]) == "G"
+        @test sscode(helix_residues[21]) == "H"
+
+        struc2 = read(pdb_path, PDB, run_stride=true)
+        for (at1, at2) in zip(collectatoms(struc)[1:5], collectatoms(struc2)[1:5])
+            @test sscode(at1) == sscode(at2)
+        end
+
+        struc3 = read(cif_path, MMCIF, run_stride=true)
+        for (at1, at3) in zip(collectatoms(struc)[1:5], collectatoms(struc3)[1:5])
+            @test sscode(at1) == sscode(at3)
+        end
+
+        struc4 = read(mmtf_path, MMTF, run_stride=true)
+        for (at1, at4) in zip(collectatoms(struc)[1:5], collectatoms(struc4)[1:5])
+            @test sscode(at1) == sscode(at4)
+        end
+    end
+    rm(pdb_path)
+    rm(cif_path)
+    rm(mmtf_path)
 end
 
 # Delete temporary file

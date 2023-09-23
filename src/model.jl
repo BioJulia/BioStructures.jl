@@ -146,6 +146,7 @@ mutable struct Residue <: AbstractResidue
     atom_list::Vector{String}
     atoms::Dict{String, AbstractAtom}
     chain::StructuralElement
+    ss_code::String # Secondary structure code
 end
 
 """
@@ -222,8 +223,9 @@ function Residue(name::AbstractString,
                 number::Integer,
                 ins_code::Char,
                 het_res::Bool,
-                ch::Chain)
-    return Residue(name, number, ins_code, het_res, [], Dict(), ch)
+                ch::Chain,
+                ss_code::String="")
+    return Residue(name, number, ins_code, het_res, [], Dict(), ch, ss_code)
 end
 
 """

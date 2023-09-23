@@ -455,13 +455,17 @@ Read a Protein Data Bank (PDB) file and return a `ProteinStructure`.
 - `read_het_atoms::Bool=true`: whether to read HETATOM records.
 - `gzip::Bool=false`: whether the input is gzipped, not available for PDB
     format.
+- `run_dssp::Bool=false`: whether to run DSSP to assign secondary structure.
+- `run_stride::Bool=false`: whether to run STRIDE to assign secondary structure.
 """
 function Base.read(input::IO,
             ::Type{PDB};
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
-            read_het_atoms::Bool=true)
+            read_het_atoms::Bool=true,
+            run_dssp::Bool=false,
+            run_stride::Bool=false,)
     # Define ProteinStructure and add to it incrementally
     struc = ProteinStructure(structure_name)
     struc[1] = Model(1, struc)
@@ -501,6 +505,16 @@ function Base.read(input::IO,
     end
     # Generate lists for iteration
     fixlists!(struc)
+    if run_dssp && run_stride
+        throw(ArgumentError("Cannot run both DSSP and STRIDE, the functionality is the same."))
+    end
+    # Run DSSP and STRIDE if required
+    if run_dssp
+        rundssp!(struc)
+    end
+    if run_stride
+        runstride!(struc)
+    end
     return struc
 end
 
