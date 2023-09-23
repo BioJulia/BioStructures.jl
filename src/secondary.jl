@@ -8,27 +8,16 @@ const helixsscodes = Set(["G", "H", "I", "P"])
 const sheetsscodes = Set(["E", "B"])
 const coilsscodes = Set(["C", "T", "S", " "])
 
-"""
-    rundssp(curr_model::Model, mod_n::Int)
-"""
-function rundssp(curr_model::Model, mod_n::Int)
-    struc = ProteinStructure()
-    struc.models[mod_n] = curr_model
-    fixlists!(struc)
-
+function rundssp!(model::Model)
     # Write the structure to a temporary PDB file
     tmp_pdb_path = tempname() * ".pdb"
     open(tmp_pdb_path, "w") do io
         print(io, header_line)
-        writepdb(io, struc)
+        writepdb(io, model)
     end
 
     # Run DSSP on the temporary PDB file
-    dssp_output = try
-        readchomp(pipeline(`$dssp_executable $tmp_pdb_path`))
-    catch
-        "Error: DSSP failed to run."
-    end
+    dssp_output = readchomp(pipeline(`$dssp_executable $tmp_pdb_path`))
 
     # Delete the temporary PDB file
     rm(tmp_pdb_path)
@@ -46,53 +35,55 @@ function rundssp(curr_model::Model, mod_n::Int)
         resnum = (parse(Int, line[6:10]))
         resnum = "$(resnum)"
         ss_code = "$(line[17])"
-        sscode!(curr_model[chainname][resnum], ss_code)
+        sscode!(model[chainname][resnum], ss_code)
     end
-    return curr_model
+    return model
 end
 
 
 """
-    rundssp(struc::ProteinStructure)
-
-Runs DSSP (Dictionary of Secondary Structure of Proteins) on the given `struc` ProteinStructure object.
-This function iterates over all models in the ProteinStructure object and runs DSSP on each model.
+    rundssp!(struc::ProteinStructure)
+    rundssp!(model::Model)
+    
+Runs DSSP (Define Secondary Structure of Proteins) on the given protein structure or model.
+    
+# Arguments
+- `struc::ProteinStructure`: The protein structure to run DSSP on.
+- `model::Model`: The model to run DSSP on.
+    
+# Returns
+- `struc::ProteinStructure`: The protein structure with DSSP results added to its models.
 """
-function rundssp(struc::ProteinStructure)
+function rundssp!(struc::ProteinStructure)
     if countmodels(struc) > 1
         @info "Structure has $(countmodels(struc)) models, the keys are $(keys(struc.models))."
     end
-    for (mod_n, curr_model) in models(struc)
-        struc[mod_n] = rundssp(curr_model, mod_n)
+    for (_, model) in models(struc)
+        rundssp!(model)
     end
     return struc
 end
 
 """
-    rundssp!(struc::ProteinStructure)
+    rundssp(struc::ProteinStructure)
+    rundssp(model::Model)
 
-Using DSSP to set the ss_code field of each residue in the given `struc` ProteinStructure object.
+Runs DSSP (Dictionary of Secondary Structure of Proteins) on the given `ProteinStructure` object.
 """
-rundssp!(struc::ProteinStructure) = (struc = rundssp(struc))
+rundssp(el::Union{ProteinStructure, Model}) = rundssp!(deepcopy(el))
 
-function runstride(curr_model::Model, mod_n::Int)
-    struc = ProteinStructure()
-    struc.models[mod_n] = curr_model
-    fixlists!(struc)
+
+function runstride!(model::Model)
 
     # Write the structure to a temporary PDB file
     tmp_pdb_path = tempname() * ".pdb"
     open(tmp_pdb_path, "w") do io
         print(io, header_line)
-        writepdb(io, struc)
+        writepdb(io, model)
     end
 
     # Run STRIDE on the temporary PDB file
-    stride_output = try
-        readchomp(pipeline(`$stride_executable $tmp_pdb_path`))
-    catch
-        "Error: STRIDE failed to run."
-    end
+    stride_output = readchomp(pipeline(`$stride_executable $tmp_pdb_path`))
 
     # Delete the temporary PDB file
     rm(tmp_pdb_path)
@@ -104,36 +95,42 @@ function runstride(curr_model::Model, mod_n::Int)
             resnum = "$(parse(Int, line[12:15]))"
             ss_code = uppercase(line[25:25]) # stride sometimes returns "b" instead of "B"
             # @info "Assign $(sscode) to $(chainname) $(resnum)"
-            sscode!(curr_model[chainname][resnum], ss_code)
+            sscode!(model[chainname][resnum], ss_code)
         end
     end
-    return curr_model
+    return model
 end
 
 """
-    runstride(struc::ProteinStructure)
+    runstride!(struc::ProteinStructure)
+    runstride!(model::Model)
 
-Runs the STRIDE algorithm to assign secondary structure to a protein structure.
-This function iterates over all models in the ProteinStructure object and runs STRIDE on each model.
+Run the STRIDE algorithm to assign secondary structure to the protein structure or model.
+
+# Arguments
+- `struc::ProteinStructure`: The protein structure to assign secondary structure to.
+- `model::Model`: The model to assign secondary structure to.
+
+# Returns
+- The updated `ProteinStructure` or `Model` with assigned secondary structure.
 """
-function runstride(struc::ProteinStructure)
+function runstride!(struc::ProteinStructure)
     if countmodels(struc) > 1
         @info "Structure has $(countmodels(struc)) models, the keys are $(keys(struc.models))"
     end
-
-    for (mod_n, curr_model) in models(struc)
-        struc[mod_n] = runstride(curr_model, mod_n)
+    for (_, model) in models(struc)
+        runstride!(model)
     end
     return struc
 end
 
 """
-    runstride!(struc::ProteinStructure)
+    runstride(struc::ProteinStructure)
+    runstride(model::Model)
 
-Using STRIDE to set the ss_code field of each residue in the given `struc` ProteinStructure object.
+Run the STRIDE algorithm to calculate the secondary structure of a protein structure.
 """
-runstride!(struc::ProteinStructure) = (struc = runstride(struc))
-
+runstride(el::Union{ProteinStructure, Model}) = runstride!(deepcopy(el))
 
 """
     sscode!(res::Residue, ss_code::String)
