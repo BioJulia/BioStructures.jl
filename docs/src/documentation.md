@@ -3927,6 +3927,7 @@ viewer.render();
 ```
 
 See the [Bio3DView.jl tutorial](http://nbviewer.jupyter.org/github/jgreener64/Bio3DView.jl/blob/master/examples/tutorial.ipynb) for more information.
+[BioMakie.jl](https://github.com/BioJulia/BioMakie.jl) can also be used to visualise BioStructures objects.
 
 ## Related software
 
@@ -3934,6 +3935,7 @@ Other packages in the Julia ecosystem that deal with structural bioinformatics o
 - [MIToS.jl](https://github.com/diegozea/MIToS.jl) - protein sequence and structure analysis.
 - [PdbTool.jl](https://github.com/christophfeinauer/PdbTool.jl) - read and work with PDB files.
 - [Bio3DView.jl](https://github.com/jgreener64/Bio3DView.jl) - view molecular structures (see [Visualising structures](@ref)).
+- [BioMakie.jl](https://github.com/BioJulia/BioMakie.jl) - view molecular structures and sequence alignments.
 - [MMTF.jl](https://github.com/BioJulia/MMTF.jl) - read and write MMTF files. BioStructures.jl builds on top of MMTF.jl.
 - [ProteinEnsembles.jl](https://github.com/jgreener64/ProteinEnsembles.jl) - model ensembles of protein structures.
-- [Molly.jl](https://github.com/jgreener64/Molly.jl) - proof of concept molecular dynamics.
+- [Molly.jl](https://github.com/jgreener64/Molly.jl) - molecular dynamics of biomolecules.
