@@ -48,9 +48,9 @@ fmtdir = BioCore.Testing.get_bio_fmt_specimens("master", false)
 # Access files in BioFmtSpecimens to test against
 testfilepath(path::AbstractString...) = joinpath(fmtdir, path...)
 
-# All writing is done to one temporary file which is removed at the end
-temp_filename, io = mktemp()
-close(io)
+# All writing is done to one temporary file and temporary directory which are removed at the end
+const temp_filename = tempname()
+const temp_dir = mktempdir()
 
 # Gzip a file
 function gzip_file(infile, outfile)
@@ -92,53 +92,52 @@ Aqua.test_all(BioStructures; ambiguities=(recursive=false))
 
     @test length(pdbobsoletelist()) > 3600
 
-    dir = joinpath(tempdir(), "PDB")
     # Invalid PDB ID format
     @test_throws ArgumentError downloadpdb("1a df")
     # Valid PDB ID format but PDB does not exist
-    @test_throws Exception downloadpdb("no1e", dir=dir)
+    @test_throws Exception downloadpdb("no1e", dir=temp_dir)
     # Invalid file format
-    @test_throws TypeError downloadpdb("1alw", dir=dir, format=String)
+    @test_throws TypeError downloadpdb("1alw", dir=temp_dir, format=String)
     # Biological assembly not available in PDBXML and MMTF
-    @test_throws ArgumentError downloadpdb("1alw", dir=dir, format=PDBXML, ba_number=1)
+    @test_throws ArgumentError downloadpdb("1alw", dir=temp_dir, format=PDBXML, ba_number=1)
     # Invalid BA number for this PDB entry
-    @test_throws Exception downloadpdb("1alw", dir=dir, format=MMCIF, ba_number=10)
+    @test_throws Exception downloadpdb("1alw", dir=temp_dir, format=MMCIF, ba_number=10)
     # Test if downloadpdb returns the path to the downloaded file
-    @test isfile(downloadpdb("1crn", dir=dir))
+    @test isfile(downloadpdb("1crn", dir=temp_dir))
 
     # PDB format
-    downloadpdb("1alw", dir=dir, format=PDB)
-    pdbpath = joinpath(dir, "1ALW.$(pdbextension[PDB])")
+    downloadpdb("1alw", dir=temp_dir, format=PDB)
+    pdbpath = joinpath(temp_dir, "1ALW.$(pdbextension[PDB])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # PDBXML format
-    downloadpdb("1alw", dir=dir, format=PDBXML)
-    pdbpath = joinpath(dir, "1ALW.$(pdbextension[PDBXML])")
+    downloadpdb("1alw", dir=temp_dir, format=PDBXML)
+    pdbpath = joinpath(temp_dir, "1ALW.$(pdbextension[PDBXML])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # mmCIF format
-    downloadpdb("1alw", dir=dir, format=MMCIF)
-    pdbpath = joinpath(dir, "1ALW.$(pdbextension[MMCIF])")
+    downloadpdb("1alw", dir=temp_dir, format=MMCIF)
+    pdbpath = joinpath(temp_dir, "1ALW.$(pdbextension[MMCIF])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # MMTF format
-    downloadpdb("1alw", dir=dir, format=MMTF)
-    pdbpath = joinpath(dir, "1ALW.$(pdbextension[MMTF])")
+    downloadpdb("1alw", dir=temp_dir, format=MMTF)
+    pdbpath = joinpath(temp_dir, "1ALW.$(pdbextension[MMTF])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Obsolete PDB
-    downloadpdb("116l", dir=dir, format=PDB, obsolete=true)
-    pdbpath = joinpath(dir, "obsolete", "116L.$(pdbextension[PDB])")
+    downloadpdb("116l", dir=temp_dir, format=PDB, obsolete=true)
+    pdbpath = joinpath(temp_dir, "obsolete", "116L.$(pdbextension[PDB])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Biological assembly - PDB format
-    downloadpdb("1alw", dir=dir, format=PDB, ba_number=1)
-    pdbpath = joinpath(dir, "1ALW_ba1.$(pdbextension[PDB])")
+    downloadpdb("1alw", dir=temp_dir, format=PDB, ba_number=1)
+    pdbpath = joinpath(temp_dir, "1ALW_ba1.$(pdbextension[PDB])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Biological assembly - mmCIF format
-    downloadpdb("5a9z", dir=dir, format=MMCIF, ba_number=1)
-    pdbpath = joinpath(dir, "5A9Z_ba1.$(pdbextension[MMCIF])")
+    downloadpdb("5a9z", dir=temp_dir, format=MMCIF, ba_number=1)
+    pdbpath = joinpath(temp_dir, "5A9Z_ba1.$(pdbextension[MMCIF])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Download multiple PDB files
     pdbidlist = ["1ent", "1en2"]
-    downloadpdb(pdbidlist, dir=dir, format=PDB)
+    downloadpdb(pdbidlist, dir=temp_dir, format=PDB)
     for pdbid in pdbidlist
-        pdbpath = joinpath(dir, "$(uppercase(pdbid)).$(pdbextension[PDB])")
+        pdbpath = joinpath(temp_dir, "$(uppercase(pdbid)).$(pdbextension[PDB])")
         @test isfile(pdbpath) && filesize(pdbpath) > 0
     end
 
@@ -158,23 +157,20 @@ Aqua.test_all(BioStructures; ambiguities=(recursive=false))
     end == [5, 1]
 
     # Test retrievepdb
-    struc = retrievepdb("1AKE", dir=dir, structure_name="New name")
+    struc = retrievepdb("1AKE", dir=temp_dir, structure_name="New name")
     @test structurename(struc) == "New name"
     @test countatoms(struc) == 3804
 
-    struc = retrievepdb("1AKE", dir=dir, obsolete=true, read_het_atoms=false)
+    struc = retrievepdb("1AKE", dir=temp_dir, obsolete=true, read_het_atoms=false)
     @test countatoms(struc) == 3312
     @test serial(collectatoms(struc)[2000]) == 2006
     @test sum(ishetero, collectatoms(struc)) == 0
 
-    struc = retrievepdb("1AKE", dir=dir, ba_number=1, read_het_atoms=false, read_std_atoms=false)
+    struc = retrievepdb("1AKE", dir=temp_dir, ba_number=1, read_het_atoms=false, read_std_atoms=false)
     @test countatoms(struc) == 0
     @test countresidues(struc) == 0
     @test countchains(struc) == 0
     @test countmodels(struc) == 0
-
-    # Delete temporary directory
-    rm(dir, recursive=true, force=true)
 end
 
 @testset "Types" begin
@@ -236,7 +232,7 @@ end
 
     Residue("ALA", 1, ' ', false, ["CA"], Dict("CA"=>
         Atom(1, "CA", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "  ", "  ",
-        Residue("ALA", 1, ' ', false, Chain('A')))), Chain('A'), "")
+        Residue("ALA", 1, ' ', false, Chain('A')))), Chain('A'), '-')
     Residue("ALA", 1, ' ', false, Chain('A'))
 
     # Test show
@@ -1661,7 +1657,7 @@ end
 
     checkchainerror(Chain("A"))
     @test_throws ArgumentError checkchainerror(Chain("AA"))
-    res = Residue("ALA", 10, ' ', false, [], Dict(), Chain("AA"), "")
+    res = Residue("ALA", 10, ' ', false, [], Dict(), Chain("AA"), '-')
     res["CA"] = Atom(100, " CA ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res)
     push!(res.atom_list, "CA")
     @test_throws ArgumentError writepdb(temp_filename, res)
@@ -3174,144 +3170,129 @@ end
     @test mg[2, :element] == struc_1AKE["B"]
 end
 
-@testset "Secondary Structure Information" begin
-    @testset "Residue Manipulation 1" begin
-        res = Residue("ALA", 1, ' ', false, Chain('A'))
-        sscode!(res, "H")
-        @test sscode(res) == "H"
+@testset "Secondary structure" begin
+    res = Residue("ALA", 1, ' ', false, Chain('A'))
+    @test sscode(res) == '-'
+    sscode!(res, 'H')
+    @test sscode(res) == 'H'
 
-        res = Residue(
-            "ALA",
-            1,
-            ' ',
-            false,
-            ["CA"],
-            Dict(
-                "CA" => Atom(
-                    1,
-                    "CA",
-                    ' ',
-                    [0.0, 0.0, 0.0],
-                    1.0,
-                    0.0,
-                    "  ",
-                    "  ",
-                    Residue("ALA", 1, ' ', false, Chain('A')),
-                ),
+    res = Residue(
+        "ALA",
+        1,
+        ' ',
+        false,
+        ["CA"],
+        Dict(
+            "CA" => Atom(
+                1,
+                "CA",
+                ' ',
+                [0.0, 0.0, 0.0],
+                1.0,
+                0.0,
+                "  ",
+                "  ",
+                Residue("ALA", 1, ' ', false, Chain('A')),
             ),
-            Chain('A'),
-            "T"
-        )
-        @test sscode(res) == "T"
+        ),
+        Chain('A'),
+        'T'
+    )
+    @test sscode(res) == 'T'
+    sscode!(res, 'P')
+    @test sscode(res) == 'P'
 
-        sscode!(res, "P")
-        @test sscode(res) == "P"
+    pdb_path  = downloadpdb("1BQ0", dir=temp_dir, format=PDB)
+    cif_path  = downloadpdb("1BQ0", dir=temp_dir, format=MMCIF)
+    mmtf_path = downloadpdb("1BQ0", dir=temp_dir, format=MMTF)
+
+    struc = read(pdb_path, PDB)
+    for res in collectresidues(struc)[1:5]
+        sscode!(res, 'T')
+        @test sscode(res) == 'T'
     end
 
-    pdb_path = downloadpdb("1BQ0", dir = tempdir(), format = PDB)
-    cif_path = downloadpdb("1BQ0", dir = tempdir(), format = MMCIF)
-    mmtf_path = downloadpdb("1BQ0", dir = tempdir(), format = MMTF)
+    struc = read(pdb_path, PDB)
+    rundssp!(struc)
 
-    @testset "sscode" begin
-        struc = read(pdb_path, PDB)
-        for at in collectatoms(struc)[1:5]
-            sscode!(at, "T")
-            @test sscode(at) == "T"
-        end
-    end
+    helix_atoms = collectatoms(struc, helixselector)
+    sheet_atoms = collectatoms(struc, sheetselector)
+    coil_atoms  = collectatoms(struc, coilselector)
 
-    @testset "DSSP" begin
-        struc = read(pdb_path, PDB)
-        struc = rundssp(struc)
+    helixselector2(el) = sscodeselector(el, ['G', 'H', 'I', 'P'])
+    helix_atoms2 = collectatoms(struc, helixselector2)
+    helix_residues2 = collectresidues(struc, helixselector2)
 
-        helix_atoms = collectatoms(struc, helixselector)
-        sheet_atoms = collectatoms(struc, sheetselector)
-        coil_atoms = collectatoms(struc, coilselector)
+    @test length(helix_atoms)  == 441
+    @test length(sheet_atoms)  == 0
+    @test length(coil_atoms)   == 803
+    @test length(helix_atoms2) == 441
 
-        helixselector2(el::Union{Atom, Residue}) = sscodeselector(el, ["G", "H", "I", "P"])
-        helix_atoms2 = collectatoms(struc, helixselector2)
-        helix_residues2 = collectresidues(struc, helixselector2)
+    helix_residues = collectresidues(struc, helixselector)
+    sheet_residues = collectresidues(struc, sheetselector)
+    coil_residues  = collectresidues(struc, coilselector)
 
-        @test length(helix_atoms) == 441
-        @test length(sheet_atoms) == 0
-        @test length(coil_atoms) == 791
-        @test length(helix_atoms2) == 441
+    @test length(helix_residues)  == 25
+    @test length(sheet_residues)  == 0
+    @test length(coil_residues)   == 52
+    @test length(helix_residues2) == 25
 
-        helix_residues = collectresidues(struc, helixselector)
-        sheet_residues = collectresidues(struc, sheetselector)
-        coil_residues = collectresidues(struc, coilselector)
+    @test sscode(helix_residues[1])  == 'H'
+    @test sscode(helix_residues[11]) == 'H'
+    @test sscode(helix_residues[21]) == 'H'
 
+    struc2 = read(pdb_path, PDB; run_dssp=true)
+    @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc2))
 
-        @test length(helix_residues) == 25
-        @test length(sheet_residues) == 0
-        @test length(coil_residues) == 51 
-        @test length(helix_residues2) == 25
+    struc3 = read(cif_path, MMCIF; run_dssp=true)
+    @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc3))
 
-        @test sscode(helix_residues[1]) == "H"
-        @test sscode(helix_residues[11]) == "H"
-        @test sscode(helix_residues[21]) == "H"
+    struc4 = read(mmtf_path, MMTF; run_dssp=true)
+    @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc3))
 
-        struc2 = read(pdb_path, PDB, run_dssp=true)
-        for (at1, at2) in zip(collectatoms(struc)[1:5], collectatoms(struc2)[1:5])
-            @test sscode(at1) == sscode(at2)
-        end
+    struc = read(pdb_path, PDB)
+    runstride!(struc)
 
-        struc3 = read(cif_path, MMCIF, run_dssp=true)
-        for (at1, at3) in zip(collectatoms(struc)[1:5], collectatoms(struc3)[1:5])
-            @test sscode(at1) == sscode(at3)
-        end
+    helix_atoms = collectatoms(struc, helixselector)
+    sheet_atoms = collectatoms(struc, sheetselector)
+    coil_atoms  = collectatoms(struc, coilselector)
 
-        struc4 = read(mmtf_path, MMTF, run_dssp=true)
-        for (at1, at4) in zip(collectatoms(struc)[1:5], collectatoms(struc4)[1:5])
-            @test sscode(at1) == sscode(at4)
-        end
-    end
+    @test length(helix_atoms) == 595
+    @test length(sheet_atoms) == 0
+    @test length(coil_atoms)  == 649
 
-    @testset "STRIDE" begin
-        struc = read(pdb_path, PDB)
-        struc = runstride(struc)
+    helix_residues = collectresidues(struc, helixselector)
+    sheet_residues = collectresidues(struc, sheetselector)
+    coil_residues  = collectresidues(struc, coilselector)
 
-        helix_atoms = collectatoms(struc, helixselector)
-        sheet_atoms = collectatoms(struc, sheetselector)
-        coil_atoms = collectatoms(struc, coilselector)
+    @test length(helix_residues) == 34
+    @test length(sheet_residues) == 0
+    @test length(coil_residues)  == 43
 
-        @test length(helix_atoms) == 595
-        @test length(sheet_atoms) == 0
-        @test length(coil_atoms) == 649
+    @test sscode(helix_residues[1])  == 'H'
+    @test sscode(helix_residues[11]) == 'G'
+    @test sscode(helix_residues[21]) == 'H'
 
-        helix_residues = collectresidues(struc, helixselector)
-        sheet_residues = collectresidues(struc, sheetselector)
-        coil_residues = collectresidues(struc, coilselector)
+    struc2 = read(pdb_path, PDB; run_stride=true)
+    @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc2))
 
-        @test length(helix_residues) == 34
-        @test length(sheet_residues) == 0
-        @test length(coil_residues) == 43
+    struc3 = read(cif_path, MMCIF; run_stride=true)
+    @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc3))
 
-        @test sscode(helix_residues[1]) == "H"
-        @test sscode(helix_residues[11]) == "G"
-        @test sscode(helix_residues[21]) == "H"
+    struc4 = read(mmtf_path, MMTF; run_stride=true)
+    @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc4))
 
-        struc2 = read(pdb_path, PDB, run_stride=true)
-        for (at1, at2) in zip(collectatoms(struc)[1:5], collectatoms(struc2)[1:5])
-            @test sscode(at1) == sscode(at2)
-        end
-
-        struc3 = read(cif_path, MMCIF, run_stride=true)
-        for (at1, at3) in zip(collectatoms(struc)[1:5], collectatoms(struc3)[1:5])
-            @test sscode(at1) == sscode(at3)
-        end
-
-        struc4 = read(mmtf_path, MMTF, run_stride=true)
-        for (at1, at4) in zip(collectatoms(struc)[1:5], collectatoms(struc4)[1:5])
-            @test sscode(at1) == sscode(at4)
-        end
-    end
-    rm(pdb_path)
-    rm(cif_path)
-    rm(mmtf_path)
+    isfile(temp_filename) && rm(temp_filename)
+    rundssp(cif_path, temp_filename)
+    @test countlines(temp_filename) > 50
+    rm(temp_filename)
+    runstride(pdb_path, temp_filename)
+    @test countlines(temp_filename) > 100
+    rm(temp_filename)
 end
 
-# Delete temporary file
+# Delete temporary file and temporary directory
 rm(temp_filename, force=true)
+rm(temp_dir, recursive=true, force=true)
 
 end # TestBioStructures

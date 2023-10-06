@@ -69,47 +69,47 @@ See the [Biopython discussion](http://biopython.org/wiki/The_Biopython_Structura
 
 Properties can be retrieved as follows:
 
-| Function                     | Returns                                                       | Return type                     |
-| :--------------------------- | :------------------------------------------------------------ | :------------------------------ |
-| [`serial`](@ref)             | Serial number of an atom                                      | `Int`                           |
-| [`atomname`](@ref)           | Name of an atom                                               | `String`                        |
-| [`altlocid`](@ref)           | Alternative location ID of an atom                            | `Char`                          |
-| [`altlocids`](@ref)          | All alternative location IDs in a `DisorderedAtom`            | `Array{Char,1}`                 |
-| [`x`](@ref)                  | x coordinate of an atom                                       | `Float64`                       |
-| [`y`](@ref)                  | y coordinate of an atom                                       | `Float64`                       |
-| [`z`](@ref)                  | z coordinate of an atom                                       | `Float64`                       |
-| [`coords`](@ref)             | coordinates of an atom                                        | `Array{Float64,1}`              |
-| [`occupancy`](@ref)          | Occupancy of an atom (default is `1.0`)                       | `Float64`                       |
-| [`tempfactor`](@ref)         | Temperature factor of an atom (default is `0.0`)              | `Float64`                       |
-| [`element`](@ref)            | Element of an atom (default is `"  "`)                        | `String`                        |
-| [`charge`](@ref)             | Charge of an atom (default is `"  "`)                         | `String`                        |
-| [`residue`](@ref)            | Residue an atom belongs to                                    | `Residue`                       |
-| [`ishetero`](@ref)           | `true` if the residue or atom is a hetero residue/atom        | `Bool`                          |
-| [`isdisorderedatom`](@ref)   | `true` if the atom is disordered                              | `Bool`                          |
-| [`pdbline`](@ref)            | PDB ATOM/HETATM record for an atom                            | `String`                        |
-| [`resname`](@ref)            | Residue name of a residue or atom                             | `String`                        |
-| [`resnames`](@ref)           | All residue names in a `DisorderedResidue`                    | `Array{String,1}`               |
-| [`resnumber`](@ref)          | Residue number of a residue or atom                           | `Int`                           |
-| [`sequentialresidues`](@ref) | Determine if the second residue follows the first in sequence | `Bool`                          |
-| [`inscode`](@ref)            | Insertion code of a residue or atom                           | `Char`                          |
-| [`sscode`](@ref)             | Secondary Structure code of a residue or atom                 | `String`                        |
-| [`resid`](@ref)              | Residue ID of an atom or residue (`full=true` includes chain) | `String`                        |
-| [`atomnames`](@ref)          | Atom names of the atoms in a residue, sorted by serial        | `Array{String,1}`               |
-| [`atoms`](@ref)              | Dictionary of atoms in a residue                              | `Dict{String,AbstractAtom}`    |
-| [`isdisorderedres`](@ref)    | `true` if the residue has multiple residue names              | `Bool`                          |
-| [`disorderedres`](@ref)      | Access a particular residue name in a `DisorderedResidue`     | `Residue`                       |
-| [`chain`](@ref)              | Chain a residue or atom belongs to                            | `Chain`                         |
-| [`chainid`](@ref)            | Chain ID of a chain, residue or atom                          | `String`                        |
-| [`resids`](@ref)             | Sorted residue IDs in a chain                                 | `Array{String,1}`               |
-| [`residues`](@ref)           | Dictionary of residues in a chain                             | `Dict{String,AbstractResidue}` |
-| [`model`](@ref)              | Model a chain, residue or atom belongs to                     | `Model`                         |
-| [`modelnumber`](@ref)        | Model number of a model, chain, residue or atom               | `Int`                           |
-| [`chainids`](@ref)           | Sorted chain IDs in a model or structure                      | `Array{String,1}`               |
-| [`chains`](@ref)             | Dictionary of chains in a model or structure                  | `Dict{String,Chain}`           |
-| [`structure`](@ref)          | Structure a model, chain, residue or atom belongs to          | `ProteinStructure`              |
-| [`structurename`](@ref)      | Name of the structure an element belongs to                   | `String`                        |
-| [`modelnumbers`](@ref)       | Sorted model numbers in a structure                           | `Array{Int,1}`                  |
-| [`models`](@ref)             | Dictionary of models in a structure                           | `Dict{Int,Model}`              |
+| Function                     | Returns                                                                                | Return type                     |
+| :--------------------------- | :------------------------------------------------------------------------------------- | :------------------------------ |
+| [`serial`](@ref)             | Serial number of an atom                                                               | `Int`                           |
+| [`atomname`](@ref)           | Name of an atom                                                                        | `String`                        |
+| [`altlocid`](@ref)           | Alternative location ID of an atom                                                     | `Char`                          |
+| [`altlocids`](@ref)          | All alternative location IDs in a `DisorderedAtom`                                     | `Array{Char,1}`                 |
+| [`x`](@ref)                  | x coordinate of an atom                                                                | `Float64`                       |
+| [`y`](@ref)                  | y coordinate of an atom                                                                | `Float64`                       |
+| [`z`](@ref)                  | z coordinate of an atom                                                                | `Float64`                       |
+| [`coords`](@ref)             | coordinates of an atom                                                                 | `Array{Float64,1}`              |
+| [`occupancy`](@ref)          | Occupancy of an atom (default is `1.0`)                                                | `Float64`                       |
+| [`tempfactor`](@ref)         | Temperature factor of an atom (default is `0.0`)                                       | `Float64`                       |
+| [`element`](@ref)            | Element of an atom (default is `"  "`)                                                 | `String`                        |
+| [`charge`](@ref)             | Charge of an atom (default is `"  "`)                                                  | `String`                        |
+| [`residue`](@ref)            | Residue an atom belongs to                                                             | `Residue`                       |
+| [`ishetero`](@ref)           | `true` if the residue or atom is a hetero residue/atom                                 | `Bool`                          |
+| [`isdisorderedatom`](@ref)   | `true` if the atom is disordered                                                       | `Bool`                          |
+| [`pdbline`](@ref)            | PDB ATOM/HETATM record for an atom                                                     | `String`                        |
+| [`resname`](@ref)            | Residue name of a residue or atom                                                      | `String`                        |
+| [`resnames`](@ref)           | All residue names in a `DisorderedResidue`                                             | `Array{String,1}`               |
+| [`resnumber`](@ref)          | Residue number of a residue or atom                                                    | `Int`                           |
+| [`sequentialresidues`](@ref) | Determine if the second residue follows the first in sequence                          | `Bool`                          |
+| [`inscode`](@ref)            | Insertion code of a residue or atom                                                    | `Char`                          |
+| [`resid`](@ref)              | Residue ID of an atom or residue (`full=true` includes chain)                          | `String`                        |
+| [`atomnames`](@ref)          | Atom names of the atoms in a residue, sorted by serial                                 | `Array{String,1}`               |
+| [`atoms`](@ref)              | Dictionary of atoms in a residue                                                       | `Dict{String,AbstractAtom}`     |
+| [`isdisorderedres`](@ref)    | `true` if the residue has multiple residue names                                       | `Bool`                          |
+| [`disorderedres`](@ref)      | Access a particular residue name in a `DisorderedResidue`                              | `Residue`                       |
+| [`sscode`](@ref)             | Secondary structure code of a residue or atom, requires DSSP or STRIDE to be run first | `Char`                          |
+| [`chain`](@ref)              | Chain a residue or atom belongs to                                                     | `Chain`                         |
+| [`chainid`](@ref)            | Chain ID of a chain, residue or atom                                                   | `String`                        |
+| [`resids`](@ref)             | Sorted residue IDs in a chain                                                          | `Array{String,1}`               |
+| [`residues`](@ref)           | Dictionary of residues in a chain                                                      | `Dict{String,AbstractResidue}`  |
+| [`model`](@ref)              | Model a chain, residue or atom belongs to                                              | `Model`                         |
+| [`modelnumber`](@ref)        | Model number of a model, chain, residue or atom                                        | `Int`                           |
+| [`chainids`](@ref)           | Sorted chain IDs in a model or structure                                               | `Array{String,1}`               |
+| [`chains`](@ref)             | Dictionary of chains in a model or structure                                           | `Dict{String,Chain}`            |
+| [`structure`](@ref)          | Structure a model, chain, residue or atom belongs to                                   | `ProteinStructure`              |
+| [`structurename`](@ref)      | Name of the structure an element belongs to                                            | `String`                        |
+| [`modelnumbers`](@ref)       | Sorted model numbers in a structure                                                    | `Array{Int,1}`                  |
+| [`models`](@ref)             | Dictionary of models in a structure                                                    | `Dict{Int,Model}`               |
 
 The `strip` keyword argument determines whether surrounding whitespace is stripped for [`atomname`](@ref), [`element`](@ref), [`charge`](@ref), [`resname`](@ref) and [`atomnames`](@ref) (default `true`).
 
@@ -156,25 +156,25 @@ For example:
 
 The selectors available are:
 
-| Function                    | Acts on                             | Selects for                                         |
-| :-------------------------- | :---------------------------------- | :-------------------------------------------------- |
-| [`standardselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from standard (ATOM) records |
-| [`heteroselector`](@ref)    | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from hetero (HETATM) records |
-| [`atomnameselector`](@ref)  | `AbstractAtom`                      | Atoms with atom name in a given list                |
-| [`calphaselector`](@ref)    | `AbstractAtom`                      | Cα atoms                                            |
-| [`cbetaselector`](@ref)     | `AbstractAtom`                      | Cβ atoms, or Cα atoms for glycine residues          |
-| [`backboneselector`](@ref)  | `AbstractAtom`                      | Atoms in the protein backbone (CA, N, C and O)      |
-| [`heavyatomselector`](@ref) | `AbstractAtom`                      | Non-hydrogen atoms                                  |
-| [`hydrogenselector`](@ref)  | `AbstractAtom`                      | Hydrogen atoms                                      |
-| [`resnameselector`](@ref)   | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name in a given list    |
-| [`waterselector`](@ref)     | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name HOH                |
-| [`notwaterselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name not HOH            |
-| [`disorderselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with alternative locations           |
-| [`allselector`](@ref)       | `AbstractAtom` or `AbstractResidue` | All atoms/residues                                  |
-| [`helixselector`](@ref)     | `Atom` or `Residue`                 | Atoms/residues arising from Helix                   |
-| [`sheetselector`](@ref)     | `Atom` or `Residue`                 | Atoms/residues arising from Sheet                   |
-| [`coilselector`](@ref)      | `Atom` or `Residue`                 | Atoms/residues arising from Coil                    |
-| [`sscodeselector`](@ref)    | `Atom` or `Residue`                 | Atoms/residues with ss_code in a given list         |
+| Function                    | Acts on                             | Selects for                                                  |
+| :-------------------------- | :---------------------------------- | :----------------------------------------------------------- |
+| [`standardselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from standard (ATOM) records          |
+| [`heteroselector`](@ref)    | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from hetero (HETATM) records          |
+| [`atomnameselector`](@ref)  | `AbstractAtom`                      | Atoms with atom name in a given list                         |
+| [`calphaselector`](@ref)    | `AbstractAtom`                      | Cα atoms                                                     |
+| [`cbetaselector`](@ref)     | `AbstractAtom`                      | Cβ atoms, or Cα atoms for glycine residues                   |
+| [`backboneselector`](@ref)  | `AbstractAtom`                      | Atoms in the protein backbone (CA, N, C and O)               |
+| [`heavyatomselector`](@ref) | `AbstractAtom`                      | Non-hydrogen atoms                                           |
+| [`hydrogenselector`](@ref)  | `AbstractAtom`                      | Hydrogen atoms                                               |
+| [`resnameselector`](@ref)   | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name in a given list             |
+| [`waterselector`](@ref)     | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name HOH                         |
+| [`notwaterselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name not HOH                     |
+| [`disorderselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with alternative locations                    |
+| [`allselector`](@ref)       | `AbstractAtom` or `AbstractResidue` | All atoms/residues                                           |
+| [`sscodeselector`](@ref)    | `AbstractAtom` or `AbstractResidue` | Atoms/residues with secondary structure code in a given list |
+| [`helixselector`](@ref)     | `AbstractAtom` or `AbstractResidue` | Atoms/residues that are part of an α-helix                   |
+| [`sheetselector`](@ref)     | `AbstractAtom` or `AbstractResidue` | Atoms/residues that are part of a β-sheet                    |
+| [`coilselector`](@ref)      | `AbstractAtom` or `AbstractResidue` | Atoms/residues that are part of a coil                       |
 
 To create a new [`atomnameselector`](@ref), [`resnameselector`](@ref) or [`sscodeselector`](@ref):
 ```julia
@@ -409,38 +409,38 @@ See the [Graphs docs](https://juliagraphs.org/Graphs.jl/dev) for details on how 
 Similar to [`ContactMap`](@ref), contacts are found between any element type passed in.
 So if you wanted the graph of chain contacts in a protein complex you could give a [`Model`](@ref) as the first argument.
 
-## Assigning Secondary Structure
+## Assigning secondary structure
 
-The secondary structure code can be accessed after assinging the secodnary structure using [DSSP](https://github.com/PDB-REDO/dssp) or [STRIDE](https://webclu.bio.wzw.tum.de/stride/).
+The secondary structure code of a residue or atom can be accessed after assigning the secondary structure using [DSSP](https://github.com/PDB-REDO/dssp) or [STRIDE](https://webclu.bio.wzw.tum.de/stride).
 
-To assign the secondary structure when reading the structure
+To assign secondary structure when reading the structure:
 ```julia
 # Assign secondary structure using DSSP
-read("path/to/pdb", PDB, run_dssp=true)
+read("/path/to/pdb/file.pdb", PDB, run_dssp=true)
 
 # Assign secondary structure using STRIDE
-read("path/to/pdb", PDB, run_strude=true)
+read("/path/to/pdb/file.pdb", PDB, run_strude=true)
 ```
-
-[`rundssp(struc)`](@ref), [`runstride(struc)`](@ref), [`rundssp!(struc)`](@ref) and [`runstride!(struc)`](@ref) can also be used to assign secondary structure to [`ProteinStructure`](@ref).
+[`rundssp!`](@ref), [`runstride!`](@ref), [`rundssp`](@ref) and [`runstride`](@ref) can also be used to assign secondary structure to a [`ProteinStructure`](@ref) or [`Model`](@ref):
 ```julia
-struc = rundssp(struc)
-
-struc = runstride(struc)
-
 rundssp!(struc)
-
-rundssp!(struc)
+runstride!(struc)
 ```
-The assigning process may fail if the structure is too large, since we use an intermediate PDB file whose atom serial number cannot exceeds `99999`.
+The assignment process may fail if the structure is too large, since we use an intermediate PDB file where the atom serial cannot exceed 99999 and the chain ID must be a single character.
 
-To get access to the secondary structure code of atom/residue
+To get access to the secondary structure code of a residue or atom as a `Char`:
 ```julia
-sscode(at)
 sscode(res)
+sscode(at)
 ```
+The secondary structure code of a residue can be changed using [`sscode!`](@ref).
 
-The sscode of an atom/residue can be changed using [`sscode!`](@ref).
+[`rundssp`](@ref) and [`runstride`](@ref) can also be run directly on structure files:
+```julia
+rundssp("/path/to/pdb/file.pdb", "out.dssp") # Also works with mmCIF
+runstride("/path/to/pdb/file.pdb", "out.stride")
+```
+See the documentation for [DSSP_jll](https://docs.juliahub.com/General/DSSP_jll/stable/autodocs) and [STRIDE_jll](https://docs.juliahub.com/General/STRIDE_jll/stable/autodocs) for other ways to run these programs.
 
 ## Downloading PDB files
 
@@ -3936,6 +3936,7 @@ Other packages in the Julia ecosystem that deal with structural bioinformatics o
 - [PdbTool.jl](https://github.com/christophfeinauer/PdbTool.jl) - read and work with PDB files.
 - [Bio3DView.jl](https://github.com/jgreener64/Bio3DView.jl) - view molecular structures (see [Visualising structures](@ref)).
 - [BioMakie.jl](https://github.com/BioJulia/BioMakie.jl) - view molecular structures and sequence alignments.
+- [ProteinSecondaryStructures.jl](https://github.com/m3g/ProteinSecondaryStructures.jl) - parses DSSP and STRIDE outputs.
 - [MMTF.jl](https://github.com/BioJulia/MMTF.jl) - read and write MMTF files. BioStructures.jl builds on top of MMTF.jl.
 - [ProteinEnsembles.jl](https://github.com/jgreener64/ProteinEnsembles.jl) - model ensembles of protein structures.
 - [Molly.jl](https://github.com/jgreener64/Molly.jl) - molecular dynamics of biomolecules.

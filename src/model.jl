@@ -146,7 +146,7 @@ mutable struct Residue <: AbstractResidue
     atom_list::Vector{String}
     atoms::Dict{String, AbstractAtom}
     chain::StructuralElement
-    ss_code::String # Secondary structure code
+    ss_code::Char
 end
 
 """
@@ -224,8 +224,8 @@ function Residue(name::AbstractString,
                 ins_code::Char,
                 het_res::Bool,
                 ch::Chain,
-                ss_code::String="")
-    return Residue(name, number, ins_code, het_res, [], Dict(), ch, ss_code)
+                ss_code=ss_code_unassigned)
+    return Residue(name, number, ins_code, het_res, [], Dict(), ch, ss_code_unassigned)
 end
 
 """
@@ -895,7 +895,6 @@ function chainid!(res::AbstractResidue, id::String)
 
     fixlists!(structure(res))
 end
-
 
 """
     resids(ch)
@@ -1671,14 +1670,11 @@ heteroselector(res::AbstractResidue) = ishetero(res)
 """
     atomnameselector(at, atom_names; strip=true)
 
-Determines if an `AbstractAtom` has its atom name in the given `Set` or
-`Vector`.
+Determines if an `AbstractAtom` has its atom name in a list of names.
 `strip` determines whether surrounding whitespace is stripped from the atom
 name before it is checked in the list.
 """
-function atomnameselector(at::AbstractAtom,
-                    atom_names::Union{Set{String}, Vector{String}};
-                    strip::Bool=true)
+function atomnameselector(at::AbstractAtom, atom_names; strip::Bool=true)
     return atomname(at, strip=strip) in atom_names
 end
 
@@ -1736,10 +1732,9 @@ heavyatomselector(at::AbstractAtom) = standardselector(at) && !hydrogenselector(
     resnameselector(at, res_names)
 
 Determines if an `AbstractResidue` or `AbstractAtom` has its residue name
-in the given `Set` or `Vector`.
+in a list of names.
 """
-function resnameselector(el::Union{AbstractResidue, AbstractAtom},
-                    res_names::Union{Set{String}, Vector{String}})
+function resnameselector(el::Union{AbstractResidue, AbstractAtom}, res_names)
     return resname(el, strip=false) in res_names
 end
 

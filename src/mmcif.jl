@@ -271,9 +271,9 @@ function Base.read(input::IO,
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
             read_het_atoms::Bool=true,
-            gzip::Bool=false,
             run_dssp::Bool=false,
-            run_stride::Bool=false,)
+            run_stride::Bool=false,
+            gzip::Bool=false)
     mmcif_dict = MMCIFDict()
     if gzip
         gz = GzipDecompressorStream(input)
@@ -320,14 +320,16 @@ function ProteinStructure(mmcif_dict::MMCIFDict;
         fixlists!(struc)
     end
 
-    # Run DSSP and STRIDE if required
+    if run_dssp && run_stride
+        throw(ArgumentError("run_dssp and run_stride cannot both be true"))
+    end
     if run_dssp
         rundssp!(struc)
     end
-
     if run_stride
         runstride!(struc)
     end
+
     return struc
 end
 
