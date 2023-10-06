@@ -104,7 +104,6 @@ function runstride!(mod::Model)
 
     # Run STRIDE on the temporary PDB file
     stride_output_lines = readlines(pipeline(`$stride_executable $tmp_pdb_path`))
-    @assert length(stride_output_lines) > 1
     rm(tmp_pdb_path)
 
     for line in stride_output_lines

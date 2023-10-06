@@ -412,7 +412,6 @@ So if you wanted the graph of chain contacts in a protein complex you could give
 ## Assigning secondary structure
 
 The secondary structure code of a residue or atom can be accessed after assigning the secondary structure using [DSSP](https://github.com/PDB-REDO/dssp) or [STRIDE](https://webclu.bio.wzw.tum.de/stride).
-
 To assign secondary structure when reading the structure:
 ```julia
 # Assign secondary structure using DSSP
@@ -437,10 +436,10 @@ The secondary structure code of a residue can be changed using [`sscode!`](@ref)
 
 [`rundssp`](@ref) and [`runstride`](@ref) can also be run directly on structure files:
 ```julia
-rundssp("/path/to/pdb/file.pdb", "out.dssp") # Also works with mmCIF
+rundssp("/path/to/pdb/file.pdb", "out.dssp") # Also works with mmCIF files
 runstride("/path/to/pdb/file.pdb", "out.stride")
 ```
-See the documentation for [DSSP_jll](https://docs.juliahub.com/General/DSSP_jll/stable/autodocs) and [STRIDE_jll](https://docs.juliahub.com/General/STRIDE_jll/stable/autodocs) for other ways to run these programs.
+See the documentation for [DSSP_jll](https://docs.juliahub.com/General/DSSP_jll/stable/autodocs) and [STRIDE_jll](https://docs.juliahub.com/General/STRIDE_jll/stable/autodocs), and also [ProteinSecondaryStructures.jl](https://github.com/m3g/ProteinSecondaryStructures.jl), for other ways to run these programs.
 
 ## Downloading PDB files
 
