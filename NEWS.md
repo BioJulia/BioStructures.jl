@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v2.1.0 - Oct 2023
+
+* DSSP and STRIDE can now be run to assign secondary structure to proteins.
+
 ## v2.0.0 - Feb 2023
 
 * The required versions of BioSequences.jl and BioAlignments.jl are updated to v3 of each, with support for earlier versions being dropped. `LongAminoAcidSeq` is hence renamed to `LongAA`, an alias for `LongSequence{AminoAcidAlphabet}`.
