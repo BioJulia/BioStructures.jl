@@ -1,8 +1,5 @@
 using Documenter
 using BioStructures
-using DataFrames
-using Graphs
-using MetaGraphs
 
 makedocs(
     sitename="BioStructures.jl",

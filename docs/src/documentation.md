@@ -296,7 +296,7 @@ Various functions are provided to calculate spatial quantities for proteins:
 | [`superimpose!`](@ref)       | Superimpose one element onto another                                                             |
 | [`rmsd`](@ref)               | RMSD between two elements, with or without superimposition                                       |
 | [`displacements`](@ref)      | `Vector` of displacements between two elements, with or without superimposition                  |
-| [`MetaGraph`](@ref)          | Construct a `MetaGraph` of contacting elements (call `using Graphs, MetaGraphs` first)           |
+| `MetaGraph`                  | Construct a `MetaGraph` of contacting elements (call `using Graphs, MetaGraphs` first)           |
 
 The [`omegaangle`](@ref), [`phiangle`](@ref) and [`psiangle`](@ref) functions can take either a pair of residues or a chain and a position.
 The [`omegaangle`](@ref) and [`phiangle`](@ref) functions measure the angle between the residue at the given index and the one before.
@@ -382,8 +382,8 @@ These transformation functions may be useful beyond the context of protein struc
 For example, `Transformation(c1, c2)` calculates the transformation to map one set of coordinates to another.
 The coordinate sets must be the same size and have the number of dimensions in the first axis and the number of points in the second axis.
 
-The contacting elements in a molecular structure form a graph, and this can be retrieved using [`MetaGraph`](@ref).
-This extends [`MetaGraph`](@ref) from [MetaGraphs.jl](https://github.com/JuliaGraphs/MetaGraphs.jl), allowing you to use all the graph analysis tools in [Graphs.jl](https://github.com/JuliaGraphs/Graphs.jl).
+The contacting elements in a molecular structure form a graph, and this can be retrieved using `MetaGraph`.
+This extends `MetaGraph` from [MetaGraphs.jl](https://github.com/JuliaGraphs/MetaGraphs.jl), allowing you to use all the graph analysis tools in [Graphs.jl](https://github.com/JuliaGraphs/Graphs.jl).
 For example:
 
 ```julia
@@ -511,7 +511,7 @@ INFO: Downloading PDB: 1ALW
 ProteinStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atoms
 ```
 
-If you prefer to work with data frames rather than the data structures in BioStructures, the [`DataFrame`](@ref) constructor from [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) has been extended to construct relevant data frames from lists of atoms or residues:
+If you prefer to work with data frames rather than the data structures in BioStructures, the `DataFrame` constructor from [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) has been extended to construct relevant data frames from lists of atoms or residues:
 
 ```julia
 julia> using DataFrames
