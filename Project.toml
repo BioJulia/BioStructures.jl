@@ -22,6 +22,13 @@ RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 STRIDE_jll = "850473c1-9ef0-5df9-a957-757f4cde8b8b"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
+[weakdeps]
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+MetaGraphs = "626554b9-1ddb-594c-aa3c-2596fe9399a5"
+
+[extensions]
+BioStructuresGraphsExt = ["Graphs", "MetaGraphs"]
+
 [compat]
 BioAlignments = "3"
 BioCore = "2"

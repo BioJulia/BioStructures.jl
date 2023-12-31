@@ -296,7 +296,7 @@ Various functions are provided to calculate spatial quantities for proteins:
 | [`superimpose!`](@ref)       | Superimpose one element onto another                                                             |
 | [`rmsd`](@ref)               | RMSD between two elements, with or without superimposition                                       |
 | [`displacements`](@ref)      | `Vector` of displacements between two elements, with or without superimposition                  |
-| [`MetaGraph`](@ref)          | Construct a `MetaGraph` of contacting elements                                                   |
+| [`MetaGraph`](@ref)          | Construct a `MetaGraph` of contacting elements (call `using Graphs, MetaGraphs` first)           |
 
 The [`omegaangle`](@ref), [`phiangle`](@ref) and [`psiangle`](@ref) functions can take either a pair of residues or a chain and a position.
 The [`omegaangle`](@ref) and [`phiangle`](@ref) functions measure the angle between the residue at the given index and the one before.
@@ -387,10 +387,10 @@ This extends [`MetaGraph`](@ref) from [MetaGraphs.jl](https://github.com/JuliaGr
 For example:
 
 ```julia
+julia> using Graphs, MetaGraphs
+
 julia> mg = MetaGraph(collectatoms(struc["A"], cbetaselector), 8.0)
 {85, 423} undirected Int64 metagraph with Float64 weights defined by :weight (default weight 1.0)
-
-julia> using Graphs, MetaGraphs
 
 julia> nv(mg)
 85

@@ -21,8 +21,6 @@ using CodecZlib
 using DataFrames
 using Downloads
 using Format
-using Graphs
-using MetaGraphs
 import MMTF: parsemmtf, writemmtf # Imported to avoid clash with MMTF name
 using RecipesBase
 using STRIDE_jll
@@ -34,5 +32,9 @@ include("mmcif.jl")
 include("mmtf.jl")
 include("spatial.jl")
 include("secondary.jl")
+
+if !isdefined(Base, :get_extension)
+    include("../ext/BioStructuresGraphsExt.jl")
+end
 
 end # BioStructures
