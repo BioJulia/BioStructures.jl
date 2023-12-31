@@ -6,6 +6,7 @@ Here we give further examples, showing what you can do with the package.
 **A)** Print the centroid coordinate of the sidechain heavy atoms for each residue in a protein:
 
 ```julia
+using BioStructures
 using Statistics
 
 struc = read("1AKE.pdb", PDB)

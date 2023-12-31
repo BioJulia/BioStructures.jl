@@ -514,6 +514,8 @@ ProteinStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atom
 If you prefer to work with data frames rather than the data structures in BioStructures, the [`DataFrame`](@ref) constructor from [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) has been extended to construct relevant data frames from lists of atoms or residues:
 
 ```julia
+julia> using DataFrames
+
 julia> df = DataFrame(collectatoms(struc));
 
 julia> first(df, 3)

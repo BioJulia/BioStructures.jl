@@ -18,7 +18,6 @@ using BioGenerics
 using BioSequences
 using BioSymbols
 using CodecZlib
-using DataFrames
 using Downloads
 using Format
 import MMTF: parsemmtf, writemmtf # Imported to avoid clash with MMTF name
@@ -35,6 +34,7 @@ include("secondary.jl")
 
 if !isdefined(Base, :get_extension)
     include("../ext/BioStructuresGraphsExt.jl")
+    include("../ext/BioStructuresDataFramesExt.jl")
 end
 
 end # BioStructures
