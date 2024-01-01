@@ -22,16 +22,16 @@ export
 # PDB file formats
 
 "Protein Data Bank (PDB) file format."
-struct PDB <: BioCore.IO.FileFormat end
+struct PDB end
 
 "Protein Data Bank (PDB) XML file format."
-struct PDBXML <: BioCore.IO.FileFormat end
+struct PDBXML end
 
 "Protein Data Bank (PDB) mmCIF file format."
-struct MMCIF <: BioCore.IO.FileFormat end
+struct MMCIF end
 
 "Protein Data Bank (PDB) MMTF file format."
-struct MMTF <: BioCore.IO.FileFormat end
+struct MMTF end
 
 "Mapping of Protein Data Bank (PDB) formats to their file extensions."
 const pdbextension = Dict{Type, String}(PDB=> "pdb", PDBXML=> "xml",

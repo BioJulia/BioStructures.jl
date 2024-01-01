@@ -13,7 +13,6 @@ using LinearAlgebra
 using Statistics
 
 using BioAlignments
-import BioCore # Imported to avoid clash with BioGenerics distance
 using BioGenerics
 using BioSequences
 using BioSymbols
@@ -33,8 +32,8 @@ include("spatial.jl")
 include("secondary.jl")
 
 if !isdefined(Base, :get_extension)
-    include("../ext/BioStructuresGraphsExt.jl")
     include("../ext/BioStructuresDataFramesExt.jl")
+    include("../ext/BioStructuresGraphsExt.jl")
 end
 
 end # BioStructures
