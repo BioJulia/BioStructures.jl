@@ -189,6 +189,7 @@ xselector(at) = x(at) < 0
 collectatoms(struc, xselector)
 ```
 
+Selectors can be inverted with `!`, e.g. `collectatoms(struc, !xselector)`.
 Alternatively, you can use an anonymous function:
 
 ```julia

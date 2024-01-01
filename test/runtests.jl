@@ -1195,6 +1195,7 @@ end
     @test countatoms(Atom[struc['A'][51]["CA"], struc['A'][50]["CA"]]) == 2
 
     @test countatoms(struc['A'], standardselector) == 1656
+    @test countatoms(struc['A'], !standardselector) == 298
     @test countatoms(struc['A'], heteroselector) == 298
     @test countatoms(struc['A'], standardselector, disorderselector) == 5
     @test countatoms(struc, expand_disordered=true) == 3816
