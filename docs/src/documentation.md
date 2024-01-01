@@ -3935,7 +3935,9 @@ See the [Bio3DView.jl tutorial](http://nbviewer.jupyter.org/github/jgreener64/Bi
 
 Other packages in the Julia ecosystem that deal with structural bioinformatics or related fields include:
 - [MIToS.jl](https://github.com/diegozea/MIToS.jl) - protein sequence and structure analysis.
+- [PDBTools.jl](https://github.com/m3g/PDBTools.jl) - read and write PDB files.
 - [PdbTool.jl](https://github.com/christophfeinauer/PdbTool.jl) - read and work with PDB files.
+- [Chemfiles.jl](https://github.com/chemfiles/Chemfiles.jl) - read and write various chemistry trajectory files.
 - [Bio3DView.jl](https://github.com/jgreener64/Bio3DView.jl) - view molecular structures (see [Visualising structures](@ref)).
 - [BioMakie.jl](https://github.com/BioJulia/BioMakie.jl) - view molecular structures and sequence alignments.
 - [ProteinSecondaryStructures.jl](https://github.com/m3g/ProteinSecondaryStructures.jl) - parses DSSP and STRIDE outputs.
