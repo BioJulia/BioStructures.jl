@@ -1,6 +1,11 @@
 BioStructures.jl release notes
 ==============================
 
+## v3.0.0 - Jan 2024
+
+* On Julia 1.9 and later the `DataFrame` and `MetaGraph` constructors are moved to package extensions in order to reduce the number of dependencies. Calling `using DataFrames` and `using Graphs, MetaGraphs` respectively is now required to access these functions.
+* The file formats `PDB`, `PDBXML`, `MMCIF` and `MMTF` are no longer subtypes of `BioCore.IO.FileFormat`, allowing BioCore.jl to be removed as a dependency.
+
 ## v2.1.0 - Oct 2023
 
 * DSSP and STRIDE can now be run to assign secondary structure to proteins.
