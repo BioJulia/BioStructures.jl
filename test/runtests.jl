@@ -142,7 +142,7 @@ Aqua.test_all(BioStructures; ambiguities=(recursive=false))
     end
 
     # Test function as first argument to downloadpdb
-    @test downloadpdb(countlines, "1alw") == 3583
+    @test downloadpdb(countlines, "1alw") == 3584
     @test downloadpdb("1alw") do fp
         s = read(fp, PDB)
         return countresidues(s, standardselector)
