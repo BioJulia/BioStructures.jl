@@ -1,7 +1,7 @@
 name = "BioStructures"
 uuid = "de9282ab-8554-53be-b2d6-f6c222edabfc"
 authors = ["Joe G Greener <jgreener@hotmail.co.uk>"]
-version = "3.0.0"
+version = "3.1.0"
 
 [deps]
 BioAlignments = "00701ae9-d1dc-5365-b64a-a3a3ebf5695e"

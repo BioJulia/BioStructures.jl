@@ -1,6 +1,10 @@
 BioStructures.jl release notes
 ==============================
 
+## v3.1.0 - May 2024
+
+* PrecompileTools.jl is used to reduce the time to first execution of PDB file reading.
+
 ## v3.0.0 - Jan 2024
 
 * On Julia 1.9 and later the `DataFrame` and `MetaGraph` constructors are moved to package extensions in order to reduce the number of dependencies. Calling `using DataFrames` and `using Graphs, MetaGraphs` respectively is now required to access these functions.
