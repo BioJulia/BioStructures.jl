@@ -20,6 +20,7 @@ using CodecZlib
 using Downloads
 using Format
 import MMTF: parsemmtf, writemmtf # Imported to avoid clash with MMTF name
+using PrecompileTools
 using RecipesBase
 using STRIDE_jll
 using DSSP_jll
@@ -36,8 +37,6 @@ if !isdefined(Base, :get_extension)
     include("../ext/BioStructuresGraphsExt.jl")
 end
 
-using PrecompileTools
-
 @compile_workload begin
     let
         mktemp() do path, io
@@ -52,7 +51,8 @@ using PrecompileTools
                     ATOM      8  CE  MET A   1      -3.296  14.391  24.798  1.00 54.68           C
                     END
                     """)
-            read(path, PDB)
+            struc = read(path, PDB)
+            show(devnull, struc)
         end
     end
 end
