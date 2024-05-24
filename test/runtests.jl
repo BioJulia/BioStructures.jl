@@ -860,20 +860,18 @@ end
     @test parsecharge(line) == "1+"
 
     line_short = "ATOM    591  C"
+    @test_throws PDBParseError("line too short", 37, line_short) AtomRecord(line_short, 37)
     @test_throws PDBParseError    parseserial("ATOM         C   GLY A  80      29.876  54.131  35.806  1.00 40.97           C1+")
-    @test_throws PDBParseError  parseatomname(line_short)
-    @test_throws PDBParseError    parsealtloc(line_short)
-    @test_throws PDBParseError   parseresname(line_short)
-    @test_throws PDBParseError   parsechainid(line_short)
     @test_throws PDBParseError parseresnumber("ATOM    591  C   GLY A          29.876  54.131  35.806  1.00 40.97           C1+")
-    @test_throws PDBParseError   parseinscode(line_short)
     @test_throws PDBParseError    parsecoordx("ATOM    591  C   GLY A  80      xxxxxx  54.131  35.806  1.00 40.97           C1+")
     @test_throws PDBParseError    parsecoordy("ATOM    591  C   GLY A  80      29.876  xxxxxx  35.806  1.00 40.97           C1+")
     @test_throws PDBParseError    parsecoordz("ATOM    591  C   GLY A  80      29.876  54.131  xxxxxx  1.00 40.97           C1+")
-    @test parseoccupancy(line_short) == 1.0
-    @test parsetempfac(line_short) == 0.0
-    @test parseelement(line_short) == "  "
-    @test parsecharge(line_short) == "  "
+    line_medium = "ATOM    591  C   GLY A  80      29.876  54.131  35.806"
+    rec = AtomRecord(line_medium, 55)
+    @test rec.occupancy == 1.0
+    @test rec.temp_factor == 0.0
+    @test rec.element == "  "
+    @test rec.charge == "  "
 
     # Test AtomRecord constructor
     line_a = "ATOM    669  CA  ILE A  90      31.743  33.110  31.221  1.00 25.76           C  "
