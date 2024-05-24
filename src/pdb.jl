@@ -531,136 +531,106 @@ function Base.read(filepath::AbstractString,
 end
 
 # Constructor from PDB ATOM/HETATM line
-AtomRecord(pdb_line::String, line_n::Integer=1) = AtomRecord(
-    pdb_line[1] == 'H', # This assumes the line has already been checked as an ATOM/HETATM record
-    parseserial(pdb_line, line_n),
-    parseatomname(pdb_line, line_n),
-    parsealtloc(pdb_line, line_n),
-    parseresname(pdb_line, line_n),
-    parsechainid(pdb_line, line_n),
-    parseresnumber(pdb_line, line_n),
-    parseinscode(pdb_line, line_n),
-    [
-        parsecoordx(pdb_line, line_n),
-        parsecoordy(pdb_line, line_n),
-        parsecoordz(pdb_line, line_n)
-    ],
-    parseoccupancy(pdb_line),
-    parsetempfac(pdb_line),
-    parseelement(pdb_line),
-    parsecharge(pdb_line)
-)
+function AtomRecord(pdb_line::String, line_n::Integer=1)
+    n = length(pdb_line)
+    n >= 54 || throw(PDBParseError("line too short", line_n, pdb_line))
+    AtomRecord(
+        pdb_line[1] == 'H', # This assumes the line has already been checked as an ATOM/HETATM record
+        parseserial(pdb_line, line_n),
+        parseatomname(pdb_line, line_n),
+        parsealtloc(pdb_line, line_n),
+        parseresname(pdb_line, line_n),
+        parsechainid(pdb_line, line_n),
+        parseresnumber(pdb_line, line_n),
+        parseinscode(pdb_line, line_n),
+        [
+            parsecoordx(pdb_line, line_n),
+            parsecoordy(pdb_line, line_n),
+            parsecoordz(pdb_line, line_n)
+        ],
+        n >= 60 ? parseoccupancy(pdb_line) : 1.0,
+        n >= 66 ? parsetempfac(pdb_line) : 0.0,
+        n >= 78 ? parseelement(pdb_line) : "  ",
+        n >= 80 ? parsecharge(pdb_line) : "  ",
+    )
+end
 
 function parseserial(line::String, line_n::Integer=1)
-    try
-        return parse(Int, line[7:11])
-    catch
+    ret = tryparse(Int, line[7:11])
+    if ret === nothing
         throw(PDBParseError("could not read atom serial number", line_n, line))
     end
+    return ret
 end
 
 function parseatomname(line::String, line_n::Integer=1)
-    try
-        return line[13:16]
-    catch
-        throw(PDBParseError("could not read atom name", line_n, line))
-    end
+    return line[13:16]
 end
 
 function parsealtloc(line::String, line_n::Integer=1)
-    try
-        return line[17]
-    catch
-        throw(PDBParseError("could not read alt loc identifier", line_n, line))
-    end
+    return line[17]
 end
 
 function parseresname(line::String, line_n::Integer=1)
-    try
-        return line[18:20]
-    catch
-        throw(PDBParseError("could not read residue name", line_n, line))
-    end
+    return line[18:20]
 end
 
 function parsechainid(line::String, line_n::Integer=1)
-    try
-        return string(line[22])
-    catch
-        throw(PDBParseError("could not read chain ID", line_n, line))
-    end
+    return string(line[22])
 end
 
 function parseresnumber(line::String, line_n::Integer=1)
-    try
-        return parse(Int, line[23:26])
-    catch
+    ret = tryparse(Int, line[23:26])
+    if ret === nothing
         throw(PDBParseError("could not read residue number", line_n, line))
     end
+    return ret
 end
 
 function parseinscode(line::String, line_n::Integer=1)
-    try
-        return line[27]
-    catch
-        throw(PDBParseError("could not read insertion code", line_n, line))
-    end
+    return line[27]
 end
 
 function parsecoordx(line::String, line_n::Integer=1)
-    try
-        return parse(Float64, line[31:38])
-    catch
+    ret = tryparse(Float64, line[31:38])
+    if ret === nothing
         throw(PDBParseError("could not read x coordinate", line_n, line))
     end
+    return ret
 end
 
 function parsecoordy(line::String, line_n::Integer=1)
-    try
-        return parse(Float64, line[39:46])
-    catch
+    ret = tryparse(Float64, line[39:46])
+    if ret === nothing
         throw(PDBParseError("could not read y coordinate", line_n, line))
     end
+    return ret
 end
 
 function parsecoordz(line::String, line_n::Integer=1)
-    try
-        return parse(Float64, line[47:54])
-    catch
+    ret = tryparse(Float64, line[47:54])
+    if ret === nothing
         throw(PDBParseError("could not read z coordinate", line_n, line))
     end
+    return ret
 end
 
 function parseoccupancy(line::String)
-    try
-        return parse(Float64, line[55:60])
-    catch
-        return 1.0
-    end
+    ret = tryparse(Float64, line[55:60])
+    return ret === nothing ? 1.0 : ret
 end
 
 function parsetempfac(line::String)
-    try
-        return parse(Float64, line[61:66])
-    catch
-        return 0.0
-    end
+    ret = tryparse(Float64, line[61:66])
+    return ret === nothing ? 0.0 : ret
 end
 
 function parseelement(line::String)
-    try
-        return line[77:78]
-    catch
-        return "  "
-    end
+    return line[77:78]
 end
 
 function parsecharge(line::String)
-    try
-        return line[79:80]
-    catch
-        return "  "
-    end
+    return line[79:80]
 end
 
 # Form a string of a certain length from a value by adding spaces to the left
