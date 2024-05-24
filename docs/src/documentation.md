@@ -419,7 +419,7 @@ To assign secondary structure when reading the structure:
 read("/path/to/pdb/file.pdb", PDB, run_dssp=true)
 
 # Assign secondary structure using STRIDE
-read("/path/to/pdb/file.pdb", PDB, run_strude=true)
+read("/path/to/pdb/file.pdb", PDB, run_stride=true)
 ```
 [`rundssp!`](@ref), [`runstride!`](@ref), [`rundssp`](@ref) and [`runstride`](@ref) can also be used to assign secondary structure to a [`ProteinStructure`](@ref) or [`Model`](@ref):
 ```julia
