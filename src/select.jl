@@ -1,8 +1,10 @@
+using TestItems # suggested to be used all around
 #
 # Function to perform the most important selections that are used in solute-solvent
 # analysis
 #
-export select, Select, @sel_str
+export @sel_str
+const TESTPDB = joinpath(@__DIR__, "..", "test", "structure.pdb")
 
 #
 # Dictionaries of residue, atom, and element types, as originally written
@@ -70,8 +72,8 @@ const backbone_atoms = ["N", "CA", "C", "O"]
 isbackbone(atom::AbstractAtom; backbone_atoms=backbone_atoms) = isprotein(atom) && atomname(name) in backbone_atoms
 const not_side_chain_atoms = ["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3"]
 issidechain(atom::AbstractAtom; not_side_chain_atoms=not_side_chain_atoms) = isprotein(atom) && !(atomname(atom) in not_side_chain_atoms)
-const water_residues = ["HOH", "OH2", "TIP3", "TIP3P", "TIP4P", "TIP5P", "TIP7P", "SPC", "SPCE"]
-iswater(atom::AbstractAtom) = resname(atom) in water_residues
+const water_residues = ["HOH", "OH2", "TIP", "TIP3", "TIP3P", "TIP4P", "TIP5P", "TIP7P", "SPC", "SPCE"]
+iswater(atom::AbstractAtom) = strip(resname(atom)) in water_residues
 
 """
     Select
@@ -243,6 +245,7 @@ end
 # Keywords
 #
 keywords = [
+    Keyword(Int, "index", serial, operators),
     Keyword(Int, "serial", serial, operators),
     Keyword(Int, "resnumber", resnumber, operators),
     Keyword(Int, "resnum", resnumber, operators),
@@ -385,81 +388,35 @@ end
 parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
 
 
-#@testitem "Selections" begin
-#
-#    atoms = readPDB(PDBTools.TESTPDB)
-#
-#    @test length(select(atoms, "name CA")) == 104
-#    sel = select(atoms, "index = 13")
-#    @test length(sel) == 1
-#    @test sel[1].index == 13
-#    @test sel[1].index_pdb == 13
-#
-#    @test length(select(atoms, "index > 1 and index < 13")) == 11
-#
-#    @test length(select(atoms, "protein")) == 1463
-#
-#    @test length(select(atoms, "water")) == 58014
-#
-#    @test length(select(atoms, "resname GLY")) == 84
-#
-#    @test length(select(atoms, "segname PROT")) == 1463
-#
-#    @test length(select(atoms, "residue = 2")) == 11
-#
-#    @test length(select(atoms, "neutral")) == 1233
-#
-#    @test length(select(atoms, "charged")) == 230
-#
-#    @test length(select(atoms, "sidechain")) == 854
-#
-#    @test length(select(atoms, "acidic")) == 162
-#
-#    @test length(select(atoms, "basic")) == 68
-#
-#    @test length(select(atoms, "hydrophobic")) == 327
-#
-#    @test length(select(atoms, "hydrophobic")) == 327
-#
-#    @test length(select(atoms, "aliphatic")) == 379
-#
-#    @test length(select(atoms, "aromatic")) == 344
-#
-#    @test length(select(atoms, "polar")) == 880
-#
-#    @test length(select(atoms, "nonpolar")) == 583
-#
-#    @test maxmin(atoms, "chain A").xlength ≈ [83.083, 83.028, 82.7]
-#
-#    # Test editing a field
-#    atoms[1].index = 0
-#    @test atoms[1].index == 0
-#
-#    # Test residue iterator
-#    someresidues = select(atoms, "residue < 15")
-#    let
-#        n = 0
-#        m = 0.0
-#        for res in eachresidue(someresidues)
-#            if name(res) == "SER"
-#                n += 1
-#                for atom in res
-#                    m += mass(atom)
-#                end
-#            end
-#        end
-#        @test n == 4
-#        @test m ≈ 348.31340000000006
-#    end
-#
-#    # Residue properties (discontinous set)
-#    lessresidues = select(someresidues, "residue < 3 or residue > 12")
-#    @test residue.(eachresidue(lessresidues)) == [1, 2, 13, 14]
-#    @test resnum.(eachresidue(lessresidues)) == [1, 2, 13, 14]
-#    @test name.(eachresidue(lessresidues)) == ["ALA", "CYS", "SER", "SER"]
-#    @test resname.(eachresidue(lessresidues)) == ["ALA", "CYS", "SER", "SER"]
-#    @test chain.(eachresidue(lessresidues)) == ["A", "A", "A", "A"]
-#    @test model.(eachresidue(lessresidues)) == [1, 1, 1, 1]
-#
-#end # testitem
+@testitem "Selections" begin
+
+    using BioStructures
+    atoms = read(BioStructures.TESTPDB, PDB)
+
+    @test length(filter(sel"name CA", atoms)) == 104
+    sel = filter(sel"index = 13", atoms)
+    @test length(sel) == 1
+    @test serial(sel[1]) == 13
+
+    @test length(filter(sel"index > 1 and index < 13", atoms)) == 11
+    @test length(filter(sel"protein", atoms)) == 1463
+    @test length(filter(sel"water", atoms)) == 58014
+    @test length(filter(sel"resname GLY", atoms)) == 84
+    #@test length(filter(sel"segname PROT", atoms)) == 1463
+    # residue should be the incremental residue number
+    #@test length(filter(sel"residue = 2", atoms)) == 11
+    @test length(filter(sel"protein and resnum = 2", atoms)) == 11
+    @test length(filter(sel"neutral", atoms)) == 1233
+    @test length(filter(sel"charged", atoms)) == 230
+    @test length(filter(sel"sidechain", atoms)) == 854
+    @test length(filter(sel"acidic", atoms)) == 162
+    @test length(filter(sel"basic", atoms)) == 68
+    @test length(filter(sel"hydrophobic", atoms)) == 327
+    @test length(filter(sel"hydrophobic", atoms)) == 327
+    @test length(filter(sel"aliphatic", atoms)) == 379
+    @test length(filter(sel"aromatic", atoms)) == 344
+    @test length(filter(sel"polar", atoms)) == 880
+    @test length(filter(sel"nonpolar", atoms)) == 583
+
+end # testitem
 

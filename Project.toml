@@ -21,6 +21,7 @@ PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 STRIDE_jll = "850473c1-9ef0-5df9-a957-757f4cde8b8b"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 
 [weakdeps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -49,4 +50,5 @@ PrecompileTools = "1"
 RecipesBase = "1"
 STRIDE_jll = "1"
 Statistics = "1.6"
+TestItems = "1.1"
 julia = "1.6"
