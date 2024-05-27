@@ -3295,3 +3295,6 @@ rm(temp_filename, force=true)
 rm(temp_dir, recursive=true, force=true)
 
 end # TestBioStructures
+
+using TestItemRunner
+@run_package_tests
