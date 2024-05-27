@@ -69,7 +69,7 @@ ishydrophobic(atom::AbstractAtom) = isprotein(atom) && protein_residues[resname(
 ispolar(atom::AbstractAtom) = isprotein(atom) && protein_residues[resname(atom)].polar
 isnonpolar(atom::AbstractAtom) = isprotein(atom) && !ispolar(atom)
 const backbone_atoms = ["N", "CA", "C", "O"]
-isbackbone(atom::AbstractAtom; backbone_atoms=backbone_atoms) = isprotein(atom) && atomname(name) in backbone_atoms
+isbackbone(atom::AbstractAtom; backbone_atoms=backbone_atoms) = isprotein(atom) && atomname(atom) in backbone_atoms
 const not_side_chain_atoms = ["N", "CA", "C", "O", "HN", "H", "HA", "HT1", "HT2", "HT3"]
 issidechain(atom::AbstractAtom; not_side_chain_atoms=not_side_chain_atoms) = isprotein(atom) && !(atomname(atom) in not_side_chain_atoms)
 const water_residues = ["HOH", "OH2", "TIP", "TIP3", "TIP3P", "TIP4P", "TIP5P", "TIP7P", "SPC", "SPCE"]
