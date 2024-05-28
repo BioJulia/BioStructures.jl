@@ -1,4 +1,3 @@
-using TestItems # suggested to be used all around
 #
 # Function to perform the most important selections that are used in solute-solvent
 # analysis
@@ -96,10 +95,6 @@ function collectatoms(struc::StructuralElementOrList, sel::Select)
     return filter!(sel, atoms)
 end
 
-
-# Function that returns true for all atoms: the default selection
-all(atoms::AbstractVector{<:AbstractAtom}) = true
-
 # Comparison operators
 const operators = (
     "=" => (x, y) -> isequal(x, y),
@@ -155,9 +150,7 @@ function parse_to_type(key::Keyword, val)
         val = parse(key.ValueType, val)
         return val
     catch
-        parse_error(
-            "Could not parse $val for keyword $(key.name), expected $(key.ValueType)",
-        )
+        throw(ArgumentError("Could not parse $val for keyword $(key.name), expected $(key.ValueType)"))
     end
 end
 
@@ -197,7 +190,7 @@ keywords = [
     MacroKeyword("heavyatom", heavyatomselector),
     MacroKeyword("disordered", isdisorderedatom),
     MacroKeyword("sidechain", issidechain),
-    MacroKeyword("all", all),
+    MacroKeyword("all", el -> true),
 ]
 
 #
@@ -251,41 +244,5 @@ function apply_query(q, a)
     end
 end
 
-@testitem "Selections" begin
 
-    using BioStructures
-    struc = read(BioStructures.TESTPDB, PDB)
-
-    @test length(collectatoms(struc, sel"name CA")) == 104
-    sel = collectatoms(struc, sel"index = 13")
-    @test length(sel) == 1
-    @test serial(sel[1]) == 13
-
-    @test length(collectatoms(struc, sel"index > 1 and index < 13")) == 11
-    @test length(collectatoms(struc, sel"protein")) == 1463
-    @test length(collectatoms(struc, sel"water")) == 135
-    @test length(collectatoms(struc, sel"resname GLY")) == 84
-    #@test length(filter(sel"segname PROT", struc)) == 1463
-    # residue should be the incremental residue number
-    #@test length(filter(sel"residue = 2", struc)) == 11
-    @test length(collectatoms(struc, sel"protein and resnum = 2")) == 11
-    @test length(collectatoms(struc, sel"neutral")) == 1233
-    @test length(collectatoms(struc, sel"charged")) == 230
-    @test length(collectatoms(struc, sel"sidechain")) == 854
-    @test length(collectatoms(struc, sel"acidic")) == 162
-    @test length(collectatoms(struc, sel"basic")) == 68
-    @test length(collectatoms(struc, sel"hydrophobic")) == 327
-    @test length(collectatoms(struc, sel"not hydrophobic")) == 1286
-    @test length(collectatoms(struc, sel"aliphatic")) == 379
-    @test length(collectatoms(struc, sel"aromatic")) == 344
-    @test length(collectatoms(struc, sel"polar")) == 880
-    @test length(collectatoms(struc, sel"nonpolar")) == 583
-    @test length(collectatoms(struc, sel"backbone")) == 415
-    @test length(collectatoms(struc, sel"element H")) == 538
-    @test length(collectatoms(struc, sel"name CA or element S")) == 108
-    @test length(collectatoms(struc, sel"disordered")) == 4
-
-    @test_throws ArgumentError collectatoms(struc, sel"abc")
-
-end # testitem
 
