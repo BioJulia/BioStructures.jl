@@ -282,6 +282,8 @@ end
     @test length(collectatoms(struc, sel"nonpolar")) == 583
     @test length(collectatoms(struc, sel"backbone")) == 415
     @test length(collectatoms(struc, sel"element H")) == 538
+    @test length(collectatoms(struc, sel"name CA or element S")) == 108
+    @test length(collectatoms(struc, sel"disordered")) == 4
 
     @test_throws ArgumentError collectatoms(struc, sel"abc")
 
