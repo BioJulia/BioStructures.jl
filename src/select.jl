@@ -164,69 +164,25 @@ end
 
 function (key::Keyword)(s::AbstractVector{<:AbstractString})
     # if 1.6 compatibility is not needed, this can be replaced by
-    # (; name, getter, operators) = key
-    name, getter, operators = key.name, key.getter, key.operators
+    # (; getter, operators) = key
+    getter, operators = key.getter, key.operators
     for op in operators
-        if (i = has_key(op.first, s)) > 0
+        if (i = findfirst(==(op.first), s)) !== nothing
             return el -> op.second(getter(el), parse_to_type(key, s[i+1]))
         end
     end
     # If no operator was found, assume that `=` was intended
-    i = has_key(name, s)
-    return el -> isequal(getter(el), parse_to_type(key, s[i+1]))
-end
-
-#=
-    FunctionalKeyword{T}
-
-This is a structure that will store a keyword that depends on an external function
-requiring an operator and an argument. 
-
-## Example:
-
-```
-element_keyword = FunctionalKeyword(String,      
-                                    "element",
-                                    element,
-                                    ("=",isequal))
-
-```
-will define a keyword "element" to be used as `element C`, which will return
-`true` if there is an `element` function such that `element(atom) == C`.
-
-=#
-struct FunctionalKeyword{FunctionType}
-    ValueType::Type
-    name::String
-    by::FunctionType
-    operators::Tuple
-end
-
-function (key::FunctionalKeyword)(s::AbstractVector{<:AbstractString})
-    # if 1.6 compatibility is not needed, this can be replaced by
-    # (; name, by, operators) = key
-    name, by, operators = key.name, key.by, key.operators
-    for op in operators
-        if (i = has_key(op.first, s)) > 0
-            return el -> op.second(by(el), parse_to_type(key, s[i+1]))
-        end
-    end
-    # If no operator was found, assume that `=` was intended
-    i = has_key(name, s)
-    return el -> isequal(by(el), parse_to_type(key, s[i+1]))
+    return el -> isequal(getter(el), parse_to_type(key, s[1]))
 end
 
 #
 # Macro keywords (functions without parameters)
 #
-struct MacroKeyword{FunctionType}
+struct MacroKeyword{F<:Function}
     name::String
-    by::FunctionType
+    getter::F
 end
-
-function (key::MacroKeyword)(s::AbstractVector{<:AbstractString})
-    return key.by
-end
+(key::MacroKeyword)(::AbstractVector{<:AbstractString}) = key.getter
 
 #=
     parse_to_type(key::Keyword, val::String)
@@ -234,7 +190,7 @@ end
 Tries to parse `val` into the type of value expected by `key.ValueType`. 
 
 =#
-function parse_to_type(key::Union{Keyword,FunctionalKeyword}, val)
+function parse_to_type(key::Keyword, val)
     if key.ValueType == String
         return val
     end
@@ -268,6 +224,7 @@ keywords = [
     Keyword(String, "resname", resname, operators),
     Keyword(String, "chain", chainid, operators),
     Keyword(String, "chainid", chainid, operators),
+    Keyword(String, "element", element, operators),
 ]
 
 macro_keywords = [
@@ -289,39 +246,11 @@ macro_keywords = [
     MacroKeyword("all", all),
 ]
 
-functional_keywords = [FunctionalKeyword(String, "element", element, operators)]
-
 #
 # parse_query and apply_query are a very gentle contribution given by 
 # CameronBieganek in https://discourse.julialang.org/t/parsing-selection-syntax/43632/9
 # while explaining to me how to creat a syntex interpreter
 #
-#=
-    has_key(key::String, s::AbstractVector{<:AbstractString})
-
-Returns the first index of the vector `s` in which where `key` is found, or 0. 
-
-## Example:
-
-```julia-repl
-
-julia> PDBTools.has_key("or",["name","CA","or","index","1"])
-3
-
-julia> PDBTools.has_key("and",["name","CA","or","index","1"])
-0
-
-```
-
-=#
-function has_key(key::String, s::AbstractVector{<:AbstractString})
-    i = findfirst(isequal(key), s)
-    if isnothing(i)
-        0
-    else
-        i
-    end
-end
 
 #=
     parse_query(selection:String)
@@ -337,32 +266,32 @@ parse_query(selection::String) = parse_query_vector(split(selection))
 
 =#
 function parse_query_vector(s)
-    if (i = has_key("or", s)) > 0
+    if (i = findfirst(==("or"), s)) !== nothing
         deleteat!(s, i)
         (|, parse_query_vector.((s[1:i-1], s[i:end]))...)
-    elseif (i = has_key("and", s)) > 0
+    elseif (i = findfirst(==("and"), s)) !== nothing
         deleteat!(s, i)
         (&, parse_query_vector.((s[1:i-1], s[i:end]))...)
-    elseif (i = has_key("not", s)) > 0
+    elseif (i = findfirst(==("not"), s)) !== nothing
         deleteat!(s, i)
         (!, parse_query_vector(s[i:end]))
 
         # keywords 
     else
         for key in keywords
-            if (i = has_key(key.name, s)) > 0
+            if (i = findfirst(==(key.name), s)) !== nothing
                 deleteat!(s, i)
                 return key(s)
             end
         end
         for key in macro_keywords
-            if (i = has_key(key.name, s)) > 0
+            if (i = findfirst(==(key.name), s)) !== nothing
                 deleteat!(s, i)
                 return key(s)
             end
         end
         for key in functional_keywords
-            if (i = has_key(key.name, s)) > 0
+            if (i = findfirst(==(key.name), s)) !== nothing
                 deleteat!(s, i)
                 return key(s)
             end
