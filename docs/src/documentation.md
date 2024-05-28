@@ -144,7 +144,7 @@ This can be changed by setting `expand_disordered` to `true` in [`collectatoms`]
 
 Selectors are functions passed as additional arguments to these functions.
 Only elements that return `true` when passed to all the selector are retained.
-See also the selection syntax [described below](@ref selection-syntax).
+See also the selection syntax [described below](@ref Selection-syntax).
 For example:
 
 | Command                                                 | Action                                                            | Return type                |
