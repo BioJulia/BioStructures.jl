@@ -225,9 +225,6 @@ keywords = [
     Keyword(String, "chain", chainid, operators),
     Keyword(String, "chainid", chainid, operators),
     Keyword(String, "element", element, operators),
-]
-
-macro_keywords = [
     MacroKeyword("water", iswater),
     MacroKeyword("protein", isprotein),
     MacroKeyword("polar", ispolar),
@@ -279,12 +276,6 @@ function parse_query_vector(s)
         # keywords 
     else
         for key in keywords
-            if (i = findfirst(==(key.name), s)) !== nothing
-                deleteat!(s, i)
-                return key(s)
-            end
-        end
-        for key in macro_keywords
             if (i = findfirst(==(key.name), s)) !== nothing
                 deleteat!(s, i)
                 return key(s)
