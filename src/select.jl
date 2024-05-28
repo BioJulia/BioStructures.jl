@@ -86,43 +86,16 @@ struct Select <: Function
     sel::String
 end
 (s::Select)(at) = apply_query(parse_query(s.sel), at)
-
 macro sel_str(str)
     Select(str)
 end
 
-function atom_filter(by::F, struc::ProteinStructure) where {F<:Function}
-    sel = AbstractAtom[]
-    for mod in struc
-        for ch in mod
-            for res in ch
-                for at in res
-                    if by(at)
-                        push!(sel, at)
-                    end
-                end
-            end
-        end
-    end
-    return sel
+# collect atoms function
+function collectatoms(struc::StructuralElementOrList, sel::Select) 
+    atoms = collectatoms(struc)
+    return filter!(sel, atoms)
 end
 
-function atom_filter(by::F, atoms::AbstractVector{<:AbstractAtom}) where {F<:Function}
-    sel = AbstractAtom[]
-    for at in atoms
-        if by(at)
-            push!(sel, at)
-        end
-    end
-    return sel
-end
-
-# Overload Base functions to forward the selection syntax (remove these?)
-Base.filter(by::Select, struc::ProteinStructure) = atom_filter(by, struc)
-Base.findall(by::Select, struc::ProteinStructure) = serial.(atom_filter(by, struc))
-
-# collect atoms function 
-collectatoms(atoms::AbstractVector{<:AbstractAtom}, sel::Select) = atom_filter(sel, atoms)
 
 # Function that returns true for all atoms: the default selection
 all(atoms::AbstractVector{<:AbstractAtom}) = true
@@ -298,34 +271,32 @@ parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
     using BioStructures
     struc = read(BioStructures.TESTPDB, PDB)
 
-    @test length(filter(sel"name CA", struc)) == 104
-    sel = filter(sel"index = 13", struc)
+    @test length(collectatoms(struc, sel"name CA")) == 104
+    sel = collectatoms(struc, sel"index = 13")
     @test length(sel) == 1
     @test serial(sel[1]) == 13
 
-    @test length(filter(sel"index > 1 and index < 13", struc)) == 11
-    @test length(filter(sel"protein", struc)) == 1463
-    @test length(filter(sel"water", struc)) == 135
-    @test length(filter(sel"resname GLY", struc)) == 84
+    @test length(collectatoms(struc, sel"index > 1 and index < 13")) == 11
+    @test length(collectatoms(struc, sel"protein")) == 1463
+    @test length(collectatoms(struc, sel"water")) == 135
+    @test length(collectatoms(struc, sel"resname GLY")) == 84
     #@test length(filter(sel"segname PROT", struc)) == 1463
     # residue should be the incremental residue number
     #@test length(filter(sel"residue = 2", struc)) == 11
-    @test length(filter(sel"protein and resnum = 2", struc)) == 11
-    @test length(filter(sel"neutral", struc)) == 1233
-    @test length(filter(sel"charged", struc)) == 230
-    @test length(filter(sel"sidechain", struc)) == 854
-    @test length(filter(sel"acidic", struc)) == 162
-    @test length(filter(sel"basic", struc)) == 68
-    @test length(filter(sel"hydrophobic", struc)) == 327
-    @test length(filter(sel"not hydrophobic", struc)) == 1286
-    @test length(filter(sel"aliphatic", struc)) == 379
-    @test length(filter(sel"aromatic", struc)) == 344
-    @test length(filter(sel"polar", struc)) == 880
-    @test length(filter(sel"nonpolar", struc)) == 583
-    @test length(filter(sel"backbone", struc)) == 415
-    @test length(filter(sel"element H", struc)) == 538
-
-    @test collectatoms(struc, sel"resname LYS") == filter(sel"resname LYS", struc)
+    @test length(collectatoms(struc, sel"protein and resnum = 2")) == 11
+    @test length(collectatoms(struc, sel"neutral")) == 1233
+    @test length(collectatoms(struc, sel"charged")) == 230
+    @test length(collectatoms(struc, sel"sidechain")) == 854
+    @test length(collectatoms(struc, sel"acidic")) == 162
+    @test length(collectatoms(struc, sel"basic")) == 68
+    @test length(collectatoms(struc, sel"hydrophobic")) == 327
+    @test length(collectatoms(struc, sel"not hydrophobic")) == 1286
+    @test length(collectatoms(struc, sel"aliphatic")) == 379
+    @test length(collectatoms(struc, sel"aromatic")) == 344
+    @test length(collectatoms(struc, sel"polar")) == 880
+    @test length(collectatoms(struc, sel"nonpolar")) == 583
+    @test length(collectatoms(struc, sel"backbone")) == 415
+    @test length(collectatoms(struc, sel"element H")) == 538
 
 end # testitem
 
