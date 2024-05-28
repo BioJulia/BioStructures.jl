@@ -133,7 +133,7 @@ function atom_filter(by::F, atoms::AbstractVector{<:AbstractAtom}) where {F<:Fun
     return sel
 end
 
-# Overload Base functions to forward the selection syntax
+# Overload Base functions to forward the selection syntax (remove these?)
 Base.filter(by::Select, struc::ProteinStructure) = atom_filter(by, struc)
 Base.findall(by::Select, struc::ProteinStructure) = serial.(atom_filter(by, struc))
 
@@ -141,7 +141,7 @@ Base.findall(by::Select, struc::ProteinStructure) = serial.(atom_filter(by, stru
 collectatoms(atoms::AbstractVector{<:AbstractAtom}, sel::Select) = atom_filter(sel, atoms)
 
 # Function that returns true for all atoms: the default selection
-all(atoms) = true
+all(atoms::AbstractVector{<:AbstractAtom}) = true
 
 # Comparison operators
 const operators = (
@@ -162,6 +162,15 @@ struct Keyword{F<:Function}
     operators::Tuple
 end
 
+#
+# Macro keywords (functions without parameters)
+#
+struct MacroKeyword{F<:Function}
+    name::String
+    getter::F
+end
+(key::MacroKeyword)(::AbstractVector{<:AbstractString}) = key.getter
+
 function (key::Keyword)(s::AbstractVector{<:AbstractString})
     # if 1.6 compatibility is not needed, this can be replaced by
     # (; getter, operators) = key
@@ -174,15 +183,6 @@ function (key::Keyword)(s::AbstractVector{<:AbstractString})
     # If no operator was found, assume that `=` was intended
     return el -> isequal(getter(el), parse_to_type(key, s[1]))
 end
-
-#
-# Macro keywords (functions without parameters)
-#
-struct MacroKeyword{F<:Function}
-    name::String
-    getter::F
-end
-(key::MacroKeyword)(::AbstractVector{<:AbstractString}) = key.getter
 
 #=
     parse_to_type(key::Keyword, val::String)
