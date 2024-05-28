@@ -144,6 +144,7 @@ This can be changed by setting `expand_disordered` to `true` in [`collectatoms`]
 
 Selectors are functions passed as additional arguments to these functions.
 Only elements that return `true` when passed to all the selector are retained.
+See also the selection syntax [described below](@ref selection-syntax).
 For example:
 
 | Command                                                 | Action                                                            | Return type                |
@@ -269,6 +270,98 @@ PairwiseAlignmentResult{Int64, LongAA, LongAA}:
 
 In fact, [`pairalign`](@ref) is extended to carry out the above steps and return the alignment by calling `pairalign(struc1["A"], struc2["A"], standardselector)` in this case.
 `scoremodel` and `aligntype` are keyword arguments with the defaults shown above.
+
+## Selection syntax
+
+!!! compat
+    The string-selection syntax was introduced in version 3.13.
+
+`BioStructures.jl` exports the `sel` macro that provides a practical way to collect atoms from a structure
+using a natural selection syntax. It must be used as: 
+```julia
+collectatoms(struc, sel"selection string")
+```
+where `struc` is the input structure and `selection string` defines the atoms to be selected.
+
+For example:
+
+```julia
+julia> struc = retrievepdb("4YC6")
+[ Info: Downloading file from PDB: 4YC6
+ProteinStructure 4YC6.pdb with 1 models, 8 chains (A,B,C,D,E,F,G,H), 1420 residues, 12271 atoms
+
+julia> collectatoms(struc, sel"name CA and resnumber <= 5")
+24-element Vector{AbstractAtom}:
+ Atom CA with serial 2, coordinates [17.363, 31.409, -27.535]
+ Atom CA with serial 10, coordinates [20.769, 32.605, -28.801]
+ ⋮
+ Atom CA with serial 11096, coordinates [-8.996, 6.094, -29.097]
+```
+
+There are also macro-keywords to select groups of atoms with specific properties. For example:
+
+```julia
+julia> ats = collectatoms(struc, sel"acidic and name N")
+188-element Vector{AbstractAtom}:
+ Atom N with serial 9, coordinates [19.33, 32.429, -28.593]
+ Atom N with serial 18, coordinates [21.056, 33.428, -26.564]
+ ⋮
+ Atom N with serial 11603, coordinates [-0.069, 21.516, -32.604]
+
+julia> resname.(ats)
+188-element Vector{SubString{String}}:
+ "GLU"
+ "ASP"
+ ⋮
+ "GLU"
+```
+
+The current supported operators are:
+
+| Operators                   | Acts on                             |
+| :-------------------------- | :---------------------------------- |
+| `=`, `>`, `<` `>=`, `<=`    | Properties with real values.        |
+| `and`, `or`, `not`          | Selections subsets.                 | 
+
+The keywords supported are:
+
+
+| Keyword                     | Input type   | Selects for          |
+| :-------------------------- | :-----------:|:---------------------|
+|  `index`                     | `Int`         | `serial`              |
+|  `serial`                    | `Int`         | `serial`              |
+|  `resnumber`                 | `Int`         | `resnumber`           |
+|  `resnum`                    | `Int`         | `resnumber`           |
+|  `resid`                     | `Int`         | `resid`               |
+|  `occupancy`                 | `Real`        | `occupancy`           |
+|  `beta`                      | `Real`        | `tempfactor`          |
+|  `tempfactor`                | `Real`        | `tempfactor`          |
+|  `model`                     | `Int`         | `modelnumber`         |
+|  `modelnumber`               | `Int`         | `modelnumber`         |
+|  `name`                      | `String`      | `atomname`            |
+|  `atomname`                  | `String`      | `atomname`            |
+|  `segname`                   | `String`      | `segname`             |
+|  `resname`                   | `String`      | `resname`             |
+|  `chain`                     | `String`      | `chainid`             |
+|  `chainid`                   | `String`      | `chainid`             |
+|  `element`                   | `String`      | `element`             |
+|  `water`                     |               | Water molecules       |
+|  `protein`                   |               | Protein atoms         |
+|  `polar`                     |               | Polar residues        |
+|  `nonpolar`                  |               | Non-polar residues    |
+|  `basic`                     |               | Basic residues        |
+|  `acidic`                    |               | Acidic residues       |
+|  `charged`                   |               | Charged residues      |
+|  `aliphatic`                 |               | Aliphatic residues    |
+|  `aromatic`                  |               | Aromatic residues     |
+|  `hydrophobic`               |               | Hydrophobic residues  |
+|  `neutral`                   |               | Neutral residues      |
+|  `backbone`                  |               | Backbone atoms        |
+|  `heavyatom`                 |               | Heavy atoms           |
+|  `disordered`                |               | Disordered atoms      |
+|  `sidechain`                 |               | Side-chain atoms      |
+|  `all`                       |               | all atoms             |
+
 
 ## Spatial calculations
 
