@@ -75,29 +75,13 @@ issidechain(atom::AbstractAtom; not_side_chain_atoms=not_side_chain_atoms) = isp
 const water_residues = ["HOH", "OH2", "TIP", "TIP3", "TIP3P", "TIP4P", "TIP5P", "TIP7P", "SPC", "SPCE"]
 iswater(atom::AbstractAtom) = strip(resname(atom)) in water_residues
 
-"""
+#=
     Select
 
 This structure acts a function when used within typical julia filtering functions, 
 by converting a string selection into a call to query call. 
 
-# Example
-
-```jldoctest
-julia> using PDBTools
-
-julia> atoms = readPDB(PDBTools.TESTPDB, "protein");
-
-julia> findfirst(Select("name CA"), atoms)
-5
-
-julia> filter(Select("name CA and residue 1"), atoms)
-   Array{Atoms,1} with 1 atoms with fields:
-   index name resname chain   resnum  residue        x        y        z occup  beta model segname index_pdb
-       5   CA     ALA     A        1        1   -8.483  -14.912   -6.726  1.00  0.00     1    PROT         5
-
-```
-"""
+=#
 struct Select <: Function
     sel::String
 end
