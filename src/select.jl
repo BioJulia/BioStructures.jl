@@ -290,12 +290,6 @@ function parse_query_vector(s)
                 return key(s)
             end
         end
-        for key in functional_keywords
-            if (i = findfirst(==(key.name), s)) !== nothing
-                deleteat!(s, i)
-                return key(s)
-            end
-        end
         parse_error("Unable to parse selection string.")
     end
 end
