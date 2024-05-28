@@ -137,6 +137,9 @@ end
 Base.filter(by::Select, struc::ProteinStructure) = atom_filter(by, struc)
 Base.findall(by::Select, struc::ProteinStructure) = serial.(atom_filter(by, struc))
 
+# collect atoms function 
+collectatoms(atoms::AbstractVector{<:AbstractAtom}, sel::Select) = atom_filter(sel, atoms)
+
 # Function that returns true for all atoms: the default selection
 all(atoms) = true
 
@@ -160,7 +163,9 @@ struct Keyword{F<:Function}
 end
 
 function (key::Keyword)(s::AbstractVector{<:AbstractString})
-    (; name, getter, operators) = key
+    # if 1.6 compatibility is not needed, this can be replaced by
+    # (; name, getter, operators) = key
+    name, getter, operators = key.name, key.getter, key.operators
     for op in operators
         if (i = has_key(op.first, s)) > 0
             return el -> op.second(getter(el), parse_to_type(key, s[i+1]))
@@ -198,7 +203,9 @@ struct FunctionalKeyword{FunctionType}
 end
 
 function (key::FunctionalKeyword)(s::AbstractVector{<:AbstractString})
-    (; name, by, operators) = key
+    # if 1.6 compatibility is not needed, this can be replaced by
+    # (; name, by, operators) = key
+    name, by, operators = key.name, key.by, key.operators
     for op in operators
         if (i = has_key(op.first, s)) > 0
             return el -> op.second(by(el), parse_to_type(key, s[i+1]))
@@ -417,6 +424,8 @@ parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
     @test length(filter(sel"aromatic", atoms)) == 344
     @test length(filter(sel"polar", atoms)) == 880
     @test length(filter(sel"nonpolar", atoms)) == 583
+
+    @test collectatoms(atoms, sel"resname LYS") == filter(sel"resname LYS", atoms)
 
 end # testitem
 
