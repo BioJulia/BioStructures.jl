@@ -398,34 +398,36 @@ parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
 @testitem "Selections" begin
 
     using BioStructures
-    atoms = read(BioStructures.TESTPDB, PDB)
+    struc = read(BioStructures.TESTPDB, PDB)
 
-    @test length(filter(sel"name CA", atoms)) == 104
-    sel = filter(sel"index = 13", atoms)
+    @test length(filter(sel"name CA", struc)) == 104
+    sel = filter(sel"index = 13", struc)
     @test length(sel) == 1
     @test serial(sel[1]) == 13
 
-    @test length(filter(sel"index > 1 and index < 13", atoms)) == 11
-    @test length(filter(sel"protein", atoms)) == 1463
-    @test length(filter(sel"water", atoms)) == 58014
-    @test length(filter(sel"resname GLY", atoms)) == 84
-    #@test length(filter(sel"segname PROT", atoms)) == 1463
+    @test length(filter(sel"index > 1 and index < 13", struc)) == 11
+    @test length(filter(sel"protein", struc)) == 1463
+    @test length(filter(sel"water", struc)) == 135
+    @test length(filter(sel"resname GLY", struc)) == 84
+    #@test length(filter(sel"segname PROT", struc)) == 1463
     # residue should be the incremental residue number
-    #@test length(filter(sel"residue = 2", atoms)) == 11
-    @test length(filter(sel"protein and resnum = 2", atoms)) == 11
-    @test length(filter(sel"neutral", atoms)) == 1233
-    @test length(filter(sel"charged", atoms)) == 230
-    @test length(filter(sel"sidechain", atoms)) == 854
-    @test length(filter(sel"acidic", atoms)) == 162
-    @test length(filter(sel"basic", atoms)) == 68
-    @test length(filter(sel"hydrophobic", atoms)) == 327
-    @test length(filter(sel"hydrophobic", atoms)) == 327
-    @test length(filter(sel"aliphatic", atoms)) == 379
-    @test length(filter(sel"aromatic", atoms)) == 344
-    @test length(filter(sel"polar", atoms)) == 880
-    @test length(filter(sel"nonpolar", atoms)) == 583
+    #@test length(filter(sel"residue = 2", struc)) == 11
+    @test length(filter(sel"protein and resnum = 2", struc)) == 11
+    @test length(filter(sel"neutral", struc)) == 1233
+    @test length(filter(sel"charged", struc)) == 230
+    @test length(filter(sel"sidechain", struc)) == 854
+    @test length(filter(sel"acidic", struc)) == 162
+    @test length(filter(sel"basic", struc)) == 68
+    @test length(filter(sel"hydrophobic", struc)) == 327
+    @test length(filter(sel"not hydrophobic", struc)) == 1286
+    @test length(filter(sel"aliphatic", struc)) == 379
+    @test length(filter(sel"aromatic", struc)) == 344
+    @test length(filter(sel"polar", struc)) == 880
+    @test length(filter(sel"nonpolar", struc)) == 583
+    @test length(filter(sel"backbone", struc)) == 415
+    @test length(filter(sel"element H", struc)) == 538
 
-    @test collectatoms(atoms, sel"resname LYS") == filter(sel"resname LYS", atoms)
+    @test collectatoms(struc, sel"resname LYS") == filter(sel"resname LYS", struc)
 
 end # testitem
 
