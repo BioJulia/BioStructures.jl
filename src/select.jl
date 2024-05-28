@@ -238,7 +238,7 @@ function parse_query_vector(s)
                 return key(s)
             end
         end
-        parse_error("Unable to parse selection string.")
+        throw(ArgumentError(("Unable to parse selection string.")))
     end
 end
 
@@ -250,21 +250,6 @@ function apply_query(q, a)
         f(apply_query.(args, Ref(a))...)
     end
 end
-
-#
-# Simple error message (https://discourse.julialang.org/t/a-julia-equivalent-to-rs-stop/36568/13)
-#
-struct NoBackTraceException
-    exc::Exception
-end
-
-function Base.showerror(io::IO, ex::NoBackTraceException, bt; backtrace=true)
-    Base.with_output_color(get(io, :color, false) ? Base.error_color() : :nothing, io) do io
-        showerror(io, ex.exc)
-    end
-end
-parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
-
 
 @testitem "Selections" begin
 
@@ -297,6 +282,8 @@ parse_error(str) = throw(NoBackTraceException(ErrorException(str)))
     @test length(collectatoms(struc, sel"nonpolar")) == 583
     @test length(collectatoms(struc, sel"backbone")) == 415
     @test length(collectatoms(struc, sel"element H")) == 538
+
+    @test_throws ArgumentError collectatoms(struc, sel"abc")
 
 end # testitem
 
