@@ -20,7 +20,7 @@ downloadpdb("1EN2")
 
 To parse a PDB file into a Structure-Model-Chain-Residue-Atom framework:
 
-```julia
+```julia-repl
 julia> struc = read("/path/to/pdb/file.pdb", PDB)
 ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 ```
@@ -29,7 +29,7 @@ mmCIF files can be read into the same data structure with `read("/path/to/cif/fi
 The keyword argument `gzip`, default `false`, determines if the file is gzipped.
 If you want to read an mmCIF file into a dictionary to query yourself (e.g. to access metadata fields), use [`MMCIFDict`](@ref):
 
-```julia
+```julia-repl
 julia> mmcif_dict = MMCIFDict("/path/to/cif/file.cif")
 mmCIF dictionary with 716 fields
 
@@ -200,7 +200,7 @@ collectatoms(struc, at -> x(at) < 0)
 [`countatoms`](@ref), [`countresidues`](@ref), [`countchains`](@ref) and [`countmodels`](@ref) can be used to count elements with the same selector API.
 For example:
 
-```julia
+```julia-repl
 julia> countatoms(struc)
 754
 
@@ -216,7 +216,7 @@ julia> countatoms(struc, expand_disordered=true)
 
 The amino acid sequence of a protein can be retrieved by passing an element to [`LongAA`](@ref) with optional residue selectors:
 
-```julia
+```julia-repl
 julia> LongAA(struc['A'], standardselector)
 85aa Amino Acid Sequence:
 RCGSQGGGSTCPGLRCCSIWGWCGDSEPYCGRTCENKCW…RCGAAVGNPPCGQDRCCSVHGWCGGGNDYCSGGNCQYRC
@@ -228,7 +228,7 @@ See [BioSequences.jl](https://github.com/BioJulia/BioSequences.jl) and [BioAlign
 [`LongAA`](@ref) is an alias for `LongSequence{AminoAcidAlphabet}`.
 For example, to see the alignment of CDK1 and CDK2 (this example also makes use of Julia's [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/#Broadcasting-1)):
 
-```julia
+```julia-repl
 julia> struc1, struc2 = retrievepdb.(["4YC6", "1HCL"])
 2-element Array{ProteinStructure,1}:
  ProteinStructure 4YC6.pdb with 1 models, 8 chains (A,B,C,D,E,F,G,H), 1420 residues, 12271 atoms
@@ -286,7 +286,7 @@ operators and keyword defined below.
 
 For example:
 
-```julia
+```julia-repl
 julia> struc = retrievepdb("4YC6")
 [ Info: Downloading file from PDB: 4YC6
 ProteinStructure 4YC6.pdb with 1 models, 8 chains (A,B,C,D,E,F,G,H), 1420 residues, 12271 atoms
@@ -301,7 +301,7 @@ julia> collectatoms(struc, sel"name CA and resnumber <= 5")
 
 There are also macro-keywords to select groups of atoms with specific properties. For example:
 
-```julia
+```julia-repl
 julia> ats = collectatoms(struc, sel"acidic and name N")
 188-element Vector{AbstractAtom}:
  Atom N with serial 9, coordinates [19.33, 32.429, -28.593]
@@ -398,7 +398,7 @@ The [`omegaangle`](@ref) and [`phiangle`](@ref) functions measure the angle betw
 The [`psiangle`](@ref) function measures between the given index and the one after.
 For example:
 
-```julia
+```julia-repl
 julia> distance(struc['A'][10], struc['A'][20])
 10.782158874733762
 
@@ -419,7 +419,7 @@ julia> rad2deg(psiangle(struc['A'], 50))
 [`ContactMap`](@ref) can also be given two structural elements as arguments, in which case a non-symmetrical 2D array is returned showing contacts between the elements.
 The underlying `BitArray{2}` for [`ContactMap`](@ref) `contacts` can be accessed with `contacts.data` if required.
 
-```julia
+```julia-repl
 julia> contacts = ContactMap(collectatoms(struc['A'], cbetaselector), 8.0)
 Contact map of size (85, 85)
 ```
@@ -481,7 +481,7 @@ The contacting elements in a molecular structure form a graph, and this can be r
 This extends `MetaGraph` from [MetaGraphs.jl](https://github.com/JuliaGraphs/MetaGraphs.jl), allowing you to use all the graph analysis tools in [Graphs.jl](https://github.com/JuliaGraphs/Graphs.jl).
 For example:
 
-```julia
+```julia-repl
 julia> using Graphs, MetaGraphs
 
 julia> mg = MetaGraph(collectatoms(struc["A"], cbetaselector), 8.0)
@@ -582,7 +582,7 @@ In this case download the mmCIF file or MMTF file instead.
 
 To parse an existing PDB file into a Structure-Model-Chain-Residue-Atom framework:
 
-```julia
+```julia-repl
 julia> struc = read("/path/to/pdb/file.pdb", PDB)
 ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 ```
@@ -600,7 +600,7 @@ Various options can be set through optional keyword arguments when parsing PDB/m
 
 Use [`retrievepdb`](@ref) to download and parse a PDB file into a Structure-Model-Chain-Residue-Atom framework in a single line:
 
-```julia
+```julia-repl
 julia> struc = retrievepdb("1ALW", dir="path/to/pdb/directory")
 INFO: Downloading PDB: 1ALW
 ProteinStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atoms
@@ -608,7 +608,7 @@ ProteinStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atom
 
 If you prefer to work with data frames rather than the data structures in BioStructures, the `DataFrame` constructor from [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) has been extended to construct relevant data frames from lists of atoms or residues:
 
-```julia
+```julia-repl
 julia> using DataFrames
 
 julia> df = DataFrame(collectatoms(struc));
@@ -641,7 +641,7 @@ As with file writing disordered entities are expanded by default but this can be
 You can read and write files containing multiple mmCIF data blocks (equivalent to a `MMCIFDict` in this package) with the [`readmultimmcif`](@ref) and [`writemultimmcif`](@ref) functions.
 An example of such a file is the PDB's [chemical component dictionary](https://www.wwpdb.org/data/ccd).
 
-```julia
+```julia-repl
 julia> ccd = readmultimmcif("components.cif.gz"; gzip=true);
 
 julia> ccd["2W4"]
@@ -684,14 +684,14 @@ Multi-character chain IDs can be written to mmCIF and MMTF files but will throw 
 If you want the PDB record line for an [`AbstractAtom`](@ref), use [`pdbline`](@ref).
 For example:
 
-```julia
+```julia-repl
 julia> pdbline(at)
 "HETATM  101  C  A  X B  20      10.500  20.123  -5.123  0.50 50.13           C1+"
 ```
 
 If you want to generate a PDB record line from values directly, do so using an [`AtomRecord`](@ref):
 
-```julia
+```julia-repl
 julia> pdbline(AtomRecord(false, 669, "CA", ' ', "ILE", "A", 90, ' ', [31.743, 33.11, 31.221], 1.00, 25.76, "C", ""))
 "ATOM    669  CA  ILE A  90      31.743  33.110  31.221  1.00 25.76           C  "
 ```
