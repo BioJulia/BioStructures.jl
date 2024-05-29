@@ -144,7 +144,7 @@ This can be changed by setting `expand_disordered` to `true` in [`collectatoms`]
 
 Selectors are functions passed as additional arguments to these functions.
 Only elements that return `true` when passed to all the selector are retained.
-See also the selection syntax [described below](@ref Selection-syntax).
+See also the selection syntax [described below](@ref String-selection-syntax).
 For example:
 
 | Command                                                 | Action                                                            | Return type                |
@@ -271,7 +271,7 @@ PairwiseAlignmentResult{Int64, LongAA, LongAA}:
 In fact, [`pairalign`](@ref) is extended to carry out the above steps and return the alignment by calling `pairalign(struc1["A"], struc2["A"], standardselector)` in this case.
 `scoremodel` and `aligntype` are keyword arguments with the defaults shown above.
 
-## Selection syntax
+## String selection syntax
 
 !!! compat
     The string-selection syntax was introduced in version 3.13.
@@ -281,7 +281,8 @@ using a natural selection syntax. It must be used as:
 ```julia
 collectatoms(struc, sel"selection string")
 ```
-where `struc` is the input structure and `selection string` defines the atoms to be selected.
+where `struc` is the input structure and `selection string` defines the atoms to be selected, with the 
+operators and keyword defined below.
 
 For example:
 
