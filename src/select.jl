@@ -89,7 +89,7 @@ macro sel_str(str)
 end
 
 # collect atoms function
-function collectatoms(struc::StructuralElementOrList, sel::Select) 
+function collectatoms(struc::StructuralElementOrList, sel::Select)
     atoms = collectatoms(struc)
     return filter!(sel, atoms)
 end
@@ -212,6 +212,7 @@ parse_query(selection::String) = parse_query_vector(split(selection))
 
 =#
 function parse_query_vector(s)
+    # or, and, not
     if (i = findfirst(==("or"), s)) !== nothing
         deleteat!(s, i)
         (|, parse_query_vector.((s[1:i-1], s[i:end]))...)
@@ -221,8 +222,7 @@ function parse_query_vector(s)
     elseif (i = findfirst(==("not"), s)) !== nothing
         deleteat!(s, i)
         (!, parse_query_vector(s[i:end]))
-
-        # keywords 
+    # keywords 
     else
         for key in keywords
             if (i = findfirst(==(key.name), s)) !== nothing
