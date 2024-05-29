@@ -3,7 +3,6 @@
 # analysis
 #
 export @sel_str
-const TESTPDB = joinpath(@__DIR__, "..", "test", "structure.pdb")
 
 #
 # Dictionaries of residue, atom, and element types, as originally written
