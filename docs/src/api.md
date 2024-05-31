@@ -7,6 +7,7 @@ Exported names:
 ```@index
 Order   = [:module, :type, :constant, :function, :macro]
 ```
+
 Non-exported names:
 - [`BioStructures.x`](@ref)
 - [`BioStructures.x!`](@ref)
@@ -15,16 +16,20 @@ Non-exported names:
 - [`BioStructures.z`](@ref)
 - [`BioStructures.z!`](@ref)
 
+Docstrings:
 ```@autodocs
 Modules = [BioStructures]
 Private = false
 Order   = [:module, :type, :constant, :function, :macro]
 ```
+```@meta
+CurrentModule = BioStructures
+```
 ```@docs
-BioStructures.x(at)
-BioStructures.x!(at, val)
-BioStructures.y(at)
-BioStructures.y!(at, val)
-BioStructures.z(at)
-BioStructures.z!(at, val)
+x
+x!
+y
+y!
+z
+z!
 ```

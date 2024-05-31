@@ -10,6 +10,7 @@ makedocs(
         "API"           => "api.md",
     ],
     format=Documenter.HTML(size_threshold_ignore=["documentation.md"]),
+    modules=[BioStructures],
 )
 
 deploydocs(

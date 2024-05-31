@@ -3,6 +3,8 @@ module BioStructuresDataFramesExt
 using BioStructures
 using DataFrames
 
+export DataFrame
+
 """
     DataFrame(atom_list, atom_selectors...)
     DataFrame(residue_list, residue_selectors...)
