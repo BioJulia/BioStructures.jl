@@ -19,7 +19,7 @@ const ss_code_unassigned = '-'
 
 """
     rundssp!(struc)
-    rundssp!(mod)
+    rundssp!(model)
 
 Run DSSP (Define Secondary Structure of Proteins) on the given structural element
 to assign secondary structure.
@@ -27,13 +27,13 @@ to assign secondary structure.
 A temporary PDB file is written, so this will fail if the structural element cannot
 be written to a PDB file, for example if there are two-letter chain IDs.
 """
-function rundssp!(mod::Model)
+function rundssp!(mo::Model)
     # Write the structure to a temporary PDB file
     # Our mmCIF writer does not write out enough of the required entries for DSSP to read it
     tmp_pdb_path = tempname() * ".pdb"
     open(tmp_pdb_path, "w") do io
         println(io, "HEADER")
-        writepdb(io, mod)
+        writepdb(io, mo)
     end
 
     # Run DSSP on the temporary PDB file
@@ -51,7 +51,7 @@ function rundssp!(mod::Model)
         res_id = strip(line[6:11]) # Insertion code is in column 11
         ch_id = line[12]
         ss_code = line[17]
-        ch = mod[ch_id]
+        ch = mo[ch_id]
         # DSSP does not mark hetero atoms
         if haskey(ch.residues, res_id)
             sscode!(ch[res_id], ss_code)
@@ -61,19 +61,19 @@ function rundssp!(mod::Model)
             error("Could not assign secondary structure to residue ID $res_id in chain $ch_id")
         end
     end
-    return mod
+    return mo
 end
 
 function rundssp!(struc::ProteinStructure)
-    for mod in values(models(struc))
-        rundssp!(mod)
+    for mo in values(models(struc))
+        rundssp!(mo)
     end
     return struc
 end
 
 """
     rundssp(struc)
-    rundssp(mod)
+    rundssp(model)
     rundssp(filepath_in, dssp_filepath_out)
 
 Return a copy of the structural element with DSSP (Define Secondary Structure of Proteins)
@@ -87,19 +87,19 @@ end
 
 """
     runstride!(struc)
-    runstride!(mod)
+    runstride!(model)
 
 Run STRIDE on the given structural element to assign secondary structure.
 
 A temporary PDB file is written, so this will fail if the structural element cannot
 be written to a PDB file, for example if there are two-letter chain IDs.
 """
-function runstride!(mod::Model)
+function runstride!(mo::Model)
     # Write the structure to a temporary PDB file
     # STRIDE does not work with mmCIF files
     tmp_pdb_path = tempname() * ".pdb"
     open(tmp_pdb_path, "w") do io
-        writepdb(io, mod)
+        writepdb(io, mo)
     end
 
     # Run STRIDE on the temporary PDB file
@@ -111,22 +111,22 @@ function runstride!(mod::Model)
             ch_id = line[10]
             res_id = strip(line[11:15]) # Insertion code is directly after residue number
             ss_code = uppercase(line[25]) # STRIDE sometimes returns 'b' instead of 'B'
-            sscode!(mod[ch_id][res_id], ss_code)
+            sscode!(mo[ch_id][res_id], ss_code)
         end
     end
-    return mod
+    return mo
 end
 
 function runstride!(struc::ProteinStructure)
-    for mod in values(models(struc))
-        runstride!(mod)
+    for mo in values(models(struc))
+        runstride!(mo)
     end
     return struc
 end
 
 """
     runstride(struc)
-    runstride(mod)
+    runstride(model)
     runstride(filepath_in, stride_filepath_out)
 
 Return a copy of the structural element with STRIDE

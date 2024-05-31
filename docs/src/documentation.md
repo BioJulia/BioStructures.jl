@@ -122,8 +122,8 @@ Currently these are the only setter functions available.
 Elements can be looped over to reveal the sub-elements in the correct order:
 
 ```julia
-for mod in struc
-    for ch in mod
+for mo in struc
+    for ch in mo
         for res in ch
             for at in res
                 # Do something

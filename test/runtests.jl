@@ -183,13 +183,13 @@ end
     # Test constructors and indexing
     struc = ProteinStructure("Test structure")
     struc[1] = Model(1, struc)
-    mod = struc[1]
-    @test isa(mod, Model)
+    mo = struc[1]
+    @test isa(mo, Model)
     struc[3] = Model(3, struc)
-    struc[1]['A'] = Chain('A', mod)
+    struc[1]['A'] = Chain('A', mo)
     ch = struc[1]['A']
     @test isa(ch, Chain)
-    struc['B'] = Chain('B', mod)
+    struc['B'] = Chain('B', mo)
     struc['A'][10] = Residue("ALA", 10, ' ', false, ch)
     res = struc['A'][10]
     @test isa(res, Residue)
@@ -247,7 +247,7 @@ end
     show(devnull, res)
     show(devnull, dis_res)
     show(devnull, ch)
-    show(devnull, mod)
+    show(devnull, mo)
     show(devnull, struc)
     show(devnull, Model())
     show(devnull, ProteinStructure())
@@ -425,10 +425,10 @@ end
     @test chainid(res) == "C"
     @test chainid(dis_res) == "C"
     @test chainid(ch) == "C"
-    @test mod["C"] == ch
-    @test_throws KeyError mod["A"]
+    @test mo["C"] == ch
+    @test_throws KeyError mo["A"]
 
-    @test chainids(mod) == ["B", "C"]
+    @test chainids(mo) == ["B", "C"]
     chainid!(ch, "A")
 
     # Move one of the residues to a new chain and StructuralElements below it
@@ -440,12 +440,12 @@ end
     @test chainid(dis_res) == "A"
     @test chainid(ch) == "A"
 
-    @test chainids(mod) == ["A", "B", "C"]
+    @test chainids(mo) == ["A", "B", "C"]
 
     # Emptying a chain of residues by moving its residues deletes the chain
     chainid!(res, "A")
 
-    @test chainids(mod) == ["A", "B"]
+    @test chainids(mo) == ["A", "B"]
 
     # Reassigning a chain ID to one that already exists errors
     @test_throws PDBConsistencyError chainid!(ch, "B")
@@ -462,28 +462,28 @@ end
     @test length(residues(ch)) == 2
     @test serial(residues(ch)["10"]["CA"]) == 100
 
-    @test model(at) == mod
-    @test model(dis_at) == mod
-    @test model(res) == mod
-    @test model(dis_res) == mod
-    @test model(ch) == mod
-    @test model(mod) == mod
+    @test model(at) == mo
+    @test model(dis_at) == mo
+    @test model(res) == mo
+    @test model(dis_res) == mo
+    @test model(ch) == mo
+    @test model(mo) == mo
 
     @test modelnumber(at) == 1
     @test modelnumber(dis_at) == 1
     @test modelnumber(res) == 1
     @test modelnumber(dis_res) == 1
     @test modelnumber(ch) == 1
-    @test modelnumber(mod) == 1
+    @test modelnumber(mo) == 1
 
-    @test chainids(mod) == ["A", "B"]
+    @test chainids(mo) == ["A", "B"]
     @test chainids(struc) == ["A", "B"]
     @test chainids(ProteinStructure()) == String[]
     @test chainids(Model()) == String[]
 
-    @test isa(chains(mod), Dict{String, Chain})
-    @test length(chains(mod)) == 2
-    @test resname(chains(mod)["A"]["H_20A"]) == "VA"
+    @test isa(chains(mo), Dict{String, Chain})
+    @test length(chains(mo)) == 2
+    @test resname(chains(mo)["A"]["H_20A"]) == "VA"
     @test isa(chains(Model()), Dict{String, Chain})
     @test isa(chains(struc), Dict{String, Chain})
     @test length(chains(struc)) == 2
@@ -494,7 +494,7 @@ end
     @test structure(res) == struc
     @test structure(dis_res) == struc
     @test structure(ch) == struc
-    @test structure(mod) == struc
+    @test structure(mo) == struc
     @test structure(struc) == struc
 
     @test structurename(at) == "Test structure"
@@ -502,7 +502,7 @@ end
     @test structurename(res) == "Test structure"
     @test structurename(dis_res) == "Test structure"
     @test structurename(ch) == "Test structure"
-    @test structurename(mod) == "Test structure"
+    @test structurename(mo) == "Test structure"
     @test structurename(struc) == "Test structure"
 
     @test modelnumbers(struc) == [1, 3]
@@ -545,10 +545,10 @@ end
         @test resname(ch_col[2]) == "VA"
     end
 
-    for mod_col in (collect(mod), eltype(mod)[i for i in mod])
-        @test isa(mod_col, Vector{Chain})
-        @test length(mod_col) == 2
-        @test chainid(mod_col[2]) == "B"
+    for mo_col in (collect(mo), eltype(mo)[i for i in mo])
+        @test isa(mo_col, Vector{Chain})
+        @test length(mo_col) == 2
+        @test chainid(mo_col[2]) == "B"
     end
 
     for struc_col in (collect(struc), eltype(struc)[i for i in struc])
@@ -582,10 +582,10 @@ end
     @test_throws KeyError ch["11"]
     @test_throws KeyError ch[11]
 
-    @test isa(mod["A"], Chain)
-    @test isa(mod['A'], Chain)
-    @test resname(mod['A']["H_20A"]) == "VA"
-    @test_throws KeyError mod['C']
+    @test isa(mo["A"], Chain)
+    @test isa(mo['A'], Chain)
+    @test resname(mo['A']["H_20A"]) == "VA"
+    @test_throws KeyError mo['C']
 
     @test isa(struc[1], Model)
     @test isa(struc[3], Model)
@@ -736,7 +736,7 @@ end
     @test resnames(dis_res_ord) == ["SER", "ALA", "ILE", "THR", "VAL"]
 
     # Order when sorting chain IDs is character ordering with the empty chain ID at the end
-    mod_ord = Model(1, Dict(
+    mo_ord = Model(1, Dict(
         "AB"  => Chain("AB"),
         "A"   => Chain("A"),
         " "   => Chain(" "),
@@ -747,7 +747,7 @@ end
         "X"   => Chain("X"),
         "AC"  => Chain("AC"),
     ), ProteinStructure())
-    @test chainids(mod_ord) == ["1", "A", "X", "a", "AB", "AC", "BC", "AAA", " "]
+    @test chainids(mo_ord) == ["1", "A", "X", "a", "AB", "AC", "BC", "AAA", " "]
 
     # Test sequence extraction
     @test threeletter_to_aa["ALA"] == AA_A
@@ -935,9 +935,9 @@ end
     @test x(struc['A'][167]["CD"]) == 24.502
     @test x(struc['A'][167]["CD"]['A']) == 24.502
     @test x(struc['A'][167]["CD"]['B']) == 24.69
-    mods = collect(struc)
-    @test modelnumber(mods[1]) == 1
-    chs = collect(mods[1])
+    mos = collect(struc)
+    @test modelnumber(mos[1]) == 1
+    chs = collect(mos[1])
     @test chainid.(chs) == ["A", "B"]
     res = collect(chs[1])
     @test length(res) == 456
@@ -1109,10 +1109,10 @@ end
     @test chainid.(chs) == ["A", "A"]
     @test z(chs[2][5]["CA"]) == -5.667
     @test countchains(Model[struc[5], struc[10]]) == 2
-    mods = collectmodels(Model[struc[10], struc[5]])
-    @test length(mods) == 2
-    @test modelnumber.(mods) == [10, 5]
-    @test z(mods[2]['A'][5]["CA"]) == -5.837
+    mos = collectmodels(Model[struc[10], struc[5]])
+    @test length(mos) == 2
+    @test modelnumber.(mos) == [10, 5]
+    @test z(mos[2]['A'][5]["CA"]) == -5.837
     @test countmodels(Model[struc[10], struc[5]]) == 2
     @test modelnumber(struc[begin]) == 1
     @test modelnumber(struc[end  ]) == 20
@@ -1372,43 +1372,43 @@ end
 
     # Test collectmodels
     struc_1SSU = read(testfilepath("PDB", "1SSU.pdb"), PDB)
-    mods = collectmodels(struc_1SSU)
-    @test length(mods) == 20
-    @test isa(mods, Vector{Model})
-    @test modelnumber.(mods) == collect(1:20)
-    mods = collectmodels(struc_1SSU, mod -> modelnumber(mod) < 4)
-    @test length(mods) == 3
-    @test modelnumber(mods[2]) == 2
-    mods = collectmodels(struc_1SSU[10])
-    @test length(mods) == 1
-    @test modelnumber(mods[1]) == 10
-    mods = collectmodels(struc_1SSU['A'])
-    @test length(mods) == 1
-    @test modelnumber(mods[1]) == 1
-    mods = collectmodels(struc_1SSU[7]['A'][50])
-    @test length(mods) == 1
-    @test modelnumber(mods[1]) == 7
-    mods = collectmodels(struc_1SSU['A'][50]["CA"])
-    @test length(mods) == 1
-    @test modelnumber(mods[1]) == 1
-    mods = collectmodels(Chain[struc['B'], struc['A']])
-    @test length(mods) == 1
-    @test modelnumber(mods[1]) == 1
-    mods = collectmodels(Residue[struc['A'][51], struc['B'][50]])
-    @test length(mods) == 1
-    @test modelnumber(mods[1]) == 1
-    mods = collectmodels(AbstractResidue[struc_1SSU[12]['A'][51], struc_1SSU['A'][50]])
-    @test length(mods) == 2
-    @test modelnumber(mods[2]) == 1
-    mods = collectmodels(Atom[struc_1SSU['A'][51]["CA"], struc_1SSU['A'][50]["CA"]])
-    @test length(mods) == 1
-    @test modelnumber(mods[1]) == 1
-    mods = collectmodels(DisorderedAtom[struc['A'][167]["CZ"], struc['A'][167]["CD"]])
-    @test length(mods) == 1
-    @test modelnumber(mods[1]) == 1
-    mods = collectmodels(AbstractAtom[struc['A'][50]["CA"], struc['A'][167]["CZ"]])
-    @test length(mods) == 1
-    @test modelnumber(mods[1]) == 1
+    mos = collectmodels(struc_1SSU)
+    @test length(mos) == 20
+    @test isa(mos, Vector{Model})
+    @test modelnumber.(mos) == collect(1:20)
+    mos = collectmodels(struc_1SSU, mo -> modelnumber(mo) < 4)
+    @test length(mos) == 3
+    @test modelnumber(mos[2]) == 2
+    mos = collectmodels(struc_1SSU[10])
+    @test length(mos) == 1
+    @test modelnumber(mos[1]) == 10
+    mos = collectmodels(struc_1SSU['A'])
+    @test length(mos) == 1
+    @test modelnumber(mos[1]) == 1
+    mos = collectmodels(struc_1SSU[7]['A'][50])
+    @test length(mos) == 1
+    @test modelnumber(mos[1]) == 7
+    mos = collectmodels(struc_1SSU['A'][50]["CA"])
+    @test length(mos) == 1
+    @test modelnumber(mos[1]) == 1
+    mos = collectmodels(Chain[struc['B'], struc['A']])
+    @test length(mos) == 1
+    @test modelnumber(mos[1]) == 1
+    mos = collectmodels(Residue[struc['A'][51], struc['B'][50]])
+    @test length(mos) == 1
+    @test modelnumber(mos[1]) == 1
+    mos = collectmodels(AbstractResidue[struc_1SSU[12]['A'][51], struc_1SSU['A'][50]])
+    @test length(mos) == 2
+    @test modelnumber(mos[2]) == 1
+    mos = collectmodels(Atom[struc_1SSU['A'][51]["CA"], struc_1SSU['A'][50]["CA"]])
+    @test length(mos) == 1
+    @test modelnumber(mos[1]) == 1
+    mos = collectmodels(DisorderedAtom[struc['A'][167]["CZ"], struc['A'][167]["CD"]])
+    @test length(mos) == 1
+    @test modelnumber(mos[1]) == 1
+    mos = collectmodels(AbstractAtom[struc['A'][50]["CA"], struc['A'][167]["CZ"]])
+    @test length(mos) == 1
+    @test modelnumber(mos[1]) == 1
 
     # Test countmodels
     @test countmodels(struc_1SSU) == 20
@@ -1424,7 +1424,7 @@ end
     @test countmodels(DisorderedAtom[struc['A'][167]["CZ"], struc['A'][167]["CD"]]) == 1
     @test countmodels(Atom[struc_1SSU[7]['A'][51]["CA"], struc_1SSU['A'][50]["CA"]]) == 2
 
-    @test countmodels(struc_1SSU, mod -> modelnumber(mod) < 4) == 3
+    @test countmodels(struc_1SSU, mo -> modelnumber(mo) < 4) == 3
 
     @test countmodels(ProteinStructure()) == 0
     @test countmodels(Model()) == 1
@@ -1884,9 +1884,9 @@ end
     @test x(struc['A'][167]["CD"]) == 24.502
     @test x(struc['A'][167]["CD"]['A']) == 24.502
     @test x(struc['A'][167]["CD"]['B']) == 24.69
-    mods = collect(struc)
-    @test modelnumber(mods[1]) == 1
-    chs = collect(mods[1])
+    mos = collect(struc)
+    @test modelnumber(mos[1]) == 1
+    chs = collect(mos[1])
     @test chainid.(chs) == ["A", "B"]
     res = collect(chs[1])
     @test length(res) == 456
@@ -1993,10 +1993,10 @@ end
     @test chainid.(chs) == ["A", "A"]
     @test z(chs[2][5]["CA"]) == -5.667
     @test countchains(Model[struc[5], struc[10]]) == 2
-    mods = collectmodels(Model[struc[10], struc[5]])
-    @test length(mods) == 2
-    @test modelnumber.(mods) == [10, 5]
-    @test z(mods[2]['A'][5]["CA"]) == -5.837
+    mos = collectmodels(Model[struc[10], struc[5]])
+    @test length(mos) == 2
+    @test modelnumber.(mos) == [10, 5]
+    @test z(mos[2]['A'][5]["CA"]) == -5.837
     @test countmodels(Model[struc[10], struc[5]]) == 2
 
     # Test parsing multi-character chain IDs
@@ -2471,9 +2471,9 @@ end
     @test isapprox(x(struc['A'][167]["CD"]), 24.502, atol=1e-5)
     @test isapprox(x(struc['A'][167]["CD"]['A']), 24.502, atol=1e-5)
     @test isapprox(x(struc['A'][167]["CD"]['B']), 24.69, atol=1e-5)
-    mods = collect(struc)
-    @test modelnumber(mods[1]) == 1
-    chs = collect(mods[1])
+    mos = collect(struc)
+    @test modelnumber(mos[1]) == 1
+    chs = collect(mos[1])
     @test chainid.(chs) == ["A", "B"]
     res = collect(chs[1])
     @test length(res) == 456
@@ -2597,10 +2597,10 @@ end
     @test chainid.(chs) == ["A", "A"]
     @test isapprox(z(chs[2][5]["CA"]), -5.667, atol=1e-5)
     @test countchains(Model[struc[5], struc[10]]) == 2
-    mods = collectmodels(Model[struc[10], struc[5]])
-    @test length(mods) == 2
-    @test modelnumber.(mods) == [10, 5]
-    @test isapprox(z(mods[2]['A'][5]["CA"]), -5.837, atol=1e-5)
+    mos = collectmodels(Model[struc[10], struc[5]])
+    @test length(mos) == 2
+    @test modelnumber.(mos) == [10, 5]
+    @test isapprox(z(mos[2]['A'][5]["CA"]), -5.837, atol=1e-5)
     @test countmodels(Model[struc[10], struc[5]]) == 2
 
     # Test writemmtf

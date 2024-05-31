@@ -52,7 +52,7 @@ SUITE["dict"]["MMTF" ] = @benchmarkable MMTFDict( $(testfilepath("MMTF" , "1AKE.
 SUITE["model"]["atomaccess"  ] = @benchmarkable $(struc["1EN2"])["A"][20]["CA"]
 SUITE["model"]["sortatoms"   ] = @benchmarkable sort(ats) setup=(ats = shuffle(collectatoms(   struc["1EN2"])))
 SUITE["model"]["sortresidues"] = @benchmarkable sort(res) setup=(res = shuffle(collectresidues(struc["1EN2"])))
-SUITE["model"]["iterate"     ] = @benchmarkable for mod in $(struc["1AKE"]) for ch in mod for res in ch for at in res end end end end
+SUITE["model"]["iterate"     ] = @benchmarkable for mo in $(struc["1AKE"]) for ch in mo for res in ch for at in res end end end end
 SUITE["model"]["sequence"    ] = @benchmarkable LongAA($(collectresidues(struc["1EN2"])))
 SUITE["model"]["pdbline"     ] = @benchmarkable pdbline($(struc["1EN2"]["A"][20]["CA"]))
 

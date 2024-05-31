@@ -176,9 +176,9 @@ function ProteinStructure(d::MMTFDict;
         throw(ArgumentError("Discrepancy between atom count ($(length(d["atomIdList"]))) and atoms read in ($atom_i)"))
     end
     # Remove any models that were not added to
-    for model in struc
-        if countchains(model) == 0
-            delete!(models(struc), modelnumber(model))
+    for mo in struc
+        if countchains(mo) == 0
+            delete!(models(struc), modelnumber(mo))
         end
     end
     fixlists!(struc)
@@ -209,9 +209,9 @@ function generatechainid(entity_id::Integer)
     divisor = entity_id
     out_string = ""
     while divisor > 0
-        mod = (divisor - 1) % 26
-        out_string *= Char(65 + mod)
-        divisor = Int(floor((divisor - mod) / 26))
+        modulo = (divisor - 1) % 26
+        out_string *= Char(65 + modulo)
+        divisor = Int(floor((divisor - modulo) / 26))
     end
     return out_string
 end

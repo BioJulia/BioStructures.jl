@@ -500,9 +500,9 @@ function Base.read(input::IO,
         end
     end
     # Remove any models that were not added to
-    for model in struc
-        if countchains(model) == 0
-            delete!(models(struc), modelnumber(model))
+    for mo in struc
+        if countchains(mo) == 0
+            delete!(models(struc), modelnumber(mo))
         end
     end
     # Generate lists for iteration
@@ -791,13 +791,12 @@ function writepdb(output::IO,
                     expand_disordered::Bool=true)
     # If there are multiple models, write out MODEL/ENDMDL lines
     if length(el) > 1
-        for mod in sort(collect(el))
-            ats = collectatoms(mod, atom_selectors...;
-                                    expand_disordered=expand_disordered)
+        for mo in sort(collect(el))
+            ats = collectatoms(mo, atom_selectors...; expand_disordered=expand_disordered)
             if length(ats) == 0
                 continue
             end
-            println(output, "MODEL     ", spacestring(modelnumber(mod), 4), repeat(" ", 66))
+            println(output, "MODEL     ", spacestring(modelnumber(mo), 4), repeat(" ", 66))
             writepdb(output, ats; expand_disordered=expand_disordered)
             println(output, "ENDMDL$(repeat(" ", 74))")
         end

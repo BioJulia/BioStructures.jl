@@ -207,8 +207,8 @@ Model(number::Integer) = Model(number, ProteinStructure())
 
 Model() = Model(1)
 
-Chain(id::AbstractString, mod::Model) = Chain(id, [], Dict(), mod)
-Chain(id::Char, mod::Model) = Chain(string(id), [], Dict(), mod)
+Chain(id::AbstractString, mo::Model) = Chain(id, [], Dict(), mo)
+Chain(id::Char, mo::Model) = Chain(string(id), [], Dict(), mo)
 
 Chain(id::Union{AbstractString, Char}) = Chain(id, Model())
 
@@ -301,27 +301,27 @@ Base.lastindex(ch::Chain) = last(resids(ch))
 
 # Accessing a Model with a Char or AbstractString returns the Chain with that
 #   chain ID
-Base.getindex(mod::Model, ch_id::AbstractString) = mod.chains[ch_id]
-Base.getindex(mod::Model, ch_id::Char) = mod.chains[string(ch_id)]
+Base.getindex(mo::Model, ch_id::AbstractString) = mo.chains[ch_id]
+Base.getindex(mo::Model, ch_id::Char) = mo.chains[string(ch_id)]
 
-function Base.setindex!(mod::Model, ch::Chain, ch_id::AbstractString)
-    mod.chains[ch_id] = ch
-    return mod
+function Base.setindex!(mo::Model, ch::Chain, ch_id::AbstractString)
+    mo.chains[ch_id] = ch
+    return mo
 end
 
-function Base.setindex!(mod::Model, ch::Chain, ch_id::Char)
-    return setindex!(mod, ch, string(ch_id))
+function Base.setindex!(mo::Model, ch::Chain, ch_id::Char)
+    return setindex!(mo, ch, string(ch_id))
 end
 
-Base.firstindex(mod::Model) = first(chainids(mod))
-Base.lastindex(mod::Model) = last(chainids(mod))
+Base.firstindex(mo::Model) = first(chainids(mo))
+Base.lastindex(mo::Model) = last(chainids(mo))
 
 # Accessing a ProteinStructure with an Integer returns the Model with that model
 #   number
-Base.getindex(struc::ProteinStructure, mod_n::Integer) = struc.models[mod_n]
+Base.getindex(struc::ProteinStructure, mo_n::Integer) = struc.models[mo_n]
 
-function Base.setindex!(struc::ProteinStructure, mod::Model, mod_n::Integer)
-    struc.models[mod_n] = mod
+function Base.setindex!(struc::ProteinStructure, mo::Model, mo_n::Integer)
+    struc.models[mo_n] = mo
     return struc
 end
 
@@ -414,7 +414,7 @@ altlocid(dis_at::DisorderedAtom) = defaultaltlocid(dis_at)
 """
     x(at)
 
-Get the x coordinate of an `AbstractAtom` as a `Float64`.
+Get the x coordinate in Å of an `AbstractAtom` as a `Float64`.
 """
 x(at::Atom) = at.coords[1]
 x(dis_at::DisorderedAtom) = x(defaultatom(dis_at))
@@ -422,7 +422,7 @@ x(dis_at::DisorderedAtom) = x(defaultatom(dis_at))
 """
     x!(at, val)
 
-Set the x coordinate of an `AbstractAtom` to `val`.
+Set the x coordinate in Å of an `AbstractAtom` to `val`.
 
 For `DisorderedAtom`s only the default atom is updated.
 """
@@ -432,7 +432,7 @@ x!(dis_at::DisorderedAtom, x::Real) = x!(defaultatom(dis_at), x)
 """
     y(at)
 
-Get the y coordinate of an `AbstractAtom` as a `Float64`.
+Get the y coordinate in Å of an `AbstractAtom` as a `Float64`.
 """
 y(at::Atom) = at.coords[2]
 y(dis_at::DisorderedAtom) = y(defaultatom(dis_at))
@@ -440,7 +440,7 @@ y(dis_at::DisorderedAtom) = y(defaultatom(dis_at))
 """
     y!(at, val)
 
-Set the y coordinate of an `AbstractAtom` to `val`.
+Set the y coordinate in Å of an `AbstractAtom` to `val`.
 
 For `DisorderedAtom`s only the default atom is updated.
 """
@@ -450,7 +450,7 @@ y!(dis_at::DisorderedAtom, y::Real) = y!(defaultatom(dis_at), y)
 """
     z(at)
 
-Get the z coordinate of an `AbstractAtom` as a `Float64`.
+Get the z coordinate in Å of an `AbstractAtom` as a `Float64`.
 """
 z(at::Atom) = at.coords[3]
 z(dis_at::DisorderedAtom) = z(defaultatom(dis_at))
@@ -458,7 +458,7 @@ z(dis_at::DisorderedAtom) = z(defaultatom(dis_at))
 """
     z!(at, val)
 
-Set the z coordinate of an `AbstractAtom` to `val`.
+Set the z coordinate in Å of an `AbstractAtom` to `val`.
 
 For `DisorderedAtom`s only the default atom is updated.
 """
@@ -468,7 +468,7 @@ z!(dis_at::DisorderedAtom, z::Real) = z!(defaultatom(dis_at), z)
 """
     coords(at)
 
-Get the atomic coordinates of an `AbstractAtom` as a `Vector{Float64}`.
+Get the coordinates in Å of an `AbstractAtom` as a `Vector{Float64}`.
 """
 coords(at::Atom) = at.coords
 coords(dis_at::DisorderedAtom) = coords(defaultatom(dis_at))
@@ -476,7 +476,7 @@ coords(dis_at::DisorderedAtom) = coords(defaultatom(dis_at))
 """
     coords!(at, new_coords)
 
-Set the coordinates of an `AbstractAtom` to a `Vector` of 3 numbers.
+Set the coordinates in Å of an `AbstractAtom` to a `Vector` of 3 numbers.
 
 For `DisorderedAtom`s only the default atom is updated.
 """
@@ -914,7 +914,7 @@ model(dis_at::DisorderedAtom) = model(defaultatom(dis_at))
 model(res::Residue) = model(chain(res))
 model(dis_res::DisorderedResidue) = model(defaultresidue(dis_res))
 model(ch::Chain) = ch.model
-model(mod::Model) = mod
+model(mo::Model) = mo
 
 """
     modelnumber(el)
@@ -922,17 +922,17 @@ model(mod::Model) = mod
 Get the model number of a `Model`, `Chain`, `AbstractResidue` or `AbstractAtom`
 as an `Int`.
 """
-modelnumber(mod::Model) = mod.number
+modelnumber(mo::Model) = mo.number
 modelnumber(el::Union{Chain, AbstractResidue, AbstractAtom}) = modelnumber(model(el))
 
 """
-    chainids(mod)
+    chainids(model)
     chainids(struc)
 
 Get the sorted chain IDs of the chains in a `Model`, or the default `Model` of a
 `ProteinStructure`, as a `Vector{String}`.
 """
-chainids(mod::Model) = chainid.(sort(collect(values(chains(mod)))))
+chainids(mo::Model) = chainid.(sort(collect(values(chains(mo)))))
 
 function chainids(struc::ProteinStructure)
     if countmodels(struc) > 0
@@ -943,13 +943,13 @@ function chainids(struc::ProteinStructure)
 end
 
 """
-    chains(mod)
+    chains(model)
     chains(struc)
 
 Return the dictionary of `Chain`s in a `Model`, or the default `Model` of a
 `ProteinStructure`.
 """
-chains(mod::Model) = mod.chains
+chains(mo::Model) = mo.chains
 
 function chains(struc::ProteinStructure)
     if countmodels(struc) > 0
@@ -970,7 +970,7 @@ structure(dis_at::DisorderedAtom) = structure(defaultatom(dis_at))
 structure(res::Residue) = structure(model(res))
 structure(dis_res::DisorderedResidue) = structure(defaultresidue(dis_res))
 structure(ch::Chain) = structure(model(ch))
-structure(mod::Model) = mod.structure
+structure(mo::Model) = mo.structure
 structure(struc::ProteinStructure) = struc
 
 """
@@ -1063,8 +1063,8 @@ function Base.isless(ch_one::Chain, ch_two::Chain)
 end
 
 # Sort models by model number
-function Base.isless(mod_one::Model, mod_two::Model)
-    return isless(modelnumber(mod_one), modelnumber(mod_two))
+function Base.isless(mo_one::Model, mo_two::Model)
+    return isless(modelnumber(mo_one), modelnumber(mo_two))
 end
 
 """
@@ -1100,10 +1100,10 @@ function Base.iterate(struc::ProteinStructure, state=1)
 end
 
 # Iterating over a Model yields Chains
-Base.length(mod::Model) = length(chainids(mod))
+Base.length(mo::Model) = length(chainids(mo))
 Base.eltype(::Type{Model}) = Chain
-function Base.iterate(mod::Model, state=1)
-    state <= length(mod) ? (mod[chainids(mod)[state]], state + 1) : nothing
+function Base.iterate(mo::Model, state=1)
+    state <= length(mo) ? (mo[chainids(mo)[state]], state + 1) : nothing
 end
 
 # Iterating over a Chain yields AbstractResidues
@@ -1159,7 +1159,7 @@ Returns a `Vector` of the sub-elements in a `StructuralElementOrList`, e.g.
 `AbstractAtom`s in a `Residue` or `AbstractResidue`s in a `Chain`.
 """
 Base.collect(struc::ProteinStructure) = [struc[mn] for mn in modelnumbers(struc)]
-Base.collect(mod::Model) = [mod[cn] for cn in chainids(mod)]
+Base.collect(mo::Model) = [mo[cn] for cn in chainids(mo)]
 Base.collect(ch::Chain) = AbstractResidue[ch[rn] for rn in resids(ch)]
 Base.collect(res::Residue) = AbstractAtom[res.atoms[an] for an in atomnames(res, strip=false)]
 function Base.collect(dis_res::DisorderedResidue)
@@ -1204,20 +1204,20 @@ Additional arguments are model selector functions - only models that return
 """
 collectmodels(struc::ProteinStructure) = collect(struc)
 
-collectmodels(mod::Model) = [mod]
+collectmodels(mo::Model) = [mo]
 
 collectmodels(el::Union{Chain, AbstractResidue, AbstractAtom}) = [model(el)]
 
-collectmodels(mods::Vector{Model}) = mods
+collectmodels(mos::Vector{Model}) = mos
 
 function collectmodels(els::Vector{<:Union{Chain, AbstractResidue, AbstractAtom}})
-    mod_list = Model[]
+    mo_list = Model[]
     for el in els
-        if !(model(el) in mod_list)
-            push!(mod_list, model(el))
+        if !(model(el) in mo_list)
+            push!(mo_list, model(el))
         end
     end
-    return mod_list
+    return mo_list
 end
 
 # One selector explicitly defined to prevent this being called without selectors
@@ -1257,16 +1257,16 @@ function collectchains(struc::ProteinStructure)
     end
 end
 
-collectchains(mod::Model) = collect(mod)
+collectchains(mo::Model) = collect(mo)
 
 collectchains(ch::Chain) = [ch]
 
 collectchains(el::Union{AbstractResidue, AbstractAtom}) = [chain(el)]
 
-function collectchains(mods::Vector{Model})
+function collectchains(mos::Vector{Model})
     ch_list = Chain[]
-    for mod in mods
-        append!(ch_list, collectchains(mod))
+    for mo in mos
+        append!(ch_list, collectchains(mo))
     end
     return ch_list
 end
@@ -1301,7 +1301,7 @@ function countchains(el::StructuralElementOrList, chain_selectors::Function...)
     return length(collectchains(el, chain_selectors...))
 end
 
-countchains(mod::Model) = length(mod)
+countchains(mo::Model) = length(mo)
 
 """
     collectresidues(el)
@@ -1491,14 +1491,14 @@ end
 # Add an atom represented in an AtomRecord to a Model
 # Unsafe as sub-element lists are not updated (for speed)
 # fixlists! should be run after all additions to update the sub-element lists
-function unsafe_addatomtomodel!(mod::Model,
+function unsafe_addatomtomodel!(mo::Model,
                     atom_rec::AtomRecord;
                     remove_disorder::Bool=false)
     # Add chain to model if necessary
-    if !haskey(chains(mod), atom_rec.chain_id)
-        mod[atom_rec.chain_id] = Chain(atom_rec.chain_id, mod)
+    if !haskey(chains(mo), atom_rec.chain_id)
+        mo[atom_rec.chain_id] = Chain(atom_rec.chain_id, mo)
     end
-    ch = mod[atom_rec.chain_id]
+    ch = mo[atom_rec.chain_id]
     res_id = resid(atom_rec.het_atom, atom_rec.res_number, atom_rec.ins_code)
     # If residue does not exist in the chain, create a Residue
     if !haskey(residues(ch), res_id)
@@ -1593,8 +1593,8 @@ fullresname(res::Residue) = res.name
 
 # Internal function to form ordered sub-element lists after parsing
 function fixlists!(struc::ProteinStructure)
-    for mod in struc
-        for ch in mod
+    for mo in struc
+        for ch in mo
             ch.res_list = resid.(sort(collect(values(residues(ch)))))
             for res in ch
                 if isa(res, Residue)
@@ -1868,11 +1868,11 @@ Base.show(io::IO, struc::ProteinStructure) = print(io,
     "$(countatoms(struc)) atoms"
 )
 
-Base.show(io::IO, mod::Model) = print(io,
-    "Model $(modelnumber(mod)) with ",
-    countchains(mod) != 0 ? "$(countchains(mod)) chains ($(join(chainids(mod), ","))), " : "0 chains, ",
-    "$(countresidues(mod, standardselector)) residues, ",
-    "$(countatoms(mod)) atoms"
+Base.show(io::IO, mo::Model) = print(io,
+    "Model $(modelnumber(mo)) with ",
+    countchains(mo) != 0 ? "$(countchains(mo)) chains ($(join(chainids(mo), ","))), " : "0 chains, ",
+    "$(countresidues(mo, standardselector)) residues, ",
+    "$(countatoms(mo)) atoms"
 )
 
 Base.show(io::IO, ch::Chain) = print(io,
