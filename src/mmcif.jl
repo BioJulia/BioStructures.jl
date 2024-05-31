@@ -283,24 +283,26 @@ function Base.read(input::IO,
         tokens = tokenizecifstructure(input)
     end
     populatedict!(mmcif_dict, tokens)
-    ProteinStructure(mmcif_dict;
-                     structure_name=structure_name,
-                     remove_disorder=remove_disorder,
-                     read_std_atoms=read_std_atoms,
-                     read_het_atoms=read_het_atoms,
-                     run_dssp=run_dssp,
-                     run_stride=run_stride)
+    return MolecularStructure(
+        mmcif_dict;
+        structure_name=structure_name,
+        remove_disorder=remove_disorder,
+        read_std_atoms=read_std_atoms,
+        read_het_atoms=read_het_atoms,
+        run_dssp=run_dssp,
+        run_stride=run_stride,
+    )
 end
 
-function ProteinStructure(mmcif_dict::MMCIFDict;
+function MolecularStructure(mmcif_dict::MMCIFDict;
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
             read_het_atoms::Bool=true,
             run_dssp::Bool=false,
             run_stride::Bool=false,)
-    # Define ProteinStructure and add to it incrementally
-    struc = ProteinStructure(structure_name)
+    # Define MolecularStructure and add to it incrementally
+    struc = MolecularStructure(structure_name)
     if haskey(mmcif_dict, "_atom_site.id")
         for i in 1:length(mmcif_dict["_atom_site.id"])
             if (read_std_atoms && mmcif_dict["_atom_site.group_PDB"][i] == "ATOM") ||
@@ -523,7 +525,7 @@ function writemmcif(output::IO,
                 atom_selectors::Function...;
                 expand_disordered::Bool=true, gzip::Bool=false)
     # Ensure multiple models get written out correctly
-    loop_el = isa(el, ProteinStructure) ? collectmodels(el) : el
+    loop_el = isa(el, MolecularStructure) ? collectmodels(el) : el
     ats = collectatoms(loop_el, atom_selectors...;
                                         expand_disordered=expand_disordered)
     if length(ats) > 0

@@ -100,23 +100,25 @@ function Base.read(input::IO,
             run_stride::Bool=false,
             gzip::Bool=false)
     d = MMTFDict(parsemmtf(input; gzip=gzip))
-    ProteinStructure(d;
-                     structure_name=structure_name,
-                     remove_disorder=remove_disorder,
-                     read_std_atoms=read_std_atoms,
-                     read_het_atoms=read_het_atoms,
-                     run_dssp=run_dssp,
-                     run_stride=run_stride)
+    return MolecularStructure(
+        d;
+        structure_name=structure_name,
+        remove_disorder=remove_disorder,
+        read_std_atoms=read_std_atoms,
+        read_het_atoms=read_het_atoms,
+        run_dssp=run_dssp,
+        run_stride=run_stride,
+    )
 end
 
-function ProteinStructure(d::MMTFDict;
+function MolecularStructure(d::MMTFDict;
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
             read_het_atoms::Bool=true,
             run_dssp::Bool=false,
             run_stride::Bool=false)
-    struc = ProteinStructure(structure_name)
+    struc = MolecularStructure(structure_name)
     # Extract hetero atom information from entity list
     hets = trues(length(d["chainIdList"]))
     for e in d["entityList"]
@@ -242,7 +244,7 @@ function writemmtf(output::Union{AbstractString, IO},
                 atom_selectors::Function...;
                 expand_disordered::Bool=true,
                 gzip::Bool=false)
-    loop_el = isa(el, ProteinStructure) ? collectmodels(el) : el
+    loop_el = isa(el, MolecularStructure) ? collectmodels(el) : el
     ats = sort(sort(sort(collectatoms(loop_el, atom_selectors...;
                             expand_disordered=expand_disordered)),
                             by=residue), by=model)

@@ -397,7 +397,7 @@ end
     retrievepdb(pdbid::AbstractString; <keyword arguments>)
 
 Download and read a Protein Data Bank (PDB) file or biological assembly from the
-RCSB server, returning a `ProteinStructure`.
+RCSB server, returning a `MolecularStructure`.
 
 Requires an internet connection.
 
@@ -412,7 +412,7 @@ Requires an internet connection.
 - `ba_number::Integer=0`: if set > 0 downloads the respective biological
     assembly; by default downloads the PDB file.
 - `structure_name::AbstractString="\$pdbid.pdb"`: the name given to the returned
-    `ProteinStructure`; defaults to the PDB ID.
+    `MolecularStructure`; defaults to the PDB ID.
 - `remove_disorder::Bool=false`: whether to remove atoms with alt loc ID not ' '
     or 'A'.
 - `read_std_atoms::Bool=true`: whether to read standard ATOM records.
@@ -445,12 +445,12 @@ end
     read(filepath::AbstractString, format::Type; <keyword arguments>)
     read(input::IO, format::Type; <keyword arguments>)
 
-Read a Protein Data Bank (PDB) file and return a `ProteinStructure`.
+Read a Protein Data Bank (PDB) file and return a `MolecularStructure`.
 
 # Arguments
 - `format::Type`: the format of the PDB file; options are PDB, MMCIF and MMTF.
 - `structure_name::AbstractString`: the name given to the returned
-    `ProteinStructure`; defaults to the file name.
+    `MolecularStructure`; defaults to the file name.
 - `remove_disorder::Bool=false`: whether to remove atoms with alt loc ID not ' '
     or 'A'.
 - `read_std_atoms::Bool=true`: whether to read standard ATOM records.
@@ -468,8 +468,8 @@ function Base.read(input::IO,
             read_het_atoms::Bool=true,
             run_dssp::Bool=false,
             run_stride::Bool=false)
-    # Define ProteinStructure and add to it incrementally
-    struc = ProteinStructure(structure_name)
+    # Define MolecularStructure and add to it incrementally
+    struc = MolecularStructure(structure_name)
     struc[1] = Model(1, struc)
     # Entries outside of a MODEL/ENDMDL block are added to model 1
     curr_model = 1
@@ -786,7 +786,7 @@ function writepdb(filepath::AbstractString,
 end
 
 function writepdb(output::IO,
-                    el::Union{ProteinStructure, Vector{Model}},
+                    el::Union{MolecularStructure, Vector{Model}},
                     atom_selectors::Function...;
                     expand_disordered::Bool=true)
     # If there are multiple models, write out MODEL/ENDMDL lines

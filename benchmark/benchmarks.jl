@@ -32,7 +32,7 @@ const SUITE = BenchmarkGroup(
         "spatial"=> BenchmarkGroup(),
 )
 
-struc = Dict{String, ProteinStructure}()
+struc = Dict{String, MolecularStructure}()
 for pdbid in pdbids
     struc[pdbid] = read(testfilepath("PDB", "$pdbid.pdb"), PDB)
 end

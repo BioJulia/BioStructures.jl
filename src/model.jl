@@ -9,7 +9,7 @@ export
     DisorderedResidue,
     Chain,
     Model,
-    ProteinStructure,
+    MolecularStructure,
     AtomRecord,
     StructuralElementOrList,
     serial,
@@ -170,7 +170,7 @@ end
 A container for multiple `Model`s that represents a Protein Data Bank (PDB)
 entry.
 """
-struct ProteinStructure <: StructuralElement
+struct MolecularStructure <: StructuralElement
     name::String
     models::Dict{Int, Model}
 end
@@ -197,13 +197,13 @@ end
 
 # Constructors without sub-elements and without super-elements
 
-ProteinStructure(name::AbstractString) = ProteinStructure(name, Dict())
+MolecularStructure(name::AbstractString) = MolecularStructure(name, Dict())
 
-ProteinStructure() = ProteinStructure("")
+MolecularStructure() = MolecularStructure("")
 
-Model(number::Integer, struc::ProteinStructure) = Model(number, Dict(), struc)
+Model(number::Integer, struc::MolecularStructure) = Model(number, Dict(), struc)
 
-Model(number::Integer) = Model(number, ProteinStructure())
+Model(number::Integer) = Model(number, MolecularStructure())
 
 Model() = Model(1)
 
@@ -316,31 +316,31 @@ end
 Base.firstindex(mo::Model) = first(chainids(mo))
 Base.lastindex(mo::Model) = last(chainids(mo))
 
-# Accessing a ProteinStructure with an Integer returns the Model with that model
+# Accessing a MolecularStructure with an Integer returns the Model with that model
 #   number
-Base.getindex(struc::ProteinStructure, mo_n::Integer) = struc.models[mo_n]
+Base.getindex(struc::MolecularStructure, mo_n::Integer) = struc.models[mo_n]
 
-function Base.setindex!(struc::ProteinStructure, mo::Model, mo_n::Integer)
+function Base.setindex!(struc::MolecularStructure, mo::Model, mo_n::Integer)
     struc.models[mo_n] = mo
     return struc
 end
 
-# Accessing a ProteinStructure with a Char returns the Chain with that chain ID
+# Accessing a MolecularStructure with a Char returns the Chain with that chain ID
 #   on the default model
-Base.getindex(struc::ProteinStructure, ch_id::AbstractString) = defaultmodel(struc)[ch_id]
-Base.getindex(struc::ProteinStructure, ch_id::Char) = defaultmodel(struc)[string(ch_id)]
+Base.getindex(struc::MolecularStructure, ch_id::AbstractString) = defaultmodel(struc)[ch_id]
+Base.getindex(struc::MolecularStructure, ch_id::Char) = defaultmodel(struc)[string(ch_id)]
 
-function Base.setindex!(struc::ProteinStructure, ch::Chain, ch_id::AbstractString)
+function Base.setindex!(struc::MolecularStructure, ch::Chain, ch_id::AbstractString)
     defaultmodel(struc)[ch_id] = ch
     return struc
 end
 
-function Base.setindex!(struc::ProteinStructure, ch::Chain, ch_id::Char)
+function Base.setindex!(struc::MolecularStructure, ch::Chain, ch_id::Char)
     return setindex!(struc, ch, string(ch_id))
 end
 
-Base.firstindex(struc::ProteinStructure) = first(modelnumbers(struc))
-Base.lastindex(struc::ProteinStructure) = last(modelnumbers(struc))
+Base.firstindex(struc::MolecularStructure) = first(modelnumbers(struc))
+Base.lastindex(struc::MolecularStructure) = last(modelnumbers(struc))
 
 # Check if an atom name exists in a residue as a whitespace-padded version
 function findatombyname(res::Residue, atom_name::AbstractString)
@@ -930,11 +930,11 @@ modelnumber(el::Union{Chain, AbstractResidue, AbstractAtom}) = modelnumber(model
     chainids(struc)
 
 Get the sorted chain IDs of the chains in a `Model`, or the default `Model` of a
-`ProteinStructure`, as a `Vector{String}`.
+`MolecularStructure`, as a `Vector{String}`.
 """
 chainids(mo::Model) = chainid.(sort(collect(values(chains(mo)))))
 
-function chainids(struc::ProteinStructure)
+function chainids(struc::MolecularStructure)
     if countmodels(struc) > 0
         return chainids(defaultmodel(struc))
     else
@@ -947,11 +947,11 @@ end
     chains(struc)
 
 Return the dictionary of `Chain`s in a `Model`, or the default `Model` of a
-`ProteinStructure`.
+`MolecularStructure`.
 """
 chains(mo::Model) = mo.chains
 
-function chains(struc::ProteinStructure)
+function chains(struc::MolecularStructure)
     if countmodels(struc) > 0
         return chains(defaultmodel(struc))
     else
@@ -962,7 +962,7 @@ end
 """
     structure(el)
 
-Return the `ProteinStructure` that an `AbstractAtom`, `AbstractResidue`, `Chain`
+Return the `MolecularStructure` that an `AbstractAtom`, `AbstractResidue`, `Chain`
 or `Model` belongs to.
 """
 structure(at::Atom) = structure(model(at))
@@ -971,41 +971,41 @@ structure(res::Residue) = structure(model(res))
 structure(dis_res::DisorderedResidue) = structure(defaultresidue(dis_res))
 structure(ch::Chain) = structure(model(ch))
 structure(mo::Model) = mo.structure
-structure(struc::ProteinStructure) = struc
+structure(struc::MolecularStructure) = struc
 
 """
     structurename(el)
 
-Get the name of the `ProteinStructure` that a `StructuralElement` belongs to as
+Get the name of the `MolecularStructure` that a `StructuralElement` belongs to as
 a `String`.
 """
 structurename(el::Union{Model, Chain, AbstractResidue, AbstractAtom}) = structurename(structure(el))
-structurename(struc::ProteinStructure) = struc.name
+structurename(struc::MolecularStructure) = struc.name
 
 """
     modelnumbers(struc)
 
-Get the sorted model numbers from a `ProteinStructure` as a `Vector{Int}`.
+Get the sorted model numbers from a `MolecularStructure` as a `Vector{Int}`.
 """
-function modelnumbers(struc::ProteinStructure)
+function modelnumbers(struc::MolecularStructure)
     return modelnumber.(sort(collect(values(models(struc)))))
 end
 
 """
     models(struc)
 
-Return the dictionary of `Model`s in a `ProteinStructure`.
+Return the dictionary of `Model`s in a `MolecularStructure`.
 """
-models(struc::ProteinStructure) = struc.models
+models(struc::MolecularStructure) = struc.models
 
 """
     defaultmodel(struc)
 
-Get the default `Model` in a `ProteinStructure`.
+Get the default `Model` in a `MolecularStructure`.
 
 This is the `Model` with the lowest model number.
 """
-defaultmodel(struc::ProteinStructure) = first(sort(collect(values(models(struc)))))
+defaultmodel(struc::MolecularStructure) = first(sort(collect(values(models(struc)))))
 
 # Sort lists of elements
 
@@ -1092,10 +1092,10 @@ end
 
 # Iterators to yield sub elements when looping over an element
 
-# Iterating over a ProteinStructure yields Models
-Base.length(struc::ProteinStructure) = length(modelnumbers(struc))
-Base.eltype(::Type{ProteinStructure}) = Model
-function Base.iterate(struc::ProteinStructure, state=1)
+# Iterating over a MolecularStructure yields Models
+Base.length(struc::MolecularStructure) = length(modelnumbers(struc))
+Base.eltype(::Type{MolecularStructure}) = Model
+function Base.iterate(struc::MolecularStructure, state=1)
     state <= length(struc) ? (struc[modelnumbers(struc)[state]], state + 1) : nothing
 end
 
@@ -1158,7 +1158,7 @@ end
 Returns a `Vector` of the sub-elements in a `StructuralElementOrList`, e.g.
 `AbstractAtom`s in a `Residue` or `AbstractResidue`s in a `Chain`.
 """
-Base.collect(struc::ProteinStructure) = [struc[mn] for mn in modelnumbers(struc)]
+Base.collect(struc::MolecularStructure) = [struc[mn] for mn in modelnumbers(struc)]
 Base.collect(mo::Model) = [mo[cn] for cn in chainids(mo)]
 Base.collect(ch::Chain) = AbstractResidue[ch[rn] for rn in resids(ch)]
 Base.collect(res::Residue) = AbstractAtom[res.atoms[an] for an in atomnames(res, strip=false)]
@@ -1202,7 +1202,7 @@ Returns a `Vector` of the models in a `StructuralElementOrList`.
 Additional arguments are model selector functions - only models that return
 `true` from all the functions are retained.
 """
-collectmodels(struc::ProteinStructure) = collect(struc)
+collectmodels(struc::MolecularStructure) = collect(struc)
 
 collectmodels(mo::Model) = [mo]
 
@@ -1239,7 +1239,7 @@ function countmodels(el::StructuralElementOrList, model_selectors::Function...)
     return length(collectmodels(el, model_selectors...))
 end
 
-countmodels(struc::ProteinStructure) = length(struc)
+countmodels(struc::MolecularStructure) = length(struc)
 
 """
     collectchains(el)
@@ -1249,7 +1249,7 @@ Returns a `Vector` of the chains in a `StructuralElementOrList`.
 Additional arguments are chain selector functions - only chains that return
 `true` from all the functions are retained.
 """
-function collectchains(struc::ProteinStructure)
+function collectchains(struc::MolecularStructure)
     if countmodels(struc) > 0
         return collectchains(defaultmodel(struc))
     else
@@ -1313,7 +1313,7 @@ return `true` from all the functions are retained.
 The keyword argument `expand_disordered` (default `false`) determines whether to
 return all copies of disordered residues separately.
 """
-function collectresidues(struc::ProteinStructure; expand_disordered::Bool=false)
+function collectresidues(struc::MolecularStructure; expand_disordered::Bool=false)
     if countmodels(struc) > 0
         return collectresidues(defaultmodel(struc); expand_disordered=expand_disordered)
     else
@@ -1407,7 +1407,7 @@ Additional arguments are atom selector functions - only atoms that return
 The keyword argument `expand_disordered` (default `false`) determines whether to
 return all copies of disordered atoms separately.
 """
-function collectatoms(struc::ProteinStructure; expand_disordered::Bool=false)
+function collectatoms(struc::MolecularStructure; expand_disordered::Bool=false)
     if countmodels(struc) > 0
         return collectatoms(defaultmodel(struc); expand_disordered=expand_disordered)
     else
@@ -1592,7 +1592,7 @@ end
 fullresname(res::Residue) = res.name
 
 # Internal function to form ordered sub-element lists after parsing
-function fixlists!(struc::ProteinStructure)
+function fixlists!(struc::MolecularStructure)
     for mo in struc
         for ch in mo
             ch.res_list = resid.(sort(collect(values(residues(ch)))))
@@ -1859,8 +1859,8 @@ end
 
 # Descriptive showing of elements on a single line
 
-Base.show(io::IO, struc::ProteinStructure) = print(io,
-    "ProteinStructure ",
+Base.show(io::IO, struc::MolecularStructure) = print(io,
+    "MolecularStructure ",
     structurename(struc) != "" ? "$(structurename(struc)) " : "",
     "with $(countmodels(struc)) models, ",
     countchains(struc) != 0 ? "$(countchains(struc)) chains ($(join(chainids(struc), ","))), " : "0 chains, ",

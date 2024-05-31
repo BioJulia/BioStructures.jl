@@ -64,7 +64,7 @@ function rundssp!(mo::Model)
     return mo
 end
 
-function rundssp!(struc::ProteinStructure)
+function rundssp!(struc::MolecularStructure)
     for mo in values(models(struc))
         rundssp!(mo)
     end
@@ -79,7 +79,7 @@ end
 Return a copy of the structural element with DSSP (Define Secondary Structure of Proteins)
 run to assign secondary structure, or run DSSP directly on a PDB or mmCIF file.
 """
-rundssp(el::Union{ProteinStructure, Model}) = rundssp!(deepcopy(el))
+rundssp(el::Union{MolecularStructure, Model}) = rundssp!(deepcopy(el))
 
 function rundssp(filepath_in, dssp_filepath_out)
     run(`$dssp_executable $filepath_in $dssp_filepath_out`)
@@ -117,7 +117,7 @@ function runstride!(mo::Model)
     return mo
 end
 
-function runstride!(struc::ProteinStructure)
+function runstride!(struc::MolecularStructure)
     for mo in values(models(struc))
         runstride!(mo)
     end
@@ -132,7 +132,7 @@ end
 Return a copy of the structural element with STRIDE
 run to assign secondary structure, or run STRIDE directly on a PDB file.
 """
-runstride(el::Union{ProteinStructure, Model}) = runstride!(deepcopy(el))
+runstride(el::Union{MolecularStructure, Model}) = runstride!(deepcopy(el))
 
 function runstride(filepath_in, stride_filepath_out)
     run(`$stride_executable $filepath_in -f$stride_filepath_out`)

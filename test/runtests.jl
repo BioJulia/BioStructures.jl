@@ -181,7 +181,7 @@ end
 
 @testset "Types" begin
     # Test constructors and indexing
-    struc = ProteinStructure("Test structure")
+    struc = MolecularStructure("Test structure")
     struc[1] = Model(1, struc)
     mo = struc[1]
     @test isa(mo, Model)
@@ -216,17 +216,17 @@ end
     fixlists!(struc)
 
     # Test alternate constructors
-    ProteinStructure("struc", Dict(1=> Model()))
-    ProteinStructure()
+    MolecularStructure("struc", Dict(1=> Model()))
+    MolecularStructure()
     mmcif_dict = MMCIFDict(testfilepath("mmCIF", "1AKE.cif"))
-    struc_mmcif_1ake = ProteinStructure(mmcif_dict)
+    struc_mmcif_1ake = MolecularStructure(mmcif_dict)
     @test countatoms(struc_mmcif_1ake) == 3804
     mmtf_dict = MMTFDict(testfilepath("MMTF", "1AKE.mmtf"))
-    struc_mmtf_1ake = ProteinStructure(mmtf_dict)
+    struc_mmtf_1ake = MolecularStructure(mmtf_dict)
     @test countatoms(struc_mmtf_1ake) == 3804
 
-    Model(1, Dict("A"=> Chain('A')), ProteinStructure())
-    Model(1, ProteinStructure())
+    Model(1, Dict("A"=> Chain('A')), MolecularStructure())
+    Model(1, MolecularStructure())
     Model(1)
     Model()
 
@@ -250,7 +250,7 @@ end
     show(devnull, mo)
     show(devnull, struc)
     show(devnull, Model())
-    show(devnull, ProteinStructure())
+    show(devnull, MolecularStructure())
 
     # Test getters/setters
     @test serial(at) == 100
@@ -478,7 +478,7 @@ end
 
     @test chainids(mo) == ["A", "B"]
     @test chainids(struc) == ["A", "B"]
-    @test chainids(ProteinStructure()) == String[]
+    @test chainids(MolecularStructure()) == String[]
     @test chainids(Model()) == String[]
 
     @test isa(chains(mo), Dict{String, Chain})
@@ -487,7 +487,7 @@ end
     @test isa(chains(Model()), Dict{String, Chain})
     @test isa(chains(struc), Dict{String, Chain})
     @test length(chains(struc)) == 2
-    @test isa(chains(ProteinStructure()), Dict{String, Chain})
+    @test isa(chains(MolecularStructure()), Dict{String, Chain})
 
     @test structure(at) == struc
     @test structure(dis_at) == struc
@@ -746,7 +746,7 @@ end
         "a"   => Chain("a"),
         "X"   => Chain("X"),
         "AC"  => Chain("AC"),
-    ), ProteinStructure())
+    ), MolecularStructure())
     @test chainids(mo_ord) == ["1", "A", "X", "a", "AB", "AC", "BC", "AAA", " "]
 
     # Test sequence extraction
@@ -1205,7 +1205,7 @@ end
     @test countatoms(struc, expand_disordered=true) == 3816
     @test countatoms(struc, standardselector, expand_disordered=true) == 3317
 
-    @test countatoms(ProteinStructure()) == 0
+    @test countatoms(MolecularStructure()) == 0
     @test countatoms(Model()) == 0
     @test countatoms(Chain('X')) == 0
     @test countatoms(Residue("ALA", 100, ' ', false, Chain('A'))) == 0
@@ -1305,7 +1305,7 @@ end
     @test countresidues(struc, expand_disordered=true) == 171
     @test countresidues(struc, standardselector, expand_disordered=true) == 90
 
-    @test countresidues(ProteinStructure()) == 0
+    @test countresidues(MolecularStructure()) == 0
     @test countresidues(Model()) == 0
     @test countresidues(Chain('X')) == 0
     @test countresidues(Residue("ALA", 100, ' ', false, Chain('A'))) == 1
@@ -1365,7 +1365,7 @@ end
 
     @test countchains(struc, ch -> chainid(ch) == "B") == 1
 
-    @test countchains(ProteinStructure()) == 0
+    @test countchains(MolecularStructure()) == 0
     @test countchains(Model()) == 0
     @test countchains(Chain('X')) == 1
     @test countchains(Residue("ALA", 100, ' ', false, Chain('A'))) == 1
@@ -1426,7 +1426,7 @@ end
 
     @test countmodels(struc_1SSU, mo -> modelnumber(mo) < 4) == 3
 
-    @test countmodels(ProteinStructure()) == 0
+    @test countmodels(MolecularStructure()) == 0
     @test countmodels(Model()) == 1
     @test countmodels(Chain('X')) == 1
     @test countmodels(Residue("ALA", 100, ' ', false, Chain('A'))) == 1
@@ -1442,7 +1442,7 @@ end
     @test_throws PDBParseError read(testfilepath("PDB", "1SSU_err.pdb"), PDB)
     # Truncated MODEL record from ASTRAL/SCOP95
     struc = read(testfilepath("PDB", "d9pcya_.ent"), PDB)
-    @test isa(struc, ProteinStructure)
+    @test isa(struc, MolecularStructure)
     @test countmodels(struc) == 16
     # Duplicate atom names in same residue
     @test_throws ErrorException read(testfilepath("PDB", "1AKE_err_c.pdb"), PDB)
@@ -1451,7 +1451,7 @@ end
 
     # Test parsing empty file
     struc = read(IOBuffer(""), PDB)
-    @test isa(struc, ProteinStructure)
+    @test isa(struc, MolecularStructure)
     @test countmodels(struc) == 0
 end
 
@@ -1514,7 +1514,7 @@ end
     writepdb(temp_filename, struc)
     @test countlines(temp_filename) == 15160
     struc_written = read(temp_filename, PDB)
-    @test isa(struc_written, ProteinStructure)
+    @test isa(struc_written, MolecularStructure)
     @test modelnumbers(struc_written) == collect(1:20)
     @test countatoms(struc_written) == 756
     @test z(struc_written[4]['A']["30"]["OG"]) == -2.177
@@ -1608,7 +1608,7 @@ end
     @test countlines(temp_filename) == 0
     struc_written = read(temp_filename, PDB)
     @test countatoms(struc_written) == 0
-    writepdb(temp_filename, ProteinStructure())
+    writepdb(temp_filename, MolecularStructure())
     @test countlines(temp_filename) == 0
     struc_written = read(temp_filename, PDB)
     @test countatoms(struc_written) == 0
@@ -2075,7 +2075,7 @@ end
 
     # Test parsing empty file
     struc = read(IOBuffer(""), MMCIF)
-    @test isa(struc, ProteinStructure)
+    @test isa(struc, MolecularStructure)
     @test countmodels(struc) == 0
 
     # Test formatting
@@ -2127,7 +2127,7 @@ end
         @test length(keys(dic_written)) == 22
         @test length(dic_written["_atom_site.group_PDB"]) == 15120
         struc_written = read(temp_filename, MMCIF; kwargs...)
-        @test isa(struc_written, ProteinStructure)
+        @test isa(struc_written, MolecularStructure)
         @test modelnumbers(struc_written) == collect(1:20)
         @test countatoms(struc_written) == 756
         @test z(struc_written[4]['A']["30"]["OG"]) == -2.177
@@ -2222,7 +2222,7 @@ end
         @test length(keys(dic_written)) == 1
         struc_written = read(temp_filename, MMCIF; kwargs...)
         @test countatoms(struc_written) == 0
-        writemmcif(temp_filename, ProteinStructure(); kwargs...)
+        writemmcif(temp_filename, MolecularStructure(); kwargs...)
         dic_written = MMCIFDict(temp_filename; kwargs...)
         @test length(keys(dic_written)) == 1
         struc_written = read(temp_filename, MMCIF; kwargs...)
@@ -2340,7 +2340,7 @@ end
         @test get(dic, "nokey", ["default"]) == ["default"]
         @test ismissing(get(dic, "nokey", missing))
         # Tests for 1EN2
-        struc = ProteinStructure(cifs["1EN2"])
+        struc = MolecularStructure(cifs["1EN2"])
         @test modelnumbers(struc) == [1]
         @test chainids(struc[1]) == ["A"]
         @test serial(struc['A'][48]["CA"]) == 394
@@ -2631,7 +2631,7 @@ end
         struc = read(testfilepath(dir_name, "1SSU.$(pdbextension[ft])"), ft)
         writemmtf(temp_filename, struc)
         struc_written = read(temp_filename, MMTF)
-        @test isa(struc_written, ProteinStructure)
+        @test isa(struc_written, MolecularStructure)
         @test modelnumbers(struc_written) == collect(1:20)
         @test countatoms(struc_written) == 756
         @test isapprox(z(struc_written[4]['A']["30"]["OG"]), -2.177, atol=1e-5)
@@ -2731,7 +2731,7 @@ end
     @test length(keys(dic_written)) == 39
     struc_written = read(temp_filename, MMTF)
     @test countatoms(struc_written) == 0
-    writemmtf(temp_filename, ProteinStructure())
+    writemmtf(temp_filename, MolecularStructure())
     dic_written = MMTFDict(temp_filename)
     @test length(keys(dic_written)) == 39
     struc_written = read(temp_filename, MMTF)

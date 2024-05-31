@@ -22,7 +22,7 @@ To parse a PDB file into a Structure-Model-Chain-Residue-Atom framework:
 
 ```julia-repl
 julia> struc = read("/path/to/pdb/file.pdb", PDB)
-ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
+MolecularStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 ```
 
 mmCIF files can be read into the same data structure with `read("/path/to/cif/file.cif", MMCIF)`.
@@ -45,7 +45,7 @@ MMTF files can be read into the same data structure with `read("/path/to/mmtf/fi
 The keyword argument `gzip`, default `false`, determines if the file is gzipped.
 In a similar manner to mmCIF dictionaries, a MMTF file can be read into a dictionary with [`MMTFDict`](@ref).
 The values of the dictionary are a variety of types depending on the [MMTF specification](https://github.com/rcsb/mmtf/blob/master/spec.md).
-To convert a [`MMCIFDict`](@ref) or [`MMTFDict`](@ref) to the Structure-Model-Chain-Residue-Atom framework, use the [`ProteinStructure`](@ref) constructor, e.g. `ProteinStructure(mmcif_dict)`.
+To convert a [`MMCIFDict`](@ref) or [`MMTFDict`](@ref) to the Structure-Model-Chain-Residue-Atom framework, use the [`MolecularStructure`](@ref) constructor, e.g. `MolecularStructure(mmcif_dict)`.
 
 The elements of `struc` can be accessed as follows:
 
@@ -106,7 +106,7 @@ Properties can be retrieved as follows:
 | [`modelnumber`](@ref)        | Model number of a model, chain, residue or atom                                        | `Int`                           |
 | [`chainids`](@ref)           | Sorted chain IDs in a model or structure                                               | `Array{String,1}`               |
 | [`chains`](@ref)             | Dictionary of chains in a model or structure                                           | `Dict{String,Chain}`            |
-| [`structure`](@ref)          | Structure a model, chain, residue or atom belongs to                                   | `ProteinStructure`              |
+| [`structure`](@ref)          | Structure a model, chain, residue or atom belongs to                                   | `MolecularStructure`            |
 | [`structurename`](@ref)      | Name of the structure an element belongs to                                            | `String`                        |
 | [`modelnumbers`](@ref)       | Sorted model numbers in a structure                                                    | `Array{Int,1}`                  |
 | [`models`](@ref)             | Dictionary of models in a structure                                                    | `Dict{Int,Model}`               |
@@ -230,9 +230,9 @@ For example, to see the alignment of CDK1 and CDK2 (this example also makes use 
 
 ```julia-repl
 julia> struc1, struc2 = retrievepdb.(["4YC6", "1HCL"])
-2-element Array{ProteinStructure,1}:
- ProteinStructure 4YC6.pdb with 1 models, 8 chains (A,B,C,D,E,F,G,H), 1420 residues, 12271 atoms
- ProteinStructure 1HCL.pdb with 1 models, 1 chains (A), 294 residues, 2546 atoms
+2-element Array{MolecularStructure,1}:
+ MolecularStructure 4YC6.pdb with 1 models, 8 chains (A,B,C,D,E,F,G,H), 1420 residues, 12271 atoms
+ MolecularStructure 1HCL.pdb with 1 models, 1 chains (A), 294 residues, 2546 atoms
 
 julia> seq1, seq2 = LongAA.([struc1["A"], struc2["A"]], standardselector, gaps=false)
 2-element Vector{LongAA}:
@@ -515,7 +515,7 @@ read("/path/to/pdb/file.pdb", PDB, run_dssp=true)
 # Assign secondary structure using STRIDE
 read("/path/to/pdb/file.pdb", PDB, run_stride=true)
 ```
-[`rundssp!`](@ref), [`runstride!`](@ref), [`rundssp`](@ref) and [`runstride`](@ref) can also be used to assign secondary structure to a [`ProteinStructure`](@ref) or [`Model`](@ref):
+[`rundssp!`](@ref), [`runstride!`](@ref), [`rundssp`](@ref) and [`runstride`](@ref) can also be used to assign secondary structure to a [`MolecularStructure`](@ref) or [`Model`](@ref):
 ```julia
 rundssp!(struc)
 runstride!(struc)
@@ -584,26 +584,26 @@ To parse an existing PDB file into a Structure-Model-Chain-Residue-Atom framewor
 
 ```julia-repl
 julia> struc = read("/path/to/pdb/file.pdb", PDB)
-ProteinStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
+MolecularStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 ```
 
 Read a mmCIF/MMTF file instead by replacing [`PDB`](@ref) with [`MMCIF`](@ref)/[`MMTF`](@ref).
 Various options can be set through optional keyword arguments when parsing PDB/mmCIF/MMTF files:
 
-| Keyword Argument                 | Description                                                                          |
-| :------------------------------- | :----------------------------------------------------------------------------------- |
-| `structure_name::AbstractString` | The name given to the returned [`ProteinStructure`](@ref); defaults to the file name |
-| `remove_disorder::Bool=false`    | Whether to remove atoms with alt loc ID not ' ' or 'A'                               |
-| `read_std_atoms::Bool=true`      | Whether to read standard ATOM records                                                |
-| `read_het_atoms::Bool=true`      | Whether to read HETATOM records                                                      |
-| `gzip::Bool=false`               | Whether the file is gzipped (MMTF and mmCIF files only)                              |
+| Keyword Argument                 | Description                                                                            |
+| :------------------------------- | :------------------------------------------------------------------------------------- |
+| `structure_name::AbstractString` | The name given to the returned [`MolecularStructure`](@ref); defaults to the file name |
+| `remove_disorder::Bool=false`    | Whether to remove atoms with alt loc ID not ' ' or 'A'                                 |
+| `read_std_atoms::Bool=true`      | Whether to read standard ATOM records                                                  |
+| `read_het_atoms::Bool=true`      | Whether to read HETATOM records                                                        |
+| `gzip::Bool=false`               | Whether the file is gzipped (MMTF and mmCIF files only)                                |
 
 Use [`retrievepdb`](@ref) to download and parse a PDB file into a Structure-Model-Chain-Residue-Atom framework in a single line:
 
 ```julia-repl
 julia> struc = retrievepdb("1ALW", dir="path/to/pdb/directory")
 INFO: Downloading PDB: 1ALW
-ProteinStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atoms
+MolecularStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atoms
 ```
 
 If you prefer to work with data frames rather than the data structures in BioStructures, the `DataFrame` constructor from [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) has been extended to construct relevant data frames from lists of atoms or residues:
