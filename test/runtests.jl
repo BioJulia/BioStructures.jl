@@ -16,6 +16,12 @@ using RecipesBase
 
 using BioStructures
 using BioStructures:
+    x,
+    x!,
+    y,
+    y!,
+    z,
+    z!,
     fixlists!,
     parseserial,
     parseatomname,

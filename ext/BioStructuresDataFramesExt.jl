@@ -38,9 +38,9 @@ function DataFrames.DataFrame(ats::Vector{<:AbstractAtom},
     for a in collectatoms(ats, atom_selectors...;
                             expand_disordered=expand_disordered)
         push!(df, (ishetero(a), serial(a), atomname(a), altlocid(a), resname(a),
-                    chainid(a), resnumber(a), inscode(a), x(a), y(a), z(a),
-                    occupancy(a), tempfactor(a), element(a), charge(a),
-                    modelnumber(a), isdisorderedatom(a)))
+                    chainid(a), resnumber(a), inscode(a), BioStructures.x(a),
+                    BioStructures.y(a), BioStructures.z(a), occupancy(a), tempfactor(a),
+                    element(a), charge(a), modelnumber(a), isdisorderedatom(a)))
     end
     return df
 end

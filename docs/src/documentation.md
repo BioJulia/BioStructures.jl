@@ -75,9 +75,9 @@ Properties can be retrieved as follows:
 | [`atomname`](@ref)           | Name of an atom                                                                        | `String`                        |
 | [`altlocid`](@ref)           | Alternative location ID of an atom                                                     | `Char`                          |
 | [`altlocids`](@ref)          | All alternative location IDs in a `DisorderedAtom`                                     | `Array{Char,1}`                 |
-| [`x`](@ref)                  | x coordinate of an atom                                                                | `Float64`                       |
-| [`y`](@ref)                  | y coordinate of an atom                                                                | `Float64`                       |
-| [`z`](@ref)                  | z coordinate of an atom                                                                | `Float64`                       |
+| [`BioStructures.x`](@ref)    | x coordinate of an atom                                                                | `Float64`                       |
+| [`BioStructures.y`](@ref)    | y coordinate of an atom                                                                | `Float64`                       |
+| [`BioStructures.z`](@ref)    | z coordinate of an atom                                                                | `Float64`                       |
 | [`coords`](@ref)             | coordinates of an atom                                                                 | `Array{Float64,1}`              |
 | [`occupancy`](@ref)          | Occupancy of an atom (default is `1.0`)                                                | `Float64`                       |
 | [`tempfactor`](@ref)         | Temperature factor of an atom (default is `0.0`)                                       | `Float64`                       |
@@ -113,7 +113,7 @@ Properties can be retrieved as follows:
 
 The `strip` keyword argument determines whether surrounding whitespace is stripped for [`atomname`](@ref), [`element`](@ref), [`charge`](@ref), [`resname`](@ref) and [`atomnames`](@ref) (default `true`).
 
-The coordinates of an atom can be changed using [`x!`](@ref), [`y!`](@ref), [`z!`](@ref) and [`coords!`](@ref).
+The coordinates of an atom can be changed using [`coords!`](@ref) or [`BioStructures.x!`](@ref), [`BioStructures.y!`](@ref) and [`BioStructures.z!`](@ref).
 The chain ID of a chain or residue can be changed using [`chainid!`](@ref).
 Currently these are the only setter functions available.
 
@@ -3943,4 +3943,4 @@ Other packages in the Julia ecosystem that deal with structural bioinformatics o
 - [ProteinSecondaryStructures.jl](https://github.com/m3g/ProteinSecondaryStructures.jl) - parses DSSP and STRIDE outputs.
 - [MMTF.jl](https://github.com/BioJulia/MMTF.jl) - read and write MMTF files. BioStructures.jl builds on top of MMTF.jl.
 - [ProteinEnsembles.jl](https://github.com/jgreener64/ProteinEnsembles.jl) - model ensembles of protein structures.
-- [Molly.jl](https://github.com/jgreener64/Molly.jl) - molecular dynamics of biomolecules.
+- [Molly.jl](https://github.com/jgreener64/Molly.jl) - molecular dynamics in Julia.
