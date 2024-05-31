@@ -66,7 +66,7 @@ MMCIFDict() = MMCIFDict(Dict())
 Base.getindex(mmcif_dict::MMCIFDict, field::AbstractString) = mmcif_dict.dict[field]
 
 function Base.setindex!(mmcif_dict::MMCIFDict,
-                    val::Vector{String},
+                    val::AbstractVector{<:String},
                     field::AbstractString)
     mmcif_dict.dict[field] = val
     return mmcif_dict
@@ -212,7 +212,7 @@ function MMCIFDict(f::IO; gzip::Bool=false)
 end
 
 # Add tokens to a mmCIF dictionary
-function populatedict!(mmcif_dict::MMCIFDict, tokens::Vector{String})
+function populatedict!(mmcif_dict::MMCIFDict, tokens::AbstractVector{<:String})
     key = ""
     keys = String[]
     loop_flag = false

@@ -179,7 +179,7 @@ end
 
 """
     downloadpdb(pdbid::AbstractString; <keyword arguments>)
-    downloadpdb(pdbid::Array{<:AbstractString, 1}; <keyword arguments>)
+    downloadpdb(pdbid::AbstractArray{<:AbstractString, 1}; <keyword arguments>)
     downloadpdb(f::Function, args...)
 
 Download files from the Protein Data Bank (PDB) via RCSB.
@@ -280,7 +280,7 @@ function downloadpdb(pdbid::AbstractString;
     return pdbpath
 end
 
-function downloadpdb(pdbidlist::Array{<:AbstractString, 1}; kwargs...)
+function downloadpdb(pdbidlist::AbstractArray{<:AbstractString, 1}; kwargs...)
     pdbpaths = String[]
     failedlist = String[]
     for pdbid in pdbidlist

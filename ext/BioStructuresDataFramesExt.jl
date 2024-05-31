@@ -15,7 +15,7 @@ The keyword argument `expand_disordered` (default `true`) determines whether to
 return all copies of disordered atoms or residues separately.
 See DataFrames.jl for more on how to use `DataFrame`s.
 """
-function DataFrames.DataFrame(ats::Vector{<:AbstractAtom},
+function DataFrames.DataFrame(ats::AbstractVector{<:AbstractAtom},
                     atom_selectors::Function...;
                     expand_disordered::Bool=true)
     df = DataFrame(ishetero=Bool[],
@@ -45,7 +45,7 @@ function DataFrames.DataFrame(ats::Vector{<:AbstractAtom},
     return df
 end
 
-function DataFrames.DataFrame(res::Vector{<:AbstractResidue},
+function DataFrames.DataFrame(res::AbstractVector{<:AbstractResidue},
                     residue_selectors::Function...;
                     expand_disordered::Bool=true)
     df = DataFrame(ishetero=Bool[],

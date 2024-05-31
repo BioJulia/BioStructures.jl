@@ -54,9 +54,9 @@ struct Transformation
     inds2::Vector{Int}
 end
 
-function Transformation(trans1::Array{<:Real},
-                        trans2::Array{<:Real},
-                        rot::Array{<:Real, 2})
+function Transformation(trans1::AbstractArray{<:Real},
+                        trans2::AbstractArray{<:Real},
+                        rot::AbstractArray{<:Real, 2})
     return Transformation(trans1, trans2, rot, [], [])
 end
 
@@ -89,7 +89,7 @@ function coordarray(el::StructuralElementOrList,
 end
 
 # Selector functions ignored
-coordarray(coords_in::Array{<:Real}, atom_selectors::Function...) = coords_in
+coordarray(coords_in::AbstractArray{<:Real}, atom_selectors::Function...) = coords_in
 
 """
     applytransform!(el, transformation)
@@ -112,7 +112,7 @@ end
 
 Modify coordinates according to a transformation.
 """
-function applytransform(cs::Array{<:Real, 2},
+function applytransform(cs::AbstractArray{<:Real, 2},
                         t::Transformation)
     return t.rot * (cs .- t.trans1) .+ t.trans2
 end
@@ -185,10 +185,10 @@ function Transformation(el1::StructuralElementOrList,
     return Transformation(coordarray(atoms1), coordarray(atoms2), inds1, inds2)
 end
 
-function Transformation(coords1::Array{<:Real, 2},
-                        coords2::Array{<:Real, 2},
-                        inds1::Vector{Int}=Int[],
-                        inds2::Vector{Int}=Int[])
+function Transformation(coords1::AbstractArray{<:Real, 2},
+                        coords2::AbstractArray{<:Real, 2},
+                        inds1::AbstractVector{<:Integer}=Int[],
+                        inds2::AbstractVector{<:Integer}=Int[])
     if size(coords1) != size(coords2)
         throw(ArgumentError("Size of coordinate arrays differ: $(size(coords1)) and $(size(coords2))"))
     end
@@ -223,7 +223,7 @@ be of the same length.
 The keyword argument `rmsdatoms` is an atom selector that selects the atoms to
 calculate RMSD on (default `calphaselector`).
 """
-function rmsd(coords_one::Array{<:Real}, coords_two::Array{<:Real})
+function rmsd(coords_one::AbstractArray{<:Real}, coords_two::AbstractArray{<:Real})
     if size(coords_one) != size(coords_two)
         throw(ArgumentError("Coordinate arrays have size $(size(coords_one)) " *
             "and $(size(coords_two)) but must be the same to calculate RMSD"))
@@ -266,7 +266,7 @@ be of the same length.
 The keyword argument `dispatoms` is an atom selector that selects the atoms to
 calculate displacements on (default `calphaselector`).
 """
-function displacements(coords_one::Array{<:Real}, coords_two::Array{<:Real})
+function displacements(coords_one::AbstractArray{<:Real}, coords_two::AbstractArray{<:Real})
     if size(coords_one) != size(coords_two)
         throw(ArgumentError("Coordinate arrays have size $(size(coords_one)) " *
             "and $(size(coords_two)) but must be the same to calculate displacements"))
@@ -361,7 +361,7 @@ function bondangle(at_a::AbstractAtom,
     )
 end
 
-function bondangle(vec_a::Vector{<:Real}, vec_b::Vector{<:Real})
+function bondangle(vec_a::AbstractVector{<:Real}, vec_b::AbstractVector{<:Real})
     return acos(dot(vec_a, vec_b) / (norm(vec_a) * norm(vec_b)))
 end
 
@@ -385,9 +385,9 @@ function dihedralangle(at_a::AbstractAtom,
         coords(at_d) - coords(at_c))
 end
 
-function dihedralangle(vec_a::Vector{<:Real},
-                    vec_b::Vector{<:Real},
-                    vec_c::Vector{<:Real})
+function dihedralangle(vec_a::AbstractVector{<:Real},
+                    vec_b::AbstractVector{<:Real},
+                    vec_c::AbstractVector{<:Real})
     return atan(
         dot(cross(cross(vec_a, vec_b), cross(vec_b, vec_c)), vec_b / norm(vec_b)),
         dot(cross(vec_a, vec_b), cross(vec_b, vec_c)))

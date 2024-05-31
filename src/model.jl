@@ -480,7 +480,7 @@ Set the coordinates in Å of an `AbstractAtom` to a `Vector` of 3 numbers.
 
 For `DisorderedAtom`s only the default atom is updated.
 """
-function coords!(at::Atom, new_coords::Vector{<:Real})
+function coords!(at::Atom, new_coords)
     if length(new_coords) != 3
         throw(ArgumentError("3 coordinates must be given"))
     end
@@ -490,8 +490,8 @@ function coords!(at::Atom, new_coords::Vector{<:Real})
     return at
 end
 
-function coords!(dis_at::DisorderedAtom, coords::Vector{<:Real})
-    coords!(defaultatom(dis_at), coords)
+function coords!(dis_at::DisorderedAtom, new_coords)
+    coords!(defaultatom(dis_at), new_coords)
 end
 
 """
@@ -1175,7 +1175,7 @@ Base.collect(dis_at::DisorderedAtom) = [dis_at[al] for al in altlocids(dis_at)]
 Returns a copy of a `Vector` of `StructuralElement`s with all elements that do
 not return `true` from all the selector functions removed.
 """
-function applyselectors(els::Vector{<:StructuralElement}, selectors::Function...)
+function applyselectors(els::AbstractVector{<:StructuralElement}, selectors::Function...)
     new_list = copy(els)
     applyselectors!(new_list, selectors...)
     return new_list
@@ -1187,7 +1187,7 @@ end
 Removes from a `Vector` of `StructuralElement`s all elements that do not return
 `true` from all the selector functions.
 """
-function applyselectors!(els::Vector{<:StructuralElement}, selectors::Function...)
+function applyselectors!(els::AbstractVector{<:StructuralElement}, selectors::Function...)
     for selector in selectors
         filter!(selector, els)
     end
@@ -1208,9 +1208,9 @@ collectmodels(mo::Model) = [mo]
 
 collectmodels(el::Union{Chain, AbstractResidue, AbstractAtom}) = [model(el)]
 
-collectmodels(mos::Vector{Model}) = mos
+collectmodels(mos::AbstractVector{Model}) = mos
 
-function collectmodels(els::Vector{<:Union{Chain, AbstractResidue, AbstractAtom}})
+function collectmodels(els::AbstractVector{<:Union{Chain, AbstractResidue, AbstractAtom}})
     mo_list = Model[]
     for el in els
         if !(model(el) in mo_list)
@@ -1263,7 +1263,7 @@ collectchains(ch::Chain) = [ch]
 
 collectchains(el::Union{AbstractResidue, AbstractAtom}) = [chain(el)]
 
-function collectchains(mos::Vector{Model})
+function collectchains(mos::AbstractVector{Model})
     ch_list = Chain[]
     for mo in mos
         append!(ch_list, collectchains(mo))
@@ -1271,9 +1271,9 @@ function collectchains(mos::Vector{Model})
     return ch_list
 end
 
-collectchains(chs::Vector{Chain}) = chs
+collectchains(chs::AbstractVector{Chain}) = chs
 
-function collectchains(els::Vector{<:Union{AbstractResidue, AbstractAtom}})
+function collectchains(els::AbstractVector{<:Union{AbstractResidue, AbstractAtom}})
     ch_list = Chain[]
     for el in els
         if !(chain(el) in ch_list)
@@ -1362,7 +1362,7 @@ end
 
 collectresidues(at::AbstractAtom; expand_disordered::Bool=false) = AbstractResidue[residue(at)]
 
-function collectresidues(at_list::Vector{<:AbstractAtom}; expand_disordered::Bool=false)
+function collectresidues(at_list::AbstractVector{<:AbstractAtom}; expand_disordered::Bool=false)
     res_list = AbstractResidue[]
     for at in at_list
         if !(residue(at) in res_list)
@@ -1818,7 +1818,7 @@ function BioSequences.LongAA(el::Union{StructuralElement, Vector{Model},
     return LongAA(collectresidues(el, residue_selectors...); gaps=gaps)
 end
 
-function BioSequences.LongAA(res::Vector{<:AbstractResidue}; gaps::Bool=true)
+function BioSequences.LongAA(res::AbstractVector{<:AbstractResidue}; gaps::Bool=true)
     seq = AminoAcid[]
     for i in 1:length(res)
         if haskey(threeletter_to_aa, resname(res[i], strip=false))
