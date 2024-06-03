@@ -3300,4 +3300,50 @@ end
 rm(temp_filename, force=true)
 rm(temp_dir, recursive=true, force=true)
 
+@testset "Selection syntax" begin
+
+    struc = retrievepdb("4YC6")
+
+    @test length(collectatoms(struc, sel"all")) == 12271
+    @test length(collectatoms(struc, sel"name CA")) == 1420
+    sel = collectatoms(struc, sel"index = 13")
+    @test length(sel) == 1
+    @test serial(sel[1]) == 13
+
+    @test length(collectatoms(struc, sel"index > 1 and index < 13")) == 11
+    @test length(collectatoms(struc, sel"index >= 1 and index <= 13")) == 13
+    @test length(collectatoms(struc, sel"protein")) == 11632
+    @test length(collectatoms(struc, sel"water")) == 639
+    @test length(collectatoms(struc, sel"resname GLY")) == 320
+    @test length(collectatoms(struc, sel"protein and resnum = 2")) == 36
+    @test length(collectatoms(struc, sel"neutral")) == 8300
+    @test length(collectatoms(struc, sel"charged")) == 3332
+    @test length(collectatoms(struc, sel"sidechain")) == 5952
+    @test length(collectatoms(struc, sel"acidic")) == 1604
+    @test length(collectatoms(struc, sel"basic")) == 1728
+    @test length(collectatoms(struc, sel"hydrophobic")) == 3604
+    @test length(collectatoms(struc, sel"not hydrophobic")) == 8667
+    @test length(collectatoms(struc, sel"aliphatic")) == 3276
+    @test length(collectatoms(struc, sel"aromatic")) == 2340
+    @test length(collectatoms(struc, sel"polar")) == 6544
+    @test length(collectatoms(struc, sel"nonpolar")) == 5088
+    @test length(collectatoms(struc, sel"backbone")) == 5680
+    @test length(collectatoms(struc, sel"element H")) == 0
+    @test length(collectatoms(struc, sel"name CA or element S")) == 1464
+    @test length(collectatoms(struc, sel"disordered")) == 68
+    
+    # Missing: 
+    # segment
+    #@test length(filter(sel"segname PROT", struc)) == 1463
+    # residue should be the incremental residue number
+    #@test length(filter(sel"residue = 2", struc)) == 11
+
+    # input errors: invalid selection syntax
+    @test_throws ArgumentError collectatoms(struc, sel"abc")
+    # input errors: invalid value type
+    @test_throws ArgumentError collectatoms(struc, sel"index = A")
+    @test_throws ArgumentError collectatoms(struc, sel"resnum C")
+
+end
+
 end # TestBioStructures

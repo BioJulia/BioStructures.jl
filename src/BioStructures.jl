@@ -31,6 +31,7 @@ include("mmcif.jl")
 include("mmtf.jl")
 include("spatial.jl")
 include("secondary.jl")
+include("select.jl")
 
 if !isdefined(Base, :get_extension)
     include("../ext/BioStructuresDataFramesExt.jl")
