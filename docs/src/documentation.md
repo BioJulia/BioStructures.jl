@@ -274,7 +274,7 @@ In fact, [`pairalign`](@ref) is extended to carry out the above steps and return
 ## String selection syntax
 
 !!! compat
-    The string-selection syntax was introduced in version 3.13.
+    The string-selection syntax was introduced in version 3.2.0
 
 `BioStructures.jl` exports the `sel` macro that provides a practical way to collect atoms from a structure
 using a natural selection syntax. It must be used as: 
