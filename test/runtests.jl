@@ -3296,7 +3296,6 @@ rm(temp_dir, recursive=true, force=true)
 
 @testset "Selection syntax" begin
 
-    using BioStructures
     struc = retrievepdb("4YC6")
 
     @test length(collectatoms(struc, sel"all")) == 12271
