@@ -8,6 +8,7 @@
 using BioStructures
 using BenchmarkTools
 import BioCore # Imported to avoid clash with BioGenerics distance
+using BioSequences
 using Random
 
 # Use files in BioFmtSpecimens

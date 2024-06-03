@@ -12,9 +12,7 @@ module BioStructures
 using LinearAlgebra
 using Statistics
 
-using BioAlignments
 using BioGenerics
-using BioSequences
 using BioSymbols
 using CodecZlib
 using Downloads
@@ -34,6 +32,8 @@ include("secondary.jl")
 include("select.jl")
 
 if !isdefined(Base, :get_extension)
+    include("../ext/BioStructuresBioSequencesExt.jl")
+    include("../ext/BioStructuresBioAlignmentsExt.jl")
     include("../ext/BioStructuresDataFramesExt.jl")
     include("../ext/BioStructuresGraphsExt.jl")
 end

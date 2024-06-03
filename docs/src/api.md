@@ -4,8 +4,11 @@
 CurrentModule = BioStructures
 ```
 
-On Julia 1.9 and later the `DataFrame` and `MetaGraph` constructors are in package extensions in order to reduce the number of dependencies.
-Call `using DataFrames` and `using Graphs, MetaGraphs` respectively to access these functions.
+On Julia 1.9 and later package extensions are used in order to reduce the number of dependencies:
+- To use `LongAA`, call `using BioSequences`.
+- To use `pairalign` or `Transformation` on structural elements, call `using BioSequences, BioAlignments`.
+- To use `DataFrame`, call `using DataFrames`.
+- To use `MetaGraph`, call `using Graphs, MetaGraphs`.
 
 Exported names:
 ```@index

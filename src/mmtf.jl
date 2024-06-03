@@ -302,7 +302,8 @@ function writemmtf(output::Union{AbstractString, IO},
                 ))
             end
             if !ishetero(res)
-                sequence *= string(LongAA(res; gaps=false))
+                res_symbol = get(threeletter_to_aa, resname(res, strip=false), AA_X)
+                sequence *= string(res_symbol)
             end
             group_count += 1
 

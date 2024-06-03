@@ -214,9 +214,11 @@ julia> countatoms(struc, expand_disordered=true)
 819
 ```
 
-The amino acid sequence of a protein can be retrieved by passing an element to [`LongAA`](@ref) with optional residue selectors:
+The amino acid sequence of a protein can be retrieved by passing an element to `LongAA` with optional residue selectors:
 
 ```julia-repl
+julia> using BioSequences
+
 julia> LongAA(struc['A'], standardselector)
 85aa Amino Acid Sequence:
 RCGSQGGGSTCPGLRCCSIWGWCGDSEPYCGRTCENKCW…RCGAAVGNPPCGQDRCCSVHGWCGGGNDYCSGGNCQYRC
@@ -225,10 +227,12 @@ RCGSQGGGSTCPGLRCCSIWGWCGDSEPYCGRTCENKCW…RCGAAVGNPPCGQDRCCSVHGWCGGGNDYCSGGNCQYR
 The `gaps` keyword argument determines whether to add gaps to the sequence based on missing residue numbers (default `true`).
 [`threeletter_to_aa`](@ref) provides a lookup table of amino acid codes should that be required.
 See [BioSequences.jl](https://github.com/BioJulia/BioSequences.jl) and [BioAlignments.jl](https://github.com/BioJulia/BioAlignments.jl) for more on how to deal with sequences.
-[`LongAA`](@ref) is an alias for `LongSequence{AminoAcidAlphabet}`.
+`LongAA` is an alias for `LongSequence{AminoAcidAlphabet}`.
 For example, to see the alignment of CDK1 and CDK2 (this example also makes use of Julia's [broadcasting](https://docs.julialang.org/en/v1/manual/arrays/#Broadcasting-1)):
 
 ```julia-repl
+julia> using BioSequences, BioAlignments
+
 julia> struc1, struc2 = retrievepdb.(["4YC6", "1HCL"])
 2-element Array{MolecularStructure,1}:
  MolecularStructure 4YC6.pdb with 1 models, 8 chains (A,B,C,D,E,F,G,H), 1420 residues, 12271 atoms
@@ -238,8 +242,6 @@ julia> seq1, seq2 = LongAA.([struc1["A"], struc2["A"]], standardselector, gaps=f
 2-element Vector{LongAA}:
  MEDYTKIEKIGEGTYGVVYKGRHKTTGQVVAMKKIRLES…SHVKNLDENGLDLLSKMLIYDPAKRISGKMALNHPYFND
  MENFQKVEKIGEGTYGVVYKARNKLTGEVVALKKIRTEG…RSLLSQMLHYDPNKRISAKAALAHPFFQDVTKPVPHLRL
-
-julia> using BioAlignments
 
 julia> scoremodel = AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1);
 
@@ -268,7 +270,7 @@ PairwiseAlignmentResult{Int64, LongAA, LongAA}:
 
 ```
 
-In fact, [`pairalign`](@ref) is extended to carry out the above steps and return the alignment by calling `pairalign(struc1["A"], struc2["A"], standardselector)` in this case.
+In fact, `pairalign` is extended to carry out the above steps and return the alignment by calling `pairalign(struc1["A"], struc2["A"], standardselector)` in this case.
 `scoremodel` and `aligntype` are keyword arguments with the defaults shown above.
 
 ## String selection syntax

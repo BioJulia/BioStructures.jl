@@ -83,9 +83,7 @@ export
     disorderselector,
     hydrogenselector,
     allselector,
-    LongAA,
-    threeletter_to_aa,
-    pairalign
+    threeletter_to_aa
 
 "A macromolecular structural element."
 abstract type StructuralElement end
@@ -1798,64 +1796,6 @@ allselector(res::AbstractResidue) = true
 
 "Lookup table of amino acids, re-exported from BioSymbols."
 const threeletter_to_aa = BioSymbols.threeletter_to_aa
-
-"""
-    LongAA(el)
-
-Return the amino acid sequence of a structural element.
-
-Additional arguments are residue selector functions - only residues that
-return `true` from all the functions are retained.
-The `gaps` keyword argument determines whether to add gaps to the sequence
-based on missing residue numbers (default `true`).
-See BioSequences.jl for more on how to use sequences.
-`LongAA` is an alias for `LongSequence{AminoAcidAlphabet}`.
-"""
-function BioSequences.LongAA(el::Union{StructuralElement, Vector{Model},
-                        Vector{Chain}, Vector{<:AbstractAtom}},
-                        residue_selectors::Function...;
-                        gaps::Bool=true)
-    return LongAA(collectresidues(el, residue_selectors...); gaps=gaps)
-end
-
-function BioSequences.LongAA(res::AbstractVector{<:AbstractResidue}; gaps::Bool=true)
-    seq = AminoAcid[]
-    for i in 1:length(res)
-        if haskey(threeletter_to_aa, resname(res[i], strip=false))
-            push!(seq, threeletter_to_aa[resname(res[i], strip=false)])
-        else
-            push!(seq, AA_X)
-        end
-        # Add gaps based on missing residue numbers
-        if gaps && i + 1 <= length(res) && resnumber(res[i + 1]) - resnumber(res[i]) > 1 && chainid(res[i]) == chainid(res[i + 1])
-            append!(seq, [AA_Gap for _ in 1:(resnumber(res[i + 1]) - resnumber(res[i]) - 1)])
-        end
-    end
-    return LongAA(seq)
-end
-
-"""
-    pairalign(el1, el2, residue_selectors...)
-
-Carries out a pairwise sequence alignment between the sequences of two
-structural elements.
-
-Additional arguments are residue selector functions - only residues that return
-`true` from all the functions are retained.
-The keyword arguments `scoremodel` (default
-`AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1)`) and `aligntype`
-(default `GlobalAlignment()`) determine the properties of the alignment.
-See BioAlignments.jl for more on how to use alignments.
-"""
-function BioAlignments.pairalign(el1::StructuralElementOrList,
-                            el2::StructuralElementOrList,
-                            residue_selectors::Function...;
-                            scoremodel::AbstractScoreModel=AffineGapScoreModel(BLOSUM62, gap_open=-10, gap_extend=-1),
-                            aligntype::BioAlignments.AbstractAlignment=GlobalAlignment())
-    seq1 = LongAA(el1, residue_selectors...; gaps=false)
-    seq2 = LongAA(el2, residue_selectors...; gaps=false)
-    return pairalign(aligntype, seq1, seq2, scoremodel)
-end
 
 # Descriptive showing of elements on a single line
 
