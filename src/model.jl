@@ -83,7 +83,12 @@ export
     disorderselector,
     hydrogenselector,
     allselector,
-    threeletter_to_aa
+    threeletter_to_aa,
+    PDB,
+    PDBXML,
+    MMCIF,
+    MMTF,
+    pdbextension
 
 "A macromolecular structural element."
 abstract type StructuralElement end
@@ -1796,6 +1801,24 @@ allselector(res::AbstractResidue) = true
 
 "Lookup table of amino acids, re-exported from BioSymbols."
 const threeletter_to_aa = BioSymbols.threeletter_to_aa
+
+# PDB file formats
+
+"Protein Data Bank (PDB) file format."
+struct PDB end
+
+"Protein Data Bank (PDB) XML file format."
+struct PDBXML end
+
+"Protein Data Bank (PDB) mmCIF file format."
+struct MMCIF end
+
+"Protein Data Bank (PDB) MMTF file format."
+struct MMTF end
+
+"Mapping of Protein Data Bank (PDB) formats to their file extensions."
+const pdbextension = Dict{Type, String}(PDB=> "pdb", PDBXML=> "xml",
+                                        MMCIF=> "cif", MMTF=> "mmtf")
 
 # Descriptive showing of elements on a single line
 

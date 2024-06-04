@@ -9,9 +9,6 @@
 "Read, write and manipulate macromolecular structures."
 module BioStructures
 
-using LinearAlgebra
-using Statistics
-
 using BioGenerics
 using BioSymbols
 using CodecZlib
@@ -23,13 +20,17 @@ using RecipesBase
 using STRIDE_jll
 using DSSP_jll
 
+using LinearAlgebra
+using Statistics
+
 include("model.jl")
+include("select.jl")
 include("pdb.jl")
 include("mmcif.jl")
 include("mmtf.jl")
+include("download.jl")
 include("spatial.jl")
 include("secondary.jl")
-include("select.jl")
 
 if !isdefined(Base, :get_extension)
     include("../ext/BioStructuresBioSequencesExt.jl")

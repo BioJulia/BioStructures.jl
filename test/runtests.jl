@@ -1,8 +1,5 @@
 module TestBioStructures
 
-using LinearAlgebra
-using Test
-
 using Aqua
 using BioAlignments
 using BioSequences
@@ -13,6 +10,9 @@ using Format
 using Graphs
 using MetaGraphs
 using RecipesBase
+
+using LinearAlgebra
+using Test
 
 using BioStructures
 using BioStructures:
@@ -3302,7 +3302,7 @@ rm(temp_dir, recursive=true, force=true)
 
 @testset "Selection syntax" begin
 
-    struc = retrievepdb("4YC6")
+    struc = retrievepdb("4YC6", dir=temp_dir)
 
     @test length(collectatoms(struc, sel"all")) == 12271
     @test length(collectatoms(struc, sel"name CA")) == 1420

@@ -275,10 +275,7 @@ In fact, `pairalign` is extended to carry out the above steps and return the ali
 
 ## String selection syntax
 
-!!! compat
-    The string-selection syntax was introduced in version 3.2.0
-
-`BioStructures.jl` exports the `sel` macro that provides a practical way to collect atoms from a structure
+BioStructures.jl exports the `sel` macro that provides a practical way to collect atoms from a structure
 using a natural selection syntax. It must be used as: 
 ```julia
 collectatoms(struc, sel"selection string")
