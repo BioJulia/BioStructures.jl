@@ -4,7 +4,7 @@
 CurrentModule = BioStructures
 ```
 
-On Julia 1.9 and later package extensions are used in order to reduce the number of dependencies:
+Package extensions are used in order to reduce the number of dependencies:
 - To use `LongAA`, call `using BioSequences`.
 - To use `pairalign` or `Transformation` on structural elements, call `using BioSequences, BioAlignments`.
 - To use `DataFrame`, call `using DataFrames`.

@@ -32,13 +32,6 @@ include("download.jl")
 include("spatial.jl")
 include("secondary.jl")
 
-if !isdefined(Base, :get_extension)
-    include("../ext/BioStructuresBioSequencesExt.jl")
-    include("../ext/BioStructuresBioAlignmentsExt.jl")
-    include("../ext/BioStructuresDataFramesExt.jl")
-    include("../ext/BioStructuresGraphsExt.jl")
-end
-
 @compile_workload begin
     let
         mktemp() do path, io
