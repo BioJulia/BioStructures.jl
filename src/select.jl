@@ -1,8 +1,209 @@
-#
-# Function to perform the most important selections that are used in solute-solvent
-# analysis
-#
-export @sel_str
+export
+    applyselectors,
+    applyselectors!,
+    standardselector,
+    heteroselector,
+    atomnameselector,
+    calphaatomnames,
+    calphaselector,
+    cbetaatomnames,
+    cbetaselector,
+    backboneatomnames,
+    backboneselector,
+    heavyatomselector,
+    resnameselector,
+    waterresnames,
+    waterselector,
+    notwaterselector,
+    disorderselector,
+    hydrogenselector,
+    allselector,
+    @sel_str
+
+"""
+    applyselectors(els, selectors...)
+
+Returns a copy of a `Vector` of `StructuralElement`s with all elements that do
+not return `true` from all the selector functions removed.
+"""
+function applyselectors(els::AbstractVector{<:StructuralElement}, selectors::Function...)
+    new_list = copy(els)
+    applyselectors!(new_list, selectors...)
+    return new_list
+end
+
+"""
+    applyselectors!(els, selectors...)
+
+Removes from a `Vector` of `StructuralElement`s all elements that do not return
+`true` from all the selector functions.
+"""
+function applyselectors!(els::AbstractVector{<:StructuralElement}, selectors::Function...)
+    for selector in selectors
+        filter!(selector, els)
+    end
+    return els
+end
+
+"""
+    standardselector(at)
+    standardselector(res)
+
+Determines if an `AbstractAtom` represents a standard atom, e.g. came from
+a ATOM record in a Protein Data Bank (PDB) file, or if an `AbstractResidue`
+represents a standard molecule, e.g. consists of ATOM records from a PDB
+file.
+"""
+standardselector(at::AbstractAtom) = !ishetero(at)
+standardselector(res::AbstractResidue) = !ishetero(res)
+
+"""
+    heteroselector(at)
+    heteroselector(res)
+
+Determines if an `AbstractAtom` represents a hetero atom, e.g. came from a
+HETATM record in a Protein Data Bank (PDB) file, or if an `AbstractResidue`
+represents a hetero molecule, e.g. consists of HETATM records from a PDB
+file.
+"""
+heteroselector(at::AbstractAtom) = ishetero(at)
+heteroselector(res::AbstractResidue) = ishetero(res)
+
+"""
+    atomnameselector(at, atom_names; strip=true)
+
+Determines if an `AbstractAtom` has its atom name in a list of names.
+`strip` determines whether surrounding whitespace is stripped from the atom
+name before it is checked in the list.
+"""
+function atomnameselector(at::AbstractAtom, atom_names; strip::Bool=true)
+    return atomname(at, strip=strip) in atom_names
+end
+
+"`Set` of Cα atom names."
+const calphaatomnames = Set(["CA"])
+
+"""
+    calphaselector(at)
+
+Determines if an `AbstractAtom` is not a hetero-atom and corresponds to a
+Cα atom.
+"""
+function calphaselector(at::AbstractAtom)
+    return standardselector(at) && atomnameselector(at, calphaatomnames)
+end
+
+"`Set` of Cβ atom names."
+const cbetaatomnames = Set(["CB"])
+
+"""
+    cbetaselector(at)
+
+Determines if an `AbstractAtom` is not a hetero-atom and corresponds to a
+Cβ atom, or a Cα atom in glycine.
+"""
+function cbetaselector(at::AbstractAtom)
+    return standardselector(at) &&
+        (atomnameselector(at, cbetaatomnames) ||
+        (resname(at, strip=false) == "GLY" && atomnameselector(at, calphaatomnames)))
+end
+
+"`Set` of protein backbone atom names."
+const backboneatomnames = Set(["CA", "N", "C", "O"])
+
+"""
+    backboneselector(at)
+
+Determines if an `AbstractAtom` is not a hetero-atom and corresponds to a
+protein backbone atom.
+"""
+function backboneselector(at::AbstractAtom)
+    return standardselector(at) && atomnameselector(at, backboneatomnames)
+end
+
+"""
+    heavyatomselector(at)
+
+Determines if an `AbstractAtom` corresponds to a heavy (non-hydrogen) atom
+and is not a hetero-atom.
+"""
+heavyatomselector(at::AbstractAtom) = standardselector(at) && !hydrogenselector(at)
+
+"""
+    resnameselector(res, res_names)
+    resnameselector(at, res_names)
+
+Determines if an `AbstractResidue` or `AbstractAtom` has its residue name
+in a list of names.
+"""
+function resnameselector(el::Union{AbstractResidue, AbstractAtom}, res_names)
+    return resname(el, strip=false) in res_names
+end
+
+"`Set` of residue names corresponding to water."
+const waterresnames = Set(["HOH", "WAT"])
+
+"""
+    waterselector(res)
+    waterselector(at)
+
+Determines if an `AbstractResidue` or `AbstractAtom` represents a water
+molecule, i.e. whether the residue name is in `waterresnames`.
+"""
+function waterselector(el::Union{AbstractResidue, AbstractAtom})
+    return resnameselector(el, waterresnames)
+end
+
+"""
+    notwaterselector(res)
+    notwaterselector(at)
+
+Determines if an `AbstractResidue` or `AbstractAtom` does not represent a
+water molecule, i.e. whether the residue name is not in `waterresnames`.
+"""
+function notwaterselector(el::Union{AbstractResidue, AbstractAtom})
+    return !waterselector(el)
+end
+
+"""
+    disorderselector(at)
+    disorderselector(res)
+
+Determines whether an `AbstractAtom` or `AbstractResidue` is disordered,
+i.e. has multiple locations in the case of atoms or multiple residue names
+(point mutants) in the case of residues.
+"""
+disorderselector(at::AbstractAtom) = isdisorderedatom(at)
+disorderselector(res::AbstractResidue) = isdisorderedres(res)
+
+# Either the element is H or the element field is empty, the atom name contains
+#   an H and there are no letters in the atom name before H
+# For example atom names "1H" and "H1" would be hydrogens but "NH1" would not
+"""
+    hydrogenselector(at)
+
+Determines if an `AbstractAtom` represents hydrogen.
+
+Uses the element field where possible, otherwise uses the atom name.
+"""
+function hydrogenselector(at::AbstractAtom)
+    at_name = atomname(at)
+    return element(at) == "H" ||
+        (element(at) == "" &&
+        'H' in at_name &&
+        !occursin(r"[a-zA-Z]", at_name[1:findfirst(isequal('H'), at_name) - 1]))
+end
+
+"""
+    allselector(at)
+    allselector(res)
+
+Trivial selector that returns `true` for any `AbstractAtom` or
+`AbstractResidue`.
+Use it to select all atoms or residues.
+"""
+allselector(at::AbstractAtom) = true
+allselector(res::AbstractResidue) = true
 
 #
 # Dictionaries of residue, atom, and element types, as originally written

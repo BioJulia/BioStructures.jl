@@ -526,6 +526,10 @@ To get access to the secondary structure code of a residue or atom as a `Char`:
 sscode(res)
 sscode(at)
 ```
+Or for the whole structure:
+```julia
+sscode.(collectresidues(struc))
+```
 The secondary structure code of a residue can be changed using [`sscode!`](@ref).
 
 [`rundssp`](@ref) and [`runstride`](@ref) can also be run directly on structure files:
