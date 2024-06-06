@@ -4037,6 +4037,7 @@ Other packages in the Julia ecosystem that deal with structural bioinformatics o
 - [Chemfiles.jl](https://github.com/chemfiles/Chemfiles.jl) - read and write various chemistry trajectory files.
 - [Bio3DView.jl](https://github.com/jgreener64/Bio3DView.jl) - view molecular structures (see [Visualising structures](@ref)).
 - [BioMakie.jl](https://github.com/BioJulia/BioMakie.jl) - view molecular structures and sequence alignments.
+- [ProtPlot.jl](https://github.com/MurrellGroup/ProtPlot.jl) - view protein ribbons with Makie.jl.
 - [ProteinSecondaryStructures.jl](https://github.com/m3g/ProteinSecondaryStructures.jl) - parses DSSP and STRIDE outputs.
 - [MMTF.jl](https://github.com/BioJulia/MMTF.jl) - read and write MMTF files. BioStructures.jl builds on top of MMTF.jl.
 - [ProteinEnsembles.jl](https://github.com/jgreener64/ProteinEnsembles.jl) - model ensembles of protein structures.
