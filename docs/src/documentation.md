@@ -308,9 +308,17 @@ The keywords supported are:
 |  `chain`       | `String`   | [`chainid`](@ref)                |
 |  `chainid`     | `String`   | [`chainid`](@ref)                |
 |  `element`     | `String`   | [`element`](@ref)                |
+|  `inscode`     | `Char`     | [`inscode`](@ref)                |
+|  `sscode`      | `Char`     | [`sscode`](@ref)                 |
+|  `x`           | `Real`     | [`BioStructures.x`](@ref)        |
+|  `y`           | `Real`     | [`BioStructures.y`](@ref)        |
+|  `z`           | `Real`     | [`BioStructures.z`](@ref)        |
+|  `standard`    | -          | [`standardselector`](@ref)       |
+|  `hetero`      | -          | [`heteroselector`](@ref)         |
 |  `backbone`    | -          | [`backboneselector`](@ref)       |
 |  `sidechain`   | -          | [`sidechainselector`](@ref)      |
 |  `heavyatom`   | -          | [`heavyatomselector`](@ref)      |
+|  `hydrogen`    | -          | [`hydrogenselector`](@ref)       |
 |  `protein`     | -          | [`proteinselector`](@ref)        |
 |  `acidic`      | -          | [`acidicresselector`](@ref)      |
 |  `aliphatic`   | -          | [`aliphaticresselector`](@ref)   |
@@ -323,6 +331,9 @@ The keywords supported are:
 |  `nonpolar`    | -          | [`nonpolarresselector`](@ref)    |
 |  `water`       | -          | [`waterselector`](@ref)          |
 |  `disordered`  | -          | [`disorderselector`](@ref)       |
+|  `helix`       | -          | [`helixselector`](@ref)          |
+|  `sheet`       | -          | [`sheetselector`](@ref)          |
+|  `coil`        | -          | [`coilselector`](@ref)           |
 |  `all`         | -          | [`allselector`](@ref)            |
 
 ## Sequences and alignments

@@ -484,6 +484,8 @@ end
 function parse_to_type(key::Keyword, val)
     if key.value_type == String
         return val
+    elseif key.value_type == Char && length(val) == 1
+        return val[1]
     end
     try
         val = parse(key.value_type, val)
@@ -493,7 +495,7 @@ function parse_to_type(key::Keyword, val)
     end
 end
 
-keywords = [
+const keywords = [
     Keyword(Int    , "index"      , serial     , operators),
     Keyword(Int    , "serial"     , serial     , operators),
     Keyword(Int    , "resnumber"  , resnumber  , operators),
@@ -510,9 +512,17 @@ keywords = [
     Keyword(String , "chain"      , chainid    , operators),
     Keyword(String , "chainid"    , chainid    , operators),
     Keyword(String , "element"    , element    , operators),
+    Keyword(Char   , "inscode"    , inscode    , operators),
+    Keyword(Char   , "sscode"     , sscode     , operators),
+    Keyword(Float64, "x"          , x          , operators),
+    Keyword(Float64, "y"          , y          , operators),
+    Keyword(Float64, "z"          , z          , operators),
+    MacroKeyword("standard"   , standardselector),
+    MacroKeyword("hetero"     , heteroselector),
     MacroKeyword("backbone"   , backboneselector),
     MacroKeyword("sidechain"  , sidechainselector),
     MacroKeyword("heavyatom"  , heavyatomselector),
+    MacroKeyword("hydrogen"   , hydrogenselector),
     MacroKeyword("protein"    , proteinselector),
     MacroKeyword("acidic"     , acidicresselector),
     MacroKeyword("aliphatic"  , aliphaticresselector),
@@ -525,6 +535,9 @@ keywords = [
     MacroKeyword("nonpolar"   , nonpolarresselector),
     MacroKeyword("water"      , waterselector),
     MacroKeyword("disordered" , disorderselector),
+    MacroKeyword("helix"      , helixselector),
+    MacroKeyword("sheet"      , sheetselector),
+    MacroKeyword("coil"       , coilselector),
     MacroKeyword("all"        , allselector),
 ]
 

@@ -848,15 +848,16 @@ end
 end
 
 @testset "Selection syntax" begin
-    struc = retrievepdb("4YC6", dir=temp_dir)
+    struc = retrievepdb("4YC6", dir=temp_dir, run_dssp=true)
     @test length(collectatoms(struc, sel"all")) == 12271
     @test length(collectatoms(struc, sel"name CA")) == 1420
+    @test length(collectatoms(struc, sel"name CA", sel"x > 0")) == 312
     sel = collectatoms(struc, sel"index = 13")
     @test length(sel) == 1
     @test serial(sel[1]) == 13
-
     @test length(collectatoms(struc, sel"index > 1 and index < 13")) == 11
     @test length(collectatoms(struc, sel"index >= 1 and index <= 13")) == 13
+    @test length(collectatoms(struc, sel"beta > 100.0")) == 4807
     @test length(collectatoms(struc, sel"protein")) == 11632
     @test length(collectatoms(struc, sel"water")) == 639
     @test length(collectatoms(struc, sel"resname GLY")) == 320
@@ -876,6 +877,16 @@ end
     @test length(collectatoms(struc, sel"element H")) == 0
     @test length(collectatoms(struc, sel"name CA or element S")) == 1464
     @test length(collectatoms(struc, sel"disordered")) == 68
+    @test length(collectatoms(struc, sel"sscode E")) == 2448
+    @test length(collectatoms(struc, sel"helix")) == 4047
+
+    @test length(collectresidues(struc, sel"chain A or chain B")) == 544
+    @test length(collectresidues(struc, sel"standard")) == 1420
+    @test length(collectresidues(struc, sel"coil")) == 642
+    @test length(collectchains(struc, sel"chain B")) == 1
+    @test length(collectchains(struc, sel"chain I")) == 0
+    @test length(collectmodels(struc, sel"model 1")) == 1
+    @test length(collectmodels(struc, sel"model 2")) == 0
 
     @test_throws ArgumentError collectatoms(struc, sel"abc") # Invalid selection syntax
     @test_throws ArgumentError collectatoms(struc, sel"index = A") # Invalid value type
