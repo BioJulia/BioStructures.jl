@@ -142,9 +142,14 @@ For example `sort(res)` sorts a list of residues as described above, or `sort(re
 Since most operations should use a single version of an atom or residue, disordered entities are not expanded by default and only one entity is present in the array.
 This can be changed by setting `expand_disordered` to `true` in [`collectatoms`](@ref) or [`collectresidues`](@ref).
 
-Selectors are functions passed as additional arguments to these functions.
+## Making selections
+
+There are two ways to select subsets of atoms, residues, chains and models.
+
+### Selector functions
+
+Selector functions are passed as additional arguments to the collection functions described above.
 Only elements that return `true` when passed to all the selector are retained.
-See also the selection syntax [described below](@ref String-selection-syntax).
 For example:
 
 | Command                                                 | Action                                                            | Return type                |
@@ -155,27 +160,38 @@ For example:
 | `collectatoms(struc, calphaselector)`                   | Collect the Cα atoms of an element                                | `Array{AbstractAtom,1}`    |
 | `collectatoms(struc, calphaselector, disorderselector)` | Collect the disordered Cα atoms of an element                     | `Array{AbstractAtom,1}`    |
 
-The selectors available are:
+The selector functions available are:
 
-| Function                    | Acts on                             | Selects for                                                  |
-| :-------------------------- | :---------------------------------- | :----------------------------------------------------------- |
-| [`standardselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from standard (ATOM) records          |
-| [`heteroselector`](@ref)    | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from hetero (HETATM) records          |
-| [`atomnameselector`](@ref)  | `AbstractAtom`                      | Atoms with atom name in a given list                         |
-| [`calphaselector`](@ref)    | `AbstractAtom`                      | Cα atoms                                                     |
-| [`cbetaselector`](@ref)     | `AbstractAtom`                      | Cβ atoms, or Cα atoms for glycine residues                   |
-| [`backboneselector`](@ref)  | `AbstractAtom`                      | Atoms in the protein backbone (CA, N, C and O)               |
-| [`heavyatomselector`](@ref) | `AbstractAtom`                      | Non-hydrogen atoms                                           |
-| [`hydrogenselector`](@ref)  | `AbstractAtom`                      | Hydrogen atoms                                               |
-| [`resnameselector`](@ref)   | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name in a given list             |
-| [`waterselector`](@ref)     | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name HOH                         |
-| [`notwaterselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name not HOH                     |
-| [`disorderselector`](@ref)  | `AbstractAtom` or `AbstractResidue` | Atoms/residues with alternative locations                    |
-| [`allselector`](@ref)       | `AbstractAtom` or `AbstractResidue` | All atoms/residues                                           |
-| [`sscodeselector`](@ref)    | `AbstractAtom` or `AbstractResidue` | Atoms/residues with secondary structure code in a given list |
-| [`helixselector`](@ref)     | `AbstractAtom` or `AbstractResidue` | Atoms/residues that are part of an α-helix                   |
-| [`sheetselector`](@ref)     | `AbstractAtom` or `AbstractResidue` | Atoms/residues that are part of a β-sheet                    |
-| [`coilselector`](@ref)      | `AbstractAtom` or `AbstractResidue` | Atoms/residues that are part of a coil                       |
+| Function                         | Acts on                             | Selects for                                                  |
+| :------------------------------- | :---------------------------------- | :----------------------------------------------------------- |
+| [`standardselector`](@ref)       | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from standard (ATOM) records          |
+| [`heteroselector`](@ref)         | `AbstractAtom` or `AbstractResidue` | Atoms/residues arising from hetero (HETATM) records          |
+| [`atomnameselector`](@ref)       | `AbstractAtom`                      | Atoms with atom name in a given list                         |
+| [`calphaselector`](@ref)         | `AbstractAtom`                      | Cα atoms                                                     |
+| [`cbetaselector`](@ref)          | `AbstractAtom`                      | Cβ atoms, or Cα atoms for glycine residues                   |
+| [`backboneselector`](@ref)       | `AbstractAtom`                      | Heavy atoms in the protein backbone (CA, N, C and O)         |
+| [`sidechainselector`](@ref)      | `AbstractAtom`                      | Atoms not in the protein backbone                            |
+| [`heavyatomselector`](@ref)      | `AbstractAtom`                      | Non-hydrogen atoms                                           |
+| [`hydrogenselector`](@ref)       | `AbstractAtom`                      | Hydrogen atoms                                               |
+| [`resnameselector`](@ref)        | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name in a given list             |
+| [`proteinselector`](@ref)        | `AbstractAtom` or `AbstractResidue` | Atoms/residues in a protein or peptide                       |
+| [`acidicresselector`](@ref)      | `AbstractAtom` or `AbstractResidue` | Acidic amino acids                                           |
+| [`aliphaticresselector`](@ref)   | `AbstractAtom` or `AbstractResidue` | Aliphatic amino acids                                        |
+| [`aromaticresselector`](@ref)    | `AbstractAtom` or `AbstractResidue` | Aromatic amino acids                                         |
+| [`basicresselector`](@ref)       | `AbstractAtom` or `AbstractResidue` | Basic amino acids                                            |
+| [`chargedresselector`](@ref)     | `AbstractAtom` or `AbstractResidue` | Charged amino acids                                          |
+| [`neutralresselector`](@ref)     | `AbstractAtom` or `AbstractResidue` | Neutral amino acids                                          |
+| [`hydrophobicresselector`](@ref) | `AbstractAtom` or `AbstractResidue` | Hydrophobic amino acids                                      |
+| [`polarresselector`](@ref)       | `AbstractAtom` or `AbstractResidue` | Polar amino acids                                            |
+| [`nonpolarresselector`](@ref)    | `AbstractAtom` or `AbstractResidue` | Non-polar amino acids                                        |
+| [`waterselector`](@ref)          | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name HOH                         |
+| [`notwaterselector`](@ref)       | `AbstractAtom` or `AbstractResidue` | Atoms/residues with residue name not HOH                     |
+| [`disorderselector`](@ref)       | `AbstractAtom` or `AbstractResidue` | Atoms/residues with alternative locations                    |
+| [`sscodeselector`](@ref)         | `AbstractAtom` or `AbstractResidue` | Atoms/residues with secondary structure code in a given list |
+| [`helixselector`](@ref)          | `AbstractAtom` or `AbstractResidue` | Atoms/residues that are part of an α-helix                   |
+| [`sheetselector`](@ref)          | `AbstractAtom` or `AbstractResidue` | Atoms/residues that are part of a β-sheet                    |
+| [`coilselector`](@ref)           | `AbstractAtom` or `AbstractResidue` | Atoms/residues that are part of a coil                       |
+| [`allselector`](@ref)            | Any element                         | All elements                                                 |
 
 To create a new [`atomnameselector`](@ref), [`resnameselector`](@ref) or [`sscodeselector`](@ref):
 ```julia
@@ -213,6 +229,103 @@ julia> countresidues(struc, standardselector)
 julia> countatoms(struc, expand_disordered=true)
 819
 ```
+
+### String selection syntax
+
+BioStructures exports the [`@sel_str`](@ref) macro that provides a practical way to make selections using a natural selection syntax.
+It is used as `collectatoms(struc, sel"selection string")`, where `selection string` defines the atoms to be selected with the operators and keywords defined below.
+For example:
+
+```julia-repl
+julia> struc = retrievepdb("4YC6")
+[ Info: Downloading file from PDB: 4YC6
+ProteinStructure 4YC6.pdb with 1 models, 8 chains (A,B,C,D,E,F,G,H), 1420 residues, 12271 atoms
+
+julia> collectatoms(struc, sel"name CA and resnumber <= 5")
+24-element Vector{AbstractAtom}:
+ Atom CA with serial 2, coordinates [17.363, 31.409, -27.535]
+ Atom CA with serial 10, coordinates [20.769, 32.605, -28.801]
+ ⋮
+ Atom CA with serial 11096, coordinates [-8.996, 6.094, -29.097]
+
+julia> collectchains(struc, sel"chainid <= C")
+3-element Vector{Chain}:
+ Chain A with 285 residues, 147 other molecules, 2450 atoms
+ Chain B with 70 residues, 42 other molecules, 647 atoms
+ Chain C with 285 residues, 118 other molecules, 2421 atoms
+```
+
+There are also keywords to select groups with specific properties.
+For example:
+
+```julia-repl
+julia> ats = collectatoms(struc, sel"acidic and name N")
+188-element Vector{AbstractAtom}:
+ Atom N with serial 9, coordinates [19.33, 32.429, -28.593]
+ Atom N with serial 18, coordinates [21.056, 33.428, -26.564]
+ ⋮
+ Atom N with serial 11603, coordinates [-0.069, 21.516, -32.604]
+
+julia> resname.(ats) # Acidic residues
+188-element Vector{SubString{String}}:
+ "GLU"
+ "ASP"
+ ⋮
+ "GLU"
+
+julia> collectresidues(struc, sel"acidic")
+188-element Vector{AbstractResidue}:
+ Residue 2:A with name GLU, 9 atoms
+ Residue 3:A with name ASP, 8 atoms
+ ⋮
+ Residue 63:H with name GLU, 9 atoms
+```
+
+The operators currently supported are:
+
+| Operators                   | Acts on                             |
+| :-------------------------- | :---------------------------------- |
+| `=`, `>`, `<` `>=`, `<=`    | Properties with real values.        |
+| `and`, `or`, `not`          | Selections subsets.                 | 
+
+The keywords supported are:
+
+| Keyword        | Input type | Selects for                      |
+| :------------- | :--------- |:-------------------------------- |
+|  `index`       | `Int`      | [`serial`](@ref)                 |
+|  `serial`      | `Int`      | [`serial`](@ref)                 |
+|  `resnumber`   | `Int`      | [`resnumber`](@ref)              |
+|  `resnum`      | `Int`      | [`resnumber`](@ref)              |
+|  `resid`       | `Int`      | [`resid`](@ref)                  |
+|  `occupancy`   | `Real`     | [`occupancy`](@ref)              |
+|  `beta`        | `Real`     | [`tempfactor`](@ref)             |
+|  `tempfactor`  | `Real`     | [`tempfactor`](@ref)             |
+|  `model`       | `Int`      | [`modelnumber`](@ref)            |
+|  `modelnumber` | `Int`      | [`modelnumber`](@ref)            |
+|  `name`        | `String`   | [`atomname`](@ref)               |
+|  `atomname`    | `String`   | [`atomname`](@ref)               |
+|  `resname`     | `String`   | [`resname`](@ref)                |
+|  `chain`       | `String`   | [`chainid`](@ref)                |
+|  `chainid`     | `String`   | [`chainid`](@ref)                |
+|  `element`     | `String`   | [`element`](@ref)                |
+|  `backbone`    | -          | [`backboneselector`](@ref)       |
+|  `sidechain`   | -          | [`sidechainselector`](@ref)      |
+|  `heavyatom`   | -          | [`heavyatomselector`](@ref)      |
+|  `protein`     | -          | [`proteinselector`](@ref)        |
+|  `acidic`      | -          | [`acidicresselector`](@ref)      |
+|  `aliphatic`   | -          | [`aliphaticresselector`](@ref)   |
+|  `aromatic`    | -          | [`aromaticresselector`](@ref)    |
+|  `basic`       | -          | [`basicresselector`](@ref)       |
+|  `charged`     | -          | [`chargedresselector`](@ref)     |
+|  `neutral`     | -          | [`neutralresselector`](@ref)     |
+|  `hydrophobic` | -          | [`hydrophobicresselector`](@ref) |
+|  `polar`       | -          | [`polarresselector`](@ref)       |
+|  `nonpolar`    | -          | [`nonpolarresselector`](@ref)    |
+|  `water`       | -          | [`waterselector`](@ref)          |
+|  `disordered`  | -          | [`disorderselector`](@ref)       |
+|  `all`         | -          | [`allselector`](@ref)            |
+
+## Sequences and alignments
 
 The amino acid sequence of a protein can be retrieved by passing an element to `LongAA` with optional residue selectors:
 
@@ -272,96 +385,6 @@ PairwiseAlignmentResult{Int64, LongAA, LongAA}:
 
 In fact, `pairalign` is extended to carry out the above steps and return the alignment by calling `pairalign(struc1["A"], struc2["A"], standardselector)` in this case.
 `scoremodel` and `aligntype` are keyword arguments with the defaults shown above.
-
-## String selection syntax
-
-BioStructures.jl exports the `sel` macro that provides a practical way to collect atoms from a structure
-using a natural selection syntax. It must be used as: 
-```julia
-collectatoms(struc, sel"selection string")
-```
-where `struc` is the input structure and `selection string` defines the atoms to be selected, with the 
-operators and keyword defined below.
-
-For example:
-
-```julia-repl
-julia> struc = retrievepdb("4YC6")
-[ Info: Downloading file from PDB: 4YC6
-ProteinStructure 4YC6.pdb with 1 models, 8 chains (A,B,C,D,E,F,G,H), 1420 residues, 12271 atoms
-
-julia> collectatoms(struc, sel"name CA and resnumber <= 5")
-24-element Vector{AbstractAtom}:
- Atom CA with serial 2, coordinates [17.363, 31.409, -27.535]
- Atom CA with serial 10, coordinates [20.769, 32.605, -28.801]
- ⋮
- Atom CA with serial 11096, coordinates [-8.996, 6.094, -29.097]
-```
-
-There are also macro-keywords to select groups of atoms with specific properties. For example:
-
-```julia-repl
-julia> ats = collectatoms(struc, sel"acidic and name N")
-188-element Vector{AbstractAtom}:
- Atom N with serial 9, coordinates [19.33, 32.429, -28.593]
- Atom N with serial 18, coordinates [21.056, 33.428, -26.564]
- ⋮
- Atom N with serial 11603, coordinates [-0.069, 21.516, -32.604]
-
-julia> resname.(ats)
-188-element Vector{SubString{String}}:
- "GLU"
- "ASP"
- ⋮
- "GLU"
-```
-
-The current supported operators are:
-
-| Operators                   | Acts on                             |
-| :-------------------------- | :---------------------------------- |
-| `=`, `>`, `<` `>=`, `<=`    | Properties with real values.        |
-| `and`, `or`, `not`          | Selections subsets.                 | 
-
-The keywords supported are:
-
-
-| Keyword                     | Input type   | Selects for          |
-| :-------------------------- | :-----------:|:---------------------|
-|  `index`                     | `Int`         | `serial`              |
-|  `serial`                    | `Int`         | `serial`              |
-|  `resnumber`                 | `Int`         | `resnumber`           |
-|  `resnum`                    | `Int`         | `resnumber`           |
-|  `resid`                     | `Int`         | `resid`               |
-|  `occupancy`                 | `Real`        | `occupancy`           |
-|  `beta`                      | `Real`        | `tempfactor`          |
-|  `tempfactor`                | `Real`        | `tempfactor`          |
-|  `model`                     | `Int`         | `modelnumber`         |
-|  `modelnumber`               | `Int`         | `modelnumber`         |
-|  `name`                      | `String`      | `atomname`            |
-|  `atomname`                  | `String`      | `atomname`            |
-|  `segname`                   | `String`      | `segname`             |
-|  `resname`                   | `String`      | `resname`             |
-|  `chain`                     | `String`      | `chainid`             |
-|  `chainid`                   | `String`      | `chainid`             |
-|  `element`                   | `String`      | `element`             |
-|  `water`                     |               | Water molecules       |
-|  `protein`                   |               | Protein atoms         |
-|  `polar`                     |               | Polar residues        |
-|  `nonpolar`                  |               | Non-polar residues    |
-|  `basic`                     |               | Basic residues        |
-|  `acidic`                    |               | Acidic residues       |
-|  `charged`                   |               | Charged residues      |
-|  `aliphatic`                 |               | Aliphatic residues    |
-|  `aromatic`                  |               | Aromatic residues     |
-|  `hydrophobic`               |               | Hydrophobic residues  |
-|  `neutral`                   |               | Neutral residues      |
-|  `backbone`                  |               | Backbone atoms        |
-|  `heavyatom`                 |               | Heavy atoms           |
-|  `disordered`                |               | Disordered atoms      |
-|  `sidechain`                 |               | Side-chain atoms      |
-|  `all`                       |               | all atoms             |
-
 
 ## Spatial calculations
 

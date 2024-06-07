@@ -48,6 +48,7 @@ include("secondary.jl")
                     """)
             struc = read(path, PDB)
             show(devnull, struc)
+            collectatoms(struc, sel"serial < 5")
         end
     end
 end
