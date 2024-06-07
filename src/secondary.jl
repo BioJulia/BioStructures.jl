@@ -1,21 +1,26 @@
 export
+    helixsscodes,
+    sheetsscodes,
+    coilsscodes,
     rundssp!,
     rundssp,
     runstride!,
     runstride,
     sscode,
-    sscode!,
-    sscodeselector,
-    helixsscodes,
-    sheetsscodes,
-    coilsscodes,
-    helixselector,
-    sheetselector,
-    coilselector
+    sscode!
 
 const dssp_executable = `$(DSSP_jll.mkdssp()) --mmcif-dictionary $(DSSP_jll.mmcif_pdbx_dic) --output-format dssp`
 const stride_executable = `$(STRIDE_jll.stride_exe())`
 const ss_code_unassigned = '-'
+
+"`Set` of secondary structure codes corresponding to an α-helix."
+const helixsscodes = Set(['G', 'H', 'I', 'P'])
+
+"`Set` of secondary structure codes corresponding to a β-sheet."
+const sheetsscodes = Set(['E', 'B'])
+
+"`Set` of secondary structure codes corresponding to a coil."
+const coilsscodes = Set(['C', 'T', 'S', ' '])
 
 """
     rundssp!(struc)
@@ -167,57 +172,4 @@ function sscode!(dis_res::DisorderedResidue, ss_code)
         sscode!(disorderedres(dis_res, res_name), ss_code)
     end
     return dis_res
-end
-
-"""
-    sscodeselector(res, ss_codes)
-    sscodeselector(at, ss_codes)
-
-Determines if an `AbstractResidue` or `AbstractAtom` has its secondary structure code
-in a list of secondary structure codes.
-"""
-function sscodeselector(el::Union{AbstractResidue, AbstractAtom}, ss_codes)
-    return sscode(el) in ss_codes
-end
-
-"`Set` of secondary structure codes corresponding to an α-helix."
-const helixsscodes = Set(['G', 'H', 'I', 'P'])
-
-"`Set` of secondary structure codes corresponding to a β-sheet."
-const sheetsscodes = Set(['E', 'B'])
-
-"`Set` of secondary structure codes corresponding to a coil."
-const coilsscodes = Set(['C', 'T', 'S', ' '])
-
-"""
-    helixselector(res)
-    helixselector(at)
-
-Determines if an `AbstractResidue` or `AbstractAtom` is part of an α-helix,
-i.e. whether the secondary structure code is in `helixsscodes`.
-"""
-function helixselector(el::Union{AbstractResidue, AbstractAtom})
-    return sscodeselector(el, helixsscodes)
-end
-
-"""
-    sheetselector(res)
-    sheetselector(at)
-
-Determines if an `AbstractResidue` or `AbstractAtom` is part of a β-sheet,
-i.e. whether the secondary structure code is in `sheetsscodes`.
-"""
-function sheetselector(el::Union{AbstractResidue, AbstractAtom})
-    return sscodeselector(el, sheetsscodes)
-end
-
-"""
-    coilselector(res)
-    coilselector(at)
-
-Determines if an `AbstractResidue` or `AbstractAtom` is part of a coil,
-i.e. whether the secondary structure code is in `coilsscodes`.
-"""
-function coilselector(el::Union{AbstractResidue, AbstractAtom})
-    return sscodeselector(el, coilsscodes)
 end

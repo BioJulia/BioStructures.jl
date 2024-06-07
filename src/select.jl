@@ -13,6 +13,7 @@ export
     backboneselector,
     sidechainselector,
     heavyatomselector,
+    hydrogenselector,
     resnameselector,
     proteinselector,
     acidicresselector,
@@ -28,7 +29,10 @@ export
     waterselector,
     notwaterselector,
     disorderselector,
-    hydrogenselector,
+    sscodeselector,
+    helixselector,
+    sheetselector,
+    coilselector,
     allselector,
     @sel_str
 
@@ -202,6 +206,24 @@ and is not a hetero-atom.
 """
 heavyatomselector(at::AbstractAtom) = standardselector(at) && !hydrogenselector(at)
 
+# Either the element is H or the element field is empty, the atom name contains
+#   an H and there are no letters in the atom name before H
+# For example atom names "1H" and "H1" would be hydrogens but "NH1" would not
+"""
+    hydrogenselector(at)
+
+Determines if an `AbstractAtom` represents hydrogen.
+
+Uses the element field where possible, otherwise uses the atom name.
+"""
+function hydrogenselector(at::AbstractAtom)
+    at_name = atomname(at)
+    return element(at) == "H" ||
+        (element(at) == "" &&
+        'H' in at_name &&
+        !occursin(r"[a-zA-Z]", at_name[1:findfirst(isequal('H'), at_name) - 1]))
+end
+
 """
     resnameselector(res, res_names)
     resnameselector(at, res_names)
@@ -360,33 +382,57 @@ i.e. has multiple locations in the case of atoms or multiple residue names
 disorderselector(at::AbstractAtom) = isdisorderedatom(at)
 disorderselector(res::AbstractResidue) = isdisorderedres(res)
 
-# Either the element is H or the element field is empty, the atom name contains
-#   an H and there are no letters in the atom name before H
-# For example atom names "1H" and "H1" would be hydrogens but "NH1" would not
 """
-    hydrogenselector(at)
+    sscodeselector(res, ss_codes)
+    sscodeselector(at, ss_codes)
 
-Determines if an `AbstractAtom` represents hydrogen.
-
-Uses the element field where possible, otherwise uses the atom name.
+Determines if an `AbstractResidue` or `AbstractAtom` has its secondary structure code
+in a list of secondary structure codes.
 """
-function hydrogenselector(at::AbstractAtom)
-    at_name = atomname(at)
-    return element(at) == "H" ||
-        (element(at) == "" &&
-        'H' in at_name &&
-        !occursin(r"[a-zA-Z]", at_name[1:findfirst(isequal('H'), at_name) - 1]))
+function sscodeselector(el::Union{AbstractResidue, AbstractAtom}, ss_codes)
+    return sscode(el) in ss_codes
+end
+
+"""
+    helixselector(res)
+    helixselector(at)
+
+Determines if an `AbstractResidue` or `AbstractAtom` is part of an α-helix,
+i.e. whether the secondary structure code is in `helixsscodes`.
+"""
+function helixselector(el::Union{AbstractResidue, AbstractAtom})
+    return sscodeselector(el, helixsscodes)
+end
+
+"""
+    sheetselector(res)
+    sheetselector(at)
+
+Determines if an `AbstractResidue` or `AbstractAtom` is part of a β-sheet,
+i.e. whether the secondary structure code is in `sheetsscodes`.
+"""
+function sheetselector(el::Union{AbstractResidue, AbstractAtom})
+    return sscodeselector(el, sheetsscodes)
+end
+
+"""
+    coilselector(res)
+    coilselector(at)
+
+Determines if an `AbstractResidue` or `AbstractAtom` is part of a coil,
+i.e. whether the secondary structure code is in `coilsscodes`.
+"""
+function coilselector(el::Union{AbstractResidue, AbstractAtom})
+    return sscodeselector(el, coilsscodes)
 end
 
 """
     allselector(at)
     allselector(res)
 
-Trivial selector that returns `true` for any `AbstractAtom` or
-`AbstractResidue`.
-Use it to select all atoms or residues.
+Trivial selector that returns `true` for any structural element.
 """
-allselector(at::Union{AbstractResidue, AbstractAtom}) = true
+allselector(el) = true
 
 # Acts as a function when used within typical julia filtering functions 
 #   by converting a string selection into a query call
@@ -396,6 +442,7 @@ end
 
 (s::Select)(at) = apply_query(parse_query(s.sel), at)
 
+"String selection syntax."
 macro sel_str(str)
     Select(str)
 end
@@ -463,21 +510,21 @@ keywords = [
     Keyword(String , "chain"      , chainid    , operators),
     Keyword(String , "chainid"    , chainid    , operators),
     Keyword(String , "element"    , element    , operators),
-    MacroKeyword("water"      , waterselector),
+    MacroKeyword("backbone"   , backboneselector),
+    MacroKeyword("sidechain"  , sidechainselector),
+    MacroKeyword("heavyatom"  , heavyatomselector),
     MacroKeyword("protein"    , proteinselector),
-    MacroKeyword("polar"      , polarresselector),
-    MacroKeyword("nonpolar"   , nonpolarresselector),
-    MacroKeyword("basic"      , basicresselector),
     MacroKeyword("acidic"     , acidicresselector),
-    MacroKeyword("charged"    , chargedresselector),
     MacroKeyword("aliphatic"  , aliphaticresselector),
     MacroKeyword("aromatic"   , aromaticresselector),
-    MacroKeyword("hydrophobic", hydrophobicresselector),
+    MacroKeyword("basic"      , basicresselector),
+    MacroKeyword("charged"    , chargedresselector),
     MacroKeyword("neutral"    , neutralresselector),
-    MacroKeyword("backbone"   , backboneselector),
-    MacroKeyword("heavyatom"  , heavyatomselector),
+    MacroKeyword("hydrophobic", hydrophobicresselector),
+    MacroKeyword("polar"      , polarresselector),
+    MacroKeyword("nonpolar"   , nonpolarresselector),
+    MacroKeyword("water"      , waterselector),
     MacroKeyword("disordered" , disorderselector),
-    MacroKeyword("sidechain"  , sidechainselector),
     MacroKeyword("all"        , allselector),
 ]
 
