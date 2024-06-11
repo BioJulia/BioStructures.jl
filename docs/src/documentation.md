@@ -464,7 +464,7 @@ using Plots
 plot(contacts)
 ```
 
-![contactmap](contactmap.png)
+![contactmap](assets/contactmap.png)
 
 For a quick, text-based representation of a [`ContactMap`](@ref) use [`showcontactmap`](@ref).
 
@@ -476,7 +476,7 @@ using Plots
 plot(dists)
 ```
 
-![distancemap](distancemap.png)
+![distancemap](assets/distancemap.png)
 
 Structural elements can be superimposed, and superposition-dependent properties such as the RMSD can be calculated.
 To carry out superimposition, BioStructures.jl carries out a sequence alignment and superimposes aligned residues using the [Kabsch algorithm](https://en.wikipedia.org/wiki/Kabsch_algorithm).
@@ -4063,6 +4063,23 @@ viewer.render();
 
 See the [Bio3DView.jl tutorial](http://nbviewer.jupyter.org/github/jgreener64/Bio3DView.jl/blob/master/examples/tutorial.ipynb) for more information.
 [BioMakie.jl](https://github.com/BioJulia/BioMakie.jl) can also be used to visualise BioStructures objects.
+
+## Design decisions
+
+The relationship between different types in BioStructures is shown below:
+
+![types](assets/types.svg)
+
+The design is based on Biopython, and has the intention of representing the complexity of the data in the PDB without it getting in the way of users.
+This hierarchical approach differs from some packages that represent structures as lists of either atoms or residues.
+Note that it is possible to store non-biopolymer molecules in this representation, and there are many such examples in the PDB.
+In general chemical terms: `MolecularStructure` is analogous to ensemble, `Model` to conformation, `Chain` to molecule and `Residue` to monomeric unit when relevant.
+
+The aim of BioStructures is not so much to read in the rows of a structure file, but to unambiguously represent the molecules contained within the file.
+This makes operations such as converting between file formats easier, at the cost of some complexity and occasional limits on the ability to read in files with format violations.
+For example, we have no way to represent multiple copies of the same atom with the same alt loc ID, as they would be placed at the same spot in the hierarchy.
+Such files often lead to silent errors, however, so we recommend users follow the appropriate format guidelines.
+The mmCIF format is able to store arbitrary data systematically if required.
 
 ## Related software
 
