@@ -14,7 +14,6 @@ using BioSymbols
 using CodecZlib
 using Downloads
 using Format
-import MMTF: parsemmtf, writemmtf # Imported to avoid clash with MMTF name
 using PrecompileTools
 using RecipesBase
 using STRIDE_jll

@@ -8,6 +8,7 @@ using CodecZlib
 using DataFrames
 using Format
 using Graphs
+import MMTF as MMTFPkg # Imported to avoid clash with MMTF name
 using MetaGraphs
 using RecipesBase
 
@@ -852,6 +853,7 @@ end
     @test length(collectatoms(struc, sel"all")) == 12271
     @test length(collectatoms(struc, sel"name CA")) == 1420
     @test length(collectatoms(struc, sel"name CA", sel"x > 0")) == 312
+    @test length(collectatoms(struc, calphaselector, sel"x > 0")) == 312
     sel = collectatoms(struc, sel"index = 13")
     @test length(sel) == 1
     @test serial(sel[1]) == 13

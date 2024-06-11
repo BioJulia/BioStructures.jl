@@ -41,7 +41,7 @@ julia> mmcif_dict["_entity_src_nat.common_name"]
 A [`MMCIFDict`](@ref) can be accessed in similar ways to a standard dictionary, and if necessary the underlying dictionary of [`MMCIFDict`](@ref) `d` can be accessed with `d.dict`.
 Note that the values of the dictionary are always an `Array{String,1}`, even if only one value was read in or the data is numerical.
 
-MMTF files can be read into the same data structure with `read("/path/to/mmtf/file.mmtf", MMTF)`.
+MMTF files can be read into the same data structure with `read("/path/to/mmtf/file.mmtf", MMTF)` once you have imported MMTF.jl with `import MMTF as MMTFPkg`.
 The keyword argument `gzip`, default `false`, determines if the file is gzipped.
 In a similar manner to mmCIF dictionaries, a MMTF file can be read into a dictionary with [`MMTFDict`](@ref).
 The values of the dictionary are a variety of types depending on the [MMTF specification](https://github.com/rcsb/mmtf/blob/master/spec.md).
@@ -710,7 +710,7 @@ A [`MMCIFDict`](@ref) can also be written using [`writemmcif`](@ref):
 writemmcif("1EN2_out.dic", mmcif_dict)
 ```
 
-To write out a MMTF file, use the [`writemmtf`](@ref) function with any element type or a [`MMTFDict`](@ref) as an argument.
+To write out a MMTF file, call `import MMTF as MMTFPkg` and use the [`writemmtf`](@ref) function with any element type or a [`MMTFDict`](@ref) as an argument.
 The `gzip` keyword argument, default `false`, determines whether to gzip the written file.
 
 Unlike for the collection functions, `expand_disordered` is set to `true` when writing files as it is usually desirable to retain all entities.

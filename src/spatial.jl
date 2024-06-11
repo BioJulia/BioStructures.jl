@@ -32,8 +32,8 @@ Kabsch algorithm.
 
 When called with structural elements, carries out a pairwise alignment and
 superimposes on atoms from aligned residues.
-In this case, keyword arguments for pairwise alignment can be given, see
-`pairalign`.
+In this case the BioSequences.jl and BioAlignments.jl packages should be imported.
+Keyword arguments for pairwise alignment can be given, see `pairalign`.
 The residue selectors determine which residues to do the pairwise alignment on.
 The keyword argument `alignatoms` is an atom selector that selects the atoms to
 calculate the superimposition on (default `calphaselector`).

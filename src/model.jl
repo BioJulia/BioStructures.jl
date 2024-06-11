@@ -69,7 +69,10 @@ export
     PDBXML,
     MMCIF,
     MMTF,
-    pdbextension
+    pdbextension,
+    generatechainid,
+    MMTFDict,
+    writemmtf
 
 "A macromolecular structural element."
 abstract type StructuralElement end
@@ -1613,8 +1616,69 @@ struct MMCIF end
 struct MMTF end
 
 "Mapping of Protein Data Bank (PDB) formats to their file extensions."
-const pdbextension = Dict{Type, String}(PDB=> "pdb", PDBXML=> "xml",
-                                        MMCIF=> "cif", MMTF=> "mmtf")
+const pdbextension = Dict{Type, String}(
+    PDB    => "pdb",
+    PDBXML => "xml",
+    MMCIF  => "cif",
+    MMTF   => "mmtf",
+)
+
+"""
+    generatechainid(entity_id)
+
+Convert a positive `Integer` into a chain ID.
+
+Goes A to Z, then AA to ZA, AB to ZB etc.
+This is in line with Protein Data Bank (PDB) conventions.
+"""
+function generatechainid(entity_id::Integer)
+    entity_id > 0 || throw(ArgumentError("Entity ID $entity_id is not positive"))
+    divisor = entity_id
+    out_string = ""
+    while divisor > 0
+        modulo = (divisor - 1) % 26
+        out_string *= Char(65 + modulo)
+        divisor = Int(floor((divisor - modulo) / 26))
+    end
+    return out_string
+end
+
+"""
+    MMTFDict(filepath; gzip=false)
+    MMTFDict(io; gzip=false)
+    MMTFDict()
+
+A Macromolecular Transmission Format (MMTF) dictionary.
+Use of the dictionary requires the MMTF.jl package to be imported with
+`import MMTF as MMTFPkg`.
+Can be accessed using similar functions to a standard `Dict`.
+Keys are field names as a `String` and values are various types.
+To directly access the underlying dictionary of `MMTFDict` `d`, use
+`d.dict`.
+Call `MMTFDict` with a filepath or stream to read the dictionary from that
+source.
+The keyword argument `gzip` (default `false`) determines if the file is gzipped.
+"""
+struct MMTFDict <: AbstractDict{String, Any}
+    dict::Dict{String, Any}
+end
+
+"""
+    writemmtf(output, element, atom_selectors...; gzip=false)
+    writemmtf(output, mmtf_dict; gzip=false)
+
+Write a `StructuralElementOrList` or a `MMTFDict` to a MMTF file or output
+stream.
+
+Requires the MMTF.jl package to be imported with `import MMTF as MMTFPkg`.
+Atom selector functions can be given as additional arguments - only atoms
+that return `true` from all the functions are retained.
+The keyword argument `expand_disordered` (default `true`) determines whether to
+return all copies of disordered residues and atoms.
+The keyword argument `gzip` (default `false`) determines if the file should be
+gzipped.
+"""
+function writemmtf end
 
 # Descriptive showing of elements on a single line
 

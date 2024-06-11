@@ -1,73 +1,59 @@
-export
-    MMTFDict,
-    generatechainid,
-    writemmtf
+module BioStructuresMMTFExt
 
-"""
-    MMTFDict(filepath; gzip=false)
-    MMTFDict(io; gzip=false)
-    MMTFDict()
-
-A Macromolecular Transmission Format (MMTF) dictionary.
-
-Can be accessed using similar functions to a standard `Dict`.
-Keys are field names as a `String` and values are various types.
-To directly access the underlying dictionary of `MMTFDict` `d`, use
-`d.dict`.
-Call `MMTFDict` with a filepath or stream to read the dictionary from that
-source.
-The keyword argument `gzip` (default `false`) determines if the file is gzipped.
-"""
-struct MMTFDict <: AbstractDict{String, Any}
-    dict::Dict{String, Any}
-end
+using BioStructures
+using BioSymbols
+import MMTF as MMTFPkg # Imported to avoid clash with MMTF name
 
 # Create an empty MMTF dictionary
 # Matches the decoded form of a MMTF file using MMTF.jl
 # Encoding and decoding this Dict gives an identical Dict
-MMTFDict() = MMTFDict(Dict{String, Any}(
-        "altLocList"         => Char[],
-        "atomIdList"         => Int32[],
-        "bFactorList"        => Float32[],
-        "bioAssemblyList"    => Any[],
-        "bondAtomList"       => Int32[],
-        "bondOrderList"      => Int8[],
-        "chainIdList"        => String[],
-        "chainNameList"      => String[],
-        "chainsPerModel"     => Any[],
-        "depositionDate"     => "",
-        "entityList"         => Any[],
-        "experimentalMethods"=> Any[],
-        "groupIdList"        => Int32[],
-        "groupList"          => Any[],
-        "groupsPerChain"     => Any[],
-        "groupTypeList"      => Int32[],
-        "insCodeList"        => Char[],
-        "mmtfProducer"       => "",
-        "mmtfVersion"        => "",
-        "ncsOperatorList"    => Any[],
-        "numAtoms"           => 0,
-        "numBonds"           => 0,
-        "numChains"          => 0,
-        "numGroups"          => 0,
-        "numModels"          => 0,
-        "occupancyList"      => Float32[],
-        "releaseDate"        => "",
-        "resolution"         => 0.0,
-        "rFree"              => "",
-        "rWork"              => "",
-        "secStructList"      => Int8[],
-        "sequenceIndexList"  => Int32[],
-        "spaceGroup"         => "",
-        "structureId"        => "",
-        "title"              => "",
-        "unitCell"           => Any[],
-        "xCoordList"         => Float32[],
-        "yCoordList"         => Float32[],
-        "zCoordList"         => Float32[]))
+BioStructures.MMTFDict() = MMTFDict(Dict{String, Any}(
+    "altLocList"         => Char[],
+    "atomIdList"         => Int32[],
+    "bFactorList"        => Float32[],
+    "bioAssemblyList"    => Any[],
+    "bondAtomList"       => Int32[],
+    "bondOrderList"      => Int8[],
+    "chainIdList"        => String[],
+    "chainNameList"      => String[],
+    "chainsPerModel"     => Any[],
+    "depositionDate"     => "",
+    "entityList"         => Any[],
+    "experimentalMethods"=> Any[],
+    "groupIdList"        => Int32[],
+    "groupList"          => Any[],
+    "groupsPerChain"     => Any[],
+    "groupTypeList"      => Int32[],
+    "insCodeList"        => Char[],
+    "mmtfProducer"       => "",
+    "mmtfVersion"        => "",
+    "ncsOperatorList"    => Any[],
+    "numAtoms"           => 0,
+    "numBonds"           => 0,
+    "numChains"          => 0,
+    "numGroups"          => 0,
+    "numModels"          => 0,
+    "occupancyList"      => Float32[],
+    "releaseDate"        => "",
+    "resolution"         => 0.0,
+    "rFree"              => "",
+    "rWork"              => "",
+    "secStructList"      => Int8[],
+    "sequenceIndexList"  => Int32[],
+    "spaceGroup"         => "",
+    "structureId"        => "",
+    "title"              => "",
+    "unitCell"           => Any[],
+    "xCoordList"         => Float32[],
+    "yCoordList"         => Float32[],
+    "zCoordList"         => Float32[],
+))
 
-MMTFDict(filepath::AbstractString; gzip::Bool=false) = MMTFDict(parsemmtf(filepath; gzip=gzip))
-MMTFDict(io::IO; gzip::Bool=false) = MMTFDict(parsemmtf(io; gzip=gzip))
+function BioStructures.MMTFDict(filepath::AbstractString; gzip::Bool=false)
+    return MMTFDict(MMTFPkg.parsemmtf(filepath; gzip=gzip))
+end
+
+BioStructures.MMTFDict(io::IO; gzip::Bool=false) = MMTFDict(MMTFPkg.parsemmtf(io; gzip=gzip))
 
 Base.getindex(mmtf_dict::MMTFDict, field::AbstractString) = mmtf_dict.dict[field]
 
@@ -99,7 +85,7 @@ function Base.read(input::IO,
             run_dssp::Bool=false,
             run_stride::Bool=false,
             gzip::Bool=false)
-    d = MMTFDict(parsemmtf(input; gzip=gzip))
+    d = MMTFDict(MMTFPkg.parsemmtf(input; gzip=gzip))
     return MolecularStructure(
         d;
         structure_name=structure_name,
@@ -111,7 +97,7 @@ function Base.read(input::IO,
     )
 end
 
-function MolecularStructure(d::MMTFDict;
+function BioStructures.MolecularStructure(d::MMTFDict;
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
@@ -145,30 +131,31 @@ function MolecularStructure(d::MMTFDict;
                 for ai in 1:length(group["atomNameList"])
                     atom_i += 1
                     if (read_std_atoms || hets[chain_i]) && (read_het_atoms || !hets[chain_i])
-                        unsafe_addatomtomodel!(
+                        BioStructures.unsafe_addatomtomodel!(
                             struc[model_i],
-                                AtomRecord(
-                                    hets[chain_i],
-                                    d["atomIdList"][atom_i],
-                                    group["atomNameList"][ai],
-                                    d["altLocList"][atom_i] == '\0' ? ' ' : d["altLocList"][atom_i],
-                                    group["groupName"],
-                                    d["chainNameList"][chain_i],
-                                    d["groupIdList"][group_i],
-                                    d["insCodeList"][group_i] == '\0' ? ' ' : d["insCodeList"][group_i],
-                                    [
-                                        d["xCoordList"][atom_i],
-                                        d["yCoordList"][atom_i],
-                                        d["zCoordList"][atom_i],
-                                    ],
-                                    d["occupancyList"][atom_i],
-                                    d["bFactorList"][atom_i],
-                                    group["elementList"][ai],
-                                    # Add + to positive charges to match PDB convention
-                                    group["formalChargeList"][ai] > 0 ? "+$(group["formalChargeList"][ai])" :
-                                                string(group["formalChargeList"][ai])
-                                );
-                                remove_disorder=remove_disorder)
+                            AtomRecord(
+                                hets[chain_i],
+                                d["atomIdList"][atom_i],
+                                group["atomNameList"][ai],
+                                d["altLocList"][atom_i] == '\0' ? ' ' : d["altLocList"][atom_i],
+                                group["groupName"],
+                                d["chainNameList"][chain_i],
+                                d["groupIdList"][group_i],
+                                d["insCodeList"][group_i] == '\0' ? ' ' : d["insCodeList"][group_i],
+                                [
+                                    d["xCoordList"][atom_i],
+                                    d["yCoordList"][atom_i],
+                                    d["zCoordList"][atom_i],
+                                ],
+                                d["occupancyList"][atom_i],
+                                d["bFactorList"][atom_i],
+                                group["elementList"][ai],
+                                # Add + to positive charges to match PDB convention
+                                group["formalChargeList"][ai] > 0 ? "+$(group["formalChargeList"][ai])" :
+                                            string(group["formalChargeList"][ai]),
+                            );
+                            remove_disorder=remove_disorder,
+                        )
                     end
                 end
             end
@@ -183,7 +170,7 @@ function MolecularStructure(d::MMTFDict;
             delete!(models(struc), modelnumber(mo))
         end
     end
-    fixlists!(struc)
+    BioStructures.fixlists!(struc)
 
     if run_dssp && run_stride
         throw(ArgumentError("run_dssp and run_stride cannot both be true"))
@@ -198,48 +185,14 @@ function MolecularStructure(d::MMTFDict;
     return struc
 end
 
-"""
-    generatechainid(entity_id)
-
-Convert a positive `Integer` into a chain ID.
-
-Goes A to Z, then AA to ZA, AB to ZB etc.
-This is in line with Protein Data Bank (PDB) conventions.
-"""
-function generatechainid(entity_id::Integer)
-    entity_id > 0 || throw(ArgumentError("Entity ID $entity_id is not positive"))
-    divisor = entity_id
-    out_string = ""
-    while divisor > 0
-        modulo = (divisor - 1) % 26
-        out_string *= Char(65 + modulo)
-        divisor = Int(floor((divisor - modulo) / 26))
-    end
-    return out_string
-end
-
-"""
-    writemmtf(output, element, atom_selectors...; gzip=false)
-    writemmtf(output, mmtf_dict; gzip=false)
-
-Write a `StructuralElementOrList` or a `MMTFDict` to a MMTF file or output
-stream.
-
-Atom selector functions can be given as additional arguments - only atoms
-that return `true` from all the functions are retained.
-The keyword argument `expand_disordered` (default `true`) determines whether to
-return all copies of disordered residues and atoms.
-The keyword argument `gzip` (default `false`) determines if the file should be
-gzipped.
-"""
-function writemmtf(output::Union{AbstractString, IO},
+function BioStructures.writemmtf(output::Union{AbstractString, IO},
                 d::MMTFDict;
                 gzip::Bool=false)
-    writemmtf(d.dict, output; gzip=gzip)
+    MMTFPkg.writemmtf(d.dict, output; gzip=gzip)
     return
 end
 
-function writemmtf(output::Union{AbstractString, IO},
+function BioStructures.writemmtf(output::Union{AbstractString, IO},
                 el::StructuralElementOrList,
                 atom_selectors::Function...;
                 expand_disordered::Bool=true,
@@ -356,9 +309,9 @@ function writemmtf(output::Union{AbstractString, IO},
         push!(d["atomIdList"], serial(at))
         push!(d["bFactorList"], tempfactor(at))
         push!(d["occupancyList"], occupancy(at))
-        push!(d["xCoordList"], x(at))
-        push!(d["yCoordList"], y(at))
-        push!(d["zCoordList"], z(at))
+        push!(d["xCoordList"], BioStructures.x(at))
+        push!(d["yCoordList"], BioStructures.y(at))
+        push!(d["zCoordList"], BioStructures.z(at))
     end
 
     push!(d["chainsPerModel"], chain_i)
@@ -375,3 +328,5 @@ function writemmtf(output::Union{AbstractString, IO},
 
     return writemmtf(output, d; gzip=gzip)
 end
+
+end # BioStructuresMMTFExt

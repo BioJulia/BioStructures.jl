@@ -30,6 +30,7 @@ Read a Protein Data Bank (PDB) file and return a `MolecularStructure`.
 
 # Arguments
 - `format::Type`: the format of the PDB file; options are PDB, MMCIF and MMTF.
+    MMTF requires the MMTF.jl package to be imported with `import MMTF as MMTFPkg`.
 - `structure_name::AbstractString`: the name given to the returned
     `MolecularStructure`; defaults to the file name.
 - `remove_disorder::Bool=false`: whether to remove atoms with alt loc ID not ' '

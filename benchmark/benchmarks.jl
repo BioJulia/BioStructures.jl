@@ -9,6 +9,7 @@ using BioStructures
 using BenchmarkTools
 import BioCore # Imported to avoid clash with BioGenerics distance
 using BioSequences
+import MMTF as MMTFPkg # Imported to avoid clash with MMTF name
 using Random
 
 # Use files in BioFmtSpecimens

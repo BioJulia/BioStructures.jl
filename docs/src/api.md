@@ -6,9 +6,10 @@ CurrentModule = BioStructures
 
 Package extensions are used in order to reduce the number of dependencies:
 - To use `LongAA`, call `using BioSequences`.
-- To use `pairalign` or `Transformation` on structural elements, call `using BioSequences, BioAlignments`.
+- To use `pairalign` or [`Transformation`](@ref) on structural elements, call `using BioSequences, BioAlignments`.
 - To use `DataFrame`, call `using DataFrames`.
 - To use `MetaGraph`, call `using Graphs, MetaGraphs`.
+- To use [`MMTFDict`](@ref) or [`writemmtf`](@ref), call `import MMTF as MMTFPkg` (to avoid clashing with [`BioStructures.MMTF`](@ref)).
 
 Exported names:
 ```@index
