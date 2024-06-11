@@ -27,7 +27,6 @@ include("secondary.jl")
 include("select.jl")
 include("pdb.jl")
 include("mmcif.jl")
-include("mmtf.jl")
 include("download.jl")
 include("spatial.jl")
 
