@@ -222,12 +222,12 @@ A `StructuralElement` or `Vector` of `StructuralElement`s up to
 a `Vector{Model}`.
 """
 const StructuralElementOrList = Union{
-        StructuralElement,
-        Vector{Model},
-        Vector{Chain},
-        Vector{<:AbstractResidue},
-        Vector{<:AbstractAtom},
-    }
+    StructuralElement,
+    Vector{Model},
+    Vector{Chain},
+    Vector{<:AbstractResidue},
+    Vector{<:AbstractAtom},
+}
 
 # Allow accessing sub elements contained in an element like a dictionary
 # e.g. allows you to do res[atom_name] rather than res.atoms[atom_name]
@@ -1792,49 +1792,49 @@ Base.show(io::IO, struc::MolecularStructure) = print(io,
     "with $(countmodels(struc)) models, ",
     countchains(struc) != 0 ? "$(countchains(struc)) chains ($(join(chainids(struc), ","))), " : "0 chains, ",
     "$(countresidues(struc, standardselector)) residues, ",
-    "$(countatoms(struc)) atoms"
+    "$(countatoms(struc)) atoms",
 )
 
 Base.show(io::IO, mo::Model) = print(io,
     "Model $(modelnumber(mo)) with ",
     countchains(mo) != 0 ? "$(countchains(mo)) chains ($(join(chainids(mo), ","))), " : "0 chains, ",
     "$(countresidues(mo, standardselector)) residues, ",
-    "$(countatoms(mo)) atoms"
+    "$(countatoms(mo)) atoms",
 )
 
 Base.show(io::IO, ch::Chain) = print(io,
     "Chain $(chainid(ch)) with ",
     "$(countresidues(ch, standardselector)) residues, ",
     "$(countresidues(ch, heteroselector)) other molecules, ",
-    "$(countatoms(ch)) atoms"
+    "$(countatoms(ch)) atoms",
 )
 
 Base.show(io::IO, res::Residue) = print(io,
     "Residue $(resid(res, full=true)) with ",
     "name $(resname(res)), ",
-    "$(countatoms(res)) atoms"
+    "$(countatoms(res)) atoms",
 )
 
 Base.show(io::IO, dis_res::DisorderedResidue) = print(io,
     "DisorderedResidue $(resid(dis_res, full=true)) with ",
-    "names $(join(resnames(dis_res), ","))"
+    "names $(join(resnames(dis_res), ","))",
 )
 
 Base.show(io::IO, at::Atom) = print(io,
     "Atom $(atomname(at)) with ",
     "serial $(serial(at)), ",
     "coordinates $(coords(at))",
-    altlocid(at) != ' ' ? ", alt loc ID $(altlocid(at))" : ""
+    altlocid(at) != ' ' ? ", alt loc ID $(altlocid(at))" : "",
 )
 
 Base.show(io::IO, dis_at::DisorderedAtom) = print(io,
     "DisorderedAtom $(atomname(dis_at)) with ",
-    "alt loc IDs $(join(altlocids(dis_at), ","))"
+    "alt loc IDs $(join(altlocids(dis_at), ","))",
 )
 
 Base.show(io::IO, at_rec::AtomRecord) = print(io,
     "AtomRecord $(strip(at_rec.atom_name)) with ",
     "serial $(at_rec.serial), ",
     "coordinates $(at_rec.coords)",
-    at_rec.alt_loc_id != ' ' ? ", alt loc ID $(at_rec.alt_loc_id)" : ""
+    at_rec.alt_loc_id != ' ' ? ", alt loc ID $(at_rec.alt_loc_id)" : "",
 )

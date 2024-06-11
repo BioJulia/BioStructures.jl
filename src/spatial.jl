@@ -123,6 +123,7 @@ end
 Calculate the `Transformation` that maps the first element onto the second,
 and modify all coordinates in the first element according to the transformation.
 
+Requires the BioSequences.jl and BioAlignments.jl packages to be imported.
 See `Transformation` for keyword arguments.
 """
 function superimpose!(el1::StructuralElementOrList,
@@ -166,6 +167,7 @@ Get the root-mean-square deviation (RMSD) in Å between two
 
 If `superimpose` is `true` (the default), the elements are superimposed before
 RMSD calculation and the RMSD is calculated on the superimposed residues.
+In this case the BioSequences.jl and BioAlignments.jl packages should be imported.
 See `Transformation` for keyword arguments.
 If `superimpose` is `false` the elements are assumed to be superimposed and must
 be of the same length.
@@ -209,6 +211,7 @@ Get the displacements in Å between atomic coordinates from two
 
 If `superimpose` is `true` (the default), the elements are superimposed before
 calculation and the displacements are calculated on the superimposed residues.
+In this case the BioSequences.jl and BioAlignments.jl packages should be imported.
 See `Transformation` for keyword arguments.
 If `superimpose` is `false` the elements are assumed to be superimposed and must
 be of the same length.

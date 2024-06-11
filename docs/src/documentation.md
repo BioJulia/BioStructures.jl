@@ -483,6 +483,8 @@ To carry out superimposition, BioStructures.jl carries out a sequence alignment 
 For example:
 
 ```julia
+using BioSequences, BioAlignments
+
 # Change the coordinates of element 1 to superimpose it onto element 2
 # Do sequence alignment with standard residues and calculate the transformation with Cα atoms (the default)
 superimpose!(el1, el2, standardselector)
