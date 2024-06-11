@@ -38,7 +38,9 @@ Read a Protein Data Bank (PDB) file and return a `MolecularStructure`.
 - `read_std_atoms::Bool=true`: whether to read standard ATOM records.
 - `read_het_atoms::Bool=true`: whether to read HETATOM records.
 - `run_dssp::Bool=false`: whether to run DSSP to assign secondary structure.
+    Requires the DSSP_jll.jl package to be imported if set to `true`.
 - `run_stride::Bool=false`: whether to run STRIDE to assign secondary structure.
+    Requires the STRIDE_jll.jl package to be imported if set to `true`.
 - `gzip::Bool=false`: whether the input is gzipped, not available for PDB
     format.
 """

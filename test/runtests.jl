@@ -5,12 +5,14 @@ using BioAlignments
 using BioSequences
 import BioCore # Imported to avoid clash with BioGenerics distance
 using CodecZlib
+using DSSP_jll
 using DataFrames
 using Format
 using Graphs
 import MMTF as MMTFPkg # Imported to avoid clash with MMTF name
 using MetaGraphs
 using RecipesBase
+using STRIDE_jll
 
 using LinearAlgebra
 using Test

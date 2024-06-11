@@ -16,14 +16,11 @@ using Downloads
 using Format
 using PrecompileTools
 using RecipesBase
-using STRIDE_jll
-using DSSP_jll
 
 using LinearAlgebra
 using Statistics
 
 include("model.jl")
-include("secondary.jl")
 include("select.jl")
 include("pdb.jl")
 include("mmcif.jl")

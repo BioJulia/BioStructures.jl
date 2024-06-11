@@ -39,6 +39,8 @@ export
     defaultresname,
     defaultresidue,
     resnames,
+    sscode,
+    sscode!,
     chain,
     chainid,
     chainid!,
@@ -72,7 +74,14 @@ export
     pdbextension,
     generatechainid,
     MMTFDict,
-    writemmtf
+    writemmtf,
+    helixsscodes,
+    sheetsscodes,
+    coilsscodes,
+    rundssp!,
+    rundssp,
+    runstride!,
+    runstride
 
 "A macromolecular structural element."
 abstract type StructuralElement end
@@ -804,6 +813,39 @@ function DisorderedResidue(dis_res::DisorderedResidue, default::AbstractString)
         throw(ArgumentError("The new default residue name \"$default\" must be present in the residue"))
     end
     return DisorderedResidue(dis_res.names, default)
+end
+
+const ss_code_unassigned = '-'
+
+"""
+    sscode(res)
+    sscode(at)
+
+Get the secondary structure code of an `AbstractResidue` or `AbstractAtom` as a `Char`.
+
+`'$ss_code_unassigned'` represents unassigned secondary structure.
+Secondary structure can be assigned using `rundssp!` or `runstride!`.
+"""
+sscode(res::Residue) = res.ss_code
+sscode(dis_res::DisorderedResidue) = sscode(defaultresidue(dis_res))
+sscode(at::Atom) = sscode(residue(at))
+sscode(dis_at::DisorderedAtom) = sscode(defaultatom(dis_at))
+
+"""
+    sscode!(res, ss_code)
+
+Set the secondary structure code of an `AbstractResidue` to a `Char`.
+"""
+function sscode!(res::Residue, ss_code)
+    res.ss_code = ss_code
+    return res
+end
+
+function sscode!(dis_res::DisorderedResidue, ss_code)
+    for res_name in resnames(dis_res)
+        sscode!(disorderedres(dis_res, res_name), ss_code)
+    end
+    return dis_res
 end
 
 """
@@ -1643,6 +1685,8 @@ function generatechainid(entity_id::Integer)
     return out_string
 end
 
+# MMTF functions
+
 """
     MMTFDict(filepath; gzip=false)
     MMTFDict(io; gzip=false)
@@ -1679,6 +1723,66 @@ The keyword argument `gzip` (default `false`) determines if the file should be
 gzipped.
 """
 function writemmtf end
+
+# Secondary structure
+
+"`Set` of secondary structure codes corresponding to an α-helix."
+const helixsscodes = Set(['G', 'H', 'I', 'P'])
+
+"`Set` of secondary structure codes corresponding to a β-sheet."
+const sheetsscodes = Set(['E', 'B'])
+
+"`Set` of secondary structure codes corresponding to a coil."
+const coilsscodes = Set(['C', 'T', 'S', ' '])
+
+"""
+    rundssp!(struc)
+    rundssp!(model)
+
+Run DSSP (Define Secondary Structure of Proteins) on the given structural element
+to assign secondary structure.
+
+Requires the DSSP_jll.jl package to be imported.
+A temporary PDB file is written, so this will fail if the structural element cannot
+be written to a PDB file, for example if there are two-letter chain IDs.
+"""
+function rundssp! end
+
+"""
+    rundssp(struc)
+    rundssp(model)
+    rundssp(filepath_in, dssp_filepath_out)
+
+Return a copy of the structural element with DSSP (Define Secondary Structure of Proteins)
+run to assign secondary structure, or run DSSP directly on a PDB or mmCIF file.
+
+Requires the DSSP_jll.jl package to be imported.
+"""
+function rundssp end
+
+"""
+    runstride!(struc)
+    runstride!(model)
+
+Run STRIDE on the given structural element to assign secondary structure.
+
+Requires the STRIDE_jll.jl package to be imported.
+A temporary PDB file is written, so this will fail if the structural element cannot
+be written to a PDB file, for example if there are two-letter chain IDs.
+"""
+function runstride! end
+
+"""
+    runstride(struc)
+    runstride(model)
+    runstride(filepath_in, stride_filepath_out)
+
+Return a copy of the structural element with STRIDE
+run to assign secondary structure, or run STRIDE directly on a PDB file.
+
+Requires the STRIDE_jll.jl package to be imported.
+"""
+function runstride end
 
 # Descriptive showing of elements on a single line
 
