@@ -16,7 +16,7 @@ const specialwords = Set(["loop_", "LOOP_", "stop_", "STOP_",
 
 # If certain entries should have a certain order of keys, that is specified here
 const mmciforder = Dict(
-    "_atom_site"=> [
+    "_atom_site" => [
         "group_PDB",
         "id",
         "type_symbol",
@@ -266,7 +266,7 @@ function populatedict!(mmcif_dict::MMCIFDict, tokens::AbstractVector{<:String})
 end
 
 function Base.read(input::IO,
-            ::Type{MMCIF};
+            ::Type{MMCIFFormat};
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
@@ -531,11 +531,11 @@ function writemmcif(output::IO,
     if length(ats) > 0
         # Create an empty dictionary and add atoms one at a time
         atom_dict = Dict{String, Vector{String}}(
-                ["_atom_site.$i"=> String[] for i in mmciforder["_atom_site"]])
+                ["_atom_site.$i" => String[] for i in mmciforder["_atom_site"]])
         atom_dict["data_"] = [structurename(first(el))]
     else
         # If we are not writing any atoms, don't write the dictionary keys
-        atom_dict = Dict{String, Vector{String}}(["data_"=> ["unknown"]])
+        atom_dict = Dict{String, Vector{String}}(["data_" => ["unknown"]])
     end
 
     for at in ats

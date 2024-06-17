@@ -12,7 +12,7 @@ MMCIF2Dict_python = pyimport("Bio.PDB.MMCIF2Dict").MMCIF2Dict
 pdbids = pdbentrylist()
 
 for pdbid in pdbids
-    filepath = downloadpdb(pdbid, format=MMCIF)
+    filepath = downloadpdb(pdbid, format=MMCIFFormat)
     if isfile(filepath)
         dict_julia = MMCIFDict(filepath).dict
         dict_python = MMCIF2Dict_python(filepath)

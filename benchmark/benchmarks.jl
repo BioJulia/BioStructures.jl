@@ -1,5 +1,5 @@
 # Benchmark suite for BioStructures
-# Run with something like:
+# Run with the following from the package base directory:
 #   using BioStructures
 #   using PkgBenchmark
 #   results = benchmarkpkg(".")
@@ -7,9 +7,12 @@
 
 using BioStructures
 using BenchmarkTools
+using BioAlignments
 import BioCore # Imported to avoid clash with BioGenerics distance
 using BioSequences
-import MMTF as MMTFPkg # Imported to avoid clash with MMTF name
+using Graphs
+import MMTF # Imported to avoid clash with writemmtf
+using MetaGraphs
 using Random
 
 # Use files in BioFmtSpecimens
@@ -21,22 +24,22 @@ temp_filename, io = mktemp()
 close(io)
 
 pdbids = ["1AKE", "1EN2", "1SSU"]
-formats = Dict("PDB"=> PDB, "mmCIF"=> MMCIF, "MMTF"=> MMTF)
-writefunctions = Dict("PDB"=> writepdb, "mmCIF"=> writemmcif, "MMTF"=> writemmtf)
+formats = Dict("PDB" => PDBFormat, "mmCIF" => MMCIFFormat, "MMTF" => MMTFFormat)
+writefunctions = Dict("PDB" => writepdb, "mmCIF" => writemmcif, "MMTF" => writemmtf)
 
 const SUITE = BenchmarkGroup(
-        [],
-        "read"   => BenchmarkGroup([], [f=> BenchmarkGroup() for f in keys(formats)]...),
-        "write"  => BenchmarkGroup([], [f=> BenchmarkGroup() for f in keys(formats)]...),
-        "dict"   => BenchmarkGroup(),
-        "model"  => BenchmarkGroup(),
-        "collect"=> BenchmarkGroup(),
-        "spatial"=> BenchmarkGroup(),
+    [],
+    "read"    => BenchmarkGroup([], [f => BenchmarkGroup() for f in keys(formats)]...),
+    "write"   => BenchmarkGroup([], [f => BenchmarkGroup() for f in keys(formats)]...),
+    "dict"    => BenchmarkGroup(),
+    "model"   => BenchmarkGroup(),
+    "collect" => BenchmarkGroup(),
+    "spatial" => BenchmarkGroup(),
 )
 
 struc = Dict{String, MolecularStructure}()
 for pdbid in pdbids
-    struc[pdbid] = read(testfilepath("PDB", "$pdbid.pdb"), PDB)
+    struc[pdbid] = read(testfilepath("PDB", "$pdbid.pdb"), PDBFormat)
 end
 
 for pdbid in pdbids

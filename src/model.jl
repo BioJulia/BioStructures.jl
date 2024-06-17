@@ -67,10 +67,10 @@ export
     countatoms,
     choosedefaultaltlocid,
     threeletter_to_aa,
-    PDB,
-    PDBXML,
-    MMCIF,
-    MMTF,
+    PDBFormat,
+    PDBXMLFormat,
+    MMCIFFormat,
+    MMTFFormat,
     pdbextension,
     generatechainid,
     MMTFDict,
@@ -1646,23 +1646,23 @@ const threeletter_to_aa = BioSymbols.threeletter_to_aa
 # PDB file formats
 
 "Protein Data Bank (PDB) file format."
-struct PDB end
+struct PDBFormat end
 
 "Protein Data Bank (PDB) XML file format."
-struct PDBXML end
+struct PDBXMLFormat end
 
 "Protein Data Bank (PDB) mmCIF file format."
-struct MMCIF end
+struct MMCIFFormat end
 
 "Protein Data Bank (PDB) MMTF file format."
-struct MMTF end
+struct MMTFFormat end
 
 "Mapping of Protein Data Bank (PDB) formats to their file extensions."
 const pdbextension = Dict{Type, String}(
-    PDB    => "pdb",
-    PDBXML => "xml",
-    MMCIF  => "cif",
-    MMTF   => "mmtf",
+    PDBFormat    => "pdb",
+    PDBXMLFormat => "xml",
+    MMCIFFormat  => "cif",
+    MMTFFormat   => "mmtf",
 )
 
 """
@@ -1693,8 +1693,8 @@ end
     MMTFDict()
 
 A Macromolecular Transmission Format (MMTF) dictionary.
-Use of the dictionary requires the MMTF.jl package to be imported with
-`import MMTF as MMTFPkg`.
+
+Use of the dictionary requires the MMTF.jl package to be imported.
 Can be accessed using similar functions to a standard `Dict`.
 Keys are field names as a `String` and values are various types.
 To directly access the underlying dictionary of `MMTFDict` `d`, use
@@ -1714,7 +1714,7 @@ end
 Write a `StructuralElementOrList` or a `MMTFDict` to a MMTF file or output
 stream.
 
-Requires the MMTF.jl package to be imported with `import MMTF as MMTFPkg`.
+Requires the MMTF.jl package to be imported.
 Atom selector functions can be given as additional arguments - only atoms
 that return `true` from all the functions are retained.
 The keyword argument `expand_disordered` (default `true`) determines whether to

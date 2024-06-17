@@ -2,58 +2,58 @@ module BioStructuresMMTFExt
 
 using BioStructures
 using BioSymbols
-import MMTF as MMTFPkg # Imported to avoid clash with MMTF name
+import MMTF # Imported to avoid clash with writemmtf
 
 # Create an empty MMTF dictionary
 # Matches the decoded form of a MMTF file using MMTF.jl
 # Encoding and decoding this Dict gives an identical Dict
 BioStructures.MMTFDict() = MMTFDict(Dict{String, Any}(
-    "altLocList"         => Char[],
-    "atomIdList"         => Int32[],
-    "bFactorList"        => Float32[],
-    "bioAssemblyList"    => Any[],
-    "bondAtomList"       => Int32[],
-    "bondOrderList"      => Int8[],
-    "chainIdList"        => String[],
-    "chainNameList"      => String[],
-    "chainsPerModel"     => Any[],
-    "depositionDate"     => "",
-    "entityList"         => Any[],
-    "experimentalMethods"=> Any[],
-    "groupIdList"        => Int32[],
-    "groupList"          => Any[],
-    "groupsPerChain"     => Any[],
-    "groupTypeList"      => Int32[],
-    "insCodeList"        => Char[],
-    "mmtfProducer"       => "",
-    "mmtfVersion"        => "",
-    "ncsOperatorList"    => Any[],
-    "numAtoms"           => 0,
-    "numBonds"           => 0,
-    "numChains"          => 0,
-    "numGroups"          => 0,
-    "numModels"          => 0,
-    "occupancyList"      => Float32[],
-    "releaseDate"        => "",
-    "resolution"         => 0.0,
-    "rFree"              => "",
-    "rWork"              => "",
-    "secStructList"      => Int8[],
-    "sequenceIndexList"  => Int32[],
-    "spaceGroup"         => "",
-    "structureId"        => "",
-    "title"              => "",
-    "unitCell"           => Any[],
-    "xCoordList"         => Float32[],
-    "yCoordList"         => Float32[],
-    "zCoordList"         => Float32[],
+    "altLocList"          => Char[],
+    "atomIdList"          => Int32[],
+    "bFactorList"         => Float32[],
+    "bioAssemblyList"     => Any[],
+    "bondAtomList"        => Int32[],
+    "bondOrderList"       => Int8[],
+    "chainIdList"         => String[],
+    "chainNameList"       => String[],
+    "chainsPerModel"      => Any[],
+    "depositionDate"      => "",
+    "entityList"          => Any[],
+    "experimentalMethods" => Any[],
+    "groupIdList"         => Int32[],
+    "groupList"           => Any[],
+    "groupsPerChain"      => Any[],
+    "groupTypeList"       => Int32[],
+    "insCodeList"         => Char[],
+    "mmtfProducer"        => "",
+    "mmtfVersion"         => "",
+    "ncsOperatorList"     => Any[],
+    "numAtoms"            => 0,
+    "numBonds"            => 0,
+    "numChains"           => 0,
+    "numGroups"           => 0,
+    "numModels"           => 0,
+    "occupancyList"       => Float32[],
+    "releaseDate"         => "",
+    "resolution"          => 0.0,
+    "rFree"               => "",
+    "rWork"               => "",
+    "secStructList"       => Int8[],
+    "sequenceIndexList"   => Int32[],
+    "spaceGroup"          => "",
+    "structureId"         => "",
+    "title"               => "",
+    "unitCell"            => Any[],
+    "xCoordList"          => Float32[],
+    "yCoordList"          => Float32[],
+    "zCoordList"          => Float32[],
 ))
 
 function BioStructures.MMTFDict(filepath::AbstractString; gzip::Bool=false)
-    return MMTFDict(MMTFPkg.parsemmtf(filepath; gzip=gzip))
+    return MMTFDict(MMTF.parsemmtf(filepath; gzip=gzip))
 end
 
-BioStructures.MMTFDict(io::IO; gzip::Bool=false) = MMTFDict(MMTFPkg.parsemmtf(io; gzip=gzip))
+BioStructures.MMTFDict(io::IO; gzip::Bool=false) = MMTFDict(MMTF.parsemmtf(io; gzip=gzip))
 
 Base.getindex(mmtf_dict::MMTFDict, field::AbstractString) = mmtf_dict.dict[field]
 
@@ -77,7 +77,7 @@ function Base.show(io::IO, mmtf_dict::MMTFDict)
 end
 
 function Base.read(input::IO,
-            ::Type{MMTF};
+            ::Type{MMTFFormat};
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
@@ -85,7 +85,7 @@ function Base.read(input::IO,
             run_dssp::Bool=false,
             run_stride::Bool=false,
             gzip::Bool=false)
-    d = MMTFDict(MMTFPkg.parsemmtf(input; gzip=gzip))
+    d = MMTFDict(MMTF.parsemmtf(input; gzip=gzip))
     return MolecularStructure(
         d;
         structure_name=structure_name,
@@ -188,7 +188,7 @@ end
 function BioStructures.writemmtf(output::Union{AbstractString, IO},
                 d::MMTFDict;
                 gzip::Bool=false)
-    MMTFPkg.writemmtf(d.dict, output; gzip=gzip)
+    MMTF.writemmtf(d.dict, output; gzip=gzip)
     return
 end
 
@@ -248,10 +248,10 @@ function BioStructures.writemmtf(output::Union{AbstractString, IO},
                 # Checking for similar entities is non-trivial so we treat
                 #   each molecule as a separate entity
                 push!(d["entityList"], Dict{Any, Any}(
-                    "chainIndexList"=> Any[length(d["chainIdList"]) - 1],
-                    "description"   => "",
-                    "sequence"      => "", # This is changed later
-                    "type"          => ishetero(res) ? "non-polymer" : "polymer"
+                    "chainIndexList" => Any[length(d["chainIdList"]) - 1],
+                    "description"    => "",
+                    "sequence"       => "", # This is changed later
+                    "type"           => ishetero(res) ? "non-polymer" : "polymer",
                 ))
             end
             if !ishetero(res)
@@ -282,15 +282,15 @@ function BioStructures.writemmtf(output::Union{AbstractString, IO},
 
             if group_i == 0
                 push!(d["groupList"], Dict{Any, Any}(
-                    "groupName"       => resname(res),
-                    "bondAtomList"    => Any[],
-                    "elementList"     => Any[element(at) for at in ats_res],
+                    "groupName"        => resname(res),
+                    "bondAtomList"     => Any[],
+                    "elementList"      => Any[element(at) for at in ats_res],
                     # MMTF specifies missing charges as zero
-                    "formalChargeList"=> Any[charge(at) == "" ? 0 : parse(Int64, charge(at)) for at in ats_res],
-                    "singleLetterCode"=> "",
-                    "chemCompType"    => "",
-                    "atomNameList"    => Any[at_names...],
-                    "bondOrderList"   => Any[]
+                    "formalChargeList" => Any[charge(at) == "" ? 0 : parse(Int64, charge(at)) for at in ats_res],
+                    "singleLetterCode" => "",
+                    "chemCompType"     => "",
+                    "atomNameList"     => Any[at_names...],
+                    "bondOrderList"    => Any[],
                 ))
             end
 

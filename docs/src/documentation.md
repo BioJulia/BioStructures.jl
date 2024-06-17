@@ -21,11 +21,11 @@ downloadpdb("1EN2")
 To parse a PDB file into a Structure-Model-Chain-Residue-Atom framework:
 
 ```julia-repl
-julia> struc = read("/path/to/pdb/file.pdb", PDB)
+julia> struc = read("/path/to/pdb/file.pdb", PDBFormat)
 MolecularStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 ```
 
-mmCIF files can be read into the same data structure with `read("/path/to/cif/file.cif", MMCIF)`.
+mmCIF files can be read into the same data structure with `read("/path/to/cif/file.cif", MMCIFFormat)`.
 The keyword argument `gzip`, default `false`, determines if the file is gzipped.
 If you want to read an mmCIF file into a dictionary to query yourself (e.g. to access metadata fields), use [`MMCIFDict`](@ref):
 
@@ -41,7 +41,7 @@ julia> mmcif_dict["_entity_src_nat.common_name"]
 A [`MMCIFDict`](@ref) can be accessed in similar ways to a standard dictionary, and if necessary the underlying dictionary of [`MMCIFDict`](@ref) `d` can be accessed with `d.dict`.
 Note that the values of the dictionary are always an `Array{String,1}`, even if only one value was read in or the data is numerical.
 
-MMTF files can be read into the same data structure with `read("/path/to/mmtf/file.mmtf", MMTF)` once you have imported MMTF.jl with `import MMTF as MMTFPkg`.
+MMTF files can be read into the same data structure with `read("/path/to/mmtf/file.mmtf", MMTFFormat)` once you have imported MMTF.jl.
 The keyword argument `gzip`, default `false`, determines if the file is gzipped.
 In a similar manner to mmCIF dictionaries, a MMTF file can be read into a dictionary with [`MMTFDict`](@ref).
 The values of the dictionary are a variety of types depending on the [MMTF specification](https://github.com/rcsb/mmtf/blob/master/spec.md).
@@ -545,10 +545,10 @@ The secondary structure code of a residue or atom can be accessed after assignin
 To assign secondary structure when reading the structure:
 ```julia
 # Assign secondary structure using DSSP
-read("/path/to/pdb/file.pdb", PDB, run_dssp=true)
+read("/path/to/pdb/file.pdb", PDBFormat, run_dssp=true)
 
 # Assign secondary structure using STRIDE
-read("/path/to/pdb/file.pdb", PDB, run_stride=true)
+read("/path/to/pdb/file.pdb", PDBFormat, run_stride=true)
 ```
 [`rundssp!`](@ref), [`runstride!`](@ref), [`rundssp`](@ref) and [`runstride`](@ref) can also be used to assign secondary structure to a [`MolecularStructure`](@ref) or [`Model`](@ref):
 ```julia
@@ -593,10 +593,10 @@ To download a PDB file in PDB, XML, mmCIF or MMTF format use the `format` argume
 
 ```julia
 # To get mmCIF
-downloadpdb("1ALW", dir="path/to/pdb/directory", format=MMCIF)
+downloadpdb("1ALW", dir="path/to/pdb/directory", format=MMCIFFormat)
 
 # To get XML
-downloadpdb("1ALW", dir="path/to/pdb/directory", format=PDBXML)
+downloadpdb("1ALW", dir="path/to/pdb/directory", format=PDBXMLFormat)
 ```
 
 To apply a function to a downloaded file and delete the file afterwards:
@@ -609,7 +609,7 @@ Or, using Julia's `do` syntax:
 
 ```julia
 downloadpdb("1ALW") do fp
-    s = read(fp, PDB)
+    s = read(fp, PDBFormat)
     # Do something
 end
 ```
@@ -622,11 +622,11 @@ In this case download the mmCIF file or MMTF file instead.
 To parse an existing PDB file into a Structure-Model-Chain-Residue-Atom framework:
 
 ```julia-repl
-julia> struc = read("/path/to/pdb/file.pdb", PDB)
+julia> struc = read("/path/to/pdb/file.pdb", PDBFormat)
 MolecularStructure 1EN2.pdb with 1 models, 1 chains (A), 85 residues, 754 atoms
 ```
 
-Read a mmCIF/MMTF file instead by replacing [`PDB`](@ref) with [`MMCIF`](@ref)/[`MMTF`](@ref).
+Read a mmCIF/MMTF file instead by replacing [`PDBFormat`](@ref) with [`MMCIFFormat`](@ref)/[`MMTFFormat`](@ref).
 Various options can be set through optional keyword arguments when parsing PDB/mmCIF/MMTF files:
 
 | Keyword Argument                 | Description                                                                            |
@@ -712,7 +712,7 @@ A [`MMCIFDict`](@ref) can also be written using [`writemmcif`](@ref):
 writemmcif("1EN2_out.dic", mmcif_dict)
 ```
 
-To write out a MMTF file, call `import MMTF as MMTFPkg` and use the [`writemmtf`](@ref) function with any element type or a [`MMTFDict`](@ref) as an argument.
+To write out a MMTF file, import MMTF.jl and use the [`writemmtf`](@ref) function with any element type or a [`MMTFDict`](@ref) as an argument.
 The `gzip` keyword argument, default `false`, determines whether to gzip the written file.
 
 Unlike for the collection functions, `expand_disordered` is set to `true` when writing files as it is usually desirable to retain all entities.
@@ -748,7 +748,7 @@ l = pdbentrylist()
 To download the entire RCSB PDB database in your preferred file format:
 
 ```julia
-downloadentirepdb(dir="path/to/pdb/directory", format=MMTF)
+downloadentirepdb(dir="path/to/pdb/directory", format=MMTFFormat)
 ```
 
 This operation takes a lot of disk space and time to complete, depending on internet connection.
@@ -756,7 +756,7 @@ This operation takes a lot of disk space and time to complete, depending on inte
 To update your local PDB directory based on the weekly status list of new, modified and obsolete PDB files from the RCSB server:
 
 ```julia
-updatelocalpdb(dir="path/to/pdb/directory", format=MMTF)
+updatelocalpdb(dir="path/to/pdb/directory", format=MMTFFormat)
 ```
 
 Obsolete PDB files are stored in the auto-generated `obsolete` directory inside the specified local PDB directory.
@@ -1440,7 +1440,7 @@ You can view BioStructures data types:
 
 ```julia
 struc = retrievepdb("1AKE")
-viewstruc(struc['A'], surface=Surface(Dict("colorscheme"=> "greenCarbon")))
+viewstruc(struc['A'], surface=Surface(Dict("colorscheme" => "greenCarbon")))
 ```
 
 ```@raw html

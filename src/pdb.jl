@@ -29,8 +29,8 @@ end
 Read a Protein Data Bank (PDB) file and return a `MolecularStructure`.
 
 # Arguments
-- `format::Type`: the format of the PDB file; options are PDB, MMCIF and MMTF.
-    MMTF requires the MMTF.jl package to be imported with `import MMTF as MMTFPkg`.
+- `format::Type`: the format of the PDB file; options are PDBFormat, MMCIFFormat
+    and MMTFFormat. MMTFFormat requires the MMTF.jl package to be imported.
 - `structure_name::AbstractString`: the name given to the returned
     `MolecularStructure`; defaults to the file name.
 - `remove_disorder::Bool=false`: whether to remove atoms with alt loc ID not ' '
@@ -45,7 +45,7 @@ Read a Protein Data Bank (PDB) file and return a `MolecularStructure`.
     format.
 """
 function Base.read(input::IO,
-            ::Type{PDB};
+            ::Type{PDBFormat};
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
             read_std_atoms::Bool=true,
@@ -106,7 +106,7 @@ function Base.read(input::IO,
 end
 
 function Base.read(filepath::AbstractString,
-            t::Type{<:Union{PDB, MMCIF, MMTF}};
+            t::Type{<:Union{PDBFormat, MMCIFFormat, MMTFFormat}};
             structure_name::AbstractString=splitdir(filepath)[2],
             kwargs...)
     open(filepath) do input
