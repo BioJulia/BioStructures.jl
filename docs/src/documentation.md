@@ -556,7 +556,6 @@ rundssp!(struc)
 runstride!(struc)
 ```
 The assignment process may fail if the structure is too large, since we use an intermediate PDB file where the atom serial cannot exceed 99999 and the chain ID must be a single character.
-
 To get access to the secondary structure code of a residue or atom as a `Char`:
 ```julia
 sscode(res)
@@ -567,7 +566,6 @@ Or for the whole structure:
 sscode.(collectresidues(struc))
 ```
 The secondary structure code of a residue can be changed using [`sscode!`](@ref).
-
 [`rundssp`](@ref) and [`runstride`](@ref) can also be run directly on structure files:
 ```julia
 rundssp("/path/to/pdb/file.pdb", "out.dssp") # Also works with mmCIF files
@@ -4073,7 +4071,7 @@ The relationship between different types in BioStructures is shown below:
 The design is based on Biopython, and has the intention of representing the complexity of the data in the PDB without it getting in the way of users.
 This hierarchical approach differs from some packages that represent structures as lists of either atoms or residues.
 Note that it is possible to store non-biopolymer molecules in this representation, and there are many such examples in the PDB.
-In general chemical terms: `MolecularStructure` is analogous to ensemble, `Model` to conformation, `Chain` to molecule and `Residue` to monomeric unit when relevant.
+In general chemical terms: [`MolecularStructure`](@ref) is analogous to ensemble, [`Model`](@ref) to conformation, [`Chain`](@ref) to molecule and [`Residue`](@ref) to monomeric unit when relevant.
 
 The aim of BioStructures is not so much to read in the rows of a structure file, but to unambiguously represent the molecules contained within the file.
 This makes operations such as converting between file formats easier, at the cost of some complexity and occasional limits on the ability to read in files with format violations.

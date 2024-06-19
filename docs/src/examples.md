@@ -131,3 +131,13 @@ mean(df.tempfactor) # Column-wise operations
 sort(df, :x) # Sorting
 CSV.write("1ALW.csv", df) # CSV file writing
 ```
+
+**J)** Download a model from the [AlphaFold database](https://alphafold.ebi.ac.uk) and show the secondary structure assignment of each residue.
+
+```julia
+using DSSP_jll
+fp = download("https://alphafold.ebi.ac.uk/files/AF-P24941-F1-model_v4.pdb")
+struc = read(fp, PDBFormat; run_dssp=true)
+sscodes = sscode.(collectresidues(struc))
+println(join(sscodes))
+```
