@@ -1,5 +1,24 @@
-BioStructures.jl release notes
-==============================
+# BioStructures.jl release notes
+
+## v4.0.0 - Jun 2024
+
+The package is made considerably more lightweight by moving a number of dependencies to extensions. This should make it easier for other packages to build on top of BioStructures.jl. Some types and functions are also renamed to avoid clashes, and a convenient string selection syntax is introduced.
+
+### Breaking changes
+* `PDB`, `PDBXML`, `MMCIF` and `MMTF` are renamed to `PDBFormat`, `PDBXMLFormat`, `MMCIFFormat` and `MMTFFormat` respectively to avoid clashing with module names. `read(fp, PDB)` should be replaced with `read(fp, PDBFormat)`, for example.
+* `ProteinStructure` is renamed to `MolecularStructure` since it is not limited to representing protein structures.
+* `x`, `y`, `z`, `x!`, `y!` and `z!` are no longer exported as they are common variable names. They are still available as `BioStructures.x` etc.
+* Importing BioSequences.jl is now required to use `LongAA`.
+* Importing BioSequences.jl and BioAlignments.jl is now required to use `pairalign`, `superimpose!`, `rmsd`/`displacements` with the `superimpose` option or `Transformation` on structural elements.
+* Importing MMTF.jl is now required to use `MMTFDict` or `writemmtf`.
+* Importing DSSP_jll.jl is now required to use `rundssp!`, `rundssp` or the `run_dssp` option with `read`/`retrievepdb`.
+* Importing STRIDE_jll.jl is now required to use `runstride!`, `runstride` or the `run_stride` option with `read`/`retrievepdb`.
+
+### Non-breaking changes
+* Support for Julia versions before 1.9 is dropped.
+* A string selection syntax is introduced, allowing selections such as `collectatoms(struc, sel"name CA and resnumber <= 5")`.
+* The selectors `sidechainselector`, `proteinselector`, `acidicresselector`, `aliphaticresselector`, `aromaticresselector`, `basicresselector`, `chargedresselector`, `neutralresselector`, `hydrophobicresselector`, `polarresselector` and `nonpolarresselector` are added.
+* PDB parsing in certain situations is now much faster.
 
 ## v3.1.0 - May 2024
 
