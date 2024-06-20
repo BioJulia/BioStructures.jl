@@ -13,12 +13,14 @@ Package extensions are used in order to reduce the number of dependencies:
 - To use [`rundssp!`](@ref), [`rundssp`](@ref) or the `run_dssp` option with `read`/[`retrievepdb`](@ref), call `using DSSP_jll`.
 - To use [`runstride!`](@ref), [`runstride`](@ref) or the `run_stride` option with `read`/[`retrievepdb`](@ref), call `using STRIDE_jll`.
 
-Exported names:
+## Exported names
+
 ```@index
 Order   = [:module, :type, :constant, :function, :macro]
 ```
 
-Non-exported names:
+## Non-exported names
+
 - [`BioStructures.x`](@ref)
 - [`BioStructures.x!`](@ref)
 - [`BioStructures.y`](@ref)
@@ -26,7 +28,8 @@ Non-exported names:
 - [`BioStructures.z`](@ref)
 - [`BioStructures.z!`](@ref)
 
-Docstrings:
+## Docstrings
+
 ```@autodocs
 Modules = [BioStructures]
 Private = false
