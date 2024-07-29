@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · BioStructures.jl</title><meta name="title" content="Examples · BioStructures.jl"/><meta property="og:title" content="Examples · BioStructures.jl"/><meta property="twitter:title" content="Examples · BioStructures.jl"/><meta name="description" content="Documentation for BioStructures.jl."/><meta property="og:description" content="Documentation for BioStructures.jl."/><meta property="twitter:description" content="Documentation for BioStructures.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="BioStructures.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">BioStructures.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../documentation/">Documentation</a></li><li class="is-active"><a class="tocitem" href>Examples</a></li><li><a class="tocitem" href="../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Examples</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/BioJulia/BioStructures.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/BioJulia/BioStructures.jl/blob/master/docs/src/examples.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="BioStructures-examples"><a class="docs-heading-anchor" href="#BioStructures-examples">BioStructures examples</a><a id="BioStructures-examples-1"></a><a class="docs-heading-anchor-permalink" href="#BioStructures-examples" title="Permalink"></a></h1><p>The best way to learn how to use the package is to read the <a href="../documentation/#BioStructures-documentation">BioStructures documentation</a>. Here we give further examples, showing what you can do with the package.</p><p><strong>A)</strong> Print the centroid coordinate of the sidechain heavy atoms for each residue in a protein:</p><pre><code class="language-julia hljs">using BioStructures
+using Statistics
+
+struc = read(&quot;1AKE.pdb&quot;, PDBFormat)
+res_list = collectresidues(struc, standardselector)
+
+function sidechainheavyselector(a::AbstractAtom)
+    return !hydrogenselector(a) &amp;&amp; !atomnameselector(a, backboneatomnames)
+end
+
+for res in res_list
+    print(resid(res, full=true), &quot;  &quot;)
+    if resname(res) == &quot;GLY&quot;
+        println(&quot;no sidechain&quot;)
+    else
+        coord_array = coordarray(res, sidechainheavyselector)
+        println(join(mean(coord_array, dims=2), &quot;  &quot;))
+    end
+end</code></pre><p><strong>B)</strong> Plot the temperature factors of a protein:</p><pre><code class="language-julia hljs">using Plots
+calphas = collectatoms(struc, calphaselector)
+plot(
+    resnumber.(calphas),
+    tempfactor.(calphas),
+    xlabel=&quot;Residue number&quot;,
+    ylabel=&quot;Temperature factor&quot;,
+    label=&quot;&quot;,
+)</code></pre><p><strong>C)</strong> Print the PDB records for all Cα atoms within 5 Å of residue 38:</p><pre><code class="language-julia hljs">for at in calphas
+    if distance(struc[&#39;A&#39;][38], at) &lt; 5.0 &amp;&amp; resnumber(at) != 38
+        println(pdbline(at))
+    end
+end</code></pre><p><strong>D)</strong> Find the residues at the interface of a protein-protein interaction:</p><pre><code class="language-julia hljs">for res_a in collectresidues(struc[&quot;A&quot;], standardselector)
+    for res_b in collectresidues(struc[&quot;B&quot;], standardselector)
+        if distance(res_a, res_b) &lt; 5.0
+            println(resnumber(res_a), &quot;A &quot;, resnumber(res_b), &quot;B&quot;)
+        end
+    end
+end</code></pre><p><strong>E)</strong> Show the Ramachandran phi/psi angle plot of a protein structure:</p><pre><code class="language-julia hljs">using Plots
+phi_angles, psi_angles = ramachandranangles(struc, standardselector)
+scatter(
+    rad2deg.(phi_angles),
+    rad2deg.(psi_angles),
+    title=&quot;Ramachandran plot&quot;,
+    xlabel=&quot;Phi / degrees&quot;,
+    ylabel=&quot;Psi / degrees&quot;,
+    label=&quot;&quot;,
+    xticks=[-180, -90, 0, 90, 180],
+    yticks=[-180, -90, 0, 90, 180],
+    xlims=(-180, 180),
+    ylims=(-180, 180),
+)</code></pre><p><strong>F)</strong> Calculate the RMSD and displacements between the heavy (non-hydrogen) atoms of two models in an NMR structure:</p><pre><code class="language-julia hljs">downloadpdb(&quot;1SSU&quot;)
+struc_nmr = read(&quot;1SSU.pdb&quot;, PDBFormat)
+rmsd(struc_nmr[5], struc_nmr[10], superimpose=false, rmsdatoms=heavyatomselector)
+displacements(struc_nmr[5], struc_nmr[10], superimpose=false, rmsdatoms=heavyatomselector)</code></pre><p><strong>G)</strong> Calculate the cysteine fraction of every protein in the PDB:</p><pre><code class="language-julia hljs">l = pdbentrylist()
+for p in l
+    downloadpdb(p, format=MMCIFFormat) do fp
+        s = read(fp, MMCIFFormat)
+        nres = countresidues(s, standardselector)
+        if nres &gt; 0
+            frac = countresidues(s, standardselector, x -&gt; resname(x) == &quot;CYS&quot;) / nres
+            println(p, &quot;  &quot;, round(frac, digits=2))
+        end
+    end
+end</code></pre><p><strong>H)</strong> Interoperability is possible with other packages in the <a href="https://pkg.julialang.org/docs">Julia ecosystem</a>. For example, use <a href="https://github.com/KristofferC/NearestNeighbors.jl">NearestNeighbors.jl</a> to find the 10 nearest residues to each residue:</p><pre><code class="language-julia hljs">using NearestNeighbors
+struc = retrievepdb(&quot;1AKE&quot;)
+ca = coordarray(struc[&quot;A&quot;], cbetaselector)
+kdtree = KDTree(ca; leafsize=10)
+idxs, dists = knn(kdtree, ca, 10, true)</code></pre><p><strong>I)</strong> Interoperability with <a href="https://github.com/JuliaData/DataFrames.jl">DataFrames.jl</a> gives access to filtering, sorting, summary statistics and other writing options:</p><pre><code class="language-julia hljs">using DataFrames
+using CSV
+using Statistics
+struc = retrievepdb(&quot;1ALW&quot;)
+df = DataFrame(collectatoms(struc))
+describe(df) # Show summary
+mean(df.tempfactor) # Column-wise operations
+sort(df, :x) # Sorting
+CSV.write(&quot;1ALW.csv&quot;, df) # CSV file writing</code></pre><p><strong>J)</strong> Download a model from the <a href="https://alphafold.ebi.ac.uk">AlphaFold database</a> and show the secondary structure assignment of each residue.</p><pre><code class="language-julia hljs">using DSSP_jll
+fp = download(&quot;https://alphafold.ebi.ac.uk/files/AF-P24941-F1-model_v4.pdb&quot;)
+struc = read(fp, PDBFormat; run_dssp=true)
+sscodes = sscode.(collectresidues(struc))
+println(join(sscodes))</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../documentation/">« Documentation</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Monday 29 July 2024 13:50">Monday 29 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
