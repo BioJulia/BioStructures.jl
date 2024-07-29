@@ -644,6 +644,8 @@ INFO: Downloading PDB: 1ALW
 MolecularStructure 1ALW.pdb with 1 models, 2 chains (A,B), 346 residues, 2928 atoms
 ```
 
+By default the mmCIF file is downloaded as this is available for all PDB entries, but this can be changed with the `format` keyword argument.
+
 If you prefer to work with data frames rather than the data structures in BioStructures, the `DataFrame` constructor from [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) has been extended to construct relevant data frames from lists of atoms or residues:
 
 ```julia-repl

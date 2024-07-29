@@ -169,7 +169,7 @@ Aqua.test_all(BioStructures; ambiguities=(recursive=false))
 
     struc = retrievepdb("1AKE", dir=temp_dir, obsolete=true, read_het_atoms=false)
     @test countatoms(struc) == 3312
-    @test serial(collectatoms(struc)[2000]) == 2006
+    @test serial(collectatoms(struc)[2000]) == 2005
     @test sum(ishetero, collectatoms(struc)) == 0
 
     struc = retrievepdb("1AKE", dir=temp_dir, ba_number=1, read_het_atoms=false, read_std_atoms=false)

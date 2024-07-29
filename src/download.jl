@@ -150,7 +150,7 @@ Requires an internet connection.
 # Arguments
 - `dir::AbstractString=pwd()`: the directory to which the PDB file is
     downloaded; defaults to the current working directory.
-- `format::Type=PDB`: the format of the PDB file; options are PDBFormat,
+- `format::Type=PDBFormat`: the format of the PDB file; options are PDBFormat,
     PDBXMLFormat and MMCIFFormat. MMTF files are no longer available to download.
 - `obsolete::Bool=false`: if set `true`, the PDB file is downloaded in the
     auto-generated "obsolete" directory inside the specified `dir`.
@@ -283,7 +283,7 @@ Requires an internet connection.
 # Arguments
 - `dir::AbstractString=pwd()`: the directory to which the PDB files are
     downloaded; defaults to the current working directory.
-- `format::Type=PDB`: the format of the PDB file; options are PDBFormat,
+- `format::Type=PDBFormat`: the format of the PDB file; options are PDBFormat,
     PDBXMLFormat and MMCIFFormat. MMTF files are no longer available to download.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
     in `dir`; by default skips downloading the PDB file if it exists.
@@ -344,7 +344,7 @@ Requires an internet connection.
 # Arguments
 - `obsolete_dir::AbstractString=pwd()`: the directory where the PDB files are
     downloaded; defaults to the current working directory.
-- `format::Type=PDB`: the format of the PDB file; options are PDBFormat,
+- `format::Type=PDBFormat`: the format of the PDB file; options are PDBFormat,
     PDBXMLFormat and MMCIFFormat. MMTF files are no longer available to download.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
     in `dir`; by default skips downloading the PDB file if it exists.
@@ -368,6 +368,8 @@ Requires an internet connection.
 - `pdbid::AbstractString`: the PDB ID to be downloaded and read.
 - `dir::AbstractString=pwd()`: the directory to which the PDB file is
     downloaded; defaults to the current working directory.
+- `format::Type=MMCIFFormat`: the format of the PDB file; options are PDBFormat,
+    PDBXMLFormat and MMCIFFormat. MMTF files are no longer available to download.
 - `obsolete::Bool=false`: if set `true`, the PDB file is downloaded in the
     auto-generated "obsolete" directory inside the specified `dir`.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
@@ -387,21 +389,23 @@ Requires an internet connection.
 """
 function retrievepdb(pdbid::AbstractString;
             dir::AbstractString=pwd(),
+            format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat}}=MMCIFFormat,
             obsolete::Bool=false,
             overwrite::Bool=false,
             ba_number::Integer=0,
             structure_name::AbstractString="$(uppercase(pdbid)).pdb",
             kwargs...)
-    downloadpdb(pdbid, dir=dir, obsolete=obsolete, overwrite=overwrite, ba_number=ba_number)
+    downloadpdb(pdbid, dir=dir, format=format, obsolete=obsolete,
+                overwrite=overwrite, ba_number=ba_number)
     if obsolete
         # If obsolete is set true, the PDB file is present in the obsolete directory inside dir
         dir = joinpath(dir, "obsolete")
     end
-    pdbid = uppercase(pdbid)
+    pdbid_upper = uppercase(pdbid)
     if ba_number == 0
-        pdbpath = joinpath(dir, "$pdbid.pdb")
+        pdbpath = joinpath(dir, "$pdbid_upper.$(pdbextension[format])")
     else
-        pdbpath = joinpath(dir, "$(pdbid)_ba$ba_number.pdb")
+        pdbpath = joinpath(dir, "$(pdbid_upper)_ba$ba_number.$(pdbextension[format])")
     end
-    read(pdbpath, PDBFormat; structure_name=structure_name, kwargs...)
+    read(pdbpath, format; structure_name=structure_name, kwargs...)
 end
