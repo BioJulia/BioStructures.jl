@@ -1,5 +1,10 @@
 # BioStructures.jl release notes
 
+## v4.1.0 - Jul 2024
+
+* `retrievepdb` now takes the `format` keyword argument and uses `MMCIFFormat` by default.
+* MMTF files are no longer available to download via `downloadpdb`, `downloadentirepdb`, `updatelocalpdb` and `downloadallobsoletepdb` as the RCSB PDB no longer provides them.
+
 ## v4.0.0 - Jun 2024
 
 The package is made considerably more lightweight by moving a number of dependencies to extensions. This should make it easier for other packages to build on top of BioStructures.jl. Some types and functions are also renamed to avoid clashes, and a convenient string selection syntax is introduced.
