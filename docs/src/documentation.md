@@ -587,7 +587,7 @@ To download multiple PDB files to a specified directory:
 downloadpdb(["1EN2", "1ALW", "1AKE"], dir="path/to/pdb/directory")
 ```
 
-To download a PDB file in PDB, XML, mmCIF or MMTF format use the `format` argument:
+To download a PDB file in PDB, XML or mmCIF format use the `format` argument:
 
 ```julia
 # To get mmCIF
@@ -597,6 +597,7 @@ downloadpdb("1ALW", dir="path/to/pdb/directory", format=MMCIFFormat)
 downloadpdb("1ALW", dir="path/to/pdb/directory", format=PDBXMLFormat)
 ```
 
+Note that MMTF files are [no longer available to download](https://www.rcsb.org/news/65a1af31c76ca3abcc925d0c).
 To apply a function to a downloaded file and delete the file afterwards:
 
 ```julia
@@ -613,7 +614,7 @@ end
 ```
 
 Note that some PDB entries, e.g. large viral assemblies, are not available as PDB format files.
-In this case download the mmCIF file or MMTF file instead.
+In this case download the mmCIF file instead.
 
 ## Reading PDB files
 
@@ -746,7 +747,7 @@ l = pdbentrylist()
 To download the entire RCSB PDB database in your preferred file format:
 
 ```julia
-downloadentirepdb(dir="path/to/pdb/directory", format=MMTFFormat)
+downloadentirepdb(dir="path/to/pdb/directory", format=MMCIFFormat)
 ```
 
 This operation takes a lot of disk space and time to complete, depending on internet connection.
@@ -754,7 +755,7 @@ This operation takes a lot of disk space and time to complete, depending on inte
 To update your local PDB directory based on the weekly status list of new, modified and obsolete PDB files from the RCSB server:
 
 ```julia
-updatelocalpdb(dir="path/to/pdb/directory", format=MMTFFormat)
+updatelocalpdb(dir="path/to/pdb/directory", format=MMCIFFormat)
 ```
 
 Obsolete PDB files are stored in the auto-generated `obsolete` directory inside the specified local PDB directory.

@@ -151,7 +151,7 @@ Requires an internet connection.
 - `dir::AbstractString=pwd()`: the directory to which the PDB file is
     downloaded; defaults to the current working directory.
 - `format::Type=PDB`: the format of the PDB file; options are PDBFormat,
-    PDBXMLFormat, MMCIFFormat and MMTFFormat.
+    PDBXMLFormat and MMCIFFormat. MMTF files are no longer available to download.
 - `obsolete::Bool=false`: if set `true`, the PDB file is downloaded in the
     auto-generated "obsolete" directory inside the specified `dir`.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
@@ -161,7 +161,7 @@ Requires an internet connection.
 """
 function downloadpdb(pdbid::AbstractString;
                 dir::AbstractString=pwd(),
-                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat, MMTFFormat}}=PDBFormat,
+                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat}}=PDBFormat,
                 obsolete::Bool=false,
                 overwrite::Bool=false,
                 ba_number::Integer=0)
@@ -196,18 +196,24 @@ function downloadpdb(pdbid::AbstractString;
             # Download the compressed PDB file to the temporary location
             @info "Downloading file from PDB: $pdbid"
             if ba_number == 0
-                if format == MMTFFormat
-                    Downloads.download("http://mmtf.rcsb.org/v1.0/full/$pdbid.mmtf.gz", archivefilepath)
-                else
-                    Downloads.download("http://files.rcsb.org/download/$pdbid.$(pdbextension[format]).gz", archivefilepath)
-                end
+                Downloads.download(
+                    "http://files.rcsb.org/download/$pdbid.$(pdbextension[format]).gz",
+                    archivefilepath,
+                )
             else
                 if format == PDBFormat
-                    Downloads.download("http://files.rcsb.org/download/$pdbid.$(pdbextension[format])$ba_number.gz", archivefilepath)
+                    Downloads.download(
+                        "http://files.rcsb.org/download/$pdbid.$(pdbextension[format])$ba_number.gz",
+                        archivefilepath,
+                    )
                 elseif format == MMCIFFormat
-                    Downloads.download("http://files.rcsb.org/download/$pdbid-assembly$ba_number.$(pdbextension[format]).gz", archivefilepath)
+                    Downloads.download(
+                        "http://files.rcsb.org/download/$pdbid-assembly$ba_number.$(pdbextension[format]).gz",
+                        archivefilepath,
+                    )
                 else
-                    throw(ArgumentError("Biological assemblies are available in the PDB and mmCIF formats only"))
+                    throw(ArgumentError("Biological assemblies are available in the " *
+                                        "PDB and mmCIF formats only"))
                 end
             end
             # Verify if the compressed file is downloaded properly and extract it
@@ -221,7 +227,9 @@ function downloadpdb(pdbid::AbstractString;
             # Verify if the PDB file is downloaded and extracted without any error
             if !isfile(pdbpath) || filesize(pdbpath) == 0
                 if format == PDBFormat
-                    throw(ErrorException("Error downloading file: $pdbid; some PDB entries are not available as PDB format files, consider downloading the mmCIF file or MMTF file instead"))
+                    throw(ErrorException("Error downloading file: $pdbid; some PDB entries are " *
+                                "not available as PDB format files, consider downloading " *
+                                "the mmCIF file instead"))
                 else
                     throw(ErrorException("Error downloading file: $pdbid"))
                 end
@@ -276,12 +284,12 @@ Requires an internet connection.
 - `dir::AbstractString=pwd()`: the directory to which the PDB files are
     downloaded; defaults to the current working directory.
 - `format::Type=PDB`: the format of the PDB file; options are PDBFormat,
-    PDBXMLFormat, MMCIFFormat and MMTFFormat.
+    PDBXMLFormat and MMCIFFormat. MMTF files are no longer available to download.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
     in `dir`; by default skips downloading the PDB file if it exists.
 """
 function downloadentirepdb(; dir::AbstractString=pwd(),
-                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat, MMTFFormat}}=PDBFormat,
+                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat}}=PDBFormat,
                 overwrite::Bool=false)
     pdblist = pdbentrylist()
     @info "About to download $(length(pdblist)) PDB files, make sure you have enough disk space and time"
@@ -300,7 +308,7 @@ automatically updates the PDB files of the given `format` inside the local
 Requires an internet connection.
 """
 function updatelocalpdb(; dir::AbstractString=pwd(),
-                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat, MMTFFormat}}=PDBFormat)
+                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat}}=PDBFormat)
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
     # Download the newly added and modified pdb files
     downloadpdb(vcat(addedlist, modifiedlist), dir=dir, overwrite=true, format=format)
@@ -337,12 +345,12 @@ Requires an internet connection.
 - `obsolete_dir::AbstractString=pwd()`: the directory where the PDB files are
     downloaded; defaults to the current working directory.
 - `format::Type=PDB`: the format of the PDB file; options are PDBFormat,
-    PDBXMLFormat, MMCIFFormat and MMTFFormat.
+    PDBXMLFormat and MMCIFFormat. MMTF files are no longer available to download.
 - `overwrite::Bool=false`: if set `true`, overwrites the PDB file if it exists
     in `dir`; by default skips downloading the PDB file if it exists.
 """
 function downloadallobsoletepdb(; obsolete_dir::AbstractString=pwd(),
-                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat, MMTFFormat}}=PDBFormat,
+                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat}}=PDBFormat,
                 overwrite::Bool=false)
     obsoletelist = pdbobsoletelist()
     downloadpdb(obsoletelist, dir=obsolete_dir, format=format, overwrite=overwrite)

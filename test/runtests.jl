@@ -126,9 +126,6 @@ Aqua.test_all(BioStructures; ambiguities=(recursive=false))
     downloadpdb("1alw", dir=temp_dir, format=MMCIFFormat)
     pdbpath = joinpath(temp_dir, "1ALW.$(pdbextension[MMCIFFormat])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
-    # MMTF format
-    downloadpdb("1alw", dir=temp_dir, format=MMTFFormat)
-    pdbpath = joinpath(temp_dir, "1ALW.$(pdbextension[MMTFFormat])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Obsolete PDB
     downloadpdb("116l", dir=temp_dir, format=PDBFormat, obsolete=true)
@@ -3258,7 +3255,6 @@ end
 
     pdb_path  = downloadpdb("1BQ0", dir=temp_dir, format=PDBFormat)
     cif_path  = downloadpdb("1BQ0", dir=temp_dir, format=MMCIFFormat)
-    mmtf_path = downloadpdb("1BQ0", dir=temp_dir, format=MMTFFormat)
 
     struc = read(pdb_path, PDBFormat)
     for res in collectresidues(struc)[1:5]
@@ -3301,9 +3297,6 @@ end
     struc3 = read(cif_path, MMCIFFormat; run_dssp=true)
     @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc3))
 
-    struc4 = read(mmtf_path, MMTFFormat; run_dssp=true)
-    @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc3))
-
     struc = read(pdb_path, PDBFormat)
     runstride!(struc)
 
@@ -3332,9 +3325,6 @@ end
 
     struc3 = read(cif_path, MMCIFFormat; run_stride=true)
     @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc3))
-
-    struc4 = read(mmtf_path, MMTFFormat; run_stride=true)
-    @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc4))
 
     isfile(temp_filename) && rm(temp_filename)
     rundssp(cif_path, temp_filename)
