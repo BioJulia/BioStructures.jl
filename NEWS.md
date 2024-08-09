@@ -1,5 +1,9 @@
 # BioStructures.jl release notes
 
+## v4.1.1 - Aug 2024
+
+* PDB download functions now use HTTPS rather than FTP as the PDB will deprecate the FTP protocol.
+
 ## v4.1.0 - Jul 2024
 
 * `retrievepdb` now takes the `format` keyword argument and uses `MMCIFFormat` by default.
