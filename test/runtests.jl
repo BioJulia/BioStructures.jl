@@ -14,6 +14,7 @@ using MetaGraphs
 using RecipesBase
 using STRIDE_jll
 
+using Downloads
 using LinearAlgebra
 using Test
 
@@ -49,7 +50,8 @@ using BioStructures:
     tokenizecifstructure,
     formatmmcifcol,
     requiresnewline,
-    requiresquote
+    requiresquote,
+    pdb_download_prefix
 
 # Get the path to BioFmtSpecimens and download it if required
 fmtdir = BioCore.Testing.get_bio_fmt_specimens("master", false)
@@ -90,12 +92,9 @@ Aqua.test_all(BioStructures; ambiguities=(recursive=false))
     @test length(pdbentrylist()) > 100000
 
     # This may be empty on a given date so we just check it has the correct type
-    @test isa(pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb"), Vector{String})
+    @test isa(pdbstatuslist("$pdb_download_prefix/data/status/latest/added.pdb"), Vector{String})
     # Invalid URL
-    # The error type changes from ErrorException to ProcessFailedException in Julia v1.2
-    #   therefore we check for the more general Exception type
-    # This also applies to two examples below
-    @test_throws Exception pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/dummy.pdb")
+    @test_throws RequestError pdbstatuslist("$pdb_download_prefix/data/status/latest/dummy.pdb")
 
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
 
@@ -104,13 +103,13 @@ Aqua.test_all(BioStructures; ambiguities=(recursive=false))
     # Invalid PDB ID format
     @test_throws ArgumentError downloadpdb("1a df")
     # Valid PDB ID format but PDB does not exist
-    @test_throws Exception downloadpdb("no1e", dir=temp_dir)
+    @test_throws RequestError downloadpdb("no1e", dir=temp_dir)
     # Invalid file format
     @test_throws TypeError downloadpdb("1alw", dir=temp_dir, format=String)
     # Biological assembly not available in PDBXML and MMTF
     @test_throws ArgumentError downloadpdb("1alw", dir=temp_dir, format=PDBXMLFormat, ba_number=1)
     # Invalid BA number for this PDB entry
-    @test_throws Exception downloadpdb("1alw", dir=temp_dir, format=MMCIFFormat, ba_number=10)
+    @test_throws RequestError downloadpdb("1alw", dir=temp_dir, format=MMCIFFormat, ba_number=10)
     # Test if downloadpdb returns the path to the downloaded file
     @test isfile(downloadpdb("1crn", dir=temp_dir))
 

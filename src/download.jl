@@ -9,6 +9,8 @@ export
     downloadallobsoletepdb,
     retrievepdb
 
+const pdb_download_prefix = "https://files.wwpdb.org/pub/pdb"
+
 """
     pdbentrylist()
 
@@ -21,7 +23,7 @@ function pdbentrylist()
     @info "Fetching the list of all PDB entries from the RCSB server"
     tempfilepath = tempname()
     try
-        Downloads.download("ftp://ftp.wwpdb.org/pub/pdb/derived_data/index/entries.idx", tempfilepath)
+        Downloads.download("$pdb_download_prefix/derived_data/index/entries.idx", tempfilepath)
         open(tempfilepath) do input
             reading = false
             for line in eachline(input)
@@ -53,7 +55,7 @@ end
 Obtain the list of Protein Data Bank (PDB) entries from a RCSB weekly status
 file by specifying its URL.
 
-An example URL is ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb.
+An example URL is $pdb_download_prefix/pub/pdb/data/status/latest/added.pdb.
 Requires an internet connection.
 """
 function pdbstatuslist(url::AbstractString)
@@ -92,9 +94,9 @@ Obtain three lists giving the added, modified and obsolete Protein Data Bank
 Requires an internet connection.
 """
 function pdbrecentchanges()
-    addedlist = pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/added.pdb")
-    modifiedlist = pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/modified.pdb")
-    obsoletelist = pdbstatuslist("ftp://ftp.wwpdb.org/pub/pdb/data/status/latest/obsolete.pdb")
+    addedlist = pdbstatuslist("$pdb_download_prefix/data/status/latest/added.pdb")
+    modifiedlist = pdbstatuslist("$pdb_download_prefix/data/status/latest/modified.pdb")
+    obsoletelist = pdbstatuslist("$pdb_download_prefix/data/status/latest/obsolete.pdb")
     return addedlist, modifiedlist, obsoletelist
 end
 
@@ -111,7 +113,7 @@ function pdbobsoletelist()
     @info "Fetching the list of all obsolete PDB entries from the RCSB server"
     tempfilepath = tempname()
     try
-        Downloads.download("ftp://ftp.wwpdb.org/pub/pdb/data/status/obsolete.dat", tempfilepath)
+        Downloads.download("$pdb_download_prefix/data/status/obsolete.dat", tempfilepath)
         open(tempfilepath) do input
             for line in eachline(input)
                 # Check if its an obsolete pdb entry and not headers
