@@ -47,17 +47,17 @@ first centred set onto the second centred set, and the indices of the aligned
 residues in the first and second elements if relevant.
 """
 struct Transformation
-    trans1::Array{Float64}
-    trans2::Array{Float64}
-    rot::Array{Float64, 2}
+    trans1::Vector{Float64}
+    trans2::Vector{Float64}
+    rot::Matrix{Float64}
     inds1::Vector{Int}
     inds2::Vector{Int}
 end
 
-function Transformation(trans1::AbstractArray{<:Real},
-                        trans2::AbstractArray{<:Real},
-                        rot::AbstractArray{<:Real, 2})
-    return Transformation(trans1, trans2, rot, [], [])
+function Transformation(trans1::AbstractVector{<:Real},
+                        trans2::AbstractVector{<:Real},
+                        rot::AbstractMatrix{<:Real})
+    return Transformation(trans1, trans2, rot, Int[], Int[])
 end
 
 Base.show(io::IO, trans::Transformation) = print("3D transformation with ",
@@ -135,8 +135,8 @@ function superimpose!(el1::StructuralElementOrList,
     return el1
 end
 
-function Transformation(coords1::AbstractArray{<:Real, 2},
-                        coords2::AbstractArray{<:Real, 2},
+function Transformation(coords1::AbstractMatrix{<:Real},
+                        coords2::AbstractMatrix{<:Real},
                         inds1::AbstractVector{<:Integer}=Int[],
                         inds2::AbstractVector{<:Integer}=Int[])
     if size(coords1) != size(coords2)
@@ -154,7 +154,7 @@ function Transformation(coords1::AbstractArray{<:Real, 2},
     d = sign(det(svd_res.V * Ut))
     @view(svd_res.V[:, end]) .*= d
     rot = svd_res.V * Ut
-    return Transformation(trans1, trans2, rot, inds1, inds2)
+    return Transformation(vec(trans1), vec(trans2), rot, inds1, inds2)
 end
 
 """
