@@ -85,6 +85,33 @@ function countlines_gzip(filename::AbstractString; gzip=false)
     end
 end
 
+getparent(a::Atom) = a.residue
+getparent(r::Residue) = r.chain
+getparent(c::Chain) = c.model
+getparent(m::Model) = m.structure
+getchildren(::Atom) = ()
+getchildren(r::Residue) = values(r.atoms)
+getchildren(c::Chain) = values(c.residues)
+getchildren(m::Model) = values(m.chains)
+getchildren(s::MolecularStructure) = values(s.models)
+function testparent(children, parent)
+    for child in children
+        if isa(child, DisorderedAtom)
+            for a in values(child.alt_loc_ids)
+                @test getparent(a) === parent
+            end
+        elseif isa(child, DisorderedResidue)
+            for r in values(child.names)
+                @test getparent(r) === parent
+                testparent(getchildren(r), r)
+            end
+        else
+            @test getparent(child) === parent
+            testparent(getchildren(child), child)
+        end
+    end
+end
+
 Aqua.test_all(BioStructures; ambiguities=(recursive=false))
 
 # This is the only test set that requires an internet connection
@@ -215,11 +242,23 @@ end
     fixlists!(struc)
 
     # copy doesn't share memory
+    testparent(getchildren(struc), struc)
     struc_copy = copy(struc)
+    testparent(getchildren(struc_copy), struc_copy)
     struc_copy['A'][10]["CA"].coords[2] = 100
     @test struc_copy['A'][10]["CA"].coords[2] == 100
     @test a.coords[2] == 2
     @test struc['A'][10]["CA"].coords[2] == 2
+    # intermediate copies preserve parenting up to the node of the copy
+    testparent(getchildren(mo), mo)
+    mo_copy = copy(mo)
+    testparent(getchildren(mo_copy), mo_copy)
+    testparent(getchildren(ch), ch)
+    ch_copy = copy(ch)
+    testparent(getchildren(ch_copy), ch_copy)
+    testparent(getchildren(res), res)
+    res_copy = copy(res)
+    testparent(getchildren(res_copy), res_copy)
 
     # Test alternate constructors
     MolecularStructure("struc", Dict(1 => Model()))

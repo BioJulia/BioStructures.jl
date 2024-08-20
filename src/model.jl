@@ -113,12 +113,14 @@ struct Atom <: AbstractAtom
     charge::String
     residue::StructuralElement
 end
+Atom(a::Atom, r::StructuralElement) = Atom(a.serial, a.name, a.alt_loc_id, copy(a.coords), a.occupancy, a.temp_factor, a.element, a.charge, r)
 
 "A container to hold different locations of the same atom."
 struct DisorderedAtom <: AbstractAtom
     alt_loc_ids::Dict{Char, Atom}
     default::Char
 end
+DisorderedAtom(da::DisorderedAtom, r::StructuralElement) = DisorderedAtom(Dict(k => Atom(a, r) for (k, a) in da.alt_loc_ids), da.default)
 
 """
 A residue (amino acid) or other molecule - either a `Residue` or a
@@ -137,6 +139,14 @@ mutable struct Residue <: AbstractResidue
     chain::StructuralElement
     ss_code::Char
 end
+function Residue(r::Residue, chain::StructuralElement)
+    atoms = Dict{String, AbstractAtom}()
+    rnew = Residue(r.name, r.number, r.ins_code, r.het_res, [name for name in r.atom_list], atoms, chain, r.ss_code)
+    for (name, atom) in r.atoms
+        atoms[name] = isa(atom, Atom) ? Atom(atom, rnew) : DisorderedAtom(atom, rnew)
+    end
+    return rnew
+end
 
 """
 A container to hold different versions of the same residue (point
@@ -146,6 +156,7 @@ struct DisorderedResidue <: AbstractResidue
     names::Dict{String, Residue}
     default::String
 end
+DisorderedResidue(dr::DisorderedResidue, chain::StructuralElement) = DisorderedResidue(Dict(k => Residue(r, chain) for (k, r) in dr.names), dr.default)
 
 "A chain (molecule) from a macromolecular structure."
 mutable struct Chain <: StructuralElement
@@ -154,12 +165,28 @@ mutable struct Chain <: StructuralElement
     residues::Dict{String, AbstractResidue}
     model::StructuralElement
 end
+function Chain(c::Chain, model::StructuralElement)
+    residues = Dict{String, AbstractResidue}()
+    cnew = Chain(c.id, [id for id in c.res_list], residues, model)
+    for (id, res) in c.residues
+        residues[id] = isa(res, Residue) ? Residue(res, cnew) : DisorderedResidue(res, cnew)
+    end
+    return cnew
+end
 
 "A conformation of a macromolecular structure."
 struct Model <: StructuralElement
     number::Int
     chains::Dict{String, Chain}
     structure::StructuralElement
+end
+function Model(m::Model, structure::StructuralElement)
+    chains = Dict{String, Chain}()
+    mnew = Model(m.number, chains, structure)
+    for (id, ch) in m.chains
+        chains[id] = Chain(ch, mnew)
+    end
+    return mnew
 end
 
 """
@@ -169,6 +196,14 @@ entry.
 struct MolecularStructure <: StructuralElement
     name::String
     models::Dict{Int, Model}
+end
+function MolecularStructure(s::MolecularStructure)
+    models = Dict{Int, Model}()
+    snew = MolecularStructure(s.name, models)
+    for (number, mo) in s.models
+        models[number] = Model(mo, snew)
+    end
+    return snew
 end
 
 """
@@ -338,14 +373,14 @@ end
 Base.firstindex(struc::MolecularStructure) = first(modelnumbers(struc))
 Base.lastindex(struc::MolecularStructure) = last(modelnumbers(struc))
 
-# recursive copy methods
-Base.copy(a::Atom) = Atom(a.serial, a.name, a.alt_loc_id, copy(coords(a)), a.occupancy, a.temp_factor, a.element, a.charge, a.residue)
-Base.copy(da::DisorderedAtom) = DisorderedAtom(copy(da.alt_loc_ids), da.default)
-Base.copy(r::Residue) = Residue(r.name, r.number, r.ins_code, r.het_res, [name for name in r.atom_list], Dict(k => copy(a) for (k, a) in r.atoms), r.chain, r.ss_code)
-Base.copy(dr::DisorderedResidue) = DisorderedResidue(Dict(k => copy(r) for (k, r) in dr.names), dr.default)
-Base.copy(c::Chain) = Chain(c.id, [id for id in c.res_list], Dict(k => copy(r) for (k, r) in c.residues), c.model)
-Base.copy(m::Model) = Model(m.number, Dict(k => copy(c) for (k, c) in m.chains), m.structure)
-Base.copy(s::MolecularStructure) = MolecularStructure(s.name, Dict(k => copy(m) for (k, m) in s.models))
+# recursive copy methods. If we copy a subelement (anything below MolecularStructure), it shares the parent element
+Base.copy(a::Atom) = Atom(a, a.residue)
+Base.copy(da::DisorderedAtom) = DisorderedAtom(da, only(unique(values(da.alt_loc_ids))))
+Base.copy(r::Residue) = Residue(r, r.chain)
+Base.copy(dr::DisorderedResidue) = DisorderedResidue(dr, only(unique(values(dr.names))))
+Base.copy(c::Chain) = Chain(c, c.model)
+Base.copy(m::Model) = Model(m, m.structure)
+Base.copy(s::MolecularStructure) = MolecularStructure(s)
 
 # Check if an atom name exists in a residue as a whitespace-padded version
 function findatombyname(res::Residue, atom_name::AbstractString)
