@@ -259,6 +259,8 @@ end
     testparent(getchildren(res), res)
     res_copy = copy(res)
     testparent(getchildren(res_copy), res_copy)
+    @test copy(dis_res) isa DisorderedResidue
+    @test copy(dis_at) isa DisorderedAtom
 
     # Test alternate constructors
     MolecularStructure("struc", Dict(1 => Model()))
