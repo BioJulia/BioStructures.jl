@@ -375,9 +375,9 @@ Base.lastindex(struc::MolecularStructure) = last(modelnumbers(struc))
 
 # recursive copy methods. If we copy a subelement (anything below MolecularStructure), it shares the parent element
 Base.copy(a::Atom) = Atom(a, a.residue)
-Base.copy(da::DisorderedAtom) = DisorderedAtom(da, only(unique(values(da.alt_loc_ids))))
+Base.copy(da::DisorderedAtom) = DisorderedAtom(da, only(unique(a -> a.residue, values(da.alt_loc_ids))).residue)
 Base.copy(r::Residue) = Residue(r, r.chain)
-Base.copy(dr::DisorderedResidue) = DisorderedResidue(dr, only(unique(values(dr.names))))
+Base.copy(dr::DisorderedResidue) = DisorderedResidue(dr, only(unique(r -> r.chain, values(dr.names))).chain)
 Base.copy(c::Chain) = Chain(c, c.model)
 Base.copy(m::Model) = Model(m, m.structure)
 Base.copy(s::MolecularStructure) = MolecularStructure(s)
