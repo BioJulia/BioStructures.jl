@@ -338,6 +338,15 @@ end
 Base.firstindex(struc::MolecularStructure) = first(modelnumbers(struc))
 Base.lastindex(struc::MolecularStructure) = last(modelnumbers(struc))
 
+# recursive copy methods
+Base.copy(a::Atom) = Atom(a.serial, a.name, a.alt_loc_id, copy(coords(a)), a.occupancy, a.temp_factor, a.element, a.charge, a.residue)
+Base.copy(da::DisorderedAtom) = DisorderedAtom(copy(da.alt_loc_ids), da.default)
+Base.copy(r::Residue) = Residue(r.name, r.number, r.ins_code, r.het_res, [name for name in r.atom_list], Dict(k => copy(a) for (k, a) in r.atoms), r.chain, r.ss_code)
+Base.copy(dr::DisorderedResidue) = DisorderedResidue(Dict(k => copy(r) for (k, r) in dr.names), dr.default)
+Base.copy(c::Chain) = Chain(c.id, [id for id in c.res_list], Dict(k => copy(r) for (k, r) in c.residues), c.model)
+Base.copy(m::Model) = Model(m.number, Dict(k => copy(c) for (k, c) in m.chains), m.structure)
+Base.copy(s::MolecularStructure) = MolecularStructure(s.name, Dict(k => copy(m) for (k, m) in s.models))
+
 # Check if an atom name exists in a residue as a whitespace-padded version
 function findatombyname(res::Residue, atom_name::AbstractString)
     # Look for atom name directly

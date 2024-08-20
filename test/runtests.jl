@@ -198,8 +198,8 @@ end
     ), " VA")
     dis_res = struc['A']["H_20A"]
     @test isa(dis_res, DisorderedResidue)
-    struc['A'][10][" CA "] = Atom(
-        100, " CA ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res)
+    a = Atom(100, " CA ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " C", "  ", res)
+    struc['A'][10][" CA "] = a
     at = struc['A'][10]["CA"]
     @test isa(at, Atom)
     struc['A'][10][" CB "] = DisorderedAtom(Dict(
@@ -213,6 +213,13 @@ end
     disorderedres(dis_res, "ILE")[" O  "] = Atom(
         400, " O  ", ' ', [1.0, 2.0, 3.0], 1.0, 10.0, " O", "  ", disorderedres(dis_res, "ILE"))
     fixlists!(struc)
+
+    # copy doesn't share memory
+    struc_copy = copy(struc)
+    struc_copy['A'][10]["CA"].coords[2] = 100
+    @test struc_copy['A'][10]["CA"].coords[2] == 100
+    @test a.coords[2] == 2
+    @test struc['A'][10]["CA"].coords[2] == 2
 
     # Test alternate constructors
     MolecularStructure("struc", Dict(1 => Model()))
