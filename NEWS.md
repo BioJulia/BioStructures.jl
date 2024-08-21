@@ -1,5 +1,10 @@
 # BioStructures.jl release notes
 
+## v4.2.0 - Aug 2024
+
+* `Base.copy` is defined for structural elements and carries out a recursive copy of the element.
+* The fields of `Transformation` are made concrete, which may improve performance.
+
 ## v4.1.1 - Aug 2024
 
 * PDB download functions now use HTTPS rather than FTP as the PDB will deprecate the FTP protocol.
