@@ -35,7 +35,7 @@ function BioStructures.runstride!(struc::MolecularStructure)
     return struc
 end
 
-BioStructures.runstride(el::Union{MolecularStructure, Model}) = runstride!(deepcopy(el))
+BioStructures.runstride(el::Union{MolecularStructure, Model}) = runstride!(copy(el))
 
 function BioStructures.runstride(filepath_in, stride_filepath_out)
     run(`$stride_executable $filepath_in -f$stride_filepath_out`)

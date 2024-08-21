@@ -94,6 +94,7 @@ getchildren(r::Residue) = values(r.atoms)
 getchildren(c::Chain) = values(c.residues)
 getchildren(m::Model) = values(m.chains)
 getchildren(s::MolecularStructure) = values(s.models)
+
 function testparent(children, parent)
     for child in children
         if isa(child, DisorderedAtom)
@@ -249,7 +250,7 @@ end
     @test struc_copy['A'][10]["CA"].coords[2] == 100
     @test a.coords[2] == 2
     @test struc['A'][10]["CA"].coords[2] == 2
-    # intermediate copies preserve parenting up to the node of the copy
+    # Intermediate copies preserve parenting up to the node of the copy
     testparent(getchildren(mo), mo)
     mo_copy = copy(mo)
     testparent(getchildren(mo_copy), mo_copy)

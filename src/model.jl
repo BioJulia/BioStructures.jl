@@ -113,14 +113,21 @@ struct Atom <: AbstractAtom
     charge::String
     residue::StructuralElement
 end
-Atom(a::Atom, r::StructuralElement) = Atom(a.serial, a.name, a.alt_loc_id, copy(a.coords), a.occupancy, a.temp_factor, a.element, a.charge, r)
+
+function Atom(a::Atom, r::StructuralElement)
+    return Atom(a.serial, a.name, a.alt_loc_id, copy(a.coords), a.occupancy,
+                a.temp_factor, a.element, a.charge, r)
+end
 
 "A container to hold different locations of the same atom."
 struct DisorderedAtom <: AbstractAtom
     alt_loc_ids::Dict{Char, Atom}
     default::Char
 end
-DisorderedAtom(da::DisorderedAtom, r::StructuralElement) = DisorderedAtom(Dict(k => Atom(a, r) for (k, a) in da.alt_loc_ids), da.default)
+
+function DisorderedAtom(da::DisorderedAtom, r::StructuralElement)
+    return DisorderedAtom(Dict(k => Atom(a, r) for (k, a) in da.alt_loc_ids), da.default)
+end
 
 """
 A residue (amino acid) or other molecule - either a `Residue` or a
@@ -139,11 +146,13 @@ mutable struct Residue <: AbstractResidue
     chain::StructuralElement
     ss_code::Char
 end
-function Residue(r::Residue, chain::StructuralElement)
-    atoms = Dict{String, AbstractAtom}()
-    rnew = Residue(r.name, r.number, r.ins_code, r.het_res, [name for name in r.atom_list], atoms, chain, r.ss_code)
+
+function Residue(r::Residue, ch::StructuralElement)
+    atom_dict = Dict{String, AbstractAtom}()
+    rnew = Residue(r.name, r.number, r.ins_code, r.het_res, [name for name in r.atom_list],
+                   atom_dict, ch, r.ss_code)
     for (name, atom) in r.atoms
-        atoms[name] = isa(atom, Atom) ? Atom(atom, rnew) : DisorderedAtom(atom, rnew)
+        atom_dict[name] = isa(atom, Atom) ? Atom(atom, rnew) : DisorderedAtom(atom, rnew)
     end
     return rnew
 end
@@ -156,7 +165,10 @@ struct DisorderedResidue <: AbstractResidue
     names::Dict{String, Residue}
     default::String
 end
-DisorderedResidue(dr::DisorderedResidue, chain::StructuralElement) = DisorderedResidue(Dict(k => Residue(r, chain) for (k, r) in dr.names), dr.default)
+
+function DisorderedResidue(dr::DisorderedResidue, ch::StructuralElement)
+    return DisorderedResidue(Dict(k => Residue(r, ch) for (k, r) in dr.names), dr.default)
+end
 
 "A chain (molecule) from a macromolecular structure."
 mutable struct Chain <: StructuralElement
@@ -165,11 +177,12 @@ mutable struct Chain <: StructuralElement
     residues::Dict{String, AbstractResidue}
     model::StructuralElement
 end
-function Chain(c::Chain, model::StructuralElement)
-    residues = Dict{String, AbstractResidue}()
-    cnew = Chain(c.id, [id for id in c.res_list], residues, model)
+
+function Chain(c::Chain, mo::StructuralElement)
+    res_dict = Dict{String, AbstractResidue}()
+    cnew = Chain(c.id, [id for id in c.res_list], res_dict, mo)
     for (id, res) in c.residues
-        residues[id] = isa(res, Residue) ? Residue(res, cnew) : DisorderedResidue(res, cnew)
+        res_dict[id] = isa(res, Residue) ? Residue(res, cnew) : DisorderedResidue(res, cnew)
     end
     return cnew
 end
@@ -180,11 +193,12 @@ struct Model <: StructuralElement
     chains::Dict{String, Chain}
     structure::StructuralElement
 end
-function Model(m::Model, structure::StructuralElement)
-    chains = Dict{String, Chain}()
-    mnew = Model(m.number, chains, structure)
+
+function Model(m::Model, struc::StructuralElement)
+    chain_dict = Dict{String, Chain}()
+    mnew = Model(m.number, chain_dict, struc)
     for (id, ch) in m.chains
-        chains[id] = Chain(ch, mnew)
+        chain_dict[id] = Chain(ch, mnew)
     end
     return mnew
 end
@@ -197,11 +211,12 @@ struct MolecularStructure <: StructuralElement
     name::String
     models::Dict{Int, Model}
 end
+
 function MolecularStructure(s::MolecularStructure)
-    models = Dict{Int, Model}()
-    snew = MolecularStructure(s.name, models)
+    model_dict = Dict{Int, Model}()
+    snew = MolecularStructure(s.name, model_dict)
     for (number, mo) in s.models
-        models[number] = Model(mo, snew)
+        model_dict[number] = Model(mo, snew)
     end
     return snew
 end
@@ -373,7 +388,8 @@ end
 Base.firstindex(struc::MolecularStructure) = first(modelnumbers(struc))
 Base.lastindex(struc::MolecularStructure) = last(modelnumbers(struc))
 
-# recursive copy methods. If we copy a subelement (anything below MolecularStructure), it shares the parent element
+# Recursive copy methods
+# If we copy a sub-element (anything below MolecularStructure), it shares the parent element
 Base.copy(a::Atom) = Atom(a, a.residue)
 Base.copy(da::DisorderedAtom) = DisorderedAtom(da, only(unique(a -> a.residue, values(da.alt_loc_ids))).residue)
 Base.copy(r::Residue) = Residue(r, r.chain)

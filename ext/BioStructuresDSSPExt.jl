@@ -49,7 +49,7 @@ function BioStructures.rundssp!(struc::MolecularStructure)
     return struc
 end
 
-BioStructures.rundssp(el::Union{MolecularStructure, Model}) = rundssp!(deepcopy(el))
+BioStructures.rundssp(el::Union{MolecularStructure, Model}) = rundssp!(copy(el))
 
 function BioStructures.rundssp(filepath_in, dssp_filepath_out)
     run(`$dssp_executable $filepath_in $dssp_filepath_out`)
