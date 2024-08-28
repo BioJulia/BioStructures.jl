@@ -424,7 +424,7 @@ Various functions are provided to calculate spatial quantities for proteins:
 | [`superimpose!`](@ref)       | Superimpose one element onto another                                                             |
 | [`rmsd`](@ref)               | RMSD between two elements, with or without superimposition                                       |
 | [`displacements`](@ref)      | `Vector` of displacements between two elements, with or without superimposition                  |
-| `MetaGraph`                  | Construct a `MetaGraph` of contacting elements (call `using Graphs, MetaGraphs` first)           |
+| `MetaGraph`                  | Construct a `MetaGraph` of contacting elements (call `using MetaGraphs` first)                   |
 
 The [`omegaangle`](@ref), [`phiangle`](@ref) and [`psiangle`](@ref) functions can take either a pair of residues or a chain and a position.
 The [`omegaangle`](@ref) and [`phiangle`](@ref) functions measure the angle between the residue at the given index and the one before.
@@ -483,7 +483,7 @@ To carry out superimposition, BioStructures.jl carries out a sequence alignment 
 For example:
 
 ```julia
-using BioSequences, BioAlignments
+using BioAlignments
 
 # Change the coordinates of element 1 to superimpose it onto element 2
 # Do sequence alignment with standard residues and calculate the transformation with Cα atoms (the default)
