@@ -1,5 +1,9 @@
 # BioStructures.jl release notes
 
+## v4.2.1 - Oct 2024
+
+* Change compatibility bounds for new MetaGraphs.jl release.
+
 ## v4.2.0 - Aug 2024
 
 * `Base.copy` is defined for structural elements and carries out a recursive copy of the element.
