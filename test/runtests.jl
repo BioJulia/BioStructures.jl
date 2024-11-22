@@ -940,6 +940,12 @@ end
     @test_throws ArgumentError collectatoms(struc, sel"abc") # Invalid selection syntax
     @test_throws ArgumentError collectatoms(struc, sel"index = A") # Invalid value type
     @test_throws ArgumentError collectatoms(struc, sel"resnum C")
+
+    # test show method for @sel_str
+    sel = Select("name CA and residue 1")
+    buff = IOBuffer()
+    show(buff, MIME"text/plain"(), sel"name CA and residue 1")
+    @test String(take!(buff)) == """Select("name CA and residue 1")"""
 end
 
 @testset "PDB reading" begin
