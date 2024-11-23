@@ -1,5 +1,9 @@
 # BioStructures.jl release notes
 
+## v4.3.0 - Nov 2024
+
+* Selection strings are made much faster.
+
 ## v4.2.1 - Oct 2024
 
 * Change compatibility bounds for new MetaGraphs.jl release.

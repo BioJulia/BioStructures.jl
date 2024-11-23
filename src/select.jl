@@ -440,11 +440,14 @@ struct Select{Q} <: Function
     query_string::String
     query::Q
 end
+
 function Select(query_string::AbstractString) 
     query = parse_query(query_string)
     return Select(query_string, query)
 end
+
 (s::Select)(at) = apply_query(s.query, at)
+
 Base.show(io::IO, ::MIME"text/plain", s::Select) = print(io, """Select("$(s.query_string)")""")
 
 "String selection syntax."

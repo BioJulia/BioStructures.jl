@@ -941,7 +941,7 @@ end
     @test_throws ArgumentError collectatoms(struc, BioStructures.Select("index = A")) # Invalid value type
     @test_throws ArgumentError collectatoms(struc, BioStructures.Select("resnum C"))
 
-    # test show method for @sel_str
+    # Test show method for @sel_str
     buff = IOBuffer()
     show(buff, MIME"text/plain"(), sel"name CA and resnum 1")
     @test String(take!(buff)) == """Select("name CA and resnum 1")"""
