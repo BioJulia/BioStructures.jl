@@ -937,9 +937,14 @@ end
     @test length(collectmodels(struc, sel"model 1")) == 1
     @test length(collectmodels(struc, sel"model 2")) == 0
 
-    @test_throws ArgumentError collectatoms(struc, sel"abc") # Invalid selection syntax
-    @test_throws ArgumentError collectatoms(struc, sel"index = A") # Invalid value type
-    @test_throws ArgumentError collectatoms(struc, sel"resnum C")
+    @test_throws ArgumentError collectatoms(struc, BioStructures.Select("abc")) # Invalid selection syntax
+    @test_throws ArgumentError collectatoms(struc, BioStructures.Select("index = A")) # Invalid value type
+    @test_throws ArgumentError collectatoms(struc, BioStructures.Select("resnum C"))
+
+    # test show method for @sel_str
+    buff = IOBuffer()
+    show(buff, MIME"text/plain"(), sel"name CA and resnum 1")
+    @test String(take!(buff)) == """Select("name CA and resnum 1")"""
 end
 
 @testset "PDB reading" begin
