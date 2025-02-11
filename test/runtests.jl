@@ -928,6 +928,11 @@ end
     @test length(collectatoms(struc, sel"disordered")) == 68
     @test length(collectatoms(struc, sel"sscode E")) == 2448
     @test length(collectatoms(struc, sel"helix")) == 4047
+    # check interpolation support
+    ss_type = "helix"
+    @test length(collectatoms(struc, sel"$ss_type")) == 4047
+    sel_chains = ('A', 'B')
+    @test length(collectresidues(struc, sel"chain $(first(sel_chains)) or chain $(last(sel_chains))")) == 544
 
     @test length(collectresidues(struc, sel"chain A or chain B")) == 544
     @test length(collectresidues(struc, sel"standard")) == 1420
