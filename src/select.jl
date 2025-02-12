@@ -435,7 +435,7 @@ Trivial selector that returns `true` for any structural element.
 allselector(el) = true
 
 # Acts as a function when used within typical julia filtering functions 
-#   by converting a string selection into a query call
+# by converting a string selection into a query call
 struct Select{Q} <: Function
     query_string::String
     query::Q
@@ -450,9 +450,30 @@ end
 
 Base.show(io::IO, ::MIME"text/plain", s::Select) = print(io, """Select("$(s.query_string)")""")
 
+#
+# Parse selection string allowing interpolation in sel macro:
+# https://discourse.julialang.org/t/str-string-interpolation/125766/11?u=lmiq
+#
+_select(args...) = Select(string(args...))
 "String selection syntax."
-macro sel_str(str)
-    Select(str)
+macro sel_str(s)
+    ex = Expr(:call, GlobalRef(BioStructures, :_select))
+    i = firstindex(s)
+    buf = IOBuffer(maxsize=ncodeunits(s))
+    while i <= ncodeunits(s)
+        c = @inbounds s[i]
+        i = nextind(s, i)
+        if c === '$'
+            position(buf) > 0 && push!(ex.args, String(take!(buf)))
+            val, i = Meta.parse(s, i; greedy=false)
+            Meta.isexpr(val, :incomplete) && error(val.args[1])
+            val !== nothing && push!(ex.args, val)
+        else
+            print(buf, c)
+        end
+    end
+    position(buf) > 0 && push!(ex.args, String(take!(buf)))
+    return esc(ex)
 end
 
 const operators = (
