@@ -1,5 +1,9 @@
 # BioStructures.jl release notes
 
+## v4.4.0 - Feb 2025
+
+* Selection strings now support interpolation.
+
 ## v4.3.0 - Nov 2024
 
 * Selection strings are made much faster.

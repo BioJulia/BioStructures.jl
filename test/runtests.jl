@@ -928,7 +928,7 @@ end
     @test length(collectatoms(struc, sel"disordered")) == 68
     @test length(collectatoms(struc, sel"sscode E")) == 2448
     @test length(collectatoms(struc, sel"helix")) == 4047
-    # check interpolation support
+    # Check interpolation support
     ss_type = "helix"
     @test length(collectatoms(struc, sel"$ss_type")) == 4047
     sel_chains = ('A', 'B')

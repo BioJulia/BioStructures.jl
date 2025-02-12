@@ -450,11 +450,10 @@ end
 
 Base.show(io::IO, ::MIME"text/plain", s::Select) = print(io, """Select("$(s.query_string)")""")
 
-#
 # Parse selection string allowing interpolation in sel macro:
 # https://discourse.julialang.org/t/str-string-interpolation/125766/11?u=lmiq
-#
 _select(args...) = Select(string(args...))
+
 "String selection syntax."
 macro sel_str(s)
     ex = Expr(:call, GlobalRef(BioStructures, :_select))
