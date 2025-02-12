@@ -436,10 +436,19 @@ allselector(el) = true
 
 # Acts as a function when used within typical julia filtering functions 
 # by converting a string selection into a query call
-struct Select <: Function
-    sel::String
+struct Select{Q} <: Function
+    query_string::String
+    query::Q
 end
-(s::Select)(at) = apply_query(parse_query(s.sel), at)
+
+function Select(query_string::AbstractString) 
+    query = parse_query(query_string)
+    return Select(query_string, query)
+end
+
+(s::Select)(at) = apply_query(s.query, at)
+
+Base.show(io::IO, ::MIME"text/plain", s::Select) = print(io, """Select("$(s.query_string)")""")
 
 #
 # Parse selection string allowing interpolation in sel macro:
@@ -466,7 +475,6 @@ macro sel_str(s)
     position(buf) > 0 && push!(ex.args, String(take!(buf)))
     return esc(ex)
 end
-
 
 const operators = (
     "="  => (x, y) -> isequal(x, y),
