@@ -67,7 +67,7 @@ function BioStructures.Transformation(el1::StructuralElementOrList,
         sel_ats1 = collectatoms(res1[i1], alignatoms)
         sel_ats2 = collectatoms(res2[i2], alignatoms)
         # Ensure `atoms1` and `atoms2` have the same length, ignore residues
-        # where the number of atoms differ.
+        # where the number of atoms differ
         if length(sel_ats1) == length(sel_ats2)
             append!(atoms1, sel_ats1)
             append!(atoms2, sel_ats2)
