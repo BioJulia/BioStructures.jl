@@ -63,6 +63,7 @@ function BioStructures.Transformation(el1::StructuralElementOrList,
     end
     @info "Superimposing based on a sequence alignment between $(length(inds1)) residues"
     atoms1, atoms2 = AbstractAtom[], AbstractAtom[]
+    inds1_used, inds2_used = Int[], Int[]
     for (i1, i2) in zip(inds1, inds2)
         sel_ats1 = collectatoms(res1[i1], alignatoms)
         sel_ats2 = collectatoms(res2[i2], alignatoms)
@@ -71,13 +72,15 @@ function BioStructures.Transformation(el1::StructuralElementOrList,
         if length(sel_ats1) == length(sel_ats2)
             append!(atoms1, sel_ats1)
             append!(atoms2, sel_ats2)
+            push!(inds1_used, i1)
+            push!(inds2_used, i2)
         end
     end
     if length(atoms1) == 0
         throw(ArgumentError("No atoms found to superimpose"))
     end
     @info "Superimposing based on $(length(atoms1)) atoms"
-    return Transformation(coordarray(atoms1), coordarray(atoms2), inds1, inds2)
+    return Transformation(coordarray(atoms1), coordarray(atoms2), inds1_used, inds2_used)
 end
 
 end # BioStructuresBioAlignmentsExt
