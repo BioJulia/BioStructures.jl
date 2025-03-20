@@ -1,5 +1,9 @@
 # BioStructures.jl release notes
 
+## v4.4.2 - Mar 2025
+
+* A bug in storing indices for `Transformation` is fixed.
+
 ## v4.4.1 - Mar 2025
 
 * A bug in input checking for `Transformation` is fixed.

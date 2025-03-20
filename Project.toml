@@ -1,7 +1,7 @@
 name = "BioStructures"
 uuid = "de9282ab-8554-53be-b2d6-f6c222edabfc"
 authors = ["Joe G Greener <jgreener@hotmail.co.uk>"]
-version = "4.4.1"
+version = "4.4.2"
 
 [deps]
 BioGenerics = "47718e42-2ac5-11e9-14af-e5595289c2ea"
