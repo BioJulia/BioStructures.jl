@@ -347,8 +347,7 @@ function MolecularStructure(mmcif_dict::MMCIFDict;
     end
 
     # Secondary structure assignment
-    if haskey(mmcif_dict, "_struct_conf.conf_type_id")
-        (run_dssp | run_stride) && @warn "Secondary structure assignment will be overwritten"
+    if !(run_dssp | run_stride) && haskey(mmcif_dict, "_struct_conf.conf_type_id")
         for (i, id) in pairs(mmcif_dict["_struct_conf.conf_type_id"])
             chainid = mmcif_dict["_struct_conf.beg_label_asym_id"][i]
             mmcif_dict["_struct_conf.end_label_asym_id"][i] == chainid || continue   # mismatch in chain id

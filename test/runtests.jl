@@ -896,7 +896,7 @@ end
 end
 
 @testset "Selection syntax" begin
-    struc = @test_logs (:info, "Downloading file from PDB: 4YC6") (:warn,"Secondary structure assignment will be overwritten") retrievepdb("4YC6", dir=temp_dir, run_dssp=true)
+    struc = retrievepdb("4YC6", dir=temp_dir, run_dssp=true)
     @test length(collectatoms(struc, sel"all")) == 12271
     @test length(collectatoms(struc, sel"name CA")) == 1420
     @test length(collectatoms(struc, sel"name CA", sel"x > 0")) == 312
@@ -3359,7 +3359,7 @@ end
     struc2 = read(pdb_path, PDBFormat; run_dssp=true)
     @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc2))
 
-    struc3 = @test_logs (:warn,"Secondary structure assignment will be overwritten") read(cif_path, MMCIFFormat; run_dssp=true)
+    struc3 = read(cif_path, MMCIFFormat; run_dssp=true)
     @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc3))
 
     struc = read(pdb_path, PDBFormat)
@@ -3388,7 +3388,7 @@ end
     struc2 = read(pdb_path, PDBFormat; run_stride=true)
     @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc2))
 
-    struc3 = @test_logs (:warn,"Secondary structure assignment will be overwritten") read(cif_path, MMCIFFormat; run_stride=true)
+    struc3 = read(cif_path, MMCIFFormat; run_stride=true)
     @test sscode.(collectatoms(struc)) == sscode.(collectatoms(struc3))
 
     isfile(temp_filename) && rm(temp_filename)
