@@ -8,3 +8,4 @@ benchmark/tune.json
 benchmark/results
 Manifest.toml
 *.swp
+deps/protein.ff14SB.*

@@ -13,6 +13,7 @@ using BioGenerics
 using BioSymbols
 using CodecZlib
 using Downloads
+using Serialization
 using Format
 using PrecompileTools
 using RecipesBase
@@ -26,6 +27,14 @@ include("pdb.jl")
 include("mmcif.jl")
 include("download.jl")
 include("spatial.jl")
+
+let fn = joinpath(dirname(@__DIR__), "deps", "protein.ff14SB.jls")
+    include_dependency(fn)    # ensure we recompile if the file changes
+    io = open(fn, "r")        # the const-assignments must be done at top-level so we can't use `open() do`
+    global const atomtypes = deserialize(io)
+    global const residuedata = deserialize(io)
+    close(io)
+end
 
 @compile_workload begin
     let

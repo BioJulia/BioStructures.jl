@@ -3277,6 +3277,61 @@ end
     @test ne(mg) == 1
     @test get_prop(mg, :contactdist) == 10.0
     @test mg[2, :element] == struc_1AKE["B"]
+
+    # Test graph construction from the known AA connectivity
+    mg = MetaGraph(struc_1AKE["A"]; strict=false)
+    n1, n2 = 3, 9
+    a1, a2 = mg[n1, :element], mg[n2, :element]
+    @test resname(residue(a1)) == "MET"
+    @test resnumber(residue(a1)) == 1
+    @test atomname(a1) == "C"
+    @test resname(residue(a2)) == "ARG"
+    @test resnumber(residue(a2)) == 2
+    @test atomname(a2) == "N"
+    @test has_edge(mg, n1, n2)
+    for i = 1:8, j = 9:19
+        i == n1 && j == n2 && continue
+        @test !has_edge(mg, i, j)   # (n1, n2) is the only edge between these two
+    end
+    # connectivity within the methionine residue
+    goodedges = [(1, 2), (2, 3), (3, 4), (2, 5), (5, 6), (6, 7), (7, 8)]
+    for i = 1:7, j = i+1:8
+        if (i, j) ∈ goodedges
+            @test has_edge(mg, i, j)
+        else
+            @test !has_edge(mg, i, j)
+        end
+    end
+    # residue 167 has disordered atoms, make sure we get them all
+    a = mg[1297, :element]
+    r = residue(a)
+    @test resnumber(r) == 167 && resname(r) == "ARG"
+    @test r["CD"] isa DisorderedAtom
+    a = mg[1298, :element]
+    r = residue(a)
+    @test resnumber(r) == 168 && resname(r) == "LEU"
+    # end of the protein
+    n1, n2 = #= C in residue 213 =# 1651, #= N in residue 214 =# 1657
+    @test has_edge(mg, n1, n2)
+    for i = 1649:1656, j = 1657:1661
+        i == n1 && j == n2 && continue
+        @test !has_edge(mg, i, j)   # (n1, n2) is the only edge between these two
+    end
+    # Terminal glycine connectivity
+    goodedges = [(1657, 1658), (1658, 1659), (1659, 1660), (1659, 1661)]
+    for i = 1657:1660, j = i+1:1661
+        if (i, j) ∈ goodedges
+            @test has_edge(mg, i, j)
+        else
+            @test !has_edge(mg, i, j)
+        end
+    end
+    # None of the heteroatoms have edges
+    for i = 1662:nv(mg)
+        @test isempty(neighbors(mg, i))
+    end
+
+    @test_throws KeyError MetaGraph(struc_1AKE["A"])   # it's missing hydrogens
 end
 
 @testset "Secondary structure" begin

@@ -399,7 +399,7 @@ Base.copy(m::Model) = Model(m, m.structure)
 Base.copy(s::MolecularStructure) = MolecularStructure(s)
 
 # Check if an atom name exists in a residue as a whitespace-padded version
-function findatombyname(res::Residue, atom_name::AbstractString)
+function findatombyname(res::Residue, atom_name::AbstractString; strict::Bool=true)
     # Look for atom name directly
     if haskey(res.atoms, atom_name)
         return res.atoms[atom_name]
@@ -430,6 +430,7 @@ function findatombyname(res::Residue, atom_name::AbstractString)
         end
     end
     # Could not find atom name
+    strict || return nothing
     throw(KeyError(atom_name))
 end
 
