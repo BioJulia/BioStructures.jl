@@ -41,6 +41,24 @@ const mmciforder = Dict(
     ]
 )
 
+const cif_sscodes = Dict(
+    "HELX_LH_AL_P" => 'H',
+    "HELX_P" => 'H',
+    "STRN" => 'E',
+    "HELX_LH_3T_P" => 'G',
+    "HELX_LH_PI_P" => 'I',
+    "HELX_LH_PP_P" => 'P',
+    "TURN_OT_P" => 'T',
+    "TURN_P" => 'T',
+    "TURN_TY1P_P" => 'T',
+    "TURN_TY2P_P" => 'T',
+    "TURN_TY3P_P" => 'T',
+    "TURN_TY1_P" => 'T',
+    "TURN_TY2_P" => 'T',
+    "TURN_TY3_P" => 'T',
+    "BEND" => 'S',
+)
+
 """
     MMCIFDict(filepath; gzip=false)
     MMCIFDict(io; gzip=false)
@@ -150,17 +168,23 @@ function tokenizecif(f::IO)
     return tokens
 end
 
-# Get tokens from a mmCIF file corresponding to atom site records only
+# Get tokens from a mmCIF file corresponding to atom_site or struct_conf records only
 # This will fail if there is only a single atom record in the file
 #   and it is not in the loop format
 function tokenizecifstructure(f::IO)
     tokens = String[]
     reading = false
     in_keys = true
+    category_groups = ["_atom_site.", "_struct_conf."]
     for line in eachline(f)
-        if (!reading && !startswith(line, "_atom_site.")) || startswith(line, "#")
+        startswith(line, "#") && continue
+        iscat = any(k -> startswith(line, k), category_groups)
+        if !reading && !iscat
             continue
-        elseif startswith(line, "_atom_site.")
+        elseif iscat
+            if !reading
+                push!(tokens, "loop_")
+            end
             reading = true
             push!(tokens, rstrip(line))
         elseif startswith(line, ";")
@@ -175,14 +199,14 @@ function tokenizecifstructure(f::IO)
             end
             push!(tokens, join(token_buffer, "\n"))
         elseif (!in_keys && startswith(line, "_")) || startswith(line, "loop_") ||
-                    startswith(line, "LOOP_")
-            break
+            startswith(line, "LOOP_")
+            reading = false
+            in_keys = true
         else
             in_keys = false
             append!(tokens, splitline(line))
         end
     end
-    length(tokens) > 0 ? pushfirst!(tokens, "loop_") : nothing
     return tokens
 end
 
@@ -320,6 +344,26 @@ function MolecularStructure(mmcif_dict::MMCIFDict;
         end
         # Generate lists for iteration
         fixlists!(struc)
+    end
+
+    # Secondary structure assignment
+    if haskey(mmcif_dict, "_struct_conf.conf_type_id")
+        (run_dssp | run_stride) && @warn "Secondary structure assignment will be overwritten"
+        for (i, id) in pairs(mmcif_dict["_struct_conf.conf_type_id"])
+            chainid = mmcif_dict["_struct_conf.beg_label_asym_id"][i]
+            mmcif_dict["_struct_conf.end_label_asym_id"][i] == chainid || continue   # mismatch in chain id
+            haskey(chains(struc), chainid) || continue
+            chain = struc[chainid]
+            bg = tryparse(Int, mmcif_dict["_struct_conf.beg_auth_seq_id"][i])
+            nd = tryparse(Int, mmcif_dict["_struct_conf.end_auth_seq_id"][i])
+            (bg === nothing || nd === nothing) && continue
+            code = get(cif_sscodes, id, '-')
+            for j in bg:nd
+                r = get(residues(chain), string(j), nothing)
+                isa(r, Residue) || continue
+                r.ss_code = code
+            end
+        end
     end
 
     if run_dssp && run_stride
