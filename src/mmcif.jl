@@ -349,8 +349,13 @@ function MolecularStructure(mmcif_dict::MMCIFDict;
     # Secondary structure assignment
     if !(run_dssp | run_stride) && haskey(mmcif_dict, "_struct_conf.conf_type_id")
         for (i, id) in pairs(mmcif_dict["_struct_conf.conf_type_id"])
-            chainid = mmcif_dict["_struct_conf.beg_label_asym_id"][i]
-            mmcif_dict["_struct_conf.end_label_asym_id"][i] == chainid || continue   # mismatch in chain id
+            chainid = get(mmcif_dict, "_struct_conf.beg_auth_asym_id", nothing)[i]
+            chainidend = get(mmcif_dict, "_struct_conf.end_auth_asym_id", nothing)[i]
+            if chainid === nothing
+                chainid = mmcif_dict["_struct_conf.beg_label_asym_id"][i]
+                chainidend = mmcif_dict["_struct_conf.end_label_asym_id"][i]
+            end
+            chainidend == chainid || continue   # mismatch in chain id
             haskey(chains(struc), chainid) || continue
             chain = struc[chainid]
             bg = tryparse(Int, mmcif_dict["_struct_conf.beg_auth_seq_id"][i])
