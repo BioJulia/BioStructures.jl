@@ -3332,6 +3332,19 @@ end
     end
 
     @test_throws KeyError MetaGraph(struc_1AKE["A"])   # it's missing hydrogens
+
+    # With DisorderedResidue
+    struc_1EN2 = read(testfilepath("PDB", "1EN2.pdb"), PDBFormat)
+    @test struc_1EN2['A'][10] isa DisorderedResidue
+    mg = MetaGraph(struc_1EN2['A']; strict=false)
+    c = mg[605, :element]
+    n1 = mg[609, :element]
+    n2 = mg[610, :element]
+    @test residue(n1) === residue(n2)
+    @test atomname(n1) == atomname(n2) == "N"
+    @test atomname(c) == "C"
+    @test has_edge(mg, 605, 609)
+    @test has_edge(mg, 605, 610)
 end
 
 @testset "Secondary structure" begin

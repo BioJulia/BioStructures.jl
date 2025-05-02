@@ -58,10 +58,12 @@ function MetaGraphs.MetaGraph(chain::Chain; strict::Bool = true)
         if prev !== nothing
             if resnumber(r) == resnumber(prev) + 1
                 # Add the peptide bond(s) (disordered residues may need multiples)
-                atomsprev = getexternalbonder(prev, 2, strict)
-                atoms = getexternalbonder(r, 1, strict)
-                for atom in atoms, atomp in atomsprev
-                    add_edge!(mg, nodedict[atomp], nodedict[atom])
+                atomprev = getexternalbonder(prev, 2, strict)
+                atom = getexternalbonder(r, 1, strict)
+                for _atom in atom, _atomprev in atomprev
+                    for __atom in _atom, __atomprev in _atomprev
+                        add_edge!(mg, nodedict[__atom], nodedict[__atomprev])
+                    end
                 end
             else
                 prev = nothing
@@ -69,13 +71,16 @@ function MetaGraphs.MetaGraph(chain::Chain; strict::Bool = true)
         end
         # Add the residue bonds
         addresiduebonds!(mg, r, nodedict, strict)
-        # The "OXT" (C-terminus oxygen) is not connected
-        aj = findatombyname(r, "OXT"; strict=false)
-        if aj !== nothing
-            ai = findatombyname(r, "C"; strict)
-            connect_atoms!(mg, ai, aj, nodedict)
-        end
         prev = r
+        # The "OXT" (C-terminus oxygen) is not connected
+        riter = isa(r, DisorderedResidue) ? values(r.names) : (r,)
+        for r in riter
+            aj = findatombyname(r, "OXT"; strict=false)
+            if aj !== nothing
+                ai = findatombyname(r, "C"; strict)
+                connect_atoms!(mg, ai, aj, nodedict)
+            end
+        end
     end
 
     return mg
@@ -102,8 +107,8 @@ function connect_atoms!(mg, ai::Union{AbstractAtom,Nothing}, aj::Union{AbstractA
     end
 end
 
-addresiduebonds!(mg, dr::DisorderedResidue, nodedict) = for r in values(dr.names)
-    addresiduebonds!(mg, r, nodedict)
+addresiduebonds!(mg, dr::DisorderedResidue, nodedict, strict::Bool) = for r in values(dr.names)
+    addresiduebonds!(mg, r, nodedict, strict)
 end
 
 function _getexternalbonder(r, n, strict)
@@ -125,7 +130,9 @@ function getexternalbonder(dr::DisorderedResidue, n, strict)
     for r in values(dr.names)
         a = _getexternalbonder(r, n, strict)
         a === nothing && continue
-        push!(atoms, a)
+        for _a in a
+            push!(atoms, _a)
+        end
     end
     return atoms
 end
