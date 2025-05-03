@@ -46,7 +46,6 @@ See Graphs.jl and MetaGraphs.jl for more on how to use graphs.
 """
 function MetaGraphs.MetaGraph(chain::Chain; strict::Bool = true)
     el_list = collectatoms(chain; expand_disordered = true)
-    nodedict = IdDict(el => i for (i, el) in enumerate(el_list))
     mg = MetaGraph(length(el_list))
     for (i, el) in enumerate(el_list)
         set_prop!(mg, i, :element, el)
@@ -55,14 +54,13 @@ function MetaGraphs.MetaGraph(chain::Chain; strict::Bool = true)
 
     prev = nothing
     for r in chain
+        ishetero(r) && continue
         if prev !== nothing
             if resnumber(r) == resnumber(prev) + 1
                 # Add the peptide bond(s) (disordered residues may need multiples)
-                atomprev = getexternalbonder(prev, 2, strict)
-                atom = getexternalbonder(r, 1, strict)
-                for _atom in atom, _atomprev in atomprev
-                    for __atom in _atom, __atomprev in _atomprev
-                        add_edge!(mg, nodedict[__atom], nodedict[__atomprev])
+                for _r in collectresidues(r; expand_disordered=true), _rp in collectresidues(prev; expand_disordered=true)
+                    for a in _r["N"], ap in _rp["C"]
+                        add_edge!(mg, mg[a, :element], mg[ap, :element])
                     end
                 end
             else
@@ -70,15 +68,14 @@ function MetaGraphs.MetaGraph(chain::Chain; strict::Bool = true)
             end
         end
         # Add the residue bonds
-        addresiduebonds!(mg, r, nodedict, strict)
+        addresiduebonds!(mg, r, strict)
         prev = r
         # The "OXT" (C-terminus oxygen) is not connected
-        riter = isa(r, DisorderedResidue) ? values(r.names) : (r,)
-        for r in riter
-            aj = findatombyname(r, "OXT"; strict=false)
+        for _r in collectresidues(r; expand_disordered=true)
+            aj = findatombyname(_r, "OXT"; strict=false)
             if aj !== nothing
-                ai = findatombyname(r, "C"; strict)
-                connect_atoms!(mg, ai, aj, nodedict)
+                ai = findatombyname(_r, "C"; strict)
+                connect_atoms!(mg, ai, aj)
             end
         end
     end
@@ -86,55 +83,29 @@ function MetaGraphs.MetaGraph(chain::Chain; strict::Bool = true)
     return mg
 end
 
-function addresiduebonds!(mg, r::Residue, nodedict, strict::Bool)
+function addresiduebonds!(mg, r::Residue, strict::Bool)
     rname = residuekey(r, strict)
     strict || haskey(BioStructures.residuedata, rname) || return
     rd = BioStructures.residuedata[rname]
     for (ni, nj) in rd.bonds
-        connect_atoms!(mg, r, ni, nj, nodedict, strict)
+        connect_atoms!(mg, r, ni, nj, strict)
     end
 end
 
-connect_atoms!(mg, r, ni::AbstractString, nj::AbstractString, nodedict, strict::Bool) =
-    connect_atoms!(mg, findatombyname(r, ni; strict), findatombyname(r, nj; strict), nodedict)
+connect_atoms!(mg, r, ni::AbstractString, nj::AbstractString, strict::Bool) =
+    connect_atoms!(mg, findatombyname(r, ni; strict), findatombyname(r, nj; strict))
 
-function connect_atoms!(mg, ai::Union{AbstractAtom,Nothing}, aj::Union{AbstractAtom,Nothing}, nodedict)
+function connect_atoms!(mg, ai::Union{AbstractAtom,Nothing}, aj::Union{AbstractAtom,Nothing})
     (ai === nothing || aj === nothing) && return
     for _ai in ai, _aj in aj  # handle disordered atoms
-        i = nodedict[_ai]
-        j = nodedict[_aj]
+        i = mg[_ai, :element]
+        j = mg[_aj, :element]
         add_edge!(mg, i, j)
     end
 end
 
-addresiduebonds!(mg, dr::DisorderedResidue, nodedict, strict::Bool) = for r in values(dr.names)
-    addresiduebonds!(mg, r, nodedict, strict)
-end
-
-function _getexternalbonder(r, n, strict)
-    rk = residuekey(r, strict)
-    strict || haskey(BioStructures.residuedata, rk) || return nothing
-    rd = get(BioStructures.residuedata, residuekey(r, strict), nothing)
-    !strict && rd === nothing && return nothing
-    aname = rd.externalbonds[n]
-    a = findatombyname(r, aname; strict)
-    return a
-end
-function getexternalbonder(r::Residue, n, strict)
-    a = _getexternalbonder(r, n, strict)
-    a === nothing && return Atom[]
-    return [a]
-end
-function getexternalbonder(dr::DisorderedResidue, n, strict)
-    atoms = Atom[]
-    for r in values(dr.names)
-        a = _getexternalbonder(r, n, strict)
-        a === nothing && continue
-        for _a in a
-            push!(atoms, _a)
-        end
-    end
-    return atoms
+addresiduebonds!(mg, dr::DisorderedResidue, strict::Bool) = for r in values(dr.names)
+    addresiduebonds!(mg, r, strict)
 end
 
 function residuekey(r::Residue, strict::Bool)
