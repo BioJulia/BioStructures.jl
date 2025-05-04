@@ -464,6 +464,7 @@ function psiangle(chain::Chain, res_id::Union{Integer, AbstractString})
     return psiangle(chain[resids(chain)[i]], chain[resids(chain)[i + 1]])
 end
 
+# source: http://www.mlb.co.jp/linux/science/garlic/doc/commands/dihedrals.html
 const chitables = [
     Dict{String,NTuple{4,String}}(
         "ARG" => ("N", "CA", "CB", "CG"),
@@ -517,6 +518,22 @@ const chitables = [
     ),
 ]
 
+# source: Jumper et al 2021, Supp. Table 2
+const chisymmetries = [
+    ("ASP", 2),
+    ("GLU", 3),
+    ("PHE", 2),
+    ("TYR", 2),
+]
+
+function chiangle(a1, a2, a3, a4, sym::Bool)
+    χ = dihedralangle(a1, a2, a3, a4)
+    if sym && χ < 0
+        χ += π
+    end
+    return χ
+end
+
 """
     chiangle(res, i)
 
@@ -526,9 +543,10 @@ The angle is in the range -π to π.
 function chiangle(res::AbstractResidue, i::Integer)
     1 <= i <= 5 || throw(ArgumentError("Chi angle must be between 1 and 5"))
     ct = chitables[i]
-    t = get(ct, resname(res), nothing)
-    t === nothing && throw(ArgumentError("Chi angle $i does not exist for residue $(resname(res))"))
-    return dihedralangle(res[t[1]], res[t[2]], res[t[3]], res[t[4]])
+    rname = resname(res)
+    t = get(ct, rname, nothing)
+    t === nothing && throw(ArgumentError("Chi angle $i does not exist for residue $rname"))
+    return chiangle(res[t[1]], res[t[2]], res[t[3]], res[t[4]], (rname, i) in chisymmetries)
 end
 
 """
@@ -540,12 +558,12 @@ The angles are each in the range -π to π.
 """
 function chiangles(res::AbstractResidue)
     chi = Float64[]
-    key = resname(res)
+    rname = resname(res)
     for i = 1:5
         ct = chitables[i]
-        t = get(ct, key, nothing)
+        t = get(ct, rname, nothing)
         t === nothing && break
-        push!(chi, dihedralangle(res[t[1]], res[t[2]], res[t[3]], res[t[4]]))
+        push!(chi, chiangle(res[t[1]], res[t[2]], res[t[3]], res[t[4]], (rname, i) in chisymmetries))
     end
     return chi
 end
