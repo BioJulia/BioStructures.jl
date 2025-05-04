@@ -3184,6 +3184,27 @@ end
     @test isapprox(phis[10], phiangle(struc_1AKE['A'], 10), atol=1e-5)
     @test isapprox(omegas[10], omegaangle(struc_1AKE['A'], 10), atol=1e-5)
 
+    # Test that the entries in `chitables` are bonded
+    sortt((a, b)) = a < b ? (a, b) : (b, a)
+    rd = BioStructures.residuedata
+    for ct in BioStructures.chitables
+        for (rname, alist) in ct
+            if rname == "HIS"
+                rname = "HID"
+            end
+            sb = sortt.(rd[rname].bonds)
+            for i = 1:3
+                @test sortt((alist[i], alist[i+1])) ∈ sb
+            end
+        end
+    end
+    chis = chiangles(struc_1AKE['A'], standardselector)
+    @test length(chis) == countresidues(struc_1AKE['A'], standardselector)
+    @test chis[1] ≈ deg2rad.([-176.231, 172.056, 56.069]) rtol=1e-5   # MET
+    @test chis[2] ≈ deg2rad.([-76.551, 171.696, 171.162, -175.969, 0.424]) rtol=1e-5   # ARG
+    @test isempty(chis[7])       # GLY
+    @test chiangle(struc_1AKE['A'][2], 3) == chis[2][3]
+
     # Test ContactMap
     cas = collectatoms(struc_1AKE, calphaselector)[1:10]
     @test isa(ContactMap(cas, 10).data, BitArray{2})

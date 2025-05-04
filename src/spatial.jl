@@ -16,6 +16,8 @@ export
     omegaangles,
     phiangles,
     psiangles,
+    chiangle,
+    chiangles,
     ramachandranangles,
     SpatialMap,
     ContactMap,
@@ -341,7 +343,7 @@ function dihedralangle(vec_a::AbstractVector{<:Real},
                     vec_b::AbstractVector{<:Real},
                     vec_c::AbstractVector{<:Real})
     return atan(
-        dot(cross(cross(vec_a, vec_b), cross(vec_b, vec_c)), vec_b / norm(vec_b)),
+        norm(vec_b) * dot(vec_a, cross(vec_b, vec_c)),
         dot(cross(vec_a, vec_b), cross(vec_b, vec_c)))
 end
 
@@ -460,6 +462,92 @@ function psiangle(chain::Chain, res_id::Union{Integer, AbstractString})
         throw(ArgumentError("Cannot calculate psi angle for residue \"$res_id\" due to a lack of connected residues"))
     end
     return psiangle(chain[resids(chain)[i]], chain[resids(chain)[i + 1]])
+end
+
+const chitables = [
+    Dict{String,NTuple{4,String}}(
+        "ARG" => ("N", "CA", "CB", "CG"),
+        "ASN" => ("N", "CA", "CB", "CG"),
+        "ASP" => ("N", "CA", "CB", "CG"),
+        "CYS" => ("N", "CA", "CB", "SG"),
+        "GLN" => ("N", "CA", "CB", "CG"),
+        "GLU" => ("N", "CA", "CB", "CG"),
+        "HIS" => ("N", "CA", "CB", "CG"),
+        "ILE" => ("N", "CA", "CB", "CG1"),
+        "LEU" => ("N", "CA", "CB", "CG"),
+        "LYS" => ("N", "CA", "CB", "CG"),
+        "MET" => ("N", "CA", "CB", "CG"),
+        "PHE" => ("N", "CA", "CB", "CG"),
+        "PRO" => ("N", "CA", "CB", "CG"),
+        "SER" => ("N", "CA", "CB", "OG"),
+        "THR" => ("N", "CA", "CB", "OG1"),
+        "TRP" => ("N", "CA", "CB", "CG"),
+        "TYR" => ("N", "CA", "CB", "CG"),
+        "VAL" => ("N", "CA", "CB", "CG1"),
+    ),
+    Dict{String,NTuple{4,String}}(
+        "ARG" => ("CA", "CB", "CG", "CD"),
+        "ASN" => ("CA", "CB", "CG", "OD1"),
+        "ASP" => ("CA", "CB", "CG", "OD1"),
+        "GLN" => ("CA", "CB", "CG", "CD"),
+        "GLU" => ("CA", "CB", "CG", "CD"),
+        "HIS" => ("CA", "CB", "CG", "ND1"),
+        "ILE" => ("CA", "CB", "CG1", "CD1"),
+        "LEU" => ("CA", "CB", "CG", "CD1"),
+        "LYS" => ("CA", "CB", "CG", "CD"),
+        "MET" => ("CA", "CB", "CG", "SD"),
+        "PHE" => ("CA", "CB", "CG", "CD1"),
+        "PRO" => ("CA", "CB", "CG", "CD"),
+        "TRP" => ("CA", "CB", "CG", "CD1"),
+        "TYR" => ("CA", "CB", "CG", "CD1"),
+    ),
+    Dict{String,NTuple{4,String}}(
+        "ARG" => ("CB", "CG", "CD", "NE"),
+        "GLN" => ("CB", "CG", "CD", "OE1"),
+        "GLU" => ("CB", "CG", "CD", "OE1"),
+        "LYS" => ("CB", "CG", "CD", "CE"),
+        "MET" => ("CB", "CG", "SD", "CE"),
+    ),
+    Dict{String,NTuple{4,String}}(
+        "ARG" => ("CG", "CD", "NE", "CZ"),
+        "LYS" => ("CG", "CD", "CE", "NZ"),
+    ),
+    Dict{String,NTuple{4,String}}(
+        "ARG" => ("CD", "NE", "CZ", "NH1"),
+    ),
+]
+
+"""
+    chiangle(res, i)
+
+Calculate the χᵢ angle in radians for a standard `AbstractResidue` with standard atom names.
+The angle is in the range -π to π.
+"""
+function chiangle(res::AbstractResidue, i::Integer)
+    1 <= i <= 5 || throw(ArgumentError("Chi angle must be between 1 and 5"))
+    ct = chitables[i]
+    t = get(ct, resname(res), nothing)
+    t === nothing && throw(ArgumentError("Chi angle $i does not exist for residue $(resname(res))"))
+    return dihedralangle(res[t[1]], res[t[2]], res[t[3]], res[t[4]])
+end
+
+"""
+    chiangles(res)
+
+Calculate the `Vector` of standard χ angles for a standard `AbstractResidue` with standard atom names.
+The length of the vector ranges from 0 (GLY, ALA) to 5 (ARG).
+The angles are each in the range -π to π.
+"""
+function chiangles(res::AbstractResidue)
+    chi = Float64[]
+    key = resname(res)
+    for i = 1:5
+        ct = chitables[i]
+        t = get(ct, key, nothing)
+        t === nothing && break
+        push!(chi, dihedralangle(res[t[1]], res[t[2]], res[t[3]], res[t[4]]))
+    end
+    return chi
 end
 
 """
@@ -597,6 +685,17 @@ function ramachandranangles(el::StructuralElementOrList,
                     residue_selectors::Function...)
     return phiangles(el, residue_selectors...), psiangles(el, residue_selectors...)
 end
+
+"""
+    chiangles(element, residue_selectors...)
+
+Calculate the `Vector` of standard χ angles for each residue in a `StructuralElementOrList`.
+This returns a `Vector` of `Vector`s, where all angles are in the range -π to π.
+Additional arguments are residue selector functions - only residues that return
+`true` from the functions are retained.
+"""
+chiangles(el::StructuralElementOrList, residue_selectors::Function...) =
+    [chiangles(r) for r in collectresidues(el, residue_selectors...)]
 
 "A map of a structural property, e.g. a `ContactMap` or a `DistanceMap`."
 abstract type SpatialMap end
