@@ -286,7 +286,7 @@ The operators currently supported are:
 | Operators                   | Acts on                             |
 | :-------------------------- | :---------------------------------- |
 | `=`, `>`, `<` `>=`, `<=`    | Properties with real values.        |
-| `and`, `or`, `not`          | Selections subsets.                 | 
+| `and`, `or`, `not`          | Selections subsets.                 |
 
 The keywords supported are:
 
@@ -541,13 +541,31 @@ So if you wanted the graph of chain contacts in a protein complex you could give
 
 ## Assigning secondary structure
 
-The secondary structure code of a residue or atom can be accessed after assigning the secondary structure using [DSSP](https://github.com/PDB-REDO/dssp) or [STRIDE](https://webclu.bio.wzw.tum.de/stride).
+Any secondary structure assignment at a residue is accessed via [`sscode`](@ref):
+```julia
+sscode(res)
+sscode(at)
+```
+Or for the whole structure:
+```julia
+sscode.(collectresidues(struc))
+```
+`sscode` may return `'-'`, indicating either that the residue has no recognized secondary structure or that it has not yet been assigned.
+The secondary structure code of a residue can be changed using [`sscode!`](@ref).
+
+mmCIF files with secondary structure [annotations](https://mmcif.wwpdb.org/dictionaries/mmcif_pdbx_v50.dic/Items/_struct_conf_type.id.html) will, by default, parse and assign secondary structure.
+
+Secondary structure can also be assigned using [DSSP](https://github.com/PDB-REDO/dssp) or [STRIDE](https://webclu.bio.wzw.tum.de/stride).
+This functionality is provided through extensions, so you must load the corresponding package library (`DSSP_jll` or `STRIDE_jll`) before this functionality will work.
+
 To assign secondary structure when reading the structure:
 ```julia
 # Assign secondary structure using DSSP
+using DSSP_jll
 read("/path/to/pdb/file.pdb", PDBFormat, run_dssp=true)
 
 # Assign secondary structure using STRIDE
+using STRIDE_jll
 read("/path/to/pdb/file.pdb", PDBFormat, run_stride=true)
 ```
 [`rundssp!`](@ref), [`runstride!`](@ref), [`rundssp`](@ref) and [`runstride`](@ref) can also be used to assign secondary structure to a [`MolecularStructure`](@ref) or [`Model`](@ref):
@@ -557,21 +575,12 @@ runstride!(struc)
 ```
 The assignment process may fail if the structure is too large, since we use an intermediate PDB file where the atom serial cannot exceed 99999 and the chain ID must be a single character.
 To get access to the secondary structure code of a residue or atom as a `Char`:
-```julia
-sscode(res)
-sscode(at)
-```
-Or for the whole structure:
-```julia
-sscode.(collectresidues(struc))
-```
-The secondary structure code of a residue can be changed using [`sscode!`](@ref).
 [`rundssp`](@ref) and [`runstride`](@ref) can also be run directly on structure files:
 ```julia
 rundssp("/path/to/pdb/file.pdb", "out.dssp") # Also works with mmCIF files
 runstride("/path/to/pdb/file.pdb", "out.stride")
 ```
-See the documentation for [DSSP_jll](https://docs.juliahub.com/General/DSSP_jll/stable/autodocs) and [STRIDE_jll](https://docs.juliahub.com/General/STRIDE_jll/stable/autodocs), and also [ProteinSecondaryStructures.jl](https://github.com/m3g/ProteinSecondaryStructures.jl), for other ways to run these programs.
+See the documentation for [DSSP_jll](https://docs.juliahub.com/General/DSSP_jll/stable/autodocs) and [STRIDE_jll](https://docs.juliahub.com/General/STRIDE_jll/stable/autodocs), and also [ProteinSecondaryStructures.jl](https://github.com/BioJulia/ProteinSecondaryStructures.jl), for other ways to run these programs.
 
 ## Downloading PDB files
 

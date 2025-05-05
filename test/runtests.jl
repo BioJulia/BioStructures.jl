@@ -1787,6 +1787,7 @@ end
         @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == ["1991-11-08"]
         @test dic["_audit_author.name"] == ["Mueller, C.W.", "Schulz, G.E."]
         @test length(dic["_atom_site.group_PDB"]) == 3816
+        @test length(dic["_struct_conf.conf_type_id"]) == 18
         dic["_pdbx_database_status.recvd_initial_deposition_date"] = ["changed"]
         @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == ["changed"]
         @test length(keys(dic)) == 610
@@ -1942,10 +1943,14 @@ end
 
     open(testfilepath("mmCIF", "1AKE.cif")) do f
         tokens = tokenizecifstructure(f)
-        @test length(tokens) == 80158
-        @test tokens[1] == "loop_"
-        @test tokens[10] == "_atom_site.label_seq_id"
-        @test tokens[80089] == "77.69"
+        loopidxs = findall(==("loop_"), tokens)
+        @test length(loopidxs) == 2
+        idxsc = loopidxs[1]
+        @test tokens[idxsc + 1] == "_struct_conf.conf_type_id"
+        idxas = loopidxs[2]
+        @test length(tokens) - idxas + 1 == 80158
+        @test tokens[idxas + 9] == "_atom_site.label_seq_id"
+        @test tokens[idxas + 80088] == "77.69"
     end
 
     # Test parsing empty file
@@ -1996,6 +2001,8 @@ end
     res = collect(chs[1])
     @test length(res) == 456
     @test resid(res[20]) == "20"
+    @test sscode(res[11]) == '-'
+    @test sscode(res[12]) == 'H'
     ats = collect(res[20])
     @test length(ats) == 8
     @test atomname.(ats) == ["N", "CA", "C", "O", "CB", "CG1", "CG2", "CD1"]
