@@ -41,6 +41,7 @@ include("spatial.jl")
                     ATOM      8  CE  MET A   1      -3.296  14.391  24.798  1.00 54.68           C
                     END
                     """)
+            close(io)
             struc = read(path, PDBFormat)
             show(devnull, struc)
             collectatoms(struc, sel"serial < 5")
