@@ -541,11 +541,21 @@ Calculate the χᵢ angle in radians for a standard `AbstractResidue` with stand
 The angle is in the range -π to π.
 """
 function chiangle(res::AbstractResidue, i::Integer)
-    1 <= i <= 5 || throw(ArgumentError("Chi angle must be between 1 and 5"))
+    1 <= i <= 5 || throw(ArgumentError("χᵢ index `i` must be between 1 and 5"))
     ct = chitables[i]
     rname = resname(res)
     t = get(ct, rname, nothing)
-    t === nothing && throw(ArgumentError("Chi angle $i does not exist for residue $rname"))
+    if t === nothing
+        # is it because this isn't a standard residue?
+        (rname == "GLY" || rname == "ALA") && throw(ArgumentError("$rname does not have any χ angles"))
+        haskey(chitables[1], rname) || throw(ArgumentError("no χ angles are defined for residues with name $rname"))
+        # it must be missing specifically for `i`
+        j = 1
+        while haskey(chitables[j+1], rname)
+            j += 1
+        end
+        throw(ArgumentError("χ angle with index $i does not exist for residue $rname (max is $j)"))
+    end
     return chiangle(res[t[1]], res[t[2]], res[t[3]], res[t[4]], (rname, i) in chisymmetries)
 end
 
@@ -562,7 +572,13 @@ function chiangles(res::AbstractResidue)
     for i = 1:5
         ct = chitables[i]
         t = get(ct, rname, nothing)
-        t === nothing && break
+        if t === nothing
+            if i == 1
+                (rname == "GLY" || rname == "ALA") && break
+                throw(ArgumentError("no χ angles are defined for residues with name $rname"))
+            end
+            break
+        end
         push!(chi, chiangle(res[t[1]], res[t[2]], res[t[3]], res[t[4]], (rname, i) in chisymmetries))
     end
     return chi

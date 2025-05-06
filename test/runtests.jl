@@ -3204,6 +3204,11 @@ end
     @test chis[2] ≈ deg2rad.([-76.551, 171.696, 171.162, -175.969, 0.424]) rtol=1e-5   # ARG
     @test isempty(chis[7])       # GLY
     @test chiangle(struc_1AKE['A'][2], 3) == chis[2][3]
+    @test_throws "GLY does not have any χ angles" chiangle(struc_1AKE['A'][7], 1)
+    @test_throws "χ angle with index 4 does not exist for residue MET (max is 3)" chiangle(struc_1AKE['A'][1], 4)
+    fakeres = Residue("UKN", 10, ' ', false, struc_1AKE['A'])
+    @test_throws "no χ angles are defined for residues with name UKN" chiangle(fakeres, 1)
+    @test_throws "no χ angles are defined for residues with name UKN" chiangles(fakeres)
     # Test symmetries: two ASPs with OD1 and OD2 swapped
     io = IOBuffer("""
         ATOM    534  N   ASP A   1      -8.068   7.150  -2.008  1.00 95.46           N
