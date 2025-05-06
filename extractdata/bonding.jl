@@ -1,5 +1,7 @@
+# Running this file generates src/bonding.jl, which contains the atomtypes and residuedata dictionaries.
+# Thanks to OpenMM for the ff14SB force field XML file.
+
 using Downloads
-using Serialization
 
 if !isfile(joinpath(@__DIR__, "protein.ff14SB.xml"))
     Downloads.download("https://raw.githubusercontent.com/openmm/openmm/refs/heads/master/wrappers/python/openmm/app/data/amber14/protein.ff14SB.xml", "protein.ff14SB.xml")
@@ -96,7 +98,24 @@ atomtypes, residues = open("protein.ff14SB.xml", "r") do io
     atomtypes, residues
 end
 
-open("protein.ff14SB.jls", "w") do io
-    serialize(io, atomtypes)
-    serialize(io, residues)
+open(joinpath(dirname(@__DIR__), "src", "bonding.jl"), "w") do io
+    println(io, "const atomtypes = Dict{String, @NamedTuple{element::String, mass::Float32, name::String}}(")
+    at = sort!(collect(atomtypes); by=first)
+    for pr in at
+        println(io, "    ", pr, ',')
+    end
+    println(io, ")\n")
+
+    println(io, "const RDADict = Dict{String, @NamedTuple{charge::Float32, type::String}}")
+
+    println(io, "const residuedata = Dict{String, @NamedTuple{atoms::RDADict, bonds::Vector{Tuple{String,String}}, externalbonds::Vector{String}}}(")
+    rd = sort!(collect(residues); by=first)
+    for (k, v) in rd
+        print(io, "    "*" "^(4-length(k)))
+        show(io, k)
+        println(io, " => (atoms = ", replace(sprint(show, v.atoms), "Dict{String, @NamedTuple{charge::Float32, type::String}}" => "RDADict"), ',')
+        println(io, "               bonds = ", v.bonds, ",")
+        println(io, "               externalbonds = ", v.externalbonds, "),")
+    end
+    println(io, ")")
 end
