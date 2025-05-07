@@ -11,20 +11,30 @@ using MsgPack
 
 # Returns a Dict with attribute names as keys and their byte arrays as values.
 # """
-function read_binary_cif_attributes(filename::String)
-    dictionary = MsgPack.unpack(read(filename))
-    blocks = dictionary["dataBlocks"]
-    categories = blocks[1]["categories"]
+function Base.read(input::IO,
+            ::Type{BCIFFormat},
+            structure_name::AbstractString="",
+            remove_disorder::Bool=false,
+            read_std_atoms::Bool=true,
+            read_het_atoms::Bool=true,
+            run_dssp::Bool=false,
+            run_stride::Bool=false)
+    
+    file = MsgPack.unpack(read(input))
+    
+    # currently just looking for the first data block
+    categories = file["dataBlocks"][1]["categories"]
     atom_site = categories[findall(getindex.(categories, "name") .== "_atom_site")]
     columns = atom_site[1]["columns"]
-    new_dict = Dict{String, Any}()
-    # attributes = decode_column.(columns)
+    
+    attributes = Dict{String, Any}()
     for column in columns
-        new_dict[column["name"]] = decode_column(column)
+        attributes[column["name"]] = decode_column(column)
     end
-    # populatedict!(mmcif_dict, attributes)
-    return new_dict
+    return attributes
 end
+
+
 
 # Enum for type codes
 @enum TypeCode begin
