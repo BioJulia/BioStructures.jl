@@ -21,14 +21,23 @@ function Base.read(input::IO,
     
     # currently just looking for the first data block
     categories = file["dataBlocks"][1]["categories"]
-    atom_site = categories[findall(getindex.(categories, "name") .== "_atom_site")]
+    atom_site = get_category(categories, "_atom_site")
     columns = atom_site[1]["columns"]
     
-    attributes = Dict{String, Any}()
+    attributes = Dict{String, Vector{Any}}()
     for column in columns
         attributes[column["name"]] = decode_column(column)
     end
     return attributes
+end
+
+function get_category(cats::Vector{Any}, name::String)
+    idx = findall(getindex.(cats, "name") .== name)
+    
+    if isnothing(idx) throw(ArgumentError("Category $name not found")) end
+    if length(idx) > 1 throw(ArgumentError("Multiple categories with name $name found")) end
+
+    return cats[idx] 
 end
 
 # Enum for type codes
