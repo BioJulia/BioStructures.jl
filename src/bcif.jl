@@ -1,4 +1,4 @@
-export read_binary_cif_attributes, decode_column
+export decode_column
 using LinearAlgebra
 import MsgPack
 
@@ -23,12 +23,10 @@ function Base.read(input::IO,
     categories = file["dataBlocks"][1]["categories"]
     atom_site = get_category(categories, "_atom_site")
     columns = atom_site[1]["columns"]
-
-    attributes = Dict{String,Vector{Any}}()
-    for column in columns
-        attributes[column["name"]] = decode_column(column)
+    tasks = map(columns) do column
+        Threads.@spawn decode_column(column)
     end
-    return attributes
+    return Dict(columns[i]["name"] => result for (i, result) in enumerate(fetch.(tasks)))
 end
 
 function get_category(cats::Vector{Any}, name::String)
