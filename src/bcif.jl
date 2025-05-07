@@ -1,16 +1,13 @@
 export read_binary_cif_attributes, decode_column
 using LinearAlgebra
-using MsgPack
+import MsgPack
 
 
 """
-#     read_binary_cif_attributes(filename::String)
+    read(input::IO, ::Type{BCIFFormat}, structure_name::AbstractString="", remove_disorder::Bool=false, read_std_atoms::Bool=true, read_het_atoms::Bool=true, run_dssp::Bool=false, run_stride::Bool=false)
 
-# A simple function to read a binary CIF file from MolStar and extract
-# the list of attributes and their compressed bytes.
-
-# Returns a Dict with attribute names as keys and their byte arrays as values.
-# """
+A function to read a binary CIF file from MolStar and extract the list of attributes and their compressed bytes.
+"""
 function Base.read(input::IO,
             ::Type{BCIFFormat},
             structure_name::AbstractString="",
@@ -33,8 +30,6 @@ function Base.read(input::IO,
     end
     return attributes
 end
-
-
 
 # Enum for type codes
 @enum TypeCode begin
@@ -74,16 +69,6 @@ const INT_TO_TYPE = Dict(
     33 => Float64  
 )
 
-
-# Helper functions for camel/snake case conversion
-function camel_to_snake_case(name)
-    return lowercase(replace(name, r"(?<!^)(?=[A-Z])" => "_"))
-end
-
-function snake_to_camel_case(name)
-    parts = split(name, "_")
-    return lowercase(parts[1]) * join(uppercase.(first.(parts[2:end])) .* parts[2:end][2:end], "")
-end
 
 # Safe casting function
 function safe_cast(array, dtype)
@@ -488,15 +473,6 @@ function decode_stepwise(data, encodings)
     end
     return data
 end
-
-function create_uncompressed_encoding(array)
-    if eltype(array) <: AbstractString
-        return [StringArrayEncoding()]
-    else
-        return [ByteArrayEncoding()]
-    end
-end
-
 
 function deserialize_encoding(content::Any)
     if isa(content, Vector)
