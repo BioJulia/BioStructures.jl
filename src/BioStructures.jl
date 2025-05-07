@@ -26,6 +26,7 @@ include("pdb.jl")
 include("mmcif.jl")
 include("download.jl")
 include("spatial.jl")
+include("bonding.jl")
 
 @compile_workload begin
     let
