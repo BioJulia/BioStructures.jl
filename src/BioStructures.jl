@@ -28,6 +28,16 @@ include("download.jl")
 include("spatial.jl")
 include("bonding.jl")
 
+function __init__()
+    Base.Experimental.register_error_hint(MethodError) do io, exc, _, _
+        if exc.f ∈ (rundssp, rundssp!, runstride, runstride!)
+            if isempty(methods(exc.f))
+                printstyled(io, "\nYou may need `using DSSP_jll` or `using STRIDE_jll` to load the appropriate methods."; color=:yellow)
+            end
+        end
+    end
+end
+
 @compile_workload begin
     let
         mktemp() do path, io
