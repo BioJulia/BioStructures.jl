@@ -3191,6 +3191,59 @@ end
     @test isapprox(phis[10], phiangle(struc_1AKE['A'], 10), atol=1e-5)
     @test isapprox(omegas[10], omegaangle(struc_1AKE['A'], 10), atol=1e-5)
 
+    # Test that the entries in `chitables` are bonded
+    sortt((a, b)) = a < b ? (a, b) : (b, a)
+    rd = BioStructures.residuedata
+    for ct in BioStructures.chitables
+        for (rname, alist) in ct
+            if rname == "HIS"
+                rname = "HID"
+            end
+            sb = sortt.(rd[rname].bonds)
+            for i = 1:3
+                @test sortt((alist[i], alist[i+1])) ∈ sb
+            end
+        end
+    end
+    chis = chiangles(struc_1AKE['A'], standardselector)
+    @test length(chis) == countresidues(struc_1AKE['A'], standardselector)
+    @test chis[1] ≈ deg2rad.([-176.231, 172.056, 56.069]) rtol=1e-5   # MET
+    @test chis[2] ≈ deg2rad.([-76.551, 171.696, 171.162, -175.969, 0.424]) rtol=1e-5   # ARG
+    @test isempty(chis[7])       # GLY
+    @test chiangle(struc_1AKE['A'][2], 3) == chis[2][3]
+    @test_throws "GLY does not have any χ angles" chiangle(struc_1AKE['A'][7], 1)
+    @test_throws "χ angle with index 4 does not exist for residue MET (max is 3)" chiangle(struc_1AKE['A'][1], 4)
+    fakeres = Residue("UKN", 10, ' ', false, struc_1AKE['A'])
+    @test_throws "no χ angles are defined for residues with name UKN" chiangle(fakeres, 1)
+    @test_throws "no χ angles are defined for residues with name UKN" chiangles(fakeres)
+    # Test symmetries: two ASPs with OD1 and OD2 swapped
+    io = IOBuffer("""
+        ATOM    534  N   ASP A   1      -8.068   7.150  -2.008  1.00 95.46           N
+        ATOM    535  CA  ASP A   1      -8.464   6.572  -3.297  1.00 95.46           C
+        ATOM    536  C   ASP A   1      -8.522   7.636  -4.409  1.00 95.46           C
+        ATOM    537  CB  ASP A   1      -9.844   5.896  -3.142  1.00 95.46           C
+        ATOM    538  O   ASP A   1      -8.015   7.431  -5.518  1.00 95.46           O
+        ATOM    539  CG  ASP A   1      -9.818   4.542  -2.418  1.00 95.46           C
+        ATOM    540  OD1 ASP A   1      -8.738   3.930  -2.377  1.00 95.46           O
+        ATOM    541  OD2 ASP A   1     -10.899   4.073  -1.981  1.00 95.46           O
+        """)
+    r = only(only(only(read(io, PDBFormat))))
+    χs1 = chiangles(r)
+    io = IOBuffer("""
+        ATOM    534  N   ASP A   1      -8.068   7.150  -2.008  1.00 95.46           N
+        ATOM    535  CA  ASP A   1      -8.464   6.572  -3.297  1.00 95.46           C
+        ATOM    536  C   ASP A   1      -8.522   7.636  -4.409  1.00 95.46           C
+        ATOM    537  CB  ASP A   1      -9.844   5.896  -3.142  1.00 95.46           C
+        ATOM    538  O   ASP A   1      -8.015   7.431  -5.518  1.00 95.46           O
+        ATOM    539  CG  ASP A   1      -9.818   4.542  -2.418  1.00 95.46           C
+        ATOM    540  OD1 ASP A   1     -10.899   4.073  -1.981  1.00 95.46           O
+        ATOM    541  OD2 ASP A   1      -8.738   3.930  -2.377  1.00 95.46           O
+        """)
+    r = only(only(only(read(io, PDBFormat))))
+    χs2 = chiangles(r)
+    @test χs1[1] ≈ χs2[1]
+    @test χs1[2] ≈ χs2[2] rtol=0.05  # the bonds are not exactly symmetric
+
     # Test ContactMap
     cas = collectatoms(struc_1AKE, calphaselector)[1:10]
     @test isa(ContactMap(cas, 10).data, BitArray{2})

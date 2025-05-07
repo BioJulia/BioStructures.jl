@@ -411,9 +411,11 @@ Various functions are provided to calculate spatial quantities for proteins:
 | [`omegaangle`](@ref)         | Omega dihedral angle between a residue and the previous residue                                  |
 | [`phiangle`](@ref)           | Phi dihedral angle between a residue and the previous residue                                    |
 | [`psiangle`](@ref)           | Psi dihedral angle between a residue and the next residue                                        |
+| [`chiangle`](@ref)           | Chi dihedral angle within a residue                                                              |
 | [`omegaangles`](@ref)        | `Vector` of omega dihedral angles of an element                                                  |
 | [`phiangles`](@ref)          | `Vector` of phi dihedral angles of an element                                                    |
 | [`psiangles`](@ref)          | `Vector` of psi dihedral angles of an element                                                    |
+| [`chiangles`](@ref)          | All chi dihedral angles for a residue or element                                                 |
 | [`ramachandranangles`](@ref) | `Vector`s of phi and psi angles of an element                                                    |
 | [`ContactMap`](@ref)         | `ContactMap` of two elements, or one element with itself                                         |
 | [`DistanceMap`](@ref)        | `DistanceMap` of two elements, or one element with itself                                        |
@@ -446,6 +448,17 @@ julia> rad2deg(psiangle(struc['A'][50], struc['A'][51]))
 
 julia> rad2deg(psiangle(struc['A'], 50))
 -177.38288114072924
+
+julia> rad2deg.(chiangles(struc['A'][2]))    # ASP, χ₁...χ₅
+5-element Vector{Float64}:
+  -55.5708140556466
+ -118.03264320054458
+   56.50403552503829
+ -176.37208357380604
+    0.04991054795811607
+
+julia> rad2deg.(chiangles(struc['A'][4]))    # GLY, no χ angles
+Float64[]
 ```
 
 [`ContactMap`](@ref) takes in a structural element or a list, such as a `Chain` or `Vector{Atom}`, and returns a [`ContactMap`](@ref) object showing the contacts between the elements for a specified distance.

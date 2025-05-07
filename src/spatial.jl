@@ -16,6 +16,8 @@ export
     omegaangles,
     phiangles,
     psiangles,
+    chiangle,
+    chiangles,
     ramachandranangles,
     SpatialMap,
     ContactMap,
@@ -341,7 +343,7 @@ function dihedralangle(vec_a::AbstractVector{<:Real},
                     vec_b::AbstractVector{<:Real},
                     vec_c::AbstractVector{<:Real})
     return atan(
-        dot(cross(cross(vec_a, vec_b), cross(vec_b, vec_c)), vec_b / norm(vec_b)),
+        norm(vec_b) * dot(vec_a, cross(vec_b, vec_c)),
         dot(cross(vec_a, vec_b), cross(vec_b, vec_c)))
 end
 
@@ -460,6 +462,126 @@ function psiangle(chain::Chain, res_id::Union{Integer, AbstractString})
         throw(ArgumentError("Cannot calculate psi angle for residue \"$res_id\" due to a lack of connected residues"))
     end
     return psiangle(chain[resids(chain)[i]], chain[resids(chain)[i + 1]])
+end
+
+# source: http://www.mlb.co.jp/linux/science/garlic/doc/commands/dihedrals.html
+const chitables = [
+    Dict{String,NTuple{4,String}}(
+        "ARG" => ("N", "CA", "CB", "CG"),
+        "ASN" => ("N", "CA", "CB", "CG"),
+        "ASP" => ("N", "CA", "CB", "CG"),
+        "CYS" => ("N", "CA", "CB", "SG"),
+        "GLN" => ("N", "CA", "CB", "CG"),
+        "GLU" => ("N", "CA", "CB", "CG"),
+        "HIS" => ("N", "CA", "CB", "CG"),
+        "ILE" => ("N", "CA", "CB", "CG1"),
+        "LEU" => ("N", "CA", "CB", "CG"),
+        "LYS" => ("N", "CA", "CB", "CG"),
+        "MET" => ("N", "CA", "CB", "CG"),
+        "PHE" => ("N", "CA", "CB", "CG"),
+        "PRO" => ("N", "CA", "CB", "CG"),
+        "SER" => ("N", "CA", "CB", "OG"),
+        "THR" => ("N", "CA", "CB", "OG1"),
+        "TRP" => ("N", "CA", "CB", "CG"),
+        "TYR" => ("N", "CA", "CB", "CG"),
+        "VAL" => ("N", "CA", "CB", "CG1"),
+    ),
+    Dict{String,NTuple{4,String}}(
+        "ARG" => ("CA", "CB", "CG", "CD"),
+        "ASN" => ("CA", "CB", "CG", "OD1"),
+        "ASP" => ("CA", "CB", "CG", "OD1"),
+        "GLN" => ("CA", "CB", "CG", "CD"),
+        "GLU" => ("CA", "CB", "CG", "CD"),
+        "HIS" => ("CA", "CB", "CG", "ND1"),
+        "ILE" => ("CA", "CB", "CG1", "CD1"),
+        "LEU" => ("CA", "CB", "CG", "CD1"),
+        "LYS" => ("CA", "CB", "CG", "CD"),
+        "MET" => ("CA", "CB", "CG", "SD"),
+        "PHE" => ("CA", "CB", "CG", "CD1"),
+        "PRO" => ("CA", "CB", "CG", "CD"),
+        "TRP" => ("CA", "CB", "CG", "CD1"),
+        "TYR" => ("CA", "CB", "CG", "CD1"),
+    ),
+    Dict{String,NTuple{4,String}}(
+        "ARG" => ("CB", "CG", "CD", "NE"),
+        "GLN" => ("CB", "CG", "CD", "OE1"),
+        "GLU" => ("CB", "CG", "CD", "OE1"),
+        "LYS" => ("CB", "CG", "CD", "CE"),
+        "MET" => ("CB", "CG", "SD", "CE"),
+    ),
+    Dict{String,NTuple{4,String}}(
+        "ARG" => ("CG", "CD", "NE", "CZ"),
+        "LYS" => ("CG", "CD", "CE", "NZ"),
+    ),
+    Dict{String,NTuple{4,String}}(
+        "ARG" => ("CD", "NE", "CZ", "NH1"),
+    ),
+]
+
+# source: Jumper et al 2021, Supp. Table 2
+const chisymmetries = [
+    ("ASP", 2),
+    ("GLU", 3),
+    ("PHE", 2),
+    ("TYR", 2),
+]
+
+function chiangle(a1, a2, a3, a4, sym::Bool)
+    χ = dihedralangle(a1, a2, a3, a4)
+    if sym && χ < 0
+        χ += π
+    end
+    return χ
+end
+
+"""
+    chiangle(res, i)
+
+Calculate the χᵢ angle in radians for a standard `AbstractResidue` with standard atom names.
+The angle is in the range -π to π.
+"""
+function chiangle(res::AbstractResidue, i::Integer)
+    1 <= i <= 5 || throw(ArgumentError("χᵢ index `i` must be between 1 and 5"))
+    ct = chitables[i]
+    rname = resname(res)
+    t = get(ct, rname, nothing)
+    if t === nothing
+        # is it because this isn't a standard residue?
+        (rname == "GLY" || rname == "ALA") && throw(ArgumentError("$rname does not have any χ angles"))
+        haskey(chitables[1], rname) || throw(ArgumentError("no χ angles are defined for residues with name $rname"))
+        # it must be missing specifically for `i`
+        j = 1
+        while haskey(chitables[j+1], rname)
+            j += 1
+        end
+        throw(ArgumentError("χ angle with index $i does not exist for residue $rname (max is $j)"))
+    end
+    return chiangle(res[t[1]], res[t[2]], res[t[3]], res[t[4]], (rname, i) in chisymmetries)
+end
+
+"""
+    chiangles(res)
+
+Calculate the `Vector` of standard χ angles for a standard `AbstractResidue` with standard atom names.
+The length of the vector ranges from 0 (GLY, ALA) to 5 (ARG).
+The angles are each in the range -π to π.
+"""
+function chiangles(res::AbstractResidue)
+    chi = Float64[]
+    rname = resname(res)
+    for i = 1:5
+        ct = chitables[i]
+        t = get(ct, rname, nothing)
+        if t === nothing
+            if i == 1
+                (rname == "GLY" || rname == "ALA") && break
+                throw(ArgumentError("no χ angles are defined for residues with name $rname"))
+            end
+            break
+        end
+        push!(chi, chiangle(res[t[1]], res[t[2]], res[t[3]], res[t[4]], (rname, i) in chisymmetries))
+    end
+    return chi
 end
 
 """
@@ -597,6 +719,17 @@ function ramachandranangles(el::StructuralElementOrList,
                     residue_selectors::Function...)
     return phiangles(el, residue_selectors...), psiangles(el, residue_selectors...)
 end
+
+"""
+    chiangles(element, residue_selectors...)
+
+Calculate the `Vector` of standard χ angles for each residue in a `StructuralElementOrList`.
+This returns a `Vector` of `Vector`s, where all angles are in the range -π to π.
+Additional arguments are residue selector functions - only residues that return
+`true` from the functions are retained.
+"""
+chiangles(el::StructuralElementOrList, residue_selectors::Function...) =
+    [chiangles(r) for r in collectresidues(el, residue_selectors...)]
 
 "A map of a structural property, e.g. a `ContactMap` or a `DistanceMap`."
 abstract type SpatialMap end
