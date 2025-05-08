@@ -246,7 +246,7 @@ end
     testparent(getchildren(struc), struc)
     struc_copy = copy(struc)
     testparent(getchildren(struc_copy), struc_copy)
-    struc_copy['A'][10]["CA"].coords[2] = 100
+    y!(struc_copy['A'][10]["CA"], 100)
     @test struc_copy['A'][10]["CA"].coords[2] == 100
     @test a.coords[2] == 2
     @test struc['A'][10]["CA"].coords[2] == 2
