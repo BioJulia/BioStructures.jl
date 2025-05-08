@@ -127,11 +127,11 @@ function AtomRecord(pdb_line::String, line_n::Integer=1)
         parsechainid(pdb_line, line_n),
         parseresnumber(pdb_line, line_n),
         parseinscode(pdb_line, line_n),
-        [
+        SVector{3,Float64}((
             parsecoordx(pdb_line, line_n),
             parsecoordy(pdb_line, line_n),
             parsecoordz(pdb_line, line_n)
-        ],
+        )),
         n >= 60 ? parseoccupancy(pdb_line) : 1.0,
         n >= 66 ? parsetempfac(pdb_line) : 0.0,
         n >= 78 ? parseelement(pdb_line) : "  ",
