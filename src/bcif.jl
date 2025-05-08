@@ -1,4 +1,4 @@
-export decode_column
+export decode_column, columns_to_dict, datablock_to_dict
 using LinearAlgebra
 import MsgPack
 
@@ -36,6 +36,18 @@ function Base.read(input::IO,
     end
     fixlists!(struc)
     return struc
+end
+
+function datablock_to_dict(datablock::Dict)
+    categories = datablock["categories"]
+    return reduce(merge, [Dict(category["name"] => columns_to_dict(category["columns"])) for category in categories])
+end
+
+function columns_to_dict(columns::Vector{Any})
+    tasks = map(columns) do column
+        Threads.@spawn Dict(column["name"] => decode_column(column))
+    end
+    return reduce(merge, fetch.(tasks))
 end
 
 BCIFArrayTypes = Union{Vector{String},Vector{Int32},Vector{Float64}}
