@@ -117,12 +117,12 @@ end
 
 function Atom(a::Atom, r::StructuralElement)
     return Atom(a.serial, a.name, a.alt_loc_id, copy(a.coords), a.occupancy,
-                a.temp_factor, a.element, a.charge, r)
+        a.temp_factor, a.element, a.charge, r)
 end
 
 "A container to hold different locations of the same atom."
 struct DisorderedAtom <: AbstractAtom
-    alt_loc_ids::Dict{Char, Atom}
+    alt_loc_ids::Dict{Char,Atom}
     default::Char
 end
 
@@ -143,15 +143,15 @@ mutable struct Residue <: AbstractResidue
     ins_code::Char
     het_res::Bool # Does the residue consist of hetatoms?
     atom_list::Vector{String}
-    atoms::Dict{String, AbstractAtom}
+    atoms::Dict{String,AbstractAtom}
     chain::StructuralElement
     ss_code::Char
 end
 
 function Residue(r::Residue, ch::StructuralElement)
-    atom_dict = Dict{String, AbstractAtom}()
+    atom_dict = Dict{String,AbstractAtom}()
     rnew = Residue(r.name, r.number, r.ins_code, r.het_res, [name for name in r.atom_list],
-                   atom_dict, ch, r.ss_code)
+        atom_dict, ch, r.ss_code)
     for (name, atom) in r.atoms
         atom_dict[name] = isa(atom, Atom) ? Atom(atom, rnew) : DisorderedAtom(atom, rnew)
     end
@@ -163,7 +163,7 @@ A container to hold different versions of the same residue (point
 mutations).
 """
 struct DisorderedResidue <: AbstractResidue
-    names::Dict{String, Residue}
+    names::Dict{String,Residue}
     default::String
 end
 
@@ -175,12 +175,12 @@ end
 mutable struct Chain <: StructuralElement
     id::String # mmCIF files can have multi-character chain IDs
     res_list::Vector{String}
-    residues::Dict{String, AbstractResidue}
+    residues::Dict{String,AbstractResidue}
     model::StructuralElement
 end
 
 function Chain(c::Chain, mo::StructuralElement)
-    res_dict = Dict{String, AbstractResidue}()
+    res_dict = Dict{String,AbstractResidue}()
     cnew = Chain(c.id, [id for id in c.res_list], res_dict, mo)
     for (id, res) in c.residues
         res_dict[id] = isa(res, Residue) ? Residue(res, cnew) : DisorderedResidue(res, cnew)
@@ -191,12 +191,12 @@ end
 "A conformation of a macromolecular structure."
 struct Model <: StructuralElement
     number::Int
-    chains::Dict{String, Chain}
+    chains::Dict{String,Chain}
     structure::StructuralElement
 end
 
 function Model(m::Model, struc::StructuralElement)
-    chain_dict = Dict{String, Chain}()
+    chain_dict = Dict{String,Chain}()
     mnew = Model(m.number, chain_dict, struc)
     for (id, ch) in m.chains
         chain_dict[id] = Chain(ch, mnew)
@@ -210,11 +210,11 @@ entry.
 """
 struct MolecularStructure <: StructuralElement
     name::String
-    models::Dict{Int, Model}
+    models::Dict{Int,Model}
 end
 
 function MolecularStructure(s::MolecularStructure)
-    model_dict = Dict{Int, Model}()
+    model_dict = Dict{Int,Model}()
     snew = MolecularStructure(s.name, model_dict)
     for (number, mo) in s.models
         model_dict[number] = Model(mo, snew)
@@ -257,14 +257,14 @@ Model() = Model(1)
 Chain(id::AbstractString, mo::Model) = Chain(id, [], Dict(), mo)
 Chain(id::Char, mo::Model) = Chain(string(id), [], Dict(), mo)
 
-Chain(id::Union{AbstractString, Char}) = Chain(id, Model())
+Chain(id::Union{AbstractString,Char}) = Chain(id, Model())
 
 function Residue(name::AbstractString,
-                number::Integer,
-                ins_code::Char,
-                het_res::Bool,
-                ch::Chain,
-                ss_code=ss_code_unassigned)
+    number::Integer,
+    ins_code::Char,
+    het_res::Bool,
+    ch::Chain,
+    ss_code=ss_code_unassigned)
     return Residue(name, number, ins_code, het_res, [], Dict(), ch, ss_code_unassigned)
 end
 
@@ -404,7 +404,7 @@ function findatombyname(res::Residue, atom_name::AbstractString; strict::Bool=tr
     # Look for atom name directly
     if haskey(res.atoms, atom_name)
         return res.atoms[atom_name]
-    # Pad out name to 4 characters to read PDB atom names with whitespace
+        # Pad out name to 4 characters to read PDB atom names with whitespace
     elseif length(atom_name) == 3
         if haskey(res.atoms, " $atom_name")
             return res.atoms[" $atom_name"]
@@ -861,9 +861,9 @@ alphabetically.
 """
 function resnames(dis_res::DisorderedResidue)
     return sort(collect(keys(dis_res.names)),
-        lt= (res_name_one, res_name_two) ->
+        lt=(res_name_one, res_name_two) ->
             (isless(res_name_one, res_name_two) && res_name_two != defaultresname(dis_res)) ||
-            res_name_one == defaultresname(dis_res)
+                res_name_one == defaultresname(dis_res)
     )
 end
 
@@ -928,7 +928,7 @@ chain(ch::Chain) = ch
 Get the chain ID of an `AbstractAtom`, `AbstractResidue` or `Chain` as a
 `String`.
 """
-chainid(el::Union{AbstractResidue, AbstractAtom}) = chainid(chain(el))
+chainid(el::Union{AbstractResidue,AbstractAtom}) = chainid(chain(el))
 chainid(ch::Chain) = ch.id
 
 """
@@ -1014,7 +1014,7 @@ Get the model number of a `Model`, `Chain`, `AbstractResidue` or `AbstractAtom`
 as an `Int`.
 """
 modelnumber(mo::Model) = mo.number
-modelnumber(el::Union{Chain, AbstractResidue, AbstractAtom}) = modelnumber(model(el))
+modelnumber(el::Union{Chain,AbstractResidue,AbstractAtom}) = modelnumber(model(el))
 
 """
     chainids(model)
@@ -1046,7 +1046,7 @@ function chains(struc::MolecularStructure)
     if countmodels(struc) > 0
         return chains(defaultmodel(struc))
     else
-        return Dict{String, Chain}()
+        return Dict{String,Chain}()
     end
 end
 
@@ -1070,7 +1070,7 @@ structure(struc::MolecularStructure) = struc
 Get the name of the `MolecularStructure` that a `StructuralElement` belongs to as
 a `String`.
 """
-structurename(el::Union{Model, Chain, AbstractResidue, AbstractAtom}) = structurename(structure(el))
+structurename(el::Union{Model,Chain,AbstractResidue,AbstractAtom}) = structurename(structure(el))
 structurename(struc::MolecularStructure) = struc.name
 
 """
@@ -1131,7 +1131,7 @@ end
 function Base.isless(ch_one::Chain, ch_two::Chain)
     # Deal with usual case of single letter comparison quickly
     if length(chainid(ch_one)) == 1 && length(chainid(ch_two)) == 1 &&
-            chainid(ch_one) != " " && chainid(ch_two) != " "
+       chainid(ch_one) != " " && chainid(ch_two) != " "
         return Int(chainid(ch_one)[1]) < Int(chainid(ch_two)[1])
     end
     chid_one = strip(chainid(ch_one))
@@ -1170,11 +1170,11 @@ insertion code of the second greater than the first).
 """
 function sequentialresidues(res_first::AbstractResidue, res_second::AbstractResidue)
     if chainid(res_second) == chainid(res_first) &&
-            ishetero(res_second) == ishetero(res_first)
+       ishetero(res_second) == ishetero(res_first)
         if resnumber(res_second) == resnumber(res_first) + 1
             return true
         elseif resnumber(res_second) == resnumber(res_first) &&
-                inscode(res_second) > inscode(res_first)
+               inscode(res_second) > inscode(res_first)
             return true
         end
     end
@@ -1272,11 +1272,11 @@ collectmodels(struc::MolecularStructure) = collect(struc)
 
 collectmodels(mo::Model) = [mo]
 
-collectmodels(el::Union{Chain, AbstractResidue, AbstractAtom}) = [model(el)]
+collectmodels(el::Union{Chain,AbstractResidue,AbstractAtom}) = [model(el)]
 
 collectmodels(mos::AbstractVector{Model}) = mos
 
-function collectmodels(els::AbstractVector{<:Union{Chain, AbstractResidue, AbstractAtom}})
+function collectmodels(els::AbstractVector{<:Union{Chain,AbstractResidue,AbstractAtom}})
     mo_list = Model[]
     for el in els
         if !(model(el) in mo_list)
@@ -1288,8 +1288,8 @@ end
 
 # One selector explicitly defined to prevent this being called without selectors
 function collectmodels(el::StructuralElementOrList,
-                    model_selector::Function,
-                    model_selectors::Function...)
+    model_selector::Function,
+    model_selectors::Function...)
     return applyselectors(collectmodels(el), model_selector, model_selectors...)
 end
 
@@ -1327,7 +1327,7 @@ collectchains(mo::Model) = collect(mo)
 
 collectchains(ch::Chain) = [ch]
 
-collectchains(el::Union{AbstractResidue, AbstractAtom}) = [chain(el)]
+collectchains(el::Union{AbstractResidue,AbstractAtom}) = [chain(el)]
 
 function collectchains(mos::AbstractVector{Model})
     ch_list = Chain[]
@@ -1339,7 +1339,7 @@ end
 
 collectchains(chs::AbstractVector{Chain}) = chs
 
-function collectchains(els::AbstractVector{<:Union{AbstractResidue, AbstractAtom}})
+function collectchains(els::AbstractVector{<:Union{AbstractResidue,AbstractAtom}})
     ch_list = Chain[]
     for el in els
         if !(chain(el) in ch_list)
@@ -1350,8 +1350,8 @@ function collectchains(els::AbstractVector{<:Union{AbstractResidue, AbstractAtom
 end
 
 function collectchains(el::StructuralElementOrList,
-                    chain_selector::Function,
-                    chain_selectors::Function...)
+    chain_selector::Function,
+    chain_selectors::Function...)
     return applyselectors(collectchains(el), chain_selector, chain_selectors...)
 end
 
@@ -1387,8 +1387,8 @@ function collectresidues(struc::MolecularStructure; expand_disordered::Bool=fals
     end
 end
 
-function collectresidues(el::Union{Model, Vector{Model}, Vector{Chain}};
-                            expand_disordered::Bool=false)
+function collectresidues(el::Union{Model,Vector{Model},Vector{Chain}};
+    expand_disordered::Bool=false)
     res_list = AbstractResidue[]
     for sub_el in el
         append!(res_list, collectresidues(sub_el; expand_disordered=expand_disordered))
@@ -1399,8 +1399,8 @@ end
 # Note output is always Vector{AbstractResidue} unless input was Vector{Residue}
 #   or Vector{DisorderedResidue}, in which case output is same type as input
 #   type
-function collectresidues(el::Union{Chain, Vector{<:AbstractResidue}};
-                            expand_disordered::Bool=false)
+function collectresidues(el::Union{Chain,Vector{<:AbstractResidue}};
+    expand_disordered::Bool=false)
     if expand_disordered
         res_list = AbstractResidue[]
         for res in el
@@ -1439,11 +1439,11 @@ function collectresidues(at_list::AbstractVector{<:AbstractAtom}; expand_disorde
 end
 
 function collectresidues(el::StructuralElementOrList,
-                    residue_selector::Function,
-                    residue_selectors::Function...;
-                    expand_disordered::Bool=false)
+    residue_selector::Function,
+    residue_selectors::Function...;
+    expand_disordered::Bool=false)
     return collectresidues(applyselectors(collectresidues(el), residue_selector,
-                            residue_selectors...); expand_disordered=expand_disordered)
+            residue_selectors...); expand_disordered=expand_disordered)
 end
 
 """
@@ -1457,10 +1457,10 @@ The keyword argument `expand_disordered` (default `false`) determines whether to
 return all copies of disordered residues separately.
 """
 function countresidues(el::StructuralElementOrList,
-                        residue_selectors::Function...;
-                        expand_disordered::Bool=false)
+    residue_selectors::Function...;
+    expand_disordered::Bool=false)
     return length(collectresidues(el, residue_selectors...;
-                                    expand_disordered=expand_disordered))
+        expand_disordered=expand_disordered))
 end
 
 """
@@ -1481,9 +1481,9 @@ function collectatoms(struc::MolecularStructure; expand_disordered::Bool=false)
     end
 end
 
-function collectatoms(el::Union{Model, Chain, Vector{Model}, Vector{Chain},
-                                Vector{<:AbstractResidue}};
-                        expand_disordered::Bool=false)
+function collectatoms(el::Union{Model,Chain,Vector{Model},Vector{Chain},
+        Vector{<:AbstractResidue}};
+    expand_disordered::Bool=false)
     at_list = AbstractAtom[]
     for sub_el in el
         append!(at_list, collectatoms(sub_el; expand_disordered=expand_disordered))
@@ -1493,8 +1493,8 @@ end
 
 # Note output is always Vector{AbstractAtom} unless input was Vector{Atom} or
 #   Vector{DisorderedAtom}, in which case output is same type as input type
-function collectatoms(el::Union{Residue, Vector{<:AbstractAtom}};
-                            expand_disordered::Bool=false)
+function collectatoms(el::Union{Residue,Vector{<:AbstractAtom}};
+    expand_disordered::Bool=false)
     if expand_disordered
         at_list = AbstractAtom[]
         for at in el
@@ -1513,7 +1513,7 @@ end
 function collectatoms(dis_res::DisorderedResidue; expand_disordered::Bool=false)
     if expand_disordered
         return collectatoms(collectresidues(dis_res; expand_disordered=true);
-                            expand_disordered=true)
+            expand_disordered=true)
     else
         return collectatoms(defaultresidue(dis_res))
     end
@@ -1530,11 +1530,11 @@ function collectatoms(dis_at::DisorderedAtom; expand_disordered::Bool=false)
 end
 
 function collectatoms(el::StructuralElementOrList,
-                        atom_selector::Function,
-                        atom_selectors::Function...;
-                        expand_disordered::Bool=false)
+    atom_selector::Function,
+    atom_selectors::Function...;
+    expand_disordered::Bool=false)
     return collectatoms(applyselectors(collectatoms(el), atom_selector, atom_selectors...);
-                        expand_disordered=expand_disordered)
+        expand_disordered=expand_disordered)
 end
 
 """
@@ -1548,18 +1548,18 @@ The keyword argument `expand_disordered` (default `false`) determines whether to
 return all copies of disordered atoms separately.
 """
 function countatoms(el::StructuralElementOrList,
-                    atom_selectors::Function...;
-                    expand_disordered::Bool=false)
+    atom_selectors::Function...;
+    expand_disordered::Bool=false)
     return length(collectatoms(el, atom_selectors...;
-                                expand_disordered=expand_disordered))
+        expand_disordered=expand_disordered))
 end
 
 # Add an atom represented in an AtomRecord to a Model
 # Unsafe as sub-element lists are not updated (for speed)
 # fixlists! should be run after all additions to update the sub-element lists
 function unsafe_addatomtomodel!(mo::Model,
-                    atom_rec::AtomRecord;
-                    remove_disorder::Bool=false)
+    atom_rec::AtomRecord;
+    remove_disorder::Bool=false)
     # Add chain to model if necessary
     if !haskey(chains(mo), atom_rec.chain_id)
         mo[atom_rec.chain_id] = Chain(atom_rec.chain_id, mo)
@@ -1569,29 +1569,29 @@ function unsafe_addatomtomodel!(mo::Model,
     # If residue does not exist in the chain, create a Residue
     if !haskey(residues(ch), res_id)
         ch[res_id] = Residue(
-                    atom_rec.res_name,
-                    atom_rec.res_number,
-                    atom_rec.ins_code,
-                    atom_rec.het_atom,
-                    ch)
+            atom_rec.res_name,
+            atom_rec.res_number,
+            atom_rec.ins_code,
+            atom_rec.het_atom,
+            ch)
         res = ch[res_id]
     elseif isa(ch[res_id], Residue)
         # Residue exists in the chain and the residue names match
         # Add to that Residue
         if fullresname(ch[res_id]) == atom_rec.res_name
             res = ch[res_id]
-        # Residue exists in the chain but the residue names do not match
-        # Create a DisorderedResidue
+            # Residue exists in the chain but the residue names do not match
+            # Create a DisorderedResidue
         else
             ch[res_id] = DisorderedResidue(Dict(
-                fullresname(ch[res_id]) => ch[res_id],
-                atom_rec.res_name => Residue(
-                    atom_rec.res_name,
-                    atom_rec.res_number,
-                    atom_rec.ins_code,
-                    atom_rec.het_atom,
-                    ch)
-            ), fullresname(ch[res_id]))
+                    fullresname(ch[res_id]) => ch[res_id],
+                    atom_rec.res_name => Residue(
+                        atom_rec.res_name,
+                        atom_rec.res_number,
+                        atom_rec.ins_code,
+                        atom_rec.het_atom,
+                        ch)
+                ), fullresname(ch[res_id]))
             res = disorderedres(ch[res_id], atom_rec.res_name)
         end
     else
@@ -1599,15 +1599,15 @@ function unsafe_addatomtomodel!(mo::Model,
         # Add to that DisorderedResidue
         if atom_rec.res_name in resnames(ch[res_id])
             res = disorderedres(ch[res_id], atom_rec.res_name)
-        # DisorderedResidue exists in the chain and the residue names do not match
-        # Create a new Residue in the DisorderedResidue
+            # DisorderedResidue exists in the chain and the residue names do not match
+            # Create a new Residue in the DisorderedResidue
         else
             ch[res_id].names[atom_rec.res_name] = Residue(
-                    atom_rec.res_name,
-                    atom_rec.res_number,
-                    atom_rec.ins_code,
-                    atom_rec.het_atom,
-                    ch)
+                atom_rec.res_name,
+                atom_rec.res_number,
+                atom_rec.ins_code,
+                atom_rec.het_atom,
+                ch)
             res = disorderedres(ch[res_id], atom_rec.res_name)
         end
     end
@@ -1624,30 +1624,30 @@ function unsafe_addatomtomodel!(mo::Model,
     # If atom does not exist in the residue, create an Atom
     if !haskey(atoms(res), atom_rec.atom_name)
         res[atom_rec.atom_name] = at
-    # Atom exists in the residue, atom names match and alt loc IDs are different
+        # Atom exists in the residue, atom names match and alt loc IDs are different
     elseif isa(res[atom_rec.atom_name], Atom) &&
-            atom_rec.alt_loc_id != altlocid(res[atom_rec.atom_name])
+           atom_rec.alt_loc_id != altlocid(res[atom_rec.atom_name])
         # If we are removing disorder and the new atom is preferred to the old one, replace the old one
         if remove_disorder &&
-                choosedefaultaltlocid(at, res[atom_rec.atom_name]) == atom_rec.alt_loc_id
+           choosedefaultaltlocid(at, res[atom_rec.atom_name]) == atom_rec.alt_loc_id
             res[atom_rec.atom_name] = at
-        # If we are not removing disorder, create a new disordered atom container and add both atoms
+            # If we are not removing disorder, create a new disordered atom container and add both atoms
         elseif !remove_disorder
             res[atom_rec.atom_name] = DisorderedAtom(Dict(
-                atom_rec.alt_loc_id => at,
-                altlocid(res[atom_rec.atom_name]) => res[atom_rec.atom_name]
-            ), choosedefaultaltlocid(at, res[atom_rec.atom_name]))
+                    atom_rec.alt_loc_id => at,
+                    altlocid(res[atom_rec.atom_name]) => res[atom_rec.atom_name]
+                ), choosedefaultaltlocid(at, res[atom_rec.atom_name]))
         end
-    # A disordered atom container already exists and the alt loc ID is not taken
+        # A disordered atom container already exists and the alt loc ID is not taken
     elseif isa(res[atom_rec.atom_name], DisorderedAtom) &&
-            !(atom_rec.alt_loc_id in altlocids(res[atom_rec.atom_name]))
+           !(atom_rec.alt_loc_id in altlocids(res[atom_rec.atom_name]))
         # Add the new atom to the disordered atom container
         res[atom_rec.atom_name][atom_rec.alt_loc_id] = at
         # If the default alt loc requires changing, change it
         if choosedefaultaltlocid(defaultatom(res[atom_rec.atom_name]), at) != defaultaltlocid(res[atom_rec.atom_name])
             res[atom_rec.atom_name] = DisorderedAtom(
-                        res[atom_rec.atom_name],
-                        atom_rec.alt_loc_id)
+                res[atom_rec.atom_name],
+                atom_rec.alt_loc_id)
         end
     else
         error("Two copies of the same atom have the same alternative location ID. Existing atom:\n" *
@@ -1694,8 +1694,8 @@ chosen.
 """
 function choosedefaultaltlocid(at_one::Atom, at_two::Atom)
     if occupancy(at_one) > occupancy(at_two) ||
-            (occupancy(at_one) == occupancy(at_two) &&
-            Int(altlocid(at_one)) < Int(altlocid(at_two)))
+       (occupancy(at_one) == occupancy(at_two) &&
+        Int(altlocid(at_one)) < Int(altlocid(at_two)))
         return altlocid(at_one)
     else
         return altlocid(at_two)
@@ -1723,11 +1723,12 @@ struct BCIFFormat end
 struct MMTFFormat end
 
 "Mapping of Protein Data Bank (PDB) formats to their file extensions."
-const pdbextension = Dict{Type, String}(
-    PDBFormat    => "pdb",
+const pdbextension = Dict{Type,String}(
+    PDBFormat => "pdb",
     PDBXMLFormat => "xml",
-    MMCIFFormat  => "cif",
-    MMTFFormat   => "mmtf",
+    MMCIFFormat => "cif",
+    MMTFFormat => "mmtf",
+    BCIFFormat => "bcif",
 )
 
 """
@@ -1768,8 +1769,8 @@ Call `MMTFDict` with a filepath or stream to read the dictionary from that
 source.
 The keyword argument `gzip` (default `false`) determines if the file is gzipped.
 """
-struct MMTFDict <: AbstractDict{String, Any}
-    dict::Dict{String, Any}
+struct MMTFDict <: AbstractDict{String,Any}
+    dict::Dict{String,Any}
 end
 
 """
