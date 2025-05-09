@@ -27,7 +27,17 @@ function Base.read(input::IO,
     struc = MolecularStructure(structure_name)
 
     for (i, datablock) in enumerate(file["dataBlocks"])
-        bcif_dict = BCIFDict(datablock_to_dict(datablock)["_atom_site"])
+        # could decode the whole file at once, or just decode the _atom_site category 
+        # for efficiency which it is currently doing. Can be changed to get access to the 
+        # rest of the file
+
+        decode_all = true
+        if decode_all
+            bcif_dict = BCIFDict(datablock_to_dict(datablock)["_atom_site"])
+        else
+            bcif_dict = BCIFDict(columns_to_dict(get_category(categories, "_atom_site")))
+        end
+
         struc[i] = Model(i, struc)
         for i in 1:length(bcif_dict["id"])
             unsafe_addatomtomodel!(struc[1], AtomRecord(bcif_dict, i))
@@ -103,7 +113,88 @@ function get_category(cats::Vector{Any}, name::String)
     return cats[idx]
 end
 
+
+# Utility functions for encoding/decoding
+function encode_stepwise(data, encodings)
+    for encoding in encodings
+        data = encode(encoding, data)
+    end
+    return data
+end
+
+function decode_stepwise(data, encodings)
+    for encoding in reverse(encodings)
+        data = decode(encoding, data)
+    end
+    return data
+end
+
+function deserialize_numeric_encoding(content::Any)
+    if isa(content, Vector)
+        return [deserialize_numeric_encoding(item) for item in content]
+    end
+
+    if isa(content, Encoding)
+        return content
+    end
+    kind = content["kind"]
+
+    # if byte convert to integer
+    for (key, value) in content
+        content[key] = value isa UInt8 ? Int32(value) : value
+    end
+    params = content
+
+    encoding_constructors = Dict(
+        "ByteArray" => () -> ByteArrayEncoding(INT_TO_TYPE[get(params, "type", nothing)]),
+        "FixedPoint" => () -> FixedPointEncoding(params["factor"]; srcType=INT_TO_TYPE[get(params, "srcType", FLOAT32)]),
+        "IntervalQuantization" => () -> IntervalQuantizationEncoding(params["min"], params["max"], params["numSteps"];
+            srcType=INT_TO_TYPE[get(params, "srcType", 32)]),
+        "RunLength" => () -> RunLengthEncoding(srcSize=get(params, "srcSize", nothing),
+            srcType=INT_TO_TYPE[get(params, "srcType", nothing)]),
+        "Delta" => () -> DeltaEncoding(srcType=INT_TO_TYPE[get(params, "srcType", nothing)],
+            origin=get(params, "origin", 0)),
+        "IntegerPacking" => () -> IntegerPackingEncoding(params["byteCount"],
+            srcSize=get(params, "srcSize", nothing),
+            isUnsigned=get(params, "isUnsigned", false))
+    )
+
+    if haskey(encoding_constructors, kind)
+        return encoding_constructors[kind]()
+    else
+        error("Unknown encoding kind: $kind")
+    end
+end
+
+
+function decode_column(column::Dict)
+    column_data = column["data"]
+    encodings = []
+
+    # collect the encodings. If it's a string encoding then it should be a single encoding
+    # that contains it's own dataEncoding and offsetEncoding which also need to be handled
+    for enc in column_data["encoding"]
+        if enc["kind"] == "StringArray"
+            push!(encodings, StringArrayEncoding(
+                stringData=enc["stringData"],
+                dataEncoding=deserialize_numeric_encoding(enc["dataEncoding"]),
+                offsetEncoding=deserialize_numeric_encoding(enc["offsetEncoding"]),
+                offsets=enc["offsets"]
+            ))
+        else
+            push!(encodings, deserialize_numeric_encoding(enc))
+        end
+    end
+
+    return decode_stepwise(column_data["data"], encodings)
+end
+
+
+# Below are the encoding and decoding types for BCIF format
+
 # Data types defined for the BCIF encoding by are indicated by integer values
+# there are not well discussed in the official spec, had to ask about it excplicitly
+# https://github.com/molstar/BinaryCIF/issues/4
 @enum TypeCode begin
     INT8 = 1
     INT16 = 2
@@ -528,112 +619,4 @@ function decode(enc::StringArrayEncoding, data)
     end
 
     return substrings[indices]
-end
-
-# Utility functions for encoding/decoding
-function encode_stepwise(data, encodings)
-    for encoding in encodings
-        data = encode(encoding, data)
-    end
-    return data
-end
-
-function decode_stepwise(data, encodings)
-    for encoding in reverse(encodings)
-        data = decode(encoding, data)
-    end
-    return data
-end
-
-function deserialize_encoding(content::Any)
-    if isa(content, Vector)
-        return [deserialize_encoding(item) for item in content]
-    end
-
-    if isa(content, Encoding)
-        return content
-    end
-    kind = content["kind"]
-
-    # if byte convert to integer
-    for (key, value) in content
-        content[key] = value isa UInt8 ? Int32(value) : value
-    end
-    params = content
-
-    # Handle nested encodings
-    if haskey(params, "data_encoding")
-        params["data_encoding"] = deserialize_encoding(params["data_encoding"])
-    end
-
-    if haskey(params, "offsetEncoding")
-        params["offsetEncoding"] = deserialize_encoding(params["offsetEncoding"])
-    end
-
-    encoding_constructors = Dict(
-        "ByteArray" => () -> ByteArrayEncoding(INT_TO_TYPE[get(params, "type", nothing)]),
-        "FixedPoint" => () -> FixedPointEncoding(params["factor"]; srcType=INT_TO_TYPE[get(params, "srcType", FLOAT32)]),
-        "StringArray" => () -> StringArrayEncoding(
-            stringData=get(params, "stringData", nothing),
-            dataEncoding=get(params, "dataEncoding", nothing),
-            offsetEncoding=get(params, "offsetEncoding", nothing),
-            offsets=get(params, "offsets", nothing)
-        ),
-        "IntervalQuantization" => () -> IntervalQuantizationEncoding(params["min"], params["max"], params["numSteps"];
-            srcType=INT_TO_TYPE[get(params, "srcType", 32)]),
-        "RunLength" => () -> RunLengthEncoding(srcSize=get(params, "srcSize", nothing),
-            srcType=INT_TO_TYPE[get(params, "srcType", nothing)]),
-        "Delta" => () -> DeltaEncoding(srcType=INT_TO_TYPE[get(params, "srcType", nothing)],
-            origin=get(params, "origin", 0)),
-        "IntegerPacking" => () -> IntegerPackingEncoding(params["byteCount"],
-            srcSize=get(params, "srcSize", nothing),
-            isUnsigned=get(params, "isUnsigned", false))
-    )
-
-    if haskey(encoding_constructors, kind)
-        return encoding_constructors[kind]()
-    else
-        error("Unknown encoding kind: $kind")
-    end
-end
-
-
-function decode_column(column::Dict)
-    data = column["data"]
-    encodings = []
-
-    # Handle the encoding array properly
-    for enc in data["encoding"]
-        if haskey(enc, "dataEncoding")
-            if haskey(enc, "offsetEncoding")
-                push!(encodings, StringArrayEncoding(
-                    stringData=enc["stringData"],
-                    dataEncoding=deserialize_encoding(enc["dataEncoding"]),
-                    offsetEncoding=deserialize_encoding(enc["offsetEncoding"]),
-                    offsets=enc["offsets"]
-                ))
-            else
-                push!(encodings, deserialize_encoding(enc["dataEncoding"]))
-            end
-        else
-            push!(encodings, deserialize_encoding(enc))
-        end
-    end
-
-    # Flatten the encodings if needed
-    flat_encodings = []
-    for enc in encodings
-        if enc isa Vector
-            append!(flat_encodings, enc)
-        else
-            push!(flat_encodings, enc)
-        end
-    end
-
-
-    # return flat_encodings
-
-    decoded = decode_stepwise(data["data"], flat_encodings)
-
-
 end
