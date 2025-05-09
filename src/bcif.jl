@@ -8,6 +8,9 @@ import MsgPack
 
 A function to read a binary CIF file from MolStar and extract the list of attributes and their compressed bytes.
 """
+
+# currently isn't implementing the dssp / stride. If using BCIF it seems strange to write
+# out a .pdb, run dssp / string, then read it back in again. 
 function Base.read(input::IO,
     ::Type{BCIFFormat},
     structure_name::AbstractString="",
@@ -18,22 +21,19 @@ function Base.read(input::IO,
     run_stride::Bool=false)
 
     file = MsgPack.unpack(read(input))
-
-    # currently just looking for the first data block
     categories = file["dataBlocks"][1]["categories"]
     atom_site = get_category(categories, "_atom_site")
     columns = atom_site[1]["columns"]
-    tasks = map(columns) do column
-        Threads.@spawn decode_column(column)
+    struc = MolecularStructure(structure_name)
+
+    for (i, datablock) in enumerate(file["dataBlocks"])
+        bcif_dict = BCIFDict(datablock_to_dict(datablock)["_atom_site"])
+        struc[i] = Model(i, struc)
+        for i in 1:length(bcif_dict["id"])
+            unsafe_addatomtomodel!(struc[1], AtomRecord(bcif_dict, i))
+        end
     end
 
-    bcif_dict = BCIFDict(Dict(columns[i]["name"] => result for (i, result) in enumerate(fetch.(tasks))))
-    # return bcif_dict
-    struc = MolecularStructure(structure_name)
-    struc[1] = Model(1, struc)
-    for i in 1:length(bcif_dict["id"])
-        unsafe_addatomtomodel!(struc[1], AtomRecord(bcif_dict, i))
-    end
     fixlists!(struc)
     return struc
 end
@@ -68,15 +68,16 @@ Base.length(mmcif_dict::BCIFDict) = length(mmcif_dict.dict)
 Base.iterate(mmcif_dict::BCIFDict) = iterate(mmcif_dict.dict)
 Base.iterate(mmcif_dict::BCIFDict, i) = iterate(mmcif_dict.dict, i)
 
+
 AtomRecord = AtomRecord(d::BCIFDict, i::Int) = AtomRecord(
     d["group_PDB"][i] == "HETATM",
     d["id"][i],
     d["auth_atom_id"][i],
-    'A',# d["label_alt_id"][i],
+    d["label_atom_id"][i] == "" ? ' ' : d["label_atom_id"][i][1],
     d["auth_comp_id"][i],
     d["auth_asym_id"][i],
     d["auth_seq_id"][i],
-    'A', # d["pdbx_PDB_ins_code"][i],
+    d["label_alt_id"][i] == "" ? ' ' : d["label_alt_id"][i][1],
     [
         d["Cartn_x"][i],
         d["Cartn_y"][i],
@@ -87,7 +88,6 @@ AtomRecord = AtomRecord(d::BCIFDict, i::Int) = AtomRecord(
     d["type_symbol"][i],
     d["pdbx_formal_charge"][i],
 )
-
 
 
 function get_category(cats::Vector{Any}, name::String)
@@ -103,7 +103,7 @@ function get_category(cats::Vector{Any}, name::String)
     return cats[idx]
 end
 
-# Enum for type codes
+# Data types defined for the BCIF encoding by are indicated by integer values
 @enum TypeCode begin
     INT8 = 1
     INT16 = 2
@@ -114,6 +114,17 @@ end
     FLOAT32 = 32
     FLOAT64 = 33
 end
+
+const INT_TO_TYPE = Dict(
+    1 => Int8,
+    2 => Int16,
+    3 => Int32,
+    4 => UInt8,
+    5 => UInt16,
+    6 => UInt32,
+    32 => Float32,
+    33 => Float64
+)
 
 # Mapping from TypeCode to Julia types
 const TYPE_CODE_TO_TYPE = Dict(
@@ -129,18 +140,6 @@ const TYPE_CODE_TO_TYPE = Dict(
 
 # Mapping from Julia types to TypeCode
 const TYPE_TO_TYPE_CODE = Dict(value => key for (key, value) in TYPE_CODE_TO_TYPE)
-
-const INT_TO_TYPE = Dict(
-    1 => Int8,
-    2 => Int16,
-    3 => Int32,
-    4 => UInt8,
-    5 => UInt16,
-    6 => UInt32,
-    32 => Float32,
-    33 => Float64
-)
-
 
 # Safe casting function
 function safe_cast(array, dtype)
