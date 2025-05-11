@@ -2426,7 +2426,7 @@ end
     ]
     # Read from file - write a small multicif manually and read it back
     for gzip in (false, true)
-        transcoder = gzip ? (GzipCompressorStream,) : ()
+        transcoder = (gzip ? (GzipCompressorStream,) : ())
         open(transcoder..., temp_filename, "w") do f_out
             open(testfilepath("mmCIF", "1AKE.cif")) do f_in
                 write(f_out, f_in)
@@ -3192,7 +3192,7 @@ end
     @test isapprox(omegas[10], omegaangle(struc_1AKE['A'], 10), atol=1e-5)
 
     # Test that the entries in `chitables` are bonded
-    sortt((a, b)) = a < b ? (a, b) : (b, a)
+    sortt((a, b)) = (a < b ? (a, b) : (b, a))
     rd = BioStructures.residuedata
     for ct in BioStructures.chitables
         for (rname, alist) in ct

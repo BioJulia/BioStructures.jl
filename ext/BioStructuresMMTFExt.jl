@@ -197,7 +197,7 @@ function BioStructures.writemmtf(output::Union{AbstractString, IO},
                 atom_selectors::Function...;
                 expand_disordered::Bool=true,
                 gzip::Bool=false)
-    loop_el = isa(el, MolecularStructure) ? collectmodels(el) : el
+    loop_el = (isa(el, MolecularStructure) ? collectmodels(el) : el)
     ats = sort(sort(sort(collectatoms(loop_el, atom_selectors...;
                             expand_disordered=expand_disordered)),
                             by=residue), by=model)
@@ -251,7 +251,7 @@ function BioStructures.writemmtf(output::Union{AbstractString, IO},
                     "chainIndexList" => Any[length(d["chainIdList"]) - 1],
                     "description"    => "",
                     "sequence"       => "", # This is changed later
-                    "type"           => ishetero(res) ? "non-polymer" : "polymer",
+                    "type"           => (ishetero(res) ? "non-polymer" : "polymer"),
                 ))
             end
             if !ishetero(res)
@@ -286,7 +286,7 @@ function BioStructures.writemmtf(output::Union{AbstractString, IO},
                     "bondAtomList"     => Any[],
                     "elementList"      => Any[element(at) for at in ats_res],
                     # MMTF specifies missing charges as zero
-                    "formalChargeList" => Any[charge(at) == "" ? 0 : parse(Int64, charge(at)) for at in ats_res],
+                    "formalChargeList" => Any[(charge(at) == "" ? 0 : parse(Int64, charge(at))) for at in ats_res],
                     "singleLetterCode" => "",
                     "chemCompType"     => "",
                     "atomNameList"     => Any[at_names...],
@@ -295,17 +295,17 @@ function BioStructures.writemmtf(output::Union{AbstractString, IO},
             end
 
             push!(d["groupIdList"], resnumber(res))
-            push!(d["groupTypeList"], group_i == 0 ? length(d["groupList"]) - 1 : group_i - 1)
-            push!(d["insCodeList"], inscode(res) == ' ' ? '\0' : inscode(res))
+            push!(d["groupTypeList"], (group_i == 0 ? length(d["groupList"]) - 1 : group_i - 1))
+            push!(d["insCodeList"], (inscode(res) == ' ' ? '\0' : inscode(res)))
             push!(d["secStructList"], -1)
-            push!(d["sequenceIndexList"], ishetero(res) ? -1 : length(sequence) - 1)
+            push!(d["sequenceIndexList"], (ishetero(res) ? -1 : length(sequence) - 1))
 
             prev_resname = resname(res)
             prev_het = ishetero(res)
             last_res = res
         end
 
-        push!(d["altLocList"], altlocid(at) == ' ' ? '\0' : altlocid(at))
+        push!(d["altLocList"], (altlocid(at) == ' ' ? '\0' : altlocid(at)))
         push!(d["atomIdList"], serial(at))
         push!(d["bFactorList"], tempfactor(at))
         push!(d["occupancyList"], occupancy(at))
