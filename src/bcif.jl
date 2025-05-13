@@ -1,7 +1,23 @@
-export decode_column, columns_to_dict, datablock_to_dict
+export decode_column, columns_to_dict, datablock_to_dict, BCIFDict, BCIFFormat
 using LinearAlgebra
 import MsgPack
 
+
+
+struct BCIFDict <: AbstractDict{String, Any}
+    dict::Dict{String,Any}
+    
+    function BCIFDict(dict::Dict{String, Dict{String}})
+        new(convert(Dict{String,Any}, dict))
+    end
+    
+    function BCIFDict(dict::Dict{String,T}) where T
+        new(convert(Dict{String,Any}, dict))
+    end
+end
+
+Base.keys(mmcif_dict::BCIFDict) = keys(mmcif_dict.dict)
+Base.values(mmcif_dict::BCIFDict) = values(mmcif_dict.dict)
 
 """
     read(input::IO, ::Type{BCIFFormat}, structure_name::AbstractString="", remove_disorder::Bool=false, read_std_atoms::Bool=true, read_het_atoms::Bool=true, run_dssp::Bool=false, run_stride::Bool=false)
@@ -18,30 +34,46 @@ function Base.read(input::IO,
             run_stride::Bool=false)
 
     file = MsgPack.unpack(read(input))
-    categories = file["dataBlocks"][1]["categories"]
-    atom_site = get_category(categories, "_atom_site")
-    columns = atom_site[1]["columns"]
+    bcif_dict = BCIFDict(datablock_to_dict(file["dataBlocks"][1]))
+    
+    return MolecularStructure(
+        bcif_dict; 
+        structure_name=structure_name,
+        remove_disorder=remove_disorder,
+        read_std_atoms=read_std_atoms,
+        read_het_atoms=read_het_atoms,
+        run_dssp=run_dssp,
+        run_stride=run_stride
+    )
+end
+
+function MolecularStructure(bcif_dict::BCIFDict; 
+    structure_name::AbstractString="",
+    remove_disorder::Bool=false,
+    read_std_atoms::Bool=true,
+    read_het_atoms::Bool=true,
+    run_dssp::Bool=false,
+    run_stride::Bool=false)
+
     struc = MolecularStructure(structure_name)
+    struc[1] = Model(1, struc)  # Initialize first model
+    # println(bcif_dict)
+    for i in 1:length(bcif_dict["_atom_site"]["id"])
+        unsafe_addatomtomodel!(struc[1], AtomRecord(bcif_dict, i))
+    end
+    
+    fixlists!(struc)
 
-    for (i, datablock) in enumerate(file["dataBlocks"])
-        # could decode the whole file at once, or just decode the _atom_site category 
-        # for efficiency which it is currently doing. Can be changed to get access to the 
-        # rest of the file
-
-        decode_all = true
-        if decode_all
-            bcif_dict = BCIFDict(datablock_to_dict(datablock)["_atom_site"])
-        else
-            bcif_dict = BCIFDict(columns_to_dict(get_category(categories, "_atom_site")))
-        end
-
-        struc[i] = Model(i, struc)
-        for i in 1:length(bcif_dict["id"])
-            unsafe_addatomtomodel!(struc[1], AtomRecord(bcif_dict, i))
-        end
+    if run_dssp && run_stride
+        throw(ArgumentError("run_dssp and run_stride cannot both be true"))
+    end
+    if run_dssp
+        rundssp!(struc)
+    end
+    if run_stride
+        runstride!(struc)
     end
 
-    fixlists!(struc)
     return struc
 end
 
@@ -56,19 +88,6 @@ function columns_to_dict(columns::Vector{Any})
     end
     return reduce(merge, fetch.(tasks))
 end
-
-BCIFArrayTypes = Union{Vector{String},Vector{Int32},Vector{Float64}}
-
-struct BCIFDict <: AbstractDict{String,BCIFArrayTypes}
-    dict::Dict{String,BCIFArrayTypes}
-end
-
-function BCIFDict(dict::Dict{String,BCIFArrayTypes})
-    new(dict)
-end
-
-Base.keys(mmcif_dict::BCIFDict) = keys(mmcif_dict.dict)
-Base.values(mmcif_dict::BCIFDict) = values(mmcif_dict.dict)
 Base.haskey(mmcif_dict::BCIFDict, key) = haskey(mmcif_dict.dict, key)
 Base.get(mmcif_dict::BCIFDict, key, default) = get(mmcif_dict.dict, key, default)
 Base.length(mmcif_dict::BCIFDict) = length(mmcif_dict.dict)
@@ -76,25 +95,28 @@ Base.iterate(mmcif_dict::BCIFDict) = iterate(mmcif_dict.dict)
 Base.iterate(mmcif_dict::BCIFDict, i) = iterate(mmcif_dict.dict, i)
 
 
-AtomRecord = AtomRecord(d::BCIFDict, i::Int) = AtomRecord(
-    d["group_PDB"][i] == "HETATM",
-    d["id"][i],
-    d["auth_atom_id"][i],
-    d["label_atom_id"][i] == "" ? ' ' : d["label_atom_id"][i][1],
-    d["auth_comp_id"][i],
-    d["auth_asym_id"][i],
-    d["auth_seq_id"][i],
-    d["label_alt_id"][i] == "" ? ' ' : d["label_alt_id"][i][1],
-    [
-        d["Cartn_x"][i],
-        d["Cartn_y"][i],
-        d["Cartn_z"][i]
-    ],
-    d["occupancy"][i],
-    d["B_iso_or_equiv"][i],
-    d["type_symbol"][i],
-    d["pdbx_formal_charge"][i],
-)
+function AtomRecord(d::BCIFDict, i::Int) 
+    d = d["_atom_site"]
+    return AtomRecord(
+        d["group_PDB"][i] == "HETATM",
+        d["id"][i],
+        d["auth_atom_id"][i],
+        d["label_atom_id"][i] == "" ? ' ' : d["label_atom_id"][i][1],
+        d["auth_comp_id"][i],
+        d["auth_asym_id"][i],
+        d["auth_seq_id"][i],
+        d["label_alt_id"][i] == "" ? ' ' : d["label_alt_id"][i][1],
+        [
+            d["Cartn_x"][i],
+            d["Cartn_y"][i],
+            d["Cartn_z"][i]
+        ],
+        d["occupancy"][i],
+        d["B_iso_or_equiv"][i],
+        d["type_symbol"][i],
+        d["pdbx_formal_charge"][i],
+    )
+end
 
 
 function get_category(cats::Vector{Any}, name::String)
