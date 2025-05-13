@@ -163,7 +163,7 @@ Requires an internet connection.
 """
 function downloadpdb(pdbid::AbstractString;
                 dir::AbstractString=pwd(),
-                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat}}=PDBFormat,
+                format::Type{<:Union{PDBFormat,PDBXMLFormat,MMCIFFormat,BCIFFormat}}=PDBFormat,
                 obsolete::Bool=false,
                 overwrite::Bool=false,
                 ba_number::Integer=0)
@@ -197,9 +197,14 @@ function downloadpdb(pdbid::AbstractString;
         try
             # Download the compressed PDB file to the temporary location
             @info "Downloading file from PDB: $pdbid"
-            if ba_number == 0
+            if format == BCIFFormat
                 Downloads.download(
-                    "http://files.rcsb.org/download/$pdbid.$(pdbextension[format]).gz",
+                    "https://models.rcsb.org/$pdbid.bcif",
+                    pdbpath,
+                )
+            elseif ba_number == 0
+                Downloads.download(
+                    "http://files.rcsb.org/download/$pdbid.$(pdbextension[format])$ba_number.gz",
                     archivefilepath,
                 )
             else
@@ -219,7 +224,7 @@ function downloadpdb(pdbid::AbstractString;
                 end
             end
             # Verify if the compressed file is downloaded properly and extract it
-            if isfile(archivefilepath) && filesize(archivefilepath) > 0
+            if isfile(archivefilepath) && filesize(archivefilepath) > 0 && format != BCIFFormat
                 stream = GzipDecompressorStream(open(archivefilepath))
                 open(pdbpath, "w") do output
                     write(output, stream)
@@ -238,7 +243,9 @@ function downloadpdb(pdbid::AbstractString;
             end
         finally
             # Remove the temporary compressd PDB file downloaded to clear up space
-            rm(archivefilepath, force=true)
+            if format != BCIFFormat
+                rm(archivefilepath, force=true)
+            end
         end
     end
 
@@ -291,7 +298,7 @@ Requires an internet connection.
     in `dir`; by default skips downloading the PDB file if it exists.
 """
 function downloadentirepdb(; dir::AbstractString=pwd(),
-                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat}}=PDBFormat,
+                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat, BCIFFormat}}=PDBFormat,
                 overwrite::Bool=false)
     pdblist = pdbentrylist()
     @info "About to download $(length(pdblist)) PDB files, make sure you have enough disk space and time"
@@ -310,7 +317,7 @@ automatically updates the PDB files of the given `format` inside the local
 Requires an internet connection.
 """
 function updatelocalpdb(; dir::AbstractString=pwd(),
-                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat}}=PDBFormat)
+                format::Type{<:Union{PDBFormat,PDBXMLFormat,MMCIFFormat,BCIFFormat}}=PDBFormat)
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
     # Download the newly added and modified pdb files
     downloadpdb(vcat(addedlist, modifiedlist), dir=dir, overwrite=true, format=format)
@@ -352,7 +359,7 @@ Requires an internet connection.
     in `dir`; by default skips downloading the PDB file if it exists.
 """
 function downloadallobsoletepdb(; obsolete_dir::AbstractString=pwd(),
-                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat}}=PDBFormat,
+                format::Type{<:Union{PDBFormat,PDBXMLFormat,MMCIFFormat,BCIFFormat}}=PDBFormat,
                 overwrite::Bool=false)
     obsoletelist = pdbobsoletelist()
     downloadpdb(obsoletelist, dir=obsolete_dir, format=format, overwrite=overwrite)
@@ -391,7 +398,7 @@ Requires an internet connection.
 """
 function retrievepdb(pdbid::AbstractString;
             dir::AbstractString=pwd(),
-            format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat}}=MMCIFFormat,
+            format::Type{<:Union{PDBFormat,PDBXMLFormat,MMCIFFormat,BCIFFormat}}=MMCIFFormat,
             obsolete::Bool=false,
             overwrite::Bool=false,
             ba_number::Integer=0,

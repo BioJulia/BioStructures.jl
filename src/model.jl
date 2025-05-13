@@ -1728,6 +1728,7 @@ const pdbextension = Dict{Type, String}(
     PDBXMLFormat => "xml",
     MMCIFFormat  => "cif",
     MMTFFormat   => "mmtf",
+    BCIFFormat   => "bcif",
 )
 
 """
