@@ -573,7 +573,7 @@ function writemmcif(output::IO,
                 atom_selectors::Function...;
                 expand_disordered::Bool=true, gzip::Bool=false)
     # Ensure multiple models get written out correctly
-    loop_el = isa(el, MolecularStructure) ? collectmodels(el) : el
+    loop_el = (isa(el, MolecularStructure) ? collectmodels(el) : el)
     ats = collectatoms(loop_el, atom_selectors...;
                                         expand_disordered=expand_disordered)
     if length(ats) > 0
@@ -590,7 +590,7 @@ function writemmcif(output::IO,
         appendatom!(atom_dict, at, string(modelnumber(at)),
             strip(chainid(at)) == "" ? "." : chainid(at),
             string(resnumber(at)), resname(at),
-            ishetero(at) ? "HETATM" : "ATOM")
+            (ishetero(at) ? "HETATM" : "ATOM"))
     end
 
     # Now the MMCIFDict has been generated, write it out to the file

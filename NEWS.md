@@ -1,5 +1,11 @@
 # BioStructures.jl release notes
 
+## v4.5.0 - May 2025
+
+* `chiangle` and `chiangles` are added to calculate the sidechain dihedral angles in protein residues.
+* mmCIF files with secondary structure annotations will now, by default, parse and assign secondary structure. Setting `run_dssp` or `run_stride` to `true` will cause DSSP or STRIDE to be run and provide the secondary structure, as before.
+* A constructor for `MetaGraph` on a `Chain` is added that constructs a graph of atoms where edges are determined by the known bonds of standard amino acids in the chain.
+
 ## v4.4.2 - Mar 2025
 
 * A bug in storing indices for `Transformation` is fixed.

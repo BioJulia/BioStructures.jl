@@ -527,7 +527,7 @@ The coordinate sets must be the same size and have the number of dimensions in t
 
 The contacting elements in a molecular structure form a graph, and this can be retrieved using `MetaGraph`.
 This extends `MetaGraph` from [MetaGraphs.jl](https://github.com/JuliaGraphs/MetaGraphs.jl), allowing you to use all the graph analysis tools in [Graphs.jl](https://github.com/JuliaGraphs/Graphs.jl).
-For example:
+For example to find the graph from a contact map of Cβ atoms closer than 8 Å:
 
 ```julia-repl
 julia> using Graphs, MetaGraphs
@@ -551,6 +551,9 @@ Atom CB with serial 71, coordinates [-3.766, 4.031, 23.526]
 See the [Graphs docs](https://juliagraphs.org/Graphs.jl/dev) for details on how to calculate properties such as shortest paths, centrality measures, community detection and more.
 Similar to [`ContactMap`](@ref), contacts are found between any element type passed in.
 So if you wanted the graph of chain contacts in a protein complex you could give a [`Model`](@ref) as the first argument.
+
+Calling `MetaGraph` on a [`Chain`](@ref) without a contact distance does something different: it constructs a graph of atoms where edges are determined by the known bonds of standard amino acids in the chain.
+Hydrogens should be present and atom names should match those in OpenMM.
 
 ## Assigning secondary structure
 

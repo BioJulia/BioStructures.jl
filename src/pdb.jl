@@ -201,12 +201,12 @@ end
 
 function parseoccupancy(line::String)
     ret = tryparse(Float64, line[55:60])
-    return ret === nothing ? 1.0 : ret
+    return (ret === nothing ? 1.0 : ret)
 end
 
 function parsetempfac(line::String)
     ret = tryparse(Float64, line[61:66])
-    return ret === nothing ? 0.0 : ret
+    return (ret === nothing ? 0.0 : ret)
 end
 
 function parseelement(line::String)

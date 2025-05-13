@@ -153,7 +153,7 @@ function Residue(r::Residue, ch::StructuralElement)
     rnew = Residue(r.name, r.number, r.ins_code, r.het_res, [name for name in r.atom_list],
         atom_dict, ch, r.ss_code)
     for (name, atom) in r.atoms
-        atom_dict[name] = isa(atom, Atom) ? Atom(atom, rnew) : DisorderedAtom(atom, rnew)
+        atom_dict[name] = (isa(atom, Atom) ? Atom(atom, rnew) : DisorderedAtom(atom, rnew))
     end
     return rnew
 end
@@ -183,7 +183,7 @@ function Chain(c::Chain, mo::StructuralElement)
     res_dict = Dict{String,AbstractResidue}()
     cnew = Chain(c.id, [id for id in c.res_list], res_dict, mo)
     for (id, res) in c.residues
-        res_dict[id] = isa(res, Residue) ? Residue(res, cnew) : DisorderedResidue(res, cnew)
+        res_dict[id] = (isa(res, Residue) ? Residue(res, cnew) : DisorderedResidue(res, cnew))
     end
     return cnew
 end
@@ -1412,7 +1412,7 @@ function collectresidues(el::Union{Chain,Vector{<:AbstractResidue}};
         end
         return res_list
     else
-        return isa(el, Chain) ? collect(el) : el
+        return (isa(el, Chain) ? collect(el) : el)
     end
 end
 
@@ -1506,7 +1506,7 @@ function collectatoms(el::Union{Residue,Vector{<:AbstractAtom}};
         end
         return at_list
     else
-        return isa(el, Residue) ? collect(el) : el
+        return (isa(el, Residue) ? collect(el) : el)
     end
 end
 

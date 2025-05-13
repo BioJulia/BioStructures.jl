@@ -38,7 +38,6 @@ function parsexmlline(f, line, tag, keyname)
     return key => (; vals...)
 end
 
-
 atomtypes, residues = open("protein.ff14SB.xml", "r") do io
     line = readline(io)
     @assert line == "<ForceField>"
