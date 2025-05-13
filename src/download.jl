@@ -163,7 +163,7 @@ Requires an internet connection.
 """
 function downloadpdb(pdbid::AbstractString;
                 dir::AbstractString=pwd(),
-                format::Type{<:Union{PDBFormat,PDBXMLFormat,MMCIFFormat,BCIFFormat}}=PDBFormat,
+                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat, BCIFFormat}}=PDBFormat,
                 obsolete::Bool=false,
                 overwrite::Bool=false,
                 ba_number::Integer=0)
@@ -317,7 +317,7 @@ automatically updates the PDB files of the given `format` inside the local
 Requires an internet connection.
 """
 function updatelocalpdb(; dir::AbstractString=pwd(),
-                format::Type{<:Union{PDBFormat,PDBXMLFormat,MMCIFFormat,BCIFFormat}}=PDBFormat)
+                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat, BCIFFormat}}=PDBFormat)
     addedlist, modifiedlist, obsoletelist = pdbrecentchanges()
     # Download the newly added and modified pdb files
     downloadpdb(vcat(addedlist, modifiedlist), dir=dir, overwrite=true, format=format)
@@ -359,7 +359,7 @@ Requires an internet connection.
     in `dir`; by default skips downloading the PDB file if it exists.
 """
 function downloadallobsoletepdb(; obsolete_dir::AbstractString=pwd(),
-                format::Type{<:Union{PDBFormat,PDBXMLFormat,MMCIFFormat,BCIFFormat}}=PDBFormat,
+                format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat, BCIFFormat}}=PDBFormat,
                 overwrite::Bool=false)
     obsoletelist = pdbobsoletelist()
     downloadpdb(obsoletelist, dir=obsolete_dir, format=format, overwrite=overwrite)
@@ -398,7 +398,7 @@ Requires an internet connection.
 """
 function retrievepdb(pdbid::AbstractString;
             dir::AbstractString=pwd(),
-            format::Type{<:Union{PDBFormat,PDBXMLFormat,MMCIFFormat,BCIFFormat}}=MMCIFFormat,
+            format::Type{<:Union{PDBFormat, PDBXMLFormat, MMCIFFormat, BCIFFormat}}=MMCIFFormat,
             obsolete::Bool=false,
             overwrite::Bool=false,
             ba_number::Integer=0,

@@ -8,17 +8,14 @@ import MsgPack
 
 A function to read a binary CIF file from MolStar and extract the list of attributes and their compressed bytes.
 """
-
-# currently isn't implementing the dssp / stride. If using BCIF it seems strange to write
-# out a .pdb, run dssp / string, then read it back in again. 
 function Base.read(input::IO,
-    ::Type{BCIFFormat},
-    structure_name::AbstractString="",
-    remove_disorder::Bool=false,
-    read_std_atoms::Bool=true,
-    read_het_atoms::Bool=true,
-    run_dssp::Bool=false,
-    run_stride::Bool=false)
+            ::Type{BCIFFormat};
+            structure_name::AbstractString="",
+            remove_disorder::Bool=false,
+            read_std_atoms::Bool=true,
+            read_het_atoms::Bool=true,
+            run_dssp::Bool=false,
+            run_stride::Bool=false)
 
     file = MsgPack.unpack(read(input))
     categories = file["dataBlocks"][1]["categories"]
