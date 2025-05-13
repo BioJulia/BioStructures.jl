@@ -197,30 +197,33 @@ function downloadpdb(pdbid::AbstractString;
         try
             # Download the compressed PDB file to the temporary location
             @info "Downloading file from PDB: $pdbid"
+
             if format == BCIFFormat
                 Downloads.download(
                     "https://models.rcsb.org/$pdbid.bcif",
                     pdbpath,
                 )
-            elseif ba_number == 0
-                Downloads.download(
-                    "http://files.rcsb.org/download/$pdbid.$(pdbextension[format])$ba_number.gz",
-                    archivefilepath,
-                )
             else
-                if format == PDBFormat
+                if ba_number == 0
                     Downloads.download(
-                        "http://files.rcsb.org/download/$pdbid.$(pdbextension[format])$ba_number.gz",
-                        archivefilepath,
-                    )
-                elseif format == MMCIFFormat
-                    Downloads.download(
-                        "http://files.rcsb.org/download/$pdbid-assembly$ba_number.$(pdbextension[format]).gz",
+                        "http://files.rcsb.org/download/$pdbid.$(pdbextension[format]).gz",
                         archivefilepath,
                     )
                 else
-                    throw(ArgumentError("Biological assemblies are available in the " *
-                                        "PDB and mmCIF formats only"))
+                    if format == PDBFormat
+                        Downloads.download(
+                            "http://files.rcsb.org/download/$pdbid.$(pdbextension[format])$ba_number.gz",
+                            archivefilepath,
+                        )
+                    elseif format == MMCIFFormat
+                        Downloads.download(
+                            "http://files.rcsb.org/download/$pdbid-assembly$ba_number.$(pdbextension[format]).gz",
+                            archivefilepath,
+                        )
+                    else
+                        throw(ArgumentError("Biological assemblies are available in the " *
+                                            "PDB and mmCIF formats only"))
+                    end
                 end
             end
             # Verify if the compressed file is downloaded properly and extract it
