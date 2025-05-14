@@ -153,6 +153,8 @@ Aqua.test_all(BioStructures; ambiguities=(recursive=false))
     downloadpdb("1alw", dir=temp_dir, format=MMCIFFormat)
     pdbpath = joinpath(temp_dir, "1ALW.$(pdbextension[MMCIFFormat])")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
+    downloadpdb("1alw", dir=temp_dir, format=BCIFFormat)
+    pdbpath = joinpath(temp_dir, "1ALW.bcif")
     @test isfile(pdbpath) && filesize(pdbpath) > 0
     # Obsolete PDB
     downloadpdb("116l", dir=temp_dir, format=PDBFormat, obsolete=true)
@@ -2531,6 +2533,12 @@ end
     @test_logs (:warn,
                 "writemultimmcif: MMCIFDict for key \"not_1AKE\" has different \"data_\" key (\"1AKE\")"
                 ) writemultimmcif(temp_filename, Dict("not_1AKE" => test_multicif["1AKE"]))
+end
+
+@testset "BCIF" begin
+    bcif = retrievepdb("1AKE", dir =  temp_dir, format=BCIFFormat)
+    mmcif = retrievepdb("1AKE", dir =  temp_dir, format=MMCIFFormat)
+    @test coordarray(bcif) == coordarray(mmcif)
 end
 
 @testset "MMTF" begin
