@@ -75,16 +75,20 @@ Call `MMCIFDict` with a filepath or stream to read the dictionary from that
 source.
 The keyword argument `gzip` (default `false`) determines if the input is gzipped.
 """
-struct MMCIFDict <: AbstractDict{String, Vector{String}}
-    dict::Dict{String, Vector{String}}
+struct MMCIFDict{K<:AbstractString} <: AbstractDict{K, Vector{K}}
+    dict::Dict{K, Vector{K}}
 end
 
-MMCIFDict() = MMCIFDict(Dict())
+MMCIFDict{K}() where K<:AbstractString = MMCIFDict{K}(Dict{K,Vector{K}}())
+MMCIFDict() = MMCIFDict{String}()
+
+MMCIFDict(d::AbstractDict{K, Vector{K}}) where K<:AbstractString = MMCIFDict{K}(d)
+MMCIFDict(d::AbstractDict) = MMCIFDict{String}(Dict(d))
 
 Base.getindex(mmcif_dict::MMCIFDict, field::AbstractString) = mmcif_dict.dict[field]
 
 function Base.setindex!(mmcif_dict::MMCIFDict,
-                    val::AbstractVector{<:String},
+                    val::AbstractVector{<:AbstractString},
                     field::AbstractString)
     mmcif_dict.dict[field] = val
     return mmcif_dict
@@ -147,7 +151,7 @@ splitline(s::AbstractString) = splitline!(String[], s)   # mostly for testing
 
 # Get tokens from a mmCIF file
 function tokenizecif(f::IO)
-    tokens = String[]
+    tokens = SubString{String}[]
     for line in eachline(f)
         if startswith(line, "#")
             continue
@@ -172,7 +176,7 @@ end
 # This will fail if there is only a single atom record in the file
 #   and it is not in the loop format
 function tokenizecifstructure(f::IO)
-    tokens = String[]
+    tokens = SubString{String}[]
     reading = false
     in_keys = true
     category_groups = ["_atom_site.", "_struct_conf."]
@@ -218,7 +222,6 @@ end
 
 # Read a mmCIF file into a MMCIFDict
 function MMCIFDict(f::IO; gzip::Bool=false)
-    mmcif_dict = MMCIFDict()
     if gzip
         gz = GzipDecompressorStream(f)
         tokens = tokenizecif(gz)
@@ -226,6 +229,7 @@ function MMCIFDict(f::IO; gzip::Bool=false)
     else
         tokens = tokenizecif(f)
     end
+    mmcif_dict = MMCIFDict{eltype(tokens)}()
     # Data label token is read first
     if length(tokens) == 0
         return mmcif_dict
@@ -236,16 +240,16 @@ function MMCIFDict(f::IO; gzip::Bool=false)
 end
 
 # Add tokens to a mmCIF dictionary
-function populatedict!(mmcif_dict::MMCIFDict, tokens::AbstractVector{<:AbstractString})
+function populatedict!(mmcif_dict::MMCIFDict{K}, tokens::AbstractVector{<:AbstractString}) where K<:AbstractString
     key = ""
-    keys = String[]
+    keys = K[]
     loop_flag = false
     i = 0 # Value counter
     n = 0 # Key counter
     for token in tokens
         if token == "loop_" || token == "LOOP_"
             loop_flag = true
-            keys = String[]
+            keys = K[]
             i = 0
             n = 0
             continue
@@ -258,7 +262,7 @@ function populatedict!(mmcif_dict::MMCIFDict, tokens::AbstractVector{<:AbstractS
                 if i > 0
                     loop_flag = false
                 else
-                    mmcif_dict[token] = String[]
+                    mmcif_dict[token] = K[]
                     push!(keys, token)
                     n += 1
                     continue
@@ -290,7 +294,6 @@ function Base.read(input::IO,
             run_dssp::Bool=false,
             run_stride::Bool=false,
             gzip::Bool=false)
-    mmcif_dict = MMCIFDict()
     if gzip
         gz = GzipDecompressorStream(input)
         tokens = tokenizecifstructure(gz)
@@ -298,6 +301,7 @@ function Base.read(input::IO,
     else
         tokens = tokenizecifstructure(input)
     end
+    mmcif_dict = MMCIFDict{eltype(tokens)}()
     populatedict!(mmcif_dict, tokens)
     return MolecularStructure(
         mmcif_dict;
@@ -673,13 +677,13 @@ end
 Write multiple `MMCIFDict`s as a `Dict{String, MMCIFDict}` to a filepath or stream.
 The keyword argument `gzip` (default `false`) determines if the output is gzipped.
 """
-function writemultimmcif(filepath::AbstractString, cifs::Dict{String, MMCIFDict}; gzip::Bool=false)
+function writemultimmcif(filepath::AbstractString, cifs::Dict{String, <:MMCIFDict}; gzip::Bool=false)
     open(filepath, "w") do f
         writemultimmcif(f, cifs; gzip=gzip)
     end
 end
 
-function writemultimmcif(io::IO, cifs::Dict{String, MMCIFDict}; gzip::Bool=false)
+function writemultimmcif(io::IO, cifs::Dict{String, <:MMCIFDict}; gzip::Bool=false)
     if gzip
         io = GzipCompressorStream(io)
     end
