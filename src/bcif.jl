@@ -24,7 +24,7 @@ Base.values(mmcif_dict::BCIFDict) = values(mmcif_dict.dict)
 
 A function to read a binary CIF file from MolStar and extract the list of attributes and their compressed bytes.
 """
-function Base.read(input::IO,
+function Base.read(input::String, # TODO: does this make sense to be a string?
             ::Type{BCIFFormat};
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
@@ -56,12 +56,14 @@ function MolecularStructure(bcif_dict::BCIFDict;
     run_stride::Bool=false)
 
     struc = MolecularStructure(structure_name)
-    struc[1] = Model(1, struc)  # Initialize first model
-    # println(bcif_dict)
+
     for i in 1:length(bcif_dict["_atom_site"]["id"])
-        unsafe_addatomtomodel!(struc[1], AtomRecord(bcif_dict, i))
+        model_n = bcif_dict["_atom_site"]["pdbx_PDB_model_num"][i]
+        if !haskey(models(struc), model_n)
+            struc[model_n] = Model(model_n, struc)
+        end
+        unsafe_addatomtomodel!(struc[model_n], AtomRecord(bcif_dict, i))
     end
-    
     fixlists!(struc)
 
     if run_dssp && run_stride
@@ -101,11 +103,11 @@ function AtomRecord(d::BCIFDict, i::Int)
         d["group_PDB"][i] == "HETATM",
         d["id"][i],
         d["auth_atom_id"][i],
-        d["label_atom_id"][i] == "" ? ' ' : d["label_atom_id"][i][1],
-        d["auth_comp_id"][i],
-        d["auth_asym_id"][i],
-        d["auth_seq_id"][i],
         d["label_alt_id"][i] == "" ? ' ' : d["label_alt_id"][i][1],
+        d["auth_comp_id"][i],
+        string(d["auth_asym_id"][i]),
+        d["auth_seq_id"][i],
+        d["pdbx_PDB_ins_code"][i] == "" ? ' ' : d["pdbx_PDB_ins_code"][i][1],
         [
             d["Cartn_x"][i],
             d["Cartn_y"][i],
@@ -114,7 +116,7 @@ function AtomRecord(d::BCIFDict, i::Int)
         d["occupancy"][i],
         d["B_iso_or_equiv"][i],
         d["type_symbol"][i],
-        d["pdbx_formal_charge"][i],
+        string(d["pdbx_formal_charge"][i]),
     )
 end
 
