@@ -193,7 +193,7 @@ end
 # Below are the encoding and decoding types for BCIF format
 
 # Data types defined for the BCIF encoding by are indicated by integer values
-# there are not well discussed in the official spec, had to ask about it excplicitly
+# there are not well discussed in the official spec, had to ask about it explicitly
 # https://github.com/molstar/BinaryCIF/issues/4
 const INT_TO_TYPE = Dict(
     1 => Int8,
