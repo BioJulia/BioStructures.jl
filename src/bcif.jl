@@ -236,7 +236,7 @@ const EncodingDataTypes = Union{values(INT_TO_TYPE)...}
 abstract type Encoding end
 
 # ByteArrayEncoding
-mutable struct ByteArrayEncoding <: Encoding
+struct ByteArrayEncoding <: Encoding
     type::DataType
 end
 
@@ -261,7 +261,7 @@ function decode(enc::ByteArrayEncoding, data)
 end
 
 # FixedPointEncoding
-mutable struct FixedPointEncoding <: Encoding
+struct FixedPointEncoding <: Encoding
     factor::Float64
     srcType::DataType
 
@@ -279,7 +279,7 @@ function decode(enc::FixedPointEncoding, data)
 end
 
 # IntervalQuantizationEncoding
-mutable struct IntervalQuantizationEncoding <: Encoding
+struct IntervalQuantizationEncoding <: Encoding
     min::Float64
     max::Float64
     numSteps::Int
@@ -302,7 +302,7 @@ function decode(enc::IntervalQuantizationEncoding, data)
 end
 
 # RunLengthEncoding
-mutable struct RunLengthEncoding <: Encoding
+struct RunLengthEncoding <: Encoding
     srcSize::Int
     srcType::DataType
 
@@ -379,7 +379,7 @@ function decode(enc::RunLengthEncoding, data)
 end
 
 # DeltaEncoding
-mutable struct DeltaEncoding <: Encoding
+struct DeltaEncoding <: Encoding
     srcType::DataType
     origin::Int32
 
@@ -397,7 +397,7 @@ function decode(enc::DeltaEncoding, data)
 end
 
 # IntegerPackingEncoding
-mutable struct IntegerPackingEncoding <: Encoding
+struct IntegerPackingEncoding <: Encoding
     byteCount::Int
     srcSize::Int
     isUnsigned::Bool
@@ -506,7 +506,7 @@ function decode(enc::IntegerPackingEncoding, data)
 end
 
 # StringArrayEncoding
-mutable struct StringArrayEncoding <: Encoding
+struct StringArrayEncoding <: Encoding
     stringData::String
     dataEncoding::Vector{Encoding}
     offsetEncoding::Vector{Encoding}
