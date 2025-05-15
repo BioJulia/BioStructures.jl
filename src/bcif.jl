@@ -1,26 +1,14 @@
-export decode_column, columns_to_dict, datablock_to_dict, BCIFDict, BCIFFormat, FixedPointEncoding, TypeCode
+export BCIFDict, BCIFFormat
 using LinearAlgebra
 import MsgPack
 
-
-
-struct BCIFDict <: AbstractDict{String, Any}
-    dict::Dict{String,Any}
-    
-    function BCIFDict(dict::Dict{String, Dict{String}})
-        new(convert(Dict{String,Any}, dict))
-    end
-end
-
-Base.keys(mmcif_dict::BCIFDict) = keys(mmcif_dict.dict)
-Base.values(mmcif_dict::BCIFDict) = values(mmcif_dict.dict)
 
 """
     read(input::IO, ::Type{BCIFFormat}, structure_name::AbstractString="", remove_disorder::Bool=false, read_std_atoms::Bool=true, read_het_atoms::Bool=true, run_dssp::Bool=false, run_stride::Bool=false)
 
 A function to read a binary CIF file from MolStar and extract the list of attributes and their compressed bytes.
 """
-function Base.read(input::String, # TODO: does this make sense to be a string?
+function Base.read(io::IO,
             ::Type{BCIFFormat};
             structure_name::AbstractString="",
             remove_disorder::Bool=false,
@@ -28,9 +16,8 @@ function Base.read(input::String, # TODO: does this make sense to be a string?
             read_het_atoms::Bool=true,
             run_dssp::Bool=false,
             run_stride::Bool=false)
-
-    file = MsgPack.unpack(read(input))
-    bcif_dict = BCIFDict(datablock_to_dict(file["dataBlocks"][1]))
+    
+    bcif_dict = MsgPack.unpack(io, BCIFDict)
     
     return MolecularStructure(
         bcif_dict; 
@@ -42,6 +29,27 @@ function Base.read(input::String, # TODO: does this make sense to be a string?
         run_stride=run_stride
     )
 end
+function Base.read(filename::AbstractString, ::Type{BCIFFormat}; kwargs...)
+    open(filename) do io
+        read(io, BCIFFormat; kwargs...)
+    end
+end
+
+struct BCIFDict <: AbstractDict{String, Any}
+    dict::Dict{String,Any}
+    
+    function BCIFDict(dict::Dict{String, Dict{String}})
+        new(convert(Dict{String,Any}, dict))
+    end
+end
+
+Base.keys(mmcif_dict::BCIFDict) = keys(mmcif_dict.dict)
+Base.values(mmcif_dict::BCIFDict) = values(mmcif_dict.dict)
+Base.haskey(mmcif_dict::BCIFDict, key) = haskey(mmcif_dict.dict, key)
+Base.get(mmcif_dict::BCIFDict, key, default) = get(mmcif_dict.dict, key, default)
+Base.length(mmcif_dict::BCIFDict) = length(mmcif_dict.dict)
+Base.iterate(mmcif_dict::BCIFDict) = iterate(mmcif_dict.dict)
+Base.iterate(mmcif_dict::BCIFDict, i) = iterate(mmcif_dict.dict, i)
 
 function MolecularStructure(bcif_dict::BCIFDict; 
     structure_name::AbstractString="",
@@ -75,24 +83,6 @@ function MolecularStructure(bcif_dict::BCIFDict;
     return struc
 end
 
-function datablock_to_dict(datablock::Dict)
-    categories = datablock["categories"]
-    return reduce(merge, [Dict(category["name"] => columns_to_dict(category["columns"])) for category in categories])
-end
-
-function columns_to_dict(columns::Vector{Any})
-    tasks = map(columns) do column
-        Threads.@spawn Dict(column["name"] => decode_column(column))
-    end
-    return reduce(merge, fetch.(tasks))
-end
-Base.haskey(mmcif_dict::BCIFDict, key) = haskey(mmcif_dict.dict, key)
-Base.get(mmcif_dict::BCIFDict, key, default) = get(mmcif_dict.dict, key, default)
-Base.length(mmcif_dict::BCIFDict) = length(mmcif_dict.dict)
-Base.iterate(mmcif_dict::BCIFDict) = iterate(mmcif_dict.dict)
-Base.iterate(mmcif_dict::BCIFDict, i) = iterate(mmcif_dict.dict, i)
-
-
 function AtomRecord(d::BCIFDict, i::Int) 
     d = d["_atom_site"]
     return AtomRecord(
@@ -117,6 +107,19 @@ function AtomRecord(d::BCIFDict, i::Int)
 end
 
 # Utility functions for encoding/decoding
+
+function MsgPack.from_msgpack(::Type{BCIFDict}, data::Dict{String, Any})
+    categories = data["dataBlocks"][1]["categories"]
+    return BCIFDict(reduce(merge, [Dict(category["name"] => columns_to_dict(category["columns"])) for category in categories]))
+end
+
+function columns_to_dict(columns::Vector{Any})
+    tasks = map(columns) do column
+        Threads.@spawn Dict(column["name"] => decode_column(column))
+    end
+    return reduce(merge, fetch.(tasks))
+end
+
 function encode_stepwise(data, encodings)
     for encoding in encodings
         data = encode(encoding, data)
@@ -203,7 +206,7 @@ const INT_TO_TYPE = Dict(
     33 => Float64
 )
 
-const TYPES_TO_INT = Dict(t => i for (i, t) in INT_TO_TYPE)
+const TYPES_TO_INT = IdDict{Any, Int}(t => i for (i, t) in INT_TO_TYPE)
 
 const EncodingDataTypes = Union{values(INT_TO_TYPE)...}
 
@@ -234,11 +237,7 @@ abstract type Encoding end
 
 # ByteArrayEncoding
 mutable struct ByteArrayEncoding <: Encoding
-    type
-
-    function ByteArrayEncoding(type)
-        new(type)
-    end
+    type::DataType
 end
 
 # Add a constructor that handles the type lookup from INT_TO_TYPE
@@ -264,9 +263,9 @@ end
 # FixedPointEncoding
 mutable struct FixedPointEncoding <: Encoding
     factor::Float64
-    srcType
+    srcType::DataType
 
-    function FixedPointEncoding(factor; srcType)
+    function FixedPointEncoding(factor; srcType::DataType)
         new(factor, srcType)
     end
 end
@@ -284,11 +283,7 @@ mutable struct IntervalQuantizationEncoding <: Encoding
     min::Float64
     max::Float64
     numSteps::Int
-    srcType
-
-    function IntervalQuantizationEncoding(min, max, numSteps; srcType)
-        new(min, max, numSteps, srcType)
-    end
+    srcType::DataType
 end
 
 # function encode(enc::IntervalQuantizationEncoding, data)
@@ -309,7 +304,7 @@ end
 # RunLengthEncoding
 mutable struct RunLengthEncoding <: Encoding
     srcSize::Int
-    srcType
+    srcType::DataType
 
     function RunLengthEncoding(; srcSize, srcType)
         new(srcSize, srcType)
@@ -385,7 +380,7 @@ end
 
 # DeltaEncoding
 mutable struct DeltaEncoding <: Encoding
-    srcType
+    srcType::DataType
     origin::Int32
 
     # Constructor for Type parameter
@@ -400,7 +395,6 @@ function decode(enc::DeltaEncoding, data)
     output .+= enc.origin
     return output
 end
-# end
 
 # IntegerPackingEncoding
 mutable struct IntegerPackingEncoding <: Encoding

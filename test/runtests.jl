@@ -2536,8 +2536,10 @@ end
 end
 
 @testset "BCIF" begin
-    bcif = retrievepdb("1AKE", dir =  temp_dir, format=BCIFFormat)
-    mmcif = retrievepdb("1AKE", dir =  temp_dir, format=MMCIFFormat)
+    bcif_file = downloadpdb("1AKE",dir = temp_dir, format=BCIFFormat)
+    mmcif_file = downloadpdb("1AKE",dir = temp_dir, format=MMCIFFormat)
+    bcif = read(bcif_file, BCIFFormat)
+    mmcif = read(mmcif_file, MMCIFFormat)   
     @test coordarray(bcif) == coordarray(mmcif)
 end
 
