@@ -121,7 +121,7 @@ atomtypes, residues, bondlengths, bondangles = open("protein.ff14SB.xml", "r") d
             end
         end
     end
-    atomtypes, residues, Dict(k => v.length for (k, v) in harmonicbonds), Dict(k => v.angle for (k, v) in harmonicangles)
+    atomtypes, residues, Dict(k => 10 * v.length for (k, v) in harmonicbonds), Dict(k => v.angle for (k, v) in harmonicangles)
 end
 
 open(joinpath(dirname(@__DIR__), "src", "bonding.jl"), "w") do io
