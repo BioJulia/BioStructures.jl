@@ -3405,6 +3405,10 @@ end
     @test atomname(c) == "C"
     @test has_edge(mg, 605, 609)
     @test has_edge(mg, 605, 610)
+
+    # Bond lengths and angles
+    @test BioStructures.bondlengths[("protein-2C", "protein-2C")] == 1.526f0
+    @test BioStructures.bondangles[("protein-CT", "protein-C", "protein-N")] == 2.035054f0
 end
 
 @testset "Secondary structure" begin
