@@ -21,7 +21,7 @@ function parsestring(str)
     return String(str[2:end-1])
 end
 
-function parsexmlline(f, line, tag, keynames...)
+function parsexmlline(f, line, tag, keynames...; skip=())
     @assert startswith(line, "<$tag ")
     @assert endswith(line, "/>")
     kv = split(strip(line[length(tag)+2:end-2]), ' ')
@@ -29,6 +29,7 @@ function parsexmlline(f, line, tag, keynames...)
     vals = Pair{Symbol,Any}[]
     for kvp in kv
         k, v = split(kvp, '=')
+        k ∈ skip && continue
         if k ∈ keynames
             push!(key, parsestring(v))
         else
@@ -40,13 +41,13 @@ function parsexmlline(f, line, tag, keynames...)
     return key => (; vals...)
 end
 
-atomtypes, residues, harmonicbonds, harmonicangles = open("protein.ff14SB.xml", "r") do io
+atomtypes, residues, bondlengths, bondangles = open("protein.ff14SB.xml", "r") do io
     line = readline(io)
     @assert line == "<ForceField>"
     atomtypes = Dict{String, @NamedTuple{element::String, mass::Float32, name::String}}()
     residues = Dict{String, @NamedTuple{atoms::Dict{String, @NamedTuple{charge::Float32, type::String}}, bonds::Vector{Tuple{String,String}}, externalbonds::Vector{String}}}()
-    harmonicbonds = Dict{Tuple{String,String}, @NamedTuple{k::Float32, length::Float32}}()
-    harmonicangles = Dict{Tuple{String,String,String}, @NamedTuple{angle::Float32, k::Float32}}()
+    harmonicbonds = Dict{Tuple{String,String}, @NamedTuple{length::Float32}}()
+    harmonicangles = Dict{Tuple{String,String,String}, @NamedTuple{angle::Float32}}()
     parsexmblock(io, "</ForceField>") do line
         if line == "<AtomTypes>"
             parsexmblock(io, "</AtomTypes>") do line
@@ -98,11 +99,9 @@ atomtypes, residues, harmonicbonds, harmonicangles = open("protein.ff14SB.xml", 
             end
         elseif line == "<HarmonicBondForce>"
             parsexmblock(io, "</HarmonicBondForce>") do line
-                push!(harmonicbonds, parsexmlline(line, "Bond", "type1", "type2") do k, v
-                    if k == "k"
-                        return parse(Float32, v[2:end-1])  # strip the quotes
-                    elseif k == "length"
-                        return parse(Float32, v[2:end-1])  # strip the quotes
+                push!(harmonicbonds, parsexmlline(line, "Bond", "type1", "type2"; skip=("k",)) do k, v
+                    if k == "length"
+                        return parse(Float32, v[2:end-1])
                     else
                         error("Unknown Bond key $k")
                     end
@@ -110,7 +109,7 @@ atomtypes, residues, harmonicbonds, harmonicangles = open("protein.ff14SB.xml", 
             end
         elseif line == "<HarmonicAngleForce>"
             parsexmblock(io, "</HarmonicAngleForce>") do line
-                push!(harmonicangles, parsexmlline(line, "Angle", "type1", "type2", "type3") do k, v
+                push!(harmonicangles, parsexmlline(line, "Angle", "type1", "type2", "type3"; skip=("k",)) do k, v
                     if k == "k"
                         return parse(Float32, v[2:end-1])  # strip the quotes
                     elseif k == "angle"
@@ -122,7 +121,7 @@ atomtypes, residues, harmonicbonds, harmonicangles = open("protein.ff14SB.xml", 
             end
         end
     end
-    atomtypes, residues, harmonicbonds, harmonicangles
+    atomtypes, residues, Dict(k => v.length for (k, v) in harmonicbonds), Dict(k => v.angle for (k, v) in harmonicangles)
 end
 
 open(joinpath(dirname(@__DIR__), "src", "bonding.jl"), "w") do io
@@ -146,15 +145,15 @@ open(joinpath(dirname(@__DIR__), "src", "bonding.jl"), "w") do io
     end
     println(io, ")")
 
-    println(io, "\nconst harmonicbonds = Dict{Tuple{String,String}, @NamedTuple{k::Float32, length::Float32}}(")
-    hb = sort!(collect(harmonicbonds); by=first)
+    println(io, "\nconst bondlengths = Dict{Tuple{String,String}, Float32}(")
+    hb = sort!(collect(bondlengths); by=first)
     for pr in hb
         println(io, "    ", pr, ',')
     end
     println(io, ")")
 
-    println(io, "\nconst harmonicangles = Dict{Tuple{String,String,String}, @NamedTuple{angle::Float32, k::Float32}}(")
-    ha = sort!(collect(harmonicangles); by=first)
+    println(io, "\nconst bondangles = Dict{Tuple{String,String,String}, Float32}(")
+    ha = sort!(collect(bondangles); by=first)
     for pr in ha
         println(io, "    ", pr, ',')
     end
