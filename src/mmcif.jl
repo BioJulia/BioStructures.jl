@@ -75,16 +75,20 @@ Call `MMCIFDict` with a filepath or stream to read the dictionary from that
 source.
 The keyword argument `gzip` (default `false`) determines if the input is gzipped.
 """
-struct MMCIFDict <: AbstractDict{String, Vector{String}}
-    dict::Dict{String, Vector{String}}
+struct MMCIFDict{K<:AbstractString} <: AbstractDict{K, Vector{K}}
+    dict::Dict{K, Vector{K}}
 end
 
-MMCIFDict() = MMCIFDict(Dict())
+MMCIFDict{K}() where K<:AbstractString = MMCIFDict{K}(Dict{K,Vector{K}}())
+MMCIFDict() = MMCIFDict{String}()
+
+MMCIFDict(d::AbstractDict{K, Vector{K}}) where K<:AbstractString = MMCIFDict{K}(d)
+MMCIFDict(d::AbstractDict) = MMCIFDict{String}(Dict(d))
 
 Base.getindex(mmcif_dict::MMCIFDict, field::AbstractString) = mmcif_dict.dict[field]
 
 function Base.setindex!(mmcif_dict::MMCIFDict,
-                    val::AbstractVector{<:String},
+                    val::AbstractVector{<:AbstractString},
                     field::AbstractString)
     mmcif_dict.dict[field] = val
     return mmcif_dict
@@ -104,8 +108,7 @@ end
 
 # Split a mmCIF line into tokens
 # See https://www.iucr.org/resources/cif/spec/version1.1/cifsyntax for syntax
-function splitline(s::AbstractString)
-    tokens = String[]
+function splitline!(tokens, s::AbstractString)
     in_token = false
     # Quote character of the currently open quote, or ' ' if no quote open
     quote_open_char = ' '
@@ -114,7 +117,7 @@ function splitline(s::AbstractString)
         if c in whitespacechars
             if in_token && quote_open_char == ' '
                 in_token = false
-                push!(tokens, s[start_i:(i - 1)])
+                push!(tokens, @view(s[start_i:(i - 1)]))
             end
         elseif c in quotechars
             if quote_open_char == ' '
@@ -127,7 +130,7 @@ function splitline(s::AbstractString)
             elseif c == quote_open_char && (i == length(s) || s[i + 1] in whitespacechars)
                 quote_open_char = ' '
                 in_token = false
-                push!(tokens, s[start_i:(i - 1)])
+                push!(tokens, @view(s[start_i:(i - 1)]))
             end
         elseif c == '#' && !in_token
             return tokens
@@ -137,17 +140,18 @@ function splitline(s::AbstractString)
         end
     end
     if in_token
-        push!(tokens, s[start_i:end])
+        push!(tokens, @view(s[start_i:end]))
     end
     if quote_open_char != ' '
         throw(ArgumentError("Line ended with quote open: $s"))
     end
     return tokens
 end
+splitline(s::AbstractString) = splitline!(String[], s)   # mostly for testing
 
 # Get tokens from a mmCIF file
 function tokenizecif(f::IO)
-    tokens = String[]
+    tokens = SubString{String}[]
     for line in eachline(f)
         if startswith(line, "#")
             continue
@@ -162,7 +166,7 @@ function tokenizecif(f::IO)
             end
             push!(tokens, join(token_buffer, "\n"))
         else
-            append!(tokens, splitline(line))
+            splitline!(tokens, line)
         end
     end
     return tokens
@@ -172,7 +176,7 @@ end
 # This will fail if there is only a single atom record in the file
 #   and it is not in the loop format
 function tokenizecifstructure(f::IO)
-    tokens = String[]
+    tokens = SubString{String}[]
     reading = false
     in_keys = true
     category_groups = ["_atom_site.", "_struct_conf."]
@@ -204,7 +208,7 @@ function tokenizecifstructure(f::IO)
             in_keys = true
         else
             in_keys = false
-            append!(tokens, splitline(line))
+            splitline!(tokens, line)
         end
     end
     return tokens
@@ -218,7 +222,6 @@ end
 
 # Read a mmCIF file into a MMCIFDict
 function MMCIFDict(f::IO; gzip::Bool=false)
-    mmcif_dict = MMCIFDict()
     if gzip
         gz = GzipDecompressorStream(f)
         tokens = tokenizecif(gz)
@@ -226,6 +229,7 @@ function MMCIFDict(f::IO; gzip::Bool=false)
     else
         tokens = tokenizecif(f)
     end
+    mmcif_dict = MMCIFDict{eltype(tokens)}()
     # Data label token is read first
     if length(tokens) == 0
         return mmcif_dict
@@ -236,16 +240,16 @@ function MMCIFDict(f::IO; gzip::Bool=false)
 end
 
 # Add tokens to a mmCIF dictionary
-function populatedict!(mmcif_dict::MMCIFDict, tokens::AbstractVector{<:String})
+function populatedict!(mmcif_dict::MMCIFDict{K}, tokens::AbstractVector{<:AbstractString}) where K<:AbstractString
     key = ""
-    keys = String[]
+    keys = K[]
     loop_flag = false
     i = 0 # Value counter
     n = 0 # Key counter
     for token in tokens
         if token == "loop_" || token == "LOOP_"
             loop_flag = true
-            keys = String[]
+            keys = K[]
             i = 0
             n = 0
             continue
@@ -258,22 +262,14 @@ function populatedict!(mmcif_dict::MMCIFDict, tokens::AbstractVector{<:String})
                 if i > 0
                     loop_flag = false
                 else
-                    mmcif_dict[token] = String[]
+                    mmcif_dict[token] = K[]
                     push!(keys, token)
                     n += 1
                     continue
                 end
             else
-                try
-                    push!(mmcif_dict[keys[i % n + 1]], token)
-                catch ex
-                    # A zero division error means we have not found any keys
-                    if isa(ex, DivideError)
-                        throw(ArgumentError("Loop keys not found, token: \"$token\""))
-                    else
-                        rethrow()
-                    end
-                end
+                iszero(n) && throw(ArgumentError("Loop keys not found, token: \"$token\""))
+                push!(mmcif_dict[keys[i % n + 1]], token)
                 i += 1
                 continue
             end
@@ -298,7 +294,6 @@ function Base.read(input::IO,
             run_dssp::Bool=false,
             run_stride::Bool=false,
             gzip::Bool=false)
-    mmcif_dict = MMCIFDict()
     if gzip
         gz = GzipDecompressorStream(input)
         tokens = tokenizecifstructure(gz)
@@ -306,6 +301,7 @@ function Base.read(input::IO,
     else
         tokens = tokenizecifstructure(input)
     end
+    mmcif_dict = MMCIFDict{eltype(tokens)}()
     populatedict!(mmcif_dict, tokens)
     return MolecularStructure(
         mmcif_dict;
@@ -384,25 +380,34 @@ function MolecularStructure(mmcif_dict::MMCIFDict;
 end
 
 # Constructor from mmCIF ATOM/HETATM line
-AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
-    d["_atom_site.group_PDB"][i] == "HETATM",
-    parse(Int, d["_atom_site.id"][i]),
-    d["_atom_site.auth_atom_id"][i],
-    d["_atom_site.label_alt_id"][i] in missingvals ? ' ' : d["_atom_site.label_alt_id"][i][1],
-    d["_atom_site.auth_comp_id"][i],
-    d["_atom_site.auth_asym_id"][i],
-    parse(Int, d["_atom_site.auth_seq_id"][i]),
-    d["_atom_site.pdbx_PDB_ins_code"][i] in missingvals ? ' ' : d["_atom_site.pdbx_PDB_ins_code"][i][1],
-    [
-        parse(Float64, d["_atom_site.Cartn_x"][i]),
-        parse(Float64, d["_atom_site.Cartn_y"][i]),
-        parse(Float64, d["_atom_site.Cartn_z"][i])
-    ],
-    d["_atom_site.occupancy"][i] in missingvals ? 1.0 : parse(Float64, d["_atom_site.occupancy"][i]),
-    d["_atom_site.B_iso_or_equiv"][i] in missingvals ? 0.0 : parse(Float64, d["_atom_site.B_iso_or_equiv"][i]),
-    d["_atom_site.type_symbol"][i] in missingvals ? "  " : d["_atom_site.type_symbol"][i],
-    d["_atom_site.pdbx_formal_charge"][i] in missingvals ? "  " : d["_atom_site.pdbx_formal_charge"][i],
-)
+function AtomRecord(d::MMCIFDict, i::Integer)
+    alt_id = d["_atom_site.label_alt_id"][i]
+    ins_code = d["_atom_site.pdbx_PDB_ins_code"][i]
+    occupancy = d["_atom_site.occupancy"][i]
+    temp_factor = d["_atom_site.B_iso_or_equiv"][i]
+    typesym = d["_atom_site.type_symbol"][i]
+    charge = d["_atom_site.pdbx_formal_charge"][i]
+
+    return AtomRecord(
+        d["_atom_site.group_PDB"][i] == "HETATM",
+        parse(Int, d["_atom_site.id"][i]),
+        d["_atom_site.auth_atom_id"][i],
+        alt_id in missingvals ? ' ' : alt_id[1],
+        d["_atom_site.auth_comp_id"][i],
+        d["_atom_site.auth_asym_id"][i],
+        parse(Int, d["_atom_site.auth_seq_id"][i]),
+        ins_code in missingvals ? ' ' : ins_code[1],
+        SVector{3,Float64}((
+            parse(Float64, d["_atom_site.Cartn_x"][i]),
+            parse(Float64, d["_atom_site.Cartn_y"][i]),
+            parse(Float64, d["_atom_site.Cartn_z"][i]),
+        )),
+        occupancy in missingvals ? 1.0 : parse(Float64, occupancy),
+        temp_factor in missingvals ? 0.0 : parse(Float64, temp_factor),
+        typesym in missingvals ? "  " : typesym,
+        charge in missingvals ? "  " : charge,
+    )
+end
 
 # Format a mmCIF data value by enclosing with quotes or semicolon lines where
 #   appropriate. See
@@ -672,13 +677,13 @@ end
 Write multiple `MMCIFDict`s as a `Dict{String, MMCIFDict}` to a filepath or stream.
 The keyword argument `gzip` (default `false`) determines if the output is gzipped.
 """
-function writemultimmcif(filepath::AbstractString, cifs::Dict{String, MMCIFDict}; gzip::Bool=false)
+function writemultimmcif(filepath::AbstractString, cifs::Dict{String, <:MMCIFDict}; gzip::Bool=false)
     open(filepath, "w") do f
         writemultimmcif(f, cifs; gzip=gzip)
     end
 end
 
-function writemultimmcif(io::IO, cifs::Dict{String, MMCIFDict}; gzip::Bool=false)
+function writemultimmcif(io::IO, cifs::Dict{String, <:MMCIFDict}; gzip::Bool=false)
     if gzip
         io = GzipCompressorStream(io)
     end
