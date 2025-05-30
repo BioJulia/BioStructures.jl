@@ -4104,7 +4104,20 @@ In general chemical terms: [`MolecularStructure`](@ref) is analogous to ensemble
 The aim of BioStructures is not so much to read in the rows of a structure file, but to unambiguously represent the molecules contained within the file.
 This makes operations such as converting between file formats easier, at the cost of some complexity and occasional limits on the ability to read in files with format violations.
 For example, we have no way to represent multiple copies of the same atom with the same alt loc ID, as they would be placed at the same spot in the hierarchy.
-Such files often lead to silent errors, however, so we recommend users follow the appropriate format guidelines.
+Consequently, trying to read a PDB file containing the lines
+```
+ATOM      1  N   GLY A   1      25.776  38.291  47.527  1.00  0.00           N  
+ATOM      2  N   GLY A   1      25.020  38.731  48.032  1.00  0.00           N  
+```
+leads to the error
+```
+ERROR: Two copies of the same atom have the same alternative location ID. Existing atom:
+Atom N with serial 1, coordinates [25.776, 38.291, 47.527]
+New atom record to add:
+AtomRecord N with serial 2, coordinates [25.02, 38.731, 48.032]
+```
+Such files often lead to silent errors, however, so we recommend that users follow the appropriate format guidelines.
+Alternatively, other tools such as [PDBTools.jl](https://github.com/m3g/PDBTools.jl) are more permissive in what they accept.
 The mmCIF format is able to store arbitrary data systematically if required.
 
 ## Related software
