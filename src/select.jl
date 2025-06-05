@@ -515,12 +515,9 @@ function parse_to_type(key::Keyword, val)
     elseif key.value_type == Char && length(val) == 1
         return val[1]
     end
-    try
-        val = parse(key.value_type, val)
-        return val
-    catch
-        throw(ArgumentError("Could not parse $val for keyword $(key.name), expected $(key.value_type)"))
-    end
+    val = tryparse(key.value_type, val)
+    isnothing(val) && throw(ArgumentError("Could not parse $val for keyword $(key.name), expected $(key.value_type)"))
+    return val
 end
 
 const keywords = [
