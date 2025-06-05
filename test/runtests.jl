@@ -928,6 +928,7 @@ end
     @test length(collectatoms(struc, sel"disordered")) == 68
     @test length(collectatoms(struc, sel"sscode E")) == 2448
     @test length(collectatoms(struc, sel"helix")) == 4047
+
     # Check interpolation support
     ss_type = "helix"
     @test length(collectatoms(struc, sel"$ss_type")) == 4047
@@ -942,14 +943,51 @@ end
     @test length(collectmodels(struc, sel"model 1")) == 1
     @test length(collectmodels(struc, sel"model 2")) == 0
 
-    @test_throws ArgumentError collectatoms(struc, BioStructures.Select("abc")) # Invalid selection syntax
-    @test_throws ArgumentError collectatoms(struc, BioStructures.Select("index = A")) # Invalid value type
-    @test_throws ArgumentError collectatoms(struc, BioStructures.Select("resnum C"))
+    # Check complicated selections
+    @test length(collectatoms(struc,  sel"name CA and (resnum < 15 or resnum > 16)")) == 1404
+    @test length(collectatoms(struc,  sel"(name CA and resnum < 15) or (name N and chain A)")) == 299
+    @test length(collectatoms(struc,  sel"(not protein) and (resname HOH or (resname SOD and index < 600))")) == 639
+    @test length(collectatoms(struc,  sel"not protein and not water or (chain A and resnum < 10)")) == 79
+    @test length(collectatoms(struc,  sel"not protein and not water or (chain A and resnum <= 10)")) == 87
+    @test length(collectatoms(struc,  sel"name CA and resname ALA ARG GLU")) == 224
+    @test length(collectatoms(struc,  sel"resname ALA ARG GLU and name N")) == 224
+    @test length(collectatoms(struc,  sel"(resname ALA ARG GLU) and (name N or name CA)")) == 448
+    @test length(collectatoms(struc,  sel"index 2 3 4 5")) == 4
+    @test length(collectatoms(struc,  sel"element C")) == 7508
+    @test length(collectatoms(struc,  sel"element C N")) == 9468
+    @test length(collectatoms(struc,  sel"not protein and element C N")) == 0
+    @test length(collectatoms(struc,  sel"not protein and element O H ")) == 639
 
     # Test show method for @sel_str
     buff = IOBuffer()
     show(buff, MIME"text/plain"(), sel"name CA and resnum 1")
     @test String(take!(buff)) == """Select("name CA and resnum 1")"""
+
+    # Syntax errors
+    @test_throws ArgumentError collectatoms(struc, BioStructures.Select("abc")) # Invalid selection syntax
+    @test_throws ArgumentError collectatoms(struc, BioStructures.Select("index = A")) # Invalid value type
+    @test_throws ArgumentError collectatoms(struc, BioStructures.Select("resnum C"))
+    @test_throws ArgumentError collectatoms(struc, sel"name CA and (residue 1")
+    @test_throws ArgumentError collectatoms(struc, sel"name CA and (residue 1))")
+    @test_throws ArgumentError collectatoms(struc, sel"index <")
+    @test_throws ArgumentError collectatoms(struc, sel"index < 1.0")
+    @test_throws ArgumentError collectatoms(struc, sel"indes 1")
+    @test_throws ArgumentError collectatoms(struc, sel"element")
+    @test_throws ArgumentError collectatoms(struc, sel"index 1 element")
+    @test_throws ArgumentError collectatoms(struc, sel"protein 1")
+    @test_throws ArgumentError collectatoms(struc, sel"protein = 1")
+    @test_throws ArgumentError collectatoms(struc, sel"residue 1 < 5")
+    @test_throws ArgumentError collectatoms(struc, sel"residue A")
+    @test_throws ArgumentError collectatoms(struc, sel"residue 1 and ()")
+    @test_throws ArgumentError collectatoms(struc, sel"not (protein) and ()")
+    @test_throws ArgumentError collectatoms(struc, sel"residue 1 or")
+    @test_throws ArgumentError collectatoms(struc, sel"residue 1 and")
+    @test_throws ArgumentError collectatoms(struc, sel"residue 1 not")
+    @test_throws ArgumentError collectatoms(struc, sel"residue")
+    @test_throws ArgumentError collectatoms(struc, sel"element")
+    @test_throws ArgumentError collectatoms(struc, sel"not")
+        
+
 end
 
 @testset "PDB reading" begin
