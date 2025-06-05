@@ -281,6 +281,21 @@ julia> collectresidues(struc, sel"acidic")
  Residue 63:H with name GLU, 9 atoms
 ```
 
+Also, the selection syntax supports parenthesis and repeating the possible property
+values as a shortcut for multiple `or` clauses:
+
+```julia-repl
+julia> collectatoms(struc, sel"resname ARG GLU and (element C N)")
+1320-element Vector{AbstractAtom}:
+ Atom N with serial 9, coordinates [19.33, 32.429, -28.593]
+ Atom CA with serial 10, coordinates [20.769, 32.605, -28.801]
+ Atom C with serial 11, coordinates [21.503, 32.581, -27.478]
+ ⋮
+ Atom CZ with serial 11676, coordinates [5.525, 1.346, -44.697]
+ Atom NH1 with serial 11677, coordinates [4.626, 1.502, -45.668]
+ Atom NH2 with serial 11678, coordinates [5.206, 0.618, -43.643]
+```
+
 The operators currently supported are:
 
 | Operators                   | Acts on                             |
