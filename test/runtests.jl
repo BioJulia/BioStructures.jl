@@ -944,19 +944,19 @@ end
     @test length(collectmodels(struc, sel"model 2")) == 0
 
     # Check complicated selections
-    @test length(collectatoms(struc,  sel"name CA and (resnum < 15 or resnum > 16)")) == 1404
-    @test length(collectatoms(struc,  sel"(name CA and resnum < 15) or (name N and chain A)")) == 299
-    @test length(collectatoms(struc,  sel"(not protein) and (resname HOH or (resname SOD and index < 600))")) == 639
-    @test length(collectatoms(struc,  sel"not protein and not water or (chain A and resnum < 10)")) == 79
-    @test length(collectatoms(struc,  sel"not protein and not water or (chain A and resnum <= 10)")) == 87
-    @test length(collectatoms(struc,  sel"name CA and resname ALA ARG GLU")) == 224
-    @test length(collectatoms(struc,  sel"resname ALA ARG GLU and name N")) == 224
-    @test length(collectatoms(struc,  sel"(resname ALA ARG GLU) and (name N or name CA)")) == 448
-    @test length(collectatoms(struc,  sel"index 2 3 4 5")) == 4
-    @test length(collectatoms(struc,  sel"element C")) == 7508
-    @test length(collectatoms(struc,  sel"element C N")) == 9468
-    @test length(collectatoms(struc,  sel"not protein and element C N")) == 0
-    @test length(collectatoms(struc,  sel"not protein and element O H ")) == 639
+    @test length(collectatoms(struc, sel"name CA and (resnum < 15 or resnum > 16)")) == 1404
+    @test length(collectatoms(struc, sel"(name CA and resnum < 15) or (name N and chain A)")) == 299
+    @test length(collectatoms(struc, sel"(not protein) and (resname HOH or (resname SOD and index < 600))")) == 639
+    @test length(collectatoms(struc, sel"not protein and not water or (chain A and resnum < 10)")) == 79
+    @test length(collectatoms(struc, sel"not protein and not water or (chain A and resnum <= 10)")) == 87
+    @test length(collectatoms(struc, sel"name CA and resname ALA ARG GLU")) == 224
+    @test length(collectatoms(struc, sel"resname ALA ARG GLU and name N")) == 224
+    @test length(collectatoms(struc, sel"(resname ALA ARG GLU) and (name N or name CA)")) == 448
+    @test length(collectatoms(struc, sel"index 2 3 4 5")) == 4
+    @test length(collectatoms(struc, sel"element C")) == 7508
+    @test length(collectatoms(struc, sel"element C N")) == 9468
+    @test length(collectatoms(struc, sel"not protein and element C N")) == 0
+    @test length(collectatoms(struc, sel"not protein and element O H ")) == 639
 
     # Test show method for @sel_str
     buff = IOBuffer()
