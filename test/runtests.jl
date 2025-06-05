@@ -945,7 +945,8 @@ end
 
     # Check complicated selections
     @test length(collectatoms(struc, sel"name CA and (resnum < 15 or resnum > 16)")) == 1404
-    #@test length(collectatoms(struc, sel"(name CA and resnum < 15) or (name N and chain A)")) == 299
+    @test length(collectatoms(struc, sel"protein and (chain A and resnum < 130)")) == 1050
+    @test length(collectatoms(struc, sel"chain A and resnum 132")) == 9 # with alternate locations
     @test length(collectatoms(struc, sel"(not protein) and (resname HOH or (resname SOD and index < 600))")) == 639
     @test length(collectatoms(struc, sel"not protein and not water or (chain A and resnum < 10)")) == 79
     @test length(collectatoms(struc, sel"not protein and not water or (chain A and resnum <= 10)")) == 87
