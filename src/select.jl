@@ -644,7 +644,6 @@ end
 # Modified parse_query_vector
 function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
     s_vec = s_vec_const # Operate on slices or copies, not modifying original array passed around
-
     if isempty(s_vec)
         parse_error("Empty query segment.")
     end
@@ -694,9 +693,6 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
 
     # Base case: No top-level logical operators. Must be a keyword phrase.
     else
-        #if isempty(s_vec) # Should not happen if initial checks are correct
-        #    parse_error("Unexpected empty query segment.")
-        #end
         token_keyword_name = s_vec[begin]
 
         # Standard Keywords (e.g., "name", "resnum", "index")
@@ -733,13 +729,6 @@ function parse_query_vector(s_vec_const::AbstractVector{<:AbstractString})
                     # keyword_args will be ["<", "13"]. The Keyword functor handles this structure.
                     return key_obj(keyword_args)
                 else
-                    # Case: Not a recognized "keyword operator value" structure.
-                    # This implies implicit equality: "keyword value" or "keyword value1 value2 ..." (for OR expansion).
-        
-                    #if isempty(keyword_args) # Should have been caught by length(s_vec) == 1
-                    #     parse_error("No arguments provided for keyword '$(key_obj.name)'.") # Should be unreachable
-                    #end
-        
                     # Sanity check for multi-value: ensure no operators are present in the value list.
                     # E.g. "resnum 10 < 20" is an error here because "10" is not an operator,
                     # but "<" appears later in a context expecting only values.
