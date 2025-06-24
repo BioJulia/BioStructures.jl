@@ -8,7 +8,6 @@
 using BioStructures
 using BenchmarkTools
 using BioAlignments
-import BioCore # Imported to avoid clash with BioGenerics distance
 using BioSequences
 using Graphs
 import MMTF # Imported to avoid clash with writemmtf
@@ -16,7 +15,7 @@ using MetaGraphs
 using Random
 
 # Use files in BioFmtSpecimens
-fmtdir = BioCore.Testing.get_bio_fmt_specimens()
+fmtdir = BioStructures.get_bio_fmt_specimens()
 testfilepath(path::AbstractString...) = joinpath(fmtdir, path...)
 
 # All writing is done to one temporary file

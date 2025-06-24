@@ -3,7 +3,6 @@ module TestBioStructures
 using Aqua
 using BioAlignments
 using BioSequences
-import BioCore # Imported to avoid clash with BioGenerics distance
 using CodecZlib
 using DSSP_jll
 using DataFrames
@@ -54,7 +53,7 @@ using BioStructures:
     pdb_download_prefix
 
 # Get the path to BioFmtSpecimens and download it if required
-fmtdir = BioCore.Testing.get_bio_fmt_specimens("master", false)
+fmtdir = BioStructures.get_bio_fmt_specimens()
 
 # Access files in BioFmtSpecimens to test against
 testfilepath(path::AbstractString...) = joinpath(fmtdir, path...)

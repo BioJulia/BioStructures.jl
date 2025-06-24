@@ -411,3 +411,17 @@ function retrievepdb(pdbid::AbstractString;
     end
     read(pdbpath, format; structure_name=structure_name, kwargs...)
 end
+
+const FMT_SPECIMEN_PATH = joinpath(dirname(dirname(@__FILE__)), "BioFmtSpecimens")
+
+# Get the path to BioFmtSpecimens and download it if required
+# See https://github.com/BioJulia/BioCore.jl/blob/master/src/Testing.jl
+function get_bio_fmt_specimens(fresh=false)
+    if fresh
+        rm(FMT_SPECIMEN_PATH; force=true, recursive=true)
+    end
+    if !isdir(FMT_SPECIMEN_PATH)
+        run(`git clone https://github.com/BioJulia/BioFmtSpecimens.git $FMT_SPECIMEN_PATH`)
+    end
+    return FMT_SPECIMEN_PATH
+end

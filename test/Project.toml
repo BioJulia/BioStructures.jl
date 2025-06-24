@@ -1,7 +1,6 @@
 [deps]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 BioAlignments = "00701ae9-d1dc-5365-b64a-a3a3ebf5695e"
-BioCore = "37cfa864-2cd6-5c12-ad9e-b6597d696c81"
 BioSequences = "7e6ae17a-c86d-528c-b3b9-7f778a29fe59"
 CodecZlib = "944b1d66-785c-5afd-91f1-9de20f533193"
 DSSP_jll = "74334e00-59ce-546d-b517-81f3b7e1d491"
@@ -18,5 +17,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Aqua = "0.8"
-BioCore = "2"
 Test = "1.9"
