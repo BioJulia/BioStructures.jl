@@ -986,8 +986,6 @@ end
     @test_throws ArgumentError collectatoms(struc, sel"residue")
     @test_throws ArgumentError collectatoms(struc, sel"element")
     @test_throws ArgumentError collectatoms(struc, sel"not")
-        
-
 end
 
 @testset "PDB reading" begin

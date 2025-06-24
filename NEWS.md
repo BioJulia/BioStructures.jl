@@ -1,5 +1,10 @@
 # BioStructures.jl release notes
 
+## v4.6.0 - Jun 2025
+
+* The selection syntax now supports parentheses and multiple names as a shortcut for "or" clauses.
+* Standard protein bond lengths and angles are available as `bondlengths` and `bondangles`.
+
 ## v4.5.0 - May 2025
 
 * `chiangle` and `chiangles` are added to calculate the sidechain dihedral angles in protein residues.

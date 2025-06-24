@@ -573,7 +573,6 @@ const macro_keywords = [
     parse_query(selection:String)
 
 Calls `parse_query_vector` after splitting the selection string.
-
 =#
 function parse_query(selection::String) 
     s = replace(selection, "(" => " ( ", ")" => " ) ")
