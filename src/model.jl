@@ -69,6 +69,7 @@ export
     threeletter_to_aa,
     PDBFormat,
     PDBXMLFormat,
+    BCIFFormat,
     MMCIFFormat,
     MMTFFormat,
     pdbextension,
@@ -1715,6 +1716,9 @@ struct PDBXMLFormat end
 "Protein Data Bank (PDB) mmCIF file format."
 struct MMCIFFormat end
 
+"Protein Data Bank (PDB) Binary mmCIF file format."
+struct BCIFFormat end
+
 "Protein Data Bank (PDB) MMTF file format."
 struct MMTFFormat end
 
@@ -1724,6 +1728,7 @@ const pdbextension = Dict{Type, String}(
     PDBXMLFormat => "xml",
     MMCIFFormat  => "cif",
     MMTFFormat   => "mmtf",
+    BCIFFormat   => "bcif",
 )
 
 """
