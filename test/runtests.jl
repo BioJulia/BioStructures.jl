@@ -245,7 +245,7 @@ end
     testparent(getchildren(struc), struc)
     struc_copy = copy(struc)
     testparent(getchildren(struc_copy), struc_copy)
-    struc_copy['A'][10]["CA"].coords[2] = 100
+    y!(struc_copy['A'][10]["CA"], 100)
     @test struc_copy['A'][10]["CA"].coords[2] == 100
     @test a.coords[2] == 2
     @test struc['A'][10]["CA"].coords[2] == 2
@@ -1819,7 +1819,7 @@ end
     mmcif_1ake = testfilepath("mmCIF", "1AKE.cif")
     gzip_file(mmcif_1ake, temp_filename)
     for dic in (MMCIFDict(mmcif_1ake), MMCIFDict(temp_filename; gzip=true))
-        @test isa(dic.dict, Dict{String, Vector{String}})
+        @test isa(dic.dict, Dict{K, Vector{K}} where K<:AbstractString)
         @test dic["_pdbx_database_status.recvd_initial_deposition_date"] == ["1991-11-08"]
         @test dic["_audit_author.name"] == ["Mueller, C.W.", "Schulz, G.E."]
         @test length(dic["_atom_site.group_PDB"]) == 3816

@@ -18,6 +18,7 @@ using PrecompileTools
 using RecipesBase
 
 using LinearAlgebra
+using StaticArraysCore
 using Statistics
 
 include("model.jl")

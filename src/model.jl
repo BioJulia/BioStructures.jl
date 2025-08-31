@@ -102,20 +102,20 @@ end
 Base.showerror(io::IO, e::PDBConsistencyError) = print(io, "PDBConsistencyError: ", e.message)
 
 "An atom that is part of a macromolecule."
-struct Atom <: AbstractAtom
-    serial::Int
-    name::String
-    alt_loc_id::Char
-    coords::Vector{Float64}
-    occupancy::Float64
-    temp_factor::Float64
-    element::String
-    charge::String
-    residue::StructuralElement
+mutable struct Atom <: AbstractAtom
+    const serial::Int
+    const name::String
+    const alt_loc_id::Char
+    coords::SVector{3,Float64}
+    const occupancy::Float64
+    const temp_factor::Float64
+    const element::String
+    const charge::String
+    const residue::StructuralElement
 end
 
 function Atom(a::Atom, r::StructuralElement)
-    return Atom(a.serial, a.name, a.alt_loc_id, copy(a.coords), a.occupancy,
+    return Atom(a.serial, a.name, a.alt_loc_id, a.coords, a.occupancy,
                 a.temp_factor, a.element, a.charge, r)
 end
 
@@ -234,7 +234,7 @@ struct AtomRecord
     chain_id::String
     res_number::Int
     ins_code::Char
-    coords::Vector{Float64}
+    coords::SVector{3,Float64}
     occupancy::Float64
     temp_factor::Float64
     element::String
@@ -483,7 +483,7 @@ Set the x coordinate in Å of an `AbstractAtom` to `val`.
 
 For `DisorderedAtom`s only the default atom is updated.
 """
-x!(at::Atom, x::Real) = (at.coords[1] = x; at)
+x!(at::Atom, x::Real) = (at.coords = SVector{3,Float64}((x, at.coords[2], at.coords[3])))
 x!(dis_at::DisorderedAtom, x::Real) = x!(defaultatom(dis_at), x)
 
 """
@@ -501,7 +501,7 @@ Set the y coordinate in Å of an `AbstractAtom` to `val`.
 
 For `DisorderedAtom`s only the default atom is updated.
 """
-y!(at::Atom, y::Real) = (at.coords[2] = y; at)
+y!(at::Atom, y::Real) = (at.coords = SVector{3,Float64}((at.coords[1], y, at.coords[3])))
 y!(dis_at::DisorderedAtom, y::Real) = y!(defaultatom(dis_at), y)
 
 """
@@ -519,13 +519,13 @@ Set the z coordinate in Å of an `AbstractAtom` to `val`.
 
 For `DisorderedAtom`s only the default atom is updated.
 """
-z!(at::Atom, z::Real) = (at.coords[3] = z; at)
+z!(at::Atom, z::Real) = (at.coords = SVector{3,Float64}((at.coords[1], at.coords[2], z)))
 z!(dis_at::DisorderedAtom, z::Real) = z!(defaultatom(dis_at), z)
 
 """
     coords(at)
 
-Get the coordinates in Å of an `AbstractAtom` as a `Vector{Float64}`.
+Get the coordinates in Å of an `AbstractAtom` as a `SVector{3,Float64}`.
 """
 coords(at::Atom) = at.coords
 coords(dis_at::DisorderedAtom) = coords(defaultatom(dis_at))
@@ -533,7 +533,7 @@ coords(dis_at::DisorderedAtom) = coords(defaultatom(dis_at))
 """
     coords!(at, new_coords)
 
-Set the coordinates in Å of an `AbstractAtom` to a `Vector` of 3 numbers.
+Set the coordinates in Å of an `AbstractAtom` to `new_coords`, an iterable of 3 numbers.
 
 For `DisorderedAtom`s only the default atom is updated.
 """
@@ -541,9 +541,8 @@ function coords!(at::Atom, new_coords)
     if length(new_coords) != 3
         throw(ArgumentError("3 coordinates must be given"))
     end
-    x!(at, new_coords[1])
-    y!(at, new_coords[2])
-    z!(at, new_coords[3])
+    x, y, z = new_coords
+    at.coords = SVector{3,Float64}((x, y, z))
     return at
 end
 
@@ -784,7 +783,7 @@ function resid(hetatm::Bool, resnum::Int, inscode::Char)
         end
     else
         if inscode == ' '
-            return "$resnum"
+            return string(resnum)
         else
             return "$resnum$inscode"
         end
