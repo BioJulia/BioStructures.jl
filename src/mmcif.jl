@@ -387,7 +387,7 @@ end
 AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
     d["_atom_site.group_PDB"][i] == "HETATM",
     parse(Int, d["_atom_site.id"][i]),
-    d["_atom_site.auth_atom_id"][i],
+    get(d, "_atom_site.auth_atom_id", d["_atom_site.label_atom_id"])[i],
     d["_atom_site.label_alt_id"][i] in missingvals ? ' ' : d["_atom_site.label_alt_id"][i][1],
     d["_atom_site.auth_comp_id"][i],
     d["_atom_site.auth_asym_id"][i],
@@ -401,7 +401,7 @@ AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
     d["_atom_site.occupancy"][i] in missingvals ? 1.0 : parse(Float64, d["_atom_site.occupancy"][i]),
     d["_atom_site.B_iso_or_equiv"][i] in missingvals ? 0.0 : parse(Float64, d["_atom_site.B_iso_or_equiv"][i]),
     d["_atom_site.type_symbol"][i] in missingvals ? "  " : d["_atom_site.type_symbol"][i],
-    d["_atom_site.pdbx_formal_charge"][i] in missingvals ? "  " : d["_atom_site.pdbx_formal_charge"][i],
+    haskey(d, "_atom_site.pdbx_formal_charge") ? (d["_atom_site.pdbx_formal_charge"][i] in missingvals ? "  " : d["_atom_site.pdbx_formal_charge"][i]) : "  ",
 )
 
 # Format a mmCIF data value by enclosing with quotes or semicolon lines where
