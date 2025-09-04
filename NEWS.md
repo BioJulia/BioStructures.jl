@@ -1,5 +1,9 @@
 # BioStructures.jl release notes
 
+## v4.6.1 - Sep 2025
+
+* mmCIF file parsing is made more robust with respect to the available fields, and for example will use `_atom_site.label_atom_id` when `_atom_site.auth_atom_id` is not available.
+
 ## v4.6.0 - Jun 2025
 
 * The selection syntax now supports parentheses and multiple names as a shortcut for "or" clauses.
