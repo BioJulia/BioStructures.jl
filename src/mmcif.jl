@@ -383,25 +383,43 @@ function MolecularStructure(mmcif_dict::MMCIFDict;
     return struc
 end
 
+struct NoField end
+function firstfield(d::MMCIFDict, fields...)
+    for fn in fields
+        f = get(d, fn, NoField())
+        if f !== NoField()
+            return f
+        end
+    end
+    throw(KeyError("None of the fields $(join(fields, ", ")) found in MMCIFDict"))
+end
+
+function get_ith(d::MMCIFDict, field::AbstractString, i::Integer, default)
+    f = get(d, field, NoField())
+    f === NoField() && return default
+    i > length(f) && throw(BoundsError("Index $i out of bounds for field $field with length $(length(f))"))
+    return f[i]
+end
+
 # Constructor from mmCIF ATOM/HETATM line
 AtomRecord(d::MMCIFDict, i::Integer) = AtomRecord(
-    d["_atom_site.group_PDB"][i] == "HETATM",
+    get_ith(d, "_atom_site.group_PDB", i, "ATOM") == "HETATM",
     parse(Int, d["_atom_site.id"][i]),
-    get(d, "_atom_site.auth_atom_id", d["_atom_site.label_atom_id"])[i],
-    d["_atom_site.label_alt_id"][i] in missingvals ? ' ' : d["_atom_site.label_alt_id"][i][1],
-    d["_atom_site.auth_comp_id"][i],
+    firstfield(d, "_atom_site.auth_atom_id", "_atom_site.label_atom_id")[i],
+    (altid = get_ith(d, "_atom_site.label_alt_id", i, " "); altid in missingvals ? ' ' : altid[1]),
+    firstfield(d, "_atom_site.auth_comp_id", "_atom_site.label_comp_id")[i],
     d["_atom_site.auth_asym_id"][i],
-    parse(Int, d["_atom_site.auth_seq_id"][i]),
-    d["_atom_site.pdbx_PDB_ins_code"][i] in missingvals ? ' ' : d["_atom_site.pdbx_PDB_ins_code"][i][1],
+    parse(Int, firstfield(d, "_atom_site.auth_seq_id", "_atom_site.label_seq_id")[i]),
+    (inscode = get_ith(d, "_atom_site.pdbx_PDB_ins_code", i, " "); inscode in missingvals ? ' ' : inscode[1]),
     [
-        parse(Float64, d["_atom_site.Cartn_x"][i]),
-        parse(Float64, d["_atom_site.Cartn_y"][i]),
-        parse(Float64, d["_atom_site.Cartn_z"][i])
+        parse(Float64, get_ith(d, "_atom_site.Cartn_x", i, "NaN")),
+        parse(Float64, get_ith(d, "_atom_site.Cartn_y", i, "NaN")),
+        parse(Float64, get_ith(d, "_atom_site.Cartn_z", i, "NaN"))
     ],
-    d["_atom_site.occupancy"][i] in missingvals ? 1.0 : parse(Float64, d["_atom_site.occupancy"][i]),
-    d["_atom_site.B_iso_or_equiv"][i] in missingvals ? 0.0 : parse(Float64, d["_atom_site.B_iso_or_equiv"][i]),
-    d["_atom_site.type_symbol"][i] in missingvals ? "  " : d["_atom_site.type_symbol"][i],
-    haskey(d, "_atom_site.pdbx_formal_charge") ? (d["_atom_site.pdbx_formal_charge"][i] in missingvals ? "  " : d["_atom_site.pdbx_formal_charge"][i]) : "  ",
+    parse(Float64, get_ith(d, "_atom_site.occupancy", i, "1.0")),
+    parse(Float64, get_ith(d, "_atom_site.B_iso_or_equiv", i, "0.0")),
+    get_ith(d, "_atom_site.type_symbol", i, "  "),
+    (charge = get_ith(d, "_atom_site.pdbx_formal_charge", i, "  "); charge in missingvals ? "  " : charge),
 )
 
 # Format a mmCIF data value by enclosing with quotes or semicolon lines where
