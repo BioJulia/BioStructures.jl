@@ -2217,6 +2217,88 @@ end
     @test coords(struc['A'][1]["CA"]) == [26.091, 52.849, 39.889]
     @test serial(struc['A'][1]["O"]) == 4
 
+    # As written out by ChimeraX after adding hydrogens
+    multlinestruc_str = """
+        data_test
+        loop_
+        _atom_site.group_PDB
+        _atom_site.id
+        _atom_site.type_symbol
+        _atom_site.label_atom_id
+        _atom_site.label_alt_id
+        _atom_site.label_comp_id
+        _atom_site.label_asym_id
+        _atom_site.label_entity_id
+        _atom_site.label_seq_id
+        _atom_site.Cartn_x
+        _atom_site.Cartn_y
+        _atom_site.Cartn_z
+        _atom_site.auth_asym_id
+        _atom_site.auth_seq_id
+        _atom_site.pdbx_PDB_ins_code
+        _atom_site.occupancy
+        _atom_site.B_iso_or_equiv
+        _atom_site.pdbx_PDB_model_num
+        ATOM 1    N N    . MET A 1 1   33.586  -1.645  -17.107 A 1   ? 1.00 52.29 1 
+        ATOM 2    C CA   . MET A 1 1   32.274  -0.966  -17.129 A 1   ? 1.00 52.29 1 
+        ATOM 3    C C    . MET A 1 1   32.541  0.520   -17.257 A 1   ? 1.00 52.29 1 
+        ATOM 4    C CB   . MET A 1 1   31.483  -1.295  -15.852 A 1   ? 1.00 52.29 1 
+        ATOM 5    O O    . MET A 1 1   33.172  1.074   -16.369 A 1   ? 1.00 52.29 1 
+        ATOM 6    C CG   . MET A 1 1   30.781  -2.650  -15.985 A 1   ? 1.00 52.29 1 
+        ATOM 7    S SD   . MET A 1 1   30.056  -3.237  -14.436 A 1   ? 1.00 52.29 1 
+        ATOM 8    C CE   . MET A 1 1   28.335  -3.503  -14.949 A 1   ? 1.00 52.29 1 
+        ATOM 9    H HA   . MET A 1 1   31.709  -1.305  -17.998 A 1   ? 1.00 52.29 1 
+        ATOM 10   H HB2  . MET A 1 1   30.735  -0.520  -15.684 A 1   ? 1.00 52.29 1 
+        ATOM 11   H HB3  . MET A 1 1   32.166  -1.326  -15.003 A 1   ? 1.00 52.29 1 
+        ATOM 12   H HG2  . MET A 1 1   29.986  -2.556  -16.725 A 1   ? 1.00 52.29 1 
+        ATOM 13   H HG3  . MET A 1 1   31.503  -3.387  -16.337 A 1   ? 1.00 52.29 1 
+        ATOM 14   H H1   . MET A 1 1   34.096  -1.421  -17.950 A 1   ? 1.00 52.29 1 
+        ATOM 15   H H2   . MET A 1 1   34.112  -1.334  -16.303 A 1   ? 1.00 52.29 1 
+        ATOM 16   H H3   . MET A 1 1   33.447  -2.644  -17.052 A 1   ? 1.00 52.29 1 
+        ATOM 17   H HE1  . MET A 1 1   27.755  -3.867  -14.101 A 1   ? 1.00 52.29 1 
+        ATOM 18   H HE2  . MET A 1 1   27.912  -2.562  -15.301 A 1   ? 1.00 52.29 1 
+        ATOM 19   H HE3  . MET A 1 1   28.305  -4.239  -15.753 A 1   ? 1.00 52.29 1 
+        """
+    struc = read(IOBuffer(multlinestruc_str), MMCIFFormat)
+    @test coords(struc['A'][1]["CA"]) == [32.274, -0.966, -17.129]
+    @test serial(struc['A'][1]["O"]) == 5
+
+    # As written out by Boltz-2
+    multlinestruc_str = """
+        data_test
+        loop_
+        _atom_site.group_PDB
+        _atom_site.id
+        _atom_site.type_symbol
+        _atom_site.label_atom_id
+        _atom_site.label_alt_id
+        _atom_site.label_comp_id
+        _atom_site.label_seq_id
+        _atom_site.auth_seq_id
+        _atom_site.pdbx_PDB_ins_code
+        _atom_site.label_asym_id
+        _atom_site.Cartn_x
+        _atom_site.Cartn_y
+        _atom_site.Cartn_z
+        _atom_site.occupancy
+        _atom_site.label_entity_id
+        _atom_site.auth_asym_id
+        _atom_site.auth_comp_id
+        _atom_site.B_iso_or_equiv
+        _atom_site.pdbx_PDB_model_num
+        ATOM 1 N N . MET 1 1 ? A 6.92711 -31.05979 1.53642 1 1 A MET 49.872 1
+        ATOM 2 C CA . MET 1 1 ? A 6.00617 -31.17880 0.39791 1 1 A MET 49.872 1
+        ATOM 3 C C . MET 1 1 ? A 6.77288 -31.45638 -0.88915 1 1 A MET 49.872 1
+        ATOM 4 O O . MET 1 1 ? A 7.75015 -30.77929 -1.19468 1 1 A MET 49.872 1
+        ATOM 5 C CB . MET 1 1 ? A 5.17828 -29.90640 0.21397 1 1 A MET 49.872 1
+        ATOM 6 C CG . MET 1 1 ? A 4.15304 -29.99347 -0.90422 1 1 A MET 49.872 1
+        ATOM 7 S SD . MET 1 1 ? A 3.34741 -28.41183 -1.23501 1 1 A MET 49.872 1
+        ATOM 8 C CE . MET 1 1 ? A 4.64046 -27.59273 -2.18119 1 1 A MET 49.872 1
+        """
+    struc = read(IOBuffer(multlinestruc_str), MMCIFFormat)
+    @test coords(struc['A'][1]["CA"]) == [6.00617, -31.17880, 0.39791]
+    @test serial(struc['A'][1]["O"]) == 4
+
     # Test files that should not parse
     @test_throws Exception read(testfilepath("mmCIF", "1AKE_err.cif"), MMCIFFormat)
     @test_throws ErrorException read(testfilepath("mmCIF", "1EN2_err.cif"), MMCIFFormat)
