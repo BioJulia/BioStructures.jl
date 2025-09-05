@@ -9,4 +9,6 @@ benchmark/results
 Manifest.toml
 *.swp
 extractdata/protein.ff14SB.*
+extractdata/*.csv
+extractdata/*.yaml
 BioFmtSpecimens
