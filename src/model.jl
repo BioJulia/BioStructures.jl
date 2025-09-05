@@ -39,6 +39,7 @@ export
     defaultresname,
     defaultresidue,
     resnames,
+    specialize_resnames!,
     sscode,
     sscode!,
     chain,
@@ -1096,6 +1097,43 @@ Get the default `Model` in a `MolecularStructure`.
 This is the `Model` with the lowest model number.
 """
 defaultmodel(struc::MolecularStructure) = first(sort(collect(values(models(struc)))))
+
+"""
+    specialize_resnames!(r)
+
+If `r` is a histidine residue, rename it to reflect a specific protonation configuration (HID,
+HIE, or HIP) based on the presence of HD1 and HE2 atoms. For any other residue,
+`r` will be unchanged.
+
+Hydrogens must have been assigned prior to calling this function.
+"""
+function specialize_resnames!(r::Residue)
+    rname = resname(r)
+    if rname == "HIS"
+        hd1 = findatombyname(r, "HD1"; strict=false)
+        he2 = findatombyname(r, "HE2"; strict=false)
+        if !isnothing(hd1) && !isnothing(he2)
+            r.name = "HIP"
+        elseif !isnothing(hd1)
+            r.name = "HID"
+        elseif !isnothing(he2)
+            r.name = "HIE"
+        else
+            error("at least one of HD1 or HE2 must be present")
+        end
+    end
+    # N and C termini
+    if haskey(r.atoms, "H3") && !haskey(residuedata[rname].atoms, "H3") && haskey(residuedata, "N" * rname)
+        r.name = "N" * rname
+    elseif haskey(r.atoms, "OXT") && !haskey(residuedata[rname].atoms, "OXT") && haskey(residuedata, "C" * rname)
+        r.name = "C" * rname
+    end
+    return r
+end
+specialize_resnames!(r::DisorderedResidue) = (foreach(specialize_resnames!, collectresidues(r; expand_disordered=true)); r)
+specialize_resnames!(c::Chain) = (foreach(specialize_resnames!, c); c)
+specialize_resnames!(m::Model) = (foreach(specialize_resnames!, m); m)
+specialize_resnames!(s::MolecularStructure) = (foreach(specialize_resnames!, s); s)
 
 # Sort lists of elements
 

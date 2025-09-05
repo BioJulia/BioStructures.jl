@@ -3643,6 +3643,28 @@ end
     rm(temp_filename)
 end
 
+@testset "ff19SB-compliant residue names for added hydrogens" begin
+    struc = read(joinpath(@__DIR__, "data", "AF-M3YHX5-F1-model_v4_hydrogens.cif"), MMCIFFormat)
+    specialize_resnames!(struc)
+    A = struc["A"]
+    @test resname(first(A)) == "NMET"
+    @test resname(last(A)) == "CSER"
+    nhis = nhie = nhid = nhip = 0
+    for r in A
+        if resname(r) == "HIS"
+            nhis += 1
+        elseif resname(r) == "HIE"
+            nhie += 1
+        elseif resname(r) == "HID"
+            nhid += 1
+        elseif resname(r) == "HIP"
+            nhip += 1
+        end
+    end
+    @test nhis == 0
+    @test nhie == 2
+end
+
 # Delete temporary file and temporary directory
 rm(temp_filename, force=true)
 rm(temp_dir, recursive=true, force=true)
