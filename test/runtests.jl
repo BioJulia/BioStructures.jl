@@ -3510,6 +3510,11 @@ end
     end
 
     @test_throws KeyError MetaGraph(struc_1AKE["A"])   # it's missing hydrogens
+    struc_M3YHX5 = read(joinpath(@__DIR__, "data", "AF-M3YHX5-F1-model_v4_hydrogens.cif"), MMCIFFormat)
+    @test_throws KeyError MetaGraph(struc_M3YHX5["A"]; strict=true)  # residues need to be renamed
+    specialize_resnames!(struc_M3YHX5)
+    mg = MetaGraph(struc_M3YHX5["A"]; strict=true)
+    @test nv(mg) == 1833
 
     # With DisorderedResidue
     struc_1EN2 = read(testfilepath("PDB", "1EN2.pdb"), PDBFormat)
