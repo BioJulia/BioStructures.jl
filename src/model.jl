@@ -1131,7 +1131,18 @@ function specialize_resnames!(r::Residue)
     return r
 end
 specialize_resnames!(r::DisorderedResidue) = (foreach(specialize_resnames!, collectresidues(r; expand_disordered=true)); r)
-specialize_resnames!(c::Chain) = (foreach(specialize_resnames!, c); c)
+function specialize_resnames!(c::Chain)
+    for (key, res) in c.residues
+        if isa(res, DisorderedResidue)
+            # Create a new `names` dictionary with specialized residue names
+            names = Dict((specialize_resnames!(r); resname(r, strip=false) => r) for r in values(res.names))
+            c.residues[key] = DisorderedResidue(names, resname(res.names[defaultresname(res)]))
+        else
+            specialize_resnames!(res)
+        end
+    end
+    return c
+end
 specialize_resnames!(m::Model) = (foreach(specialize_resnames!, m); m)
 specialize_resnames!(s::MolecularStructure) = (foreach(specialize_resnames!, s); s)
 

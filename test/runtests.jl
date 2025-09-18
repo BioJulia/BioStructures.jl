@@ -3668,6 +3668,16 @@ end
     end
     @test nhis == 0
     @test nhie == 2
+
+    struc_1res = read(joinpath(@__DIR__, "data", "disordered_1res.cif"), MMCIFFormat)
+    r = struc_1res['A'][1]
+    @test r isa DisorderedResidue
+    @test resname(defaultresidue(r)) == "HIS"
+    specialize_resnames!(struc_1res)
+    r = struc_1res['A'][1]
+    @test r isa DisorderedResidue
+    @test resname(defaultresidue(r)) == "HIE"
+    @test r.default == "HIE"
 end
 
 # Delete temporary file and temporary directory
