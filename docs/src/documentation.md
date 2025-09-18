@@ -568,7 +568,34 @@ Similar to [`ContactMap`](@ref), contacts are found between any element type pas
 So if you wanted the graph of chain contacts in a protein complex you could give a [`Model`](@ref) as the first argument.
 
 Calling `MetaGraph` on a [`Chain`](@ref) without a contact distance does something different: it constructs a graph of atoms where edges are determined by the known bonds of standard amino acids in the chain.
-Hydrogens should be present and atom names should match those in OpenMM.
+Hydrogens should be present and atom names should match those in OpenMM. See [`specialize_resnames!`](@ref) to
+ensure that residue names have been specialized to their actual configuration in the protein:
+
+```julia-repl
+julia> using BioStructures, MetaGraphs
+
+julia> struc_M3YHX5 = read(joinpath(pkgdir(BioStructures), "test", "data", "AF-M3YHX5-F1-model_v4_hydrogens.cif"), MMCIFFormat)
+MolecularStructure AF-M3YHX5-F1-model_v4_hydrogens.cif with 1 models, 1 chains (A), 112 residues, 1833 atoms
+
+julia> MetaGraph(struc_M3YHX5["A"])
+r = Residue 1:A with name MET, 19 atoms
+ERROR: KeyError: key "H" not found
+[...]
+
+julia> mg = MetaGraph(struc_M3YHX5["A"]; strict=false)
+{1833, 1850} undirected Int64 metagraph with Float64 weights defined by :weight (default weight 1.0)
+```
+
+but if you really want to get all the bonds, you'd better use the default `strict=true`.
+Fortunately, this example only requires residue renaming:
+
+```julia-repl
+julia> specialize_resnames!(struc_M3YHX5)
+MolecularStructure AF-M3YHX5-F1-model_v4_hydrogens.cif with 1 models, 1 chains (A), 112 residues, 1833 atoms
+
+julia> mg = MetaGraph(struc_M3YHX5["A"])
+{1833, 1853} undirected Int64 metagraph with Float64 weights defined by :weight (default weight 1.0)
+```
 
 ## Assigning secondary structure
 

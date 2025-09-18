@@ -1,0 +1,66 @@
+data_AF-M3YHX5-F1-model_v4_hydrogens.cif
+#
+loop_
+_atom_site.group_PDB
+_atom_site.id
+_atom_site.type_symbol
+_atom_site.label_atom_id
+_atom_site.label_alt_id
+_atom_site.label_comp_id
+_atom_site.label_asym_id
+_atom_site.label_entity_id
+_atom_site.label_seq_id
+_atom_site.pdbx_PDB_ins_code
+_atom_site.Cartn_x
+_atom_site.Cartn_y
+_atom_site.Cartn_z
+_atom_site.occupancy
+_atom_site.B_iso_or_equiv
+_atom_site.pdbx_formal_charge
+_atom_site.auth_seq_id
+_atom_site.auth_comp_id
+_atom_site.auth_asym_id
+_atom_site.auth_atom_id
+_atom_site.pdbx_PDB_model_num
+ATOM 91  N N   . HIS ? ? ? ? -5.545 13.390 5.511   1.00 66.50 ? 1 HIS A N   1 
+ATOM 92  C CA  . HIS ? ? ? ? -4.677 14.009 4.508   1.00 66.50 ? 1 HIS A CA  1 
+ATOM 93  C C   . HIS ? ? ? ? -4.091 12.981 3.522   1.00 66.50 ? 1 HIS A C   1 
+ATOM 94  C CB  . HIS ? ? ? ? -3.577 14.794 5.240   1.00 66.50 ? 1 HIS A CB  1 
+ATOM 95  O O   . HIS ? ? ? ? -3.900 13.278 2.341   1.00 66.50 ? 1 HIS A O   1 
+ATOM 96  C CG  . HIS ? ? ? ? -3.386 16.174 4.676   1.00 66.50 ? 1 HIS A CG  1 
+ATOM 97  C CD2 . HIS ? ? ? ? -3.817 17.347 5.236   1.00 66.50 ? 1 HIS A CD2 1 
+ATOM 98  N ND1 . HIS ? ? ? ? -2.787 16.489 3.480   1.00 66.50 ? 1 HIS A ND1 1 
+ATOM 99  C CE1 . HIS ? ? ? ? -2.843 17.823 3.330   1.00 66.50 ? 1 HIS A CE1 1 
+ATOM 100 N NE2 . HIS ? ? ? ? -3.449 18.390 4.383   1.00 66.50 ? 1 HIS A NE2 1 
+ATOM 101 H H   . HIS ? ? ? ? -5.232 13.365 6.471   1.00 66.50 ? 1 HIS A H   1 
+ATOM 102 H HA  . HIS ? ? ? ? -5.275 14.720 3.938   1.00 66.50 ? 1 HIS A HA  1 
+ATOM 103 H HB2 . HIS ? ? ? ? -2.639 14.247 5.151   1.00 66.50 ? 1 HIS A HB2 1 
+ATOM 104 H HB3 . HIS ? ? ? ? -3.841 14.875 6.294   1.00 66.50 ? 1 HIS A HB3 1 
+ATOM 105 H HD2 . HIS ? ? ? ? -4.347 17.448 6.171   1.00 66.50 ? 1 HIS A HD2 1 
+ATOM 106 H HE1 . HIS ? ? ? ? -2.454 18.363 2.480   1.00 66.50 ? 1 HIS A HE1 1 
+ATOM 107 H HE2 . HIS ? ? ? ? -3.608 19.376 4.530   1.00 66.50 ? 1 HIS A HE2 1 
+ATOM 790 N N   . TRP ? ? ? ? 49.487 -1.947 -16.830 1.00 35.81 ? 1 TRP A N   1 
+ATOM 791 C CA  . TRP ? ? ? ? 50.037 -3.111 -16.120 1.00 35.81 ? 1 TRP A CA  1 
+ATOM 792 C C   . TRP ? ? ? ? 51.039 -2.953 -14.961 1.00 35.81 ? 1 TRP A C   1 
+ATOM 793 C CB  . TRP ? ? ? ? 50.574 -4.113 -17.151 1.00 35.81 ? 1 TRP A CB  1 
+ATOM 794 O O   . TRP ? ? ? ? 52.136 -2.424 -15.079 1.00 35.81 ? 1 TRP A O   1 
+ATOM 795 C CG  . TRP ? ? ? ? 49.536 -4.644 -18.092 1.00 35.81 ? 1 TRP A CG  1 
+ATOM 796 C CD1 . TRP ? ? ? ? 49.400 -4.308 -19.391 1.00 35.81 ? 1 TRP A CD1 1 
+ATOM 797 C CD2 . TRP ? ? ? ? 48.543 -5.688 -17.864 1.00 35.81 ? 1 TRP A CD2 1 
+ATOM 798 C CE2 . TRP ? ? ? ? 47.784 -5.864 -19.062 1.00 35.81 ? 1 TRP A CE2 1 
+ATOM 799 C CE3 . TRP ? ? ? ? 48.252 -6.548 -16.783 1.00 35.81 ? 1 TRP A CE3 1 
+ATOM 800 N NE1 . TRP ? ? ? ? 48.329 -4.966 -19.949 1.00 35.81 ? 1 TRP A NE1 1 
+ATOM 801 C CH2 . TRP ? ? ? ? 46.506 -7.666 -18.079 1.00 35.81 ? 1 TRP A CH2 1 
+ATOM 802 C CZ2 . TRP ? ? ? ? 46.771 -6.826 -19.174 1.00 35.81 ? 1 TRP A CZ2 1 
+ATOM 803 C CZ3 . TRP ? ? ? ? 47.248 -7.530 -16.892 1.00 35.81 ? 1 TRP A CZ3 1 
+ATOM 804 H H   . TRP ? ? ? ? 48.497 -1.997 -17.024 1.00 35.81 ? 1 TRP A H   1 
+ATOM 805 H HA  . TRP ? ? ? ? 49.171 -3.603 -15.676 1.00 35.81 ? 1 TRP A HA  1 
+ATOM 806 H HB2 . TRP ? ? ? ? 51.346 -3.617 -17.739 1.00 35.81 ? 1 TRP A HB2 1 
+ATOM 807 H HB3 . TRP ? ? ? ? 51.025 -4.951 -16.620 1.00 35.81 ? 1 TRP A HB3 1 
+ATOM 808 H HD1 . TRP ? ? ? ? 50.042 -3.619 -19.919 1.00 35.81 ? 1 TRP A HD1 1 
+ATOM 809 H HE3 . TRP ? ? ? ? 48.806 -6.452 -15.861 1.00 35.81 ? 1 TRP A HE3 1 
+ATOM 810 H HH2 . TRP ? ? ? ? 45.732 -8.416 -18.149 1.00 35.81 ? 1 TRP A HH2 1 
+ATOM 811 H HZ2 . TRP ? ? ? ? 46.203 -6.920 -20.088 1.00 35.81 ? 1 TRP A HZ2 1 
+ATOM 812 H HZ3 . TRP ? ? ? ? 47.046 -8.184 -16.057 1.00 35.81 ? 1 TRP A HZ3 1 
+ATOM 813 H HE1 . TRP ? ? ? ? 47.988 -4.810 -20.887 1.00 35.81 ? 1 TRP A HE1 1 
+#

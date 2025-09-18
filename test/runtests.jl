@@ -3510,6 +3510,11 @@ end
     end
 
     @test_throws KeyError MetaGraph(struc_1AKE["A"])   # it's missing hydrogens
+    struc_M3YHX5 = read(joinpath(@__DIR__, "data", "AF-M3YHX5-F1-model_v4_hydrogens.cif"), MMCIFFormat)
+    @test_throws KeyError MetaGraph(struc_M3YHX5["A"]; strict=true)  # residues need to be renamed
+    specialize_resnames!(struc_M3YHX5)
+    mg = MetaGraph(struc_M3YHX5["A"]; strict=true)
+    @test nv(mg) == 1833
 
     # With DisorderedResidue
     struc_1EN2 = read(testfilepath("PDB", "1EN2.pdb"), PDBFormat)
@@ -3641,6 +3646,38 @@ end
     runstride(pdb_path, temp_filename)
     @test countlines(temp_filename) > 100
     rm(temp_filename)
+end
+
+@testset "ff19SB-compliant residue names for added hydrogens" begin
+    struc = read(joinpath(@__DIR__, "data", "AF-M3YHX5-F1-model_v4_hydrogens.cif"), MMCIFFormat)
+    specialize_resnames!(struc)
+    A = struc["A"]
+    @test resname(first(A)) == "NMET"
+    @test resname(last(A)) == "CSER"
+    nhis = nhie = nhid = nhip = 0
+    for r in A
+        if resname(r) == "HIS"
+            nhis += 1
+        elseif resname(r) == "HIE"
+            nhie += 1
+        elseif resname(r) == "HID"
+            nhid += 1
+        elseif resname(r) == "HIP"
+            nhip += 1
+        end
+    end
+    @test nhis == 0
+    @test nhie == 2
+
+    struc_1res = read(joinpath(@__DIR__, "data", "disordered_1res.cif"), MMCIFFormat)
+    r = struc_1res['A'][1]
+    @test r isa DisorderedResidue
+    @test resname(defaultresidue(r)) == "HIS"
+    specialize_resnames!(struc_1res)
+    r = struc_1res['A'][1]
+    @test r isa DisorderedResidue
+    @test resname(defaultresidue(r)) == "HIE"
+    @test r.default == "HIE"
 end
 
 # Delete temporary file and temporary directory
