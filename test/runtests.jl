@@ -3512,7 +3512,7 @@ end
     @test_throws KeyError MetaGraph(struc_1AKE["A"])   # it's missing hydrogens
     struc_M3YHX5 = read(joinpath(@__DIR__, "data", "AF-M3YHX5-F1-model_v4_hydrogens.cif"), MMCIFFormat)
     @test_throws KeyError MetaGraph(struc_M3YHX5["A"]; strict=true)  # residues need to be renamed
-    specialize_resnames!(struc_M3YHX5)
+    specializeresnames!(struc_M3YHX5)
     mg = MetaGraph(struc_M3YHX5["A"]; strict=true)
     @test nv(mg) == 1833
 
@@ -3648,9 +3648,9 @@ end
     rm(temp_filename)
 end
 
-@testset "ff19SB-compliant residue names for added hydrogens" begin
+@testset "Renaming residues" begin
     struc = read(joinpath(@__DIR__, "data", "AF-M3YHX5-F1-model_v4_hydrogens.cif"), MMCIFFormat)
-    specialize_resnames!(struc)
+    specializeresnames!(struc)
     A = struc["A"]
     @test resname(first(A)) == "NMET"
     @test resname(last(A)) == "CSER"
@@ -3673,7 +3673,7 @@ end
     r = struc_1res['A'][1]
     @test r isa DisorderedResidue
     @test resname(defaultresidue(r)) == "HIS"
-    specialize_resnames!(struc_1res)
+    specializeresnames!(struc_1res)
     r = struc_1res['A'][1]
     @test r isa DisorderedResidue
     @test resname(defaultresidue(r)) == "HIE"

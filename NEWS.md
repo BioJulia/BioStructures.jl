@@ -1,5 +1,9 @@
 # BioStructures.jl release notes
 
+## v4.7.0 - Sep 2025
+
+* `specializeresnames!` is added, allowing residues to be renamed to reflect the bonding topology.
+
 ## v4.6.1 - Sep 2025
 
 * mmCIF file parsing is made more robust with respect to the available fields, and for example will use `_atom_site.label_atom_id` when `_atom_site.auth_atom_id` is not available.

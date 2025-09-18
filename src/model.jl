@@ -39,7 +39,6 @@ export
     defaultresname,
     defaultresidue,
     resnames,
-    specialize_resnames!,
     sscode,
     sscode!,
     chain,
@@ -56,6 +55,7 @@ export
     modelnumbers,
     models,
     defaultmodel,
+    specializeresnames!,
     sequentialresidues,
     collect,
     collectmodels,
@@ -1099,15 +1099,19 @@ This is the `Model` with the lowest model number.
 defaultmodel(struc::MolecularStructure) = first(sort(collect(values(models(struc)))))
 
 """
-    specialize_resnames!(r)
+    specializeresnames!(el)
 
-If `r` is a histidine residue, rename it to reflect a specific protonation configuration (HID,
-HIE, or HIP) based on the presence of HD1 and HE2 atoms. For any other residue,
-`r` will be unchanged.
+Rename residues to reflect the bonding topology.
+
+Renames histidine residues to reflect a specific protonation configuration
+(HID, HIE, or HIP) based on the presence of HD1 and HE2 atoms.
+Renames N-terminal and C-terminal (e.g. ALA -> NALA) residues based on the
+presence of certain atoms.
+Other residues remain unchanged.
 
 Hydrogens must have been assigned prior to calling this function.
 """
-function specialize_resnames!(r::Residue)
+function specializeresnames!(r::Residue)
     rname = resname(r)
     if rname == "HIS"
         hd1 = findatombyname(r, "HD1"; strict=false)
@@ -1130,21 +1134,24 @@ function specialize_resnames!(r::Residue)
     end
     return r
 end
-specialize_resnames!(r::DisorderedResidue) = (foreach(specialize_resnames!, collectresidues(r; expand_disordered=true)); r)
-function specialize_resnames!(c::Chain)
+
+specializeresnames!(r::DisorderedResidue) = (foreach(specializeresnames!, collectresidues(r; expand_disordered=true)); r)
+
+function specializeresnames!(c::Chain)
     for (key, res) in c.residues
         if isa(res, DisorderedResidue)
             # Create a new `names` dictionary with specialized residue names
-            names = Dict((specialize_resnames!(r); resname(r, strip=false) => r) for r in values(res.names))
+            names = Dict((specializeresnames!(r); resname(r, strip=false) => r) for r in values(res.names))
             c.residues[key] = DisorderedResidue(names, resname(res.names[defaultresname(res)]))
         else
-            specialize_resnames!(res)
+            specializeresnames!(res)
         end
     end
     return c
 end
-specialize_resnames!(m::Model) = (foreach(specialize_resnames!, m); m)
-specialize_resnames!(s::MolecularStructure) = (foreach(specialize_resnames!, s); s)
+
+specializeresnames!(m::Model) = (foreach(specializeresnames!, m); m)
+specializeresnames!(s::MolecularStructure) = (foreach(specializeresnames!, s); s)
 
 # Sort lists of elements
 
