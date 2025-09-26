@@ -25,12 +25,12 @@ export
     showcontactmap
 
 """
-    Transformation(el1, el2, residue_selectors...)
     Transformation(coords1, coords2)
+    Transformation(el1, el2, residue_selectors...)
     Transformation(trans1, trans2, rot)
 
-A 3D transformation to map one set of coordinates onto another, found using the
-Kabsch algorithm.
+A 3D rigid transformation approximately mapping `coords1` to `coords2`, found
+using the Kabsch algorithm.
 
 When called with structural elements, carries out a pairwise alignment and
 superimposes on atoms from aligned residues.
@@ -47,6 +47,9 @@ The returned `Transformation` object consists of the mean coordinates of the
 first set, the mean coordinates of the second set, the rotation to map the
 first centred set onto the second centred set, and the indices of the aligned
 residues in the first and second elements if relevant.
+
+!!! note
+    `Transformation(el1, el2, residue_selectors...)` requires that BioAlignments.jl be imported.
 """
 struct Transformation
     trans1::Vector{Float64}
