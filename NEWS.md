@@ -1,5 +1,10 @@
 # BioStructures.jl release notes
 
+## v4.7.1 - Jan 2026
+
+* Change compatibility bounds for new MetaGraphs.jl release.
+* The docstring for `Transformation` is improved.
+
 ## v4.7.0 - Sep 2025
 
 * `specializeresnames!` is added, allowing residues to be renamed to reflect the bonding topology.
