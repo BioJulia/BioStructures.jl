@@ -3511,10 +3511,27 @@ end
 
     @test_throws KeyError MetaGraph(struc_1AKE["A"])   # it's missing hydrogens
     struc_M3YHX5 = read(joinpath(@__DIR__, "data", "AF-M3YHX5-F1-model_v4_hydrogens.cif"), MMCIFFormat)
-    @test_throws KeyError MetaGraph(struc_M3YHX5["A"]; strict=true)  # residues need to be renamed
+    # HIS is the one name specializeresnames! must resolve; the terminal residues
+    # need no renaming because their terminal atoms are handled directly.
+    @test_throws "HIS is not a valid residue name" MetaGraph(struc_M3YHX5["A"]; strict=true)
     specializeresnames!(struc_M3YHX5)
     mg = MetaGraph(struc_M3YHX5["A"]; strict=true)
     @test nv(mg) == 1833
+
+    # atombonds underlies MetaGraph(chain), so their edge sets must agree.
+    bonds = atombonds(struc_M3YHX5["A"]; strict=true)
+    @test length(bonds) == ne(mg)
+    @test all(((ai, aj),) -> has_edge(mg, mg[ai, :element], mg[aj, :element]), bonds)
+    # Terminal residues left with their generic names bond identically to the
+    # specialized `NMET`/`CSER` forms: "OXT" and "H1"/"H2"/"H3" are recognized
+    # from the atom names alone.
+    struc_raw = read(joinpath(@__DIR__, "data", "AF-M3YHX5-F1-model_v4_hydrogens.cif"), MMCIFFormat)
+    bondkeys(bs) = Set(map(((ai, aj),) -> minmax(serial(ai), serial(aj)), bs))
+    @test bondkeys(atombonds(struc_raw["A"]; strict=false)) == bondkeys(bonds)
+    nterm, cterm = first(struc_raw["A"]), last(collectresidues(struc_raw["A"]))
+    @test resname(nterm) == "MET" && resname(cterm) == "SER"
+    ntermbonds = filter(((ai, aj),) -> residue(ai) === nterm, atombonds(struc_raw["A"]; strict=false))
+    @test sort([atomname(aj) for (ai, aj) in ntermbonds if atomname(ai) == "N"]) == ["CA", "H1", "H2", "H3"]
 
     # With DisorderedResidue
     struc_1EN2 = read(testfilepath("PDB", "1EN2.pdb"), PDBFormat)

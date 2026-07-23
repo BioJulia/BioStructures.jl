@@ -34,7 +34,7 @@ end
     MetaGraph(chain::Chain; strict::Bool=true)
 
 Construct a graph of atoms where edges are determined by the known bonds
-of residues in the chain.
+of residues in the chain, as given by [`atombonds`](@ref).
 
 By default, the graph is constructed in `strict` mode, which means that:
 
@@ -55,69 +55,11 @@ function MetaGraphs.MetaGraph(chain::Chain; strict::Bool=true)
     end
     set_indexing_prop!(mg, :element)
 
-    prev = nothing
-    for r in chain
-        ishetero(r) && continue
-        if prev !== nothing
-            if resnumber(r) == resnumber(prev) + 1
-                # Add the peptide bond(s) (disordered residues may need multiples)
-                for _r in collectresidues(r; expand_disordered=true), _rp in collectresidues(prev; expand_disordered=true)
-                    for a in _r["N"], ap in _rp["C"]
-                        add_edge!(mg, mg[a, :element], mg[ap, :element])
-                    end
-                end
-            else
-                prev = nothing
-            end
-        end
-        # Add the residue bonds
-        addresiduebonds!(mg, r, strict)
-        prev = r
-        # The "OXT" (C-terminus oxygen) is not connected
-        for _r in collectresidues(r; expand_disordered=true)
-            aj = findatombyname(_r, "OXT"; strict=false)
-            if aj !== nothing
-                ai = findatombyname(_r, "C"; strict)
-                connect_atoms!(mg, ai, aj)
-            end
-        end
+    for (ai, aj) in atombonds(chain; strict)
+        add_edge!(mg, mg[ai, :element], mg[aj, :element])
     end
 
     return mg
-end
-
-function addresiduebonds!(mg, r::Residue, strict::Bool)
-    rname = residuekey(r, strict)
-    strict || haskey(BioStructures.residuedata, rname) || return
-    rd = BioStructures.residuedata[rname]
-    for (ni, nj) in rd.bonds
-        connect_atoms!(mg, r, ni, nj, strict)
-    end
-end
-
-connect_atoms!(mg, r, ni::AbstractString, nj::AbstractString, strict::Bool) =
-    connect_atoms!(mg, findatombyname(r, ni; strict), findatombyname(r, nj; strict))
-
-function connect_atoms!(mg, ai::Union{AbstractAtom,Nothing}, aj::Union{AbstractAtom,Nothing})
-    (ai === nothing || aj === nothing) && return
-    for _ai in ai, _aj in aj  # handle disordered atoms
-        i = mg[_ai, :element]
-        j = mg[_aj, :element]
-        add_edge!(mg, i, j)
-    end
-end
-
-addresiduebonds!(mg, dr::DisorderedResidue, strict::Bool) = for r in values(dr.names)
-    addresiduebonds!(mg, r, strict)
-end
-
-function residuekey(r::Residue, strict::Bool)
-    rname = resname(r)
-    if rname == "HIS"
-        strict && error("HIS is not a valid residue name in strict mode; use HIE, HID, or HIP")
-        rname = "HIE"
-    end
-    return rname
 end
 
 end # BioStructuresGraphsExt

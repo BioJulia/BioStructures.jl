@@ -27,6 +27,7 @@ include("mmcif.jl")
 include("download.jl")
 include("spatial.jl")
 include("bonding.jl")
+include("atombonds.jl")
 
 function __init__()
     Base.Experimental.register_error_hint(MethodError) do io, exc, _, _
