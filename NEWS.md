@@ -1,5 +1,10 @@
 # BioStructures.jl release notes
 
+## v4.7.2 - Jul 2026
+
+* Fix the mac build
+* Non-exported function `atombonds` allows graph construction with or without MetaGraphs
+
 ## v4.7.1 - Jan 2026
 
 * Change compatibility bounds for new MetaGraphs.jl release.
