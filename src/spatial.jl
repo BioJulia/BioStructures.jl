@@ -319,7 +319,7 @@ function bondangle(at_a::AbstractAtom,
 end
 
 function bondangle(vec_a::AbstractVector{<:Real}, vec_b::AbstractVector{<:Real})
-    # clamp guards against floating-point drift just outside [-1, 1] on near-parallel vectors
+    # Clamp guards against floating-point drift just outside [-1, 1] on near-parallel vectors
     return acos(clamp(dot(vec_a, vec_b) / (norm(vec_a) * norm(vec_b)), -1, 1))
 end
 
@@ -351,7 +351,7 @@ function dihedralangle(vec_a::AbstractVector{<:Real},
     x = dot(cross(vec_a, vec_b), cross_bc)
     ang = atan(y, x)
     # atan(0, 0) is 0, but here both terms vanish only for degenerate (collinear or
-    # coincident) input, where the dihedral is undefined
+    #   coincident) input, where the dihedral is undefined
     return iszero(x) && iszero(y) ? oftype(ang, NaN) : ang
 end
 

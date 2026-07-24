@@ -1,9 +1,12 @@
 # BioStructures.jl release notes
 
+## v4.7.3 - Jul 2026
+
+* Edge cases for `bondangle` and `dihedralangle` are handled correctly.
+
 ## v4.7.2 - Jul 2026
 
-* Fix the mac build
-* Non-exported function `atombonds` allows graph construction with or without MetaGraphs
+* The non-exported function `atombonds` allows graph construction with or without MetaGraphs.jl.
 
 ## v4.7.1 - Jan 2026
 
