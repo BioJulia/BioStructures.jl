@@ -3271,6 +3271,24 @@ end
     vec_c = [1.0, -1.0, 1.0]
     @test isapprox(dihedralangle(vec_a, vec_b, vec_c), -0.785398, atol=1e-5)
 
+    # Near-linear angle where rounding pushes the acos argument past -1; must not throw
+    at_a = Atom(100, "CA", ' ', [0.5, 0.5, 0.5], 1.0, 10.0, " C", "  ", res)
+    at_b = Atom(100, "CA", ' ', [0.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
+    at_c = Atom(100, "CA", ' ', [-0.5, -0.5, -0.5], 1.0, 10.0, " C", "  ", res)
+    @test isapprox(bondangle(at_a, at_b, at_c), π)
+    @test isapprox(bondangle([0.5, 0.5, 0.5], [-0.5, -0.5, -0.5]), π)
+
+    # Degenerate dihedrals return NaN rather than a misleading 0.0
+    at_a = Atom(100, "CA", ' ', [0.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
+    at_b = Atom(100, "CA", ' ', [1.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
+    at_c = Atom(100, "CA", ' ', [2.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
+    at_d = Atom(100, "CA", ' ', [3.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
+    @test isnan(dihedralangle(at_a, at_b, at_c, at_d))
+    @test isnan(dihedralangle([1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]))
+    # Coincident pair (at_b == at_c) leaves the central vector zero
+    at_c = Atom(100, "CA", ' ', [1.0, 0.0, 0.0], 1.0, 10.0, " C", "  ", res)
+    @test isnan(dihedralangle(at_a, at_b, at_c, at_d))
+
     @test isapprox(omegaangle(struc_1AKE['A'][20], struc_1AKE['A'][19]), -3.09191, atol=1e-5)
     @test isapprox(phiangle(struc_1AKE['A'][7], struc_1AKE['A'][6]), 2.85115, atol=1e-5)
     @test isapprox(psiangle(struc_1AKE['A'][8], struc_1AKE['A'][9]), 2.83827, atol=1e-5)
