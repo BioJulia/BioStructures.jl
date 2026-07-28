@@ -6,7 +6,7 @@
 
 ## v4.7.2 - Jul 2026
 
-* The non-exported function `atombonds` allows graph construction with or without MetaGraphs.jl.
+* `atombonds` allows graph construction with or without MetaGraphs.jl.
 
 ## v4.7.1 - Jan 2026
 
