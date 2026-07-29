@@ -2,42 +2,72 @@
 # It defines only data tables (atomtypes, residuedata, bondlengths, bondangles);
 # code that uses them belongs in a hand-written file such as src/atombonds.jl.
 
-const atomtypes = Dict{String, @NamedTuple{element::String, mass::Float32, name::String}}(
-    "2C" => (element = "C", mass = 12.01f0, name = "protein-2C"),
-    "3C" => (element = "C", mass = 12.01f0, name = "protein-3C"),
-    "C" => (element = "C", mass = 12.01f0, name = "protein-C"),
-    "C*" => (element = "C", mass = 12.01f0, name = "protein-C*"),
-    "C8" => (element = "C", mass = 12.01f0, name = "protein-C8"),
-    "CA" => (element = "C", mass = 12.01f0, name = "protein-CA"),
-    "CB" => (element = "C", mass = 12.01f0, name = "protein-CB"),
-    "CC" => (element = "C", mass = 12.01f0, name = "protein-CC"),
-    "CN" => (element = "C", mass = 12.01f0, name = "protein-CN"),
-    "CO" => (element = "C", mass = 12.01f0, name = "protein-CO"),
-    "CR" => (element = "C", mass = 12.01f0, name = "protein-CR"),
-    "CT" => (element = "C", mass = 12.01f0, name = "protein-CT"),
-    "CV" => (element = "C", mass = 12.01f0, name = "protein-CV"),
-    "CW" => (element = "C", mass = 12.01f0, name = "protein-CW"),
-    "CX" => (element = "C", mass = 12.01f0, name = "protein-CX"),
-    "H" => (element = "H", mass = 1.008f0, name = "protein-H"),
-    "H1" => (element = "H", mass = 1.008f0, name = "protein-H1"),
-    "H4" => (element = "H", mass = 1.008f0, name = "protein-H4"),
-    "H5" => (element = "H", mass = 1.008f0, name = "protein-H5"),
-    "HA" => (element = "H", mass = 1.008f0, name = "protein-HA"),
-    "HC" => (element = "H", mass = 1.008f0, name = "protein-HC"),
-    "HO" => (element = "H", mass = 1.008f0, name = "protein-HO"),
-    "HP" => (element = "H", mass = 1.008f0, name = "protein-HP"),
-    "HS" => (element = "H", mass = 1.008f0, name = "protein-HS"),
-    "N" => (element = "N", mass = 14.01f0, name = "protein-N"),
-    "N2" => (element = "N", mass = 14.01f0, name = "protein-N2"),
-    "N3" => (element = "N", mass = 14.01f0, name = "protein-N3"),
-    "NA" => (element = "N", mass = 14.01f0, name = "protein-NA"),
-    "NB" => (element = "N", mass = 14.01f0, name = "protein-NB"),
-    "O" => (element = "O", mass = 16.0f0, name = "protein-O"),
-    "O2" => (element = "O", mass = 16.0f0, name = "protein-O2"),
-    "OH" => (element = "O", mass = 16.0f0, name = "protein-OH"),
-    "S" => (element = "S", mass = 32.06f0, name = "protein-S"),
-    "SH" => (element = "S", mass = 32.06f0, name = "protein-SH"),
+"""
+    atomtypes
+
+The atom types of the Amber ff14SB force field, keyed by type class (e.g., `atomtypes["CT"]`).
+Each value is a `NamedTuple` with fields:
+
+- `element`: the chemical element symbol.
+- `mass`: the atomic mass in amu.
+- `name`: the force field's full name for the type, e.g., `"protein-CT"`. This is the value
+  stored in the `type` field of `residuedata`'s per-atom entries.
+- `sigma`: the Lennard-Jones distance parameter in Å, the separation at which the pair
+  potential crosses zero. Amber's published parameter tables instead list `Rmin/2`, where
+  `Rmin = 2^(1/6) * sigma` is the separation of minimum energy.
+- `epsilon`: the Lennard-Jones well depth in kcal/mol. Type `"HO"` has `epsilon = 0` and a
+  placeholder `sigma`: it carries no Lennard-Jones interaction.
+
+Partial charges are not properties of the type, as they vary between residues; they are in
+`residuedata`.
+
+See also `ff14SB_scale14` for the scaling of nonbonded interactions between close neighbors.
+"""
+const atomtypes = Dict{String, @NamedTuple{element::String, mass::Float32, name::String, sigma::Float32, epsilon::Float32}}(
+    "2C" => (element = "C", mass = 12.01f0, name = "protein-2C", sigma = 3.3996694f0, epsilon = 0.1094f0),
+    "3C" => (element = "C", mass = 12.01f0, name = "protein-3C", sigma = 3.3996694f0, epsilon = 0.1094f0),
+    "C" => (element = "C", mass = 12.01f0, name = "protein-C", sigma = 3.3996694f0, epsilon = 0.086f0),
+    "C*" => (element = "C", mass = 12.01f0, name = "protein-C*", sigma = 3.3996694f0, epsilon = 0.086f0),
+    "C8" => (element = "C", mass = 12.01f0, name = "protein-C8", sigma = 3.3996694f0, epsilon = 0.1094f0),
+    "CA" => (element = "C", mass = 12.01f0, name = "protein-CA", sigma = 3.3996694f0, epsilon = 0.086f0),
+    "CB" => (element = "C", mass = 12.01f0, name = "protein-CB", sigma = 3.3996694f0, epsilon = 0.086f0),
+    "CC" => (element = "C", mass = 12.01f0, name = "protein-CC", sigma = 3.3996694f0, epsilon = 0.086f0),
+    "CN" => (element = "C", mass = 12.01f0, name = "protein-CN", sigma = 3.3996694f0, epsilon = 0.086f0),
+    "CO" => (element = "C", mass = 12.01f0, name = "protein-CO", sigma = 3.3996694f0, epsilon = 0.086f0),
+    "CR" => (element = "C", mass = 12.01f0, name = "protein-CR", sigma = 3.3996694f0, epsilon = 0.086f0),
+    "CT" => (element = "C", mass = 12.01f0, name = "protein-CT", sigma = 3.3996694f0, epsilon = 0.1094f0),
+    "CV" => (element = "C", mass = 12.01f0, name = "protein-CV", sigma = 3.3996694f0, epsilon = 0.086f0),
+    "CW" => (element = "C", mass = 12.01f0, name = "protein-CW", sigma = 3.3996694f0, epsilon = 0.086f0),
+    "CX" => (element = "C", mass = 12.01f0, name = "protein-CX", sigma = 3.3996694f0, epsilon = 0.1094f0),
+    "H" => (element = "H", mass = 1.008f0, name = "protein-H", sigma = 1.0690784f0, epsilon = 0.0157f0),
+    "H1" => (element = "H", mass = 1.008f0, name = "protein-H1", sigma = 2.471353f0, epsilon = 0.0157f0),
+    "H4" => (element = "H", mass = 1.008f0, name = "protein-H4", sigma = 2.5105526f0, epsilon = 0.015f0),
+    "H5" => (element = "H", mass = 1.008f0, name = "protein-H5", sigma = 2.4214628f0, epsilon = 0.015f0),
+    "HA" => (element = "H", mass = 1.008f0, name = "protein-HA", sigma = 2.5996425f0, epsilon = 0.015f0),
+    "HC" => (element = "H", mass = 1.008f0, name = "protein-HC", sigma = 2.6495328f0, epsilon = 0.0157f0),
+    "HO" => (element = "H", mass = 1.008f0, name = "protein-HO", sigma = 10.0f0, epsilon = 0.0f0),
+    "HP" => (element = "H", mass = 1.008f0, name = "protein-HP", sigma = 1.9599771f0, epsilon = 0.0157f0),
+    "HS" => (element = "H", mass = 1.008f0, name = "protein-HS", sigma = 1.0690784f0, epsilon = 0.0157f0),
+    "N" => (element = "N", mass = 14.01f0, name = "protein-N", sigma = 3.2499986f0, epsilon = 0.17f0),
+    "N2" => (element = "N", mass = 14.01f0, name = "protein-N2", sigma = 3.2499986f0, epsilon = 0.17f0),
+    "N3" => (element = "N", mass = 14.01f0, name = "protein-N3", sigma = 3.2499986f0, epsilon = 0.17f0),
+    "NA" => (element = "N", mass = 14.01f0, name = "protein-NA", sigma = 3.2499986f0, epsilon = 0.17f0),
+    "NB" => (element = "N", mass = 14.01f0, name = "protein-NB", sigma = 3.2499986f0, epsilon = 0.17f0),
+    "O" => (element = "O", mass = 16.0f0, name = "protein-O", sigma = 2.9599218f0, epsilon = 0.21f0),
+    "O2" => (element = "O", mass = 16.0f0, name = "protein-O2", sigma = 2.9599218f0, epsilon = 0.21f0),
+    "OH" => (element = "O", mass = 16.0f0, name = "protein-OH", sigma = 3.0664735f0, epsilon = 0.2104f0),
+    "S" => (element = "S", mass = 32.06f0, name = "protein-S", sigma = 3.5635948f0, epsilon = 0.25f0),
+    "SH" => (element = "S", mass = 32.06f0, name = "protein-SH", sigma = 3.5635948f0, epsilon = 0.25f0),
 )
+
+"""
+    ff14SB_scale14
+
+The factors by which the ff14SB force field scales nonbonded interactions between atoms
+separated by exactly three bonds (1-4 pairs): `coulomb` for electrostatics and `lj` for the
+Lennard-Jones terms of `atomtypes`.
+"""
+const ff14SB_scale14 = (coulomb = 0.8333333f0, lj = 0.5f0)
 
 const RDADict = Dict{String, @NamedTuple{charge::Float32, type::String}}
 const residuedata = Dict{String, @NamedTuple{atoms::RDADict, bonds::Vector{Tuple{String,String}}, externalbonds::Vector{String}}}(

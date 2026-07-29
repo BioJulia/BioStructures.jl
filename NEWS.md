@@ -1,5 +1,10 @@
 # BioStructures.jl release notes
 
+## v4.8.0 - Jul 2026
+
+* `atomtypes` entries gain the ff14SB Lennard-Jones parameters `sigma` (Å) and `epsilon` (kcal/mol).
+* `ff14SB_scale14` holds the force field's 1-4 nonbonded scaling factors.
+
 ## v4.7.3 - Jul 2026
 
 * Edge cases for `bondangle` and `dihedralangle` are handled correctly.

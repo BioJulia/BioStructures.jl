@@ -21,6 +21,8 @@ Order   = [:module, :type, :constant, :function, :macro]
 
 ## Non-exported names
 
+- [`BioStructures.atomtypes`](@ref)
+- [`BioStructures.ff14SB_scale14`](@ref)
 - [`BioStructures.x`](@ref)
 - [`BioStructures.x!`](@ref)
 - [`BioStructures.y`](@ref)
@@ -36,6 +38,8 @@ Private = false
 Order   = [:module, :type, :constant, :function, :macro]
 ```
 ```@docs
+atomtypes
+ff14SB_scale14
 x
 x!
 y

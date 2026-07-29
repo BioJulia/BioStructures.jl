@@ -3567,6 +3567,25 @@ end
     # Bond lengths and angles
     @test BioStructures.bondlengths[("protein-2C", "protein-2C")] == 1.526f0
     @test BioStructures.bondangles[("protein-CT", "protein-C", "protein-N")] == 2.035054f0
+
+    # Lennard-Jones parameters
+    at = BioStructures.atomtypes
+    @test length(at) == 34
+    # Every type referenced by a residue template has parameters
+    typenames = Set(t.name for t in values(at))
+    @test all(a.type ∈ typenames for r in values(rd) for a in values(r.atoms))
+    # Amber tabulates Rmin/2 = 1.9080 Å and ε = 0.0860 kcal/mol for type C
+    @test at["C"].epsilon ≈ 0.0860f0 atol=1e-5
+    @test at["C"].sigma ≈ 3.39967f0 atol=1e-4
+    @test 2^(1/6) * at["C"].sigma / 2 ≈ 1.9080f0 atol=1e-3
+    for (class, t) in at
+        @test isfinite(t.sigma) && t.sigma > 0
+        @test isfinite(t.epsilon) && t.epsilon ≥ 0
+        # HO is a non-interacting dummy: zero well depth and a placeholder sigma
+        @test (t.epsilon > 0) == (class != "HO")
+    end
+    @test BioStructures.ff14SB_scale14.coulomb ≈ 5/6
+    @test BioStructures.ff14SB_scale14.lj == 0.5f0
 end
 
 @testset "Secondary structure" begin
