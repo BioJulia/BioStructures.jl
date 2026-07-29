@@ -3,8 +3,10 @@
 
 using Downloads
 
-if !isfile(joinpath(@__DIR__, "protein.ff14SB.xml"))
-    Downloads.download("https://raw.githubusercontent.com/openmm/openmm/refs/heads/master/wrappers/python/openmm/app/data/amber14/protein.ff14SB.xml", "protein.ff14SB.xml")
+const xmlfile = joinpath(@__DIR__, "protein.ff14SB.xml")
+
+if !isfile(xmlfile)
+    Downloads.download("https://raw.githubusercontent.com/openmm/openmm/refs/heads/master/wrappers/python/openmm/app/data/amber14/protein.ff14SB.xml", xmlfile)
 end
 
 function parsexmblock(f, io::IO, key)
@@ -41,7 +43,7 @@ function parsexmlline(f, line, tag, keynames...; skip=())
     return key => (; vals...)
 end
 
-rawatomtypes, residues, bondlengths, bondangles, nonbonded, scale14 = open("protein.ff14SB.xml", "r") do io
+rawatomtypes, residues, bondlengths, bondangles, nonbonded, scale14 = open(xmlfile, "r") do io
     line = readline(io)
     @assert line == "<ForceField>"
     atomtypes = Dict{String, @NamedTuple{element::String, mass::Float32, name::String}}()
