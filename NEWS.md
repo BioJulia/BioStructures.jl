@@ -1,5 +1,9 @@
 # BioStructures.jl release notes
 
+## v4.8.0 - Aug 2026
+
+* Add `disulfidebonds` to find disulfide bonds and `renamedisulfides!` to rename disulfide-bonded residues.
+
 ## v4.7.3 - Jul 2026
 
 * Edge cases for `bondangle` and `dihedralangle` are handled correctly.
