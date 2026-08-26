@@ -3715,6 +3715,53 @@ end
     @test r.default == "HIE"
 end
 
+@testset "Disulfide bonds" begin
+    # CYX lacks the CYS thiol hydrogen
+    cys = BioStructures.residuedata["CYS"]
+    cyx = BioStructures.residuedata["CYX"]
+    @test setdiff(keys(cys.atoms), keys(cyx.atoms)) == Set(["HG"])
+    @test issubset(keys(cyx.atoms), keys(cys.atoms))
+    @test ("SG", "HG") in cys.bonds
+    @test !any(b -> "HG" in b, cyx.bonds)
+    @test haskey(BioStructures.residuedata, "NCYX")
+    @test haskey(BioStructures.residuedata, "CCYX")
+
+    # 1EN2 has eight disulfides in chain A
+    struc_1EN2 = read(testfilepath("PDB", "1EN2.pdb"), PDBFormat)
+    expected_pairs = Set([(3, 18), (12, 24), (17, 31), (35, 39), (49, 64),
+                           (58, 70), (63, 77), (82, 86)])
+    bonds = disulfidebonds(struc_1EN2)
+    @test length(bonds) == 8
+    found_pairs = Set(minmax(resnumber(residue(a)), resnumber(residue(b))) for (a, b) in bonds)
+    @test found_pairs == expected_pairs
+    @test all(((a, b),) -> 2.0 < distance(a, b) < 2.1, bonds)
+
+    renamedisulfides!(struc_1EN2)
+    resnames_A = resname.(collectresidues(struc_1EN2["A"]))
+    @test count(==("CYX"), resnames_A) == 16
+    @test count(==("CYS"), resnames_A) == 0
+
+    # 1AKE has two free cysteines
+    struc_1AKE = read(testfilepath("PDB", "1AKE.pdb"), PDBFormat)
+    @test isempty(disulfidebonds(struc_1AKE))
+    renamedisulfides!(struc_1AKE)
+    resnames_1AKE = resname.(collectresidues(struc_1AKE))
+    @test count(==("CYS"), resnames_1AKE) == 2
+    @test count(==("CYX"), resnames_1AKE) == 0
+
+    # The middle SG atom has two possible partners
+    ch = Chain("A")
+    for (i, sgx) in enumerate((0.0, 2.0, 4.0))
+        r = Residue("CYS", i, ' ', false, ch)
+        r.atoms["SG"] = Atom(1, "SG", ' ', [sgx, 0.0, 0.0], 1.0, 0.0, "S", "  ", r)
+        push!(r.atom_list, "SG")
+        ch.residues[string(i)] = r
+        push!(ch.res_list, string(i))
+    end
+    @test_throws "disulfide pairing is ambiguous" disulfidebonds(ch)
+    @test_throws "disulfide pairing is ambiguous" renamedisulfides!(ch)
+end
+
 # Delete temporary file and temporary directory
 rm(temp_filename, force=true)
 rm(temp_dir, recursive=true, force=true)
