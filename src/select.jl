@@ -105,10 +105,31 @@ const amino_acid_data = Dict{String, AminoAcidResidue}(
     "HID"  => AminoAcidResidue("Histidine (D)", "HIS", "H", "Aromatic",   true,  false, 137.058912, 137.1393,  0, false), 
     "HIE"  => AminoAcidResidue("Histidine (E)", "HIS", "H", "Aromatic",   true,  false, 137.058912, 137.1393,  0, false), 
     "HIP"  => AminoAcidResidue("Histidine (doubly protonated)", "HIS", "H", "Aromatic",   true,  false, 137.058912, 137.1393,  1, false), 
+    # Disulfide-bonded cysteine, which lacks the thiol hydrogen of CYS
+    "CYX"  => AminoAcidResidue("Cysteine (disulfide-bonded)", "CYS", "C", "Sulfuric", false, false, 102.001360, 102.1350, 0, false),
 )
 
-"`Set` of residue names found in proteins and peptides."
-const proteinresnames = Set(keys(amino_acid_data))
+"""
+`Set` of residue names found in proteins and peptides.
+
+As well as the standard names, this contains the alternate protonation states,
+the disulfide-bonded cysteine names assigned by [`renamedisulfides!`](@ref), and
+the N- and C-terminal names assigned by [`specializeresnames!`](@ref), e.g.
+`NALA` and `CALA`.
+"""
+const proteinresnames = let base = Set(keys(amino_acid_data))
+    terminal = [rname for rname in keys(residuedata) if
+                length(rname) > 3 && first(rname) in ('N', 'C') && rname[2:end] in base]
+    union(base, terminal)
+end
+
+# The amino acid a residue name denotes, with the terminal names `NALA` and
+# `CALA` both denoting `ALA`. Defined for names in `proteinresnames`.
+function aminoaciddata(el::Union{AbstractResidue, AbstractAtom})
+    rname = resname(el, strip=false)
+    haskey(amino_acid_data, rname) && return amino_acid_data[rname]
+    return amino_acid_data[chop(rname; head=1, tail=0)]
+end
 
 """
     standardselector(at)
@@ -240,7 +261,12 @@ end
     proteinselector(at)
 
 Determines if an `AbstractResidue` or `AbstractAtom` is part of a protein
-or peptide based on the residue name.
+or peptide based on the residue name, i.e. whether the residue name is in
+`proteinresnames`.
+
+The names assigned by [`specializeresnames!`](@ref) and
+[`renamedisulfides!`](@ref), such as `NALA` and `CYX`, are selected along with
+the standard names.
 """
 function proteinselector(el::Union{AbstractResidue, AbstractAtom})
     return resnameselector(el, proteinresnames)
@@ -254,7 +280,7 @@ Determines if an `AbstractResidue` is, or an `AbstractAtom` is part of, an
 acidic amino acid based on the residue name.
 """
 function acidicresselector(el::Union{AbstractResidue, AbstractAtom})
-    return proteinselector(el) && amino_acid_data[resname(el)].type == "Acidic"
+    return proteinselector(el) && aminoaciddata(el).type == "Acidic"
 end
 
 """
@@ -265,7 +291,7 @@ Determines if an `AbstractResidue` is, or an `AbstractAtom` is part of, an
 aliphatic amino acid based on the residue name.
 """
 function aliphaticresselector(el::Union{AbstractResidue, AbstractAtom})
-    return proteinselector(el) && amino_acid_data[resname(el)].type == "Aliphatic"
+    return proteinselector(el) && aminoaciddata(el).type == "Aliphatic"
 end
 
 """
@@ -276,7 +302,7 @@ Determines if an `AbstractResidue` is, or an `AbstractAtom` is part of, an
 aromatic amino acid based on the residue name.
 """
 function aromaticresselector(el::Union{AbstractResidue, AbstractAtom})
-    return proteinselector(el) && amino_acid_data[resname(el)].type == "Aromatic"
+    return proteinselector(el) && aminoaciddata(el).type == "Aromatic"
 end
 
 """
@@ -287,7 +313,7 @@ Determines if an `AbstractResidue` is, or an `AbstractAtom` is part of, a
 basic amino acid based on the residue name.
 """
 function basicresselector(el::Union{AbstractResidue, AbstractAtom})
-    return proteinselector(el) && amino_acid_data[resname(el)].type == "Basic"
+    return proteinselector(el) && aminoaciddata(el).type == "Basic"
 end
 
 """
@@ -298,7 +324,7 @@ Determines if an `AbstractResidue` is, or an `AbstractAtom` is part of, a
 charged amino acid based on the residue name.
 """
 function chargedresselector(el::Union{AbstractResidue, AbstractAtom})
-    return proteinselector(el) && amino_acid_data[resname(el)].charge != 0
+    return proteinselector(el) && aminoaciddata(el).charge != 0
 end
 
 """
@@ -309,7 +335,7 @@ Determines if an `AbstractResidue` is, or an `AbstractAtom` is part of, a
 neutral amino acid based on the residue name.
 """
 function neutralresselector(el::Union{AbstractResidue, AbstractAtom})
-    return proteinselector(el) && amino_acid_data[resname(el)].charge == 0
+    return proteinselector(el) && aminoaciddata(el).charge == 0
 end
 
 """
@@ -320,7 +346,7 @@ Determines if an `AbstractResidue` is, or an `AbstractAtom` is part of, a
 hydrophobic amino acid based on the residue name.
 """
 function hydrophobicresselector(el::Union{AbstractResidue, AbstractAtom})
-    return proteinselector(el) && amino_acid_data[resname(el)].hydrophobic
+    return proteinselector(el) && aminoaciddata(el).hydrophobic
 end
 
 """
@@ -331,7 +357,7 @@ Determines if an `AbstractResidue` is, or an `AbstractAtom` is part of, a
 polar amino acid based on the residue name.
 """
 function polarresselector(el::Union{AbstractResidue, AbstractAtom})
-    return proteinselector(el) && amino_acid_data[resname(el)].polar
+    return proteinselector(el) && aminoaciddata(el).polar
 end
 
 """
@@ -342,7 +368,7 @@ Determines if an `AbstractResidue` is, or an `AbstractAtom` is part of, a
 non-polar amino acid based on the residue name.
 """
 function nonpolarresselector(el::Union{AbstractResidue, AbstractAtom})
-    return proteinselector(el) && !amino_acid_data[resname(el)].polar
+    return proteinselector(el) && !aminoaciddata(el).polar
 end
 
 "`Set` of residue names corresponding to water."

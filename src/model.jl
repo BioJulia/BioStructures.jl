@@ -1126,11 +1126,18 @@ function specializeresnames!(r::Residue)
             error("at least one of HD1 or HE2 must be present")
         end
     end
-    # N and C termini
-    if haskey(r.atoms, "H3") && !haskey(residuedata[rname].atoms, "H3") && haskey(residuedata, "N" * rname)
-        r.name = "N" * rname
-    elseif haskey(r.atoms, "OXT") && !haskey(residuedata[rname].atoms, "OXT") && haskey(residuedata, "C" * rname)
-        r.name = "C" * rname
+    # N and C termini. `rname` is read again because the protonation branch
+    # above may have renamed the residue.
+    rname = resname(r)
+    rd = get(residuedata, rname, nothing)
+    if rd !== nothing
+        if !haskey(rd.atoms, "H3") && findatombyname(r, "H3"; strict=false) !== nothing &&
+                haskey(residuedata, "N" * rname)
+            r.name = "N" * rname
+        elseif !haskey(rd.atoms, "OXT") && findatombyname(r, "OXT"; strict=false) !== nothing &&
+                haskey(residuedata, "C" * rname)
+            r.name = "C" * rname
+        end
     end
     return r
 end

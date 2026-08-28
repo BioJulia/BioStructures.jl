@@ -21,12 +21,12 @@ using LinearAlgebra
 using Statistics
 
 include("model.jl")
+include("bonding.jl")
 include("select.jl")
 include("pdb.jl")
 include("mmcif.jl")
 include("download.jl")
 include("spatial.jl")
-include("bonding.jl")
 include("atombonds.jl")
 include("disulfides.jl")
 
