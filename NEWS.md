@@ -1,5 +1,10 @@
 # BioStructures.jl release notes
 
+## v4.8.1 - Aug 2026
+
+* `proteinselector`, and the amino acid property selectors built on it, recognize the residue names assigned by `specializeresnames!` and `renamedisulfides!`, such as `NALA` and `CYX`.
+* `specializeresnames!` renames the terminal residues of structures read from PDB files, whose atom names are space-padded, and specializes terminal histidines.
+
 ## v4.8.0 - Aug 2026
 
 * Add `disulfidebonds` to find disulfide bonds and `renamedisulfides!` to rename disulfide-bonded residues.

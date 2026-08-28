@@ -3704,6 +3704,11 @@ end
     @test nhis == 0
     @test nhie == 2
 
+    # The specialized names are still protein
+    @test length(collectatoms(struc, proteinselector)) == length(collectatoms(struc, standardselector))
+    @test length(collectresidues(struc, polarresselector)) +
+          length(collectresidues(struc, nonpolarresselector)) == length(collectresidues(struc))
+
     struc_1res = read(joinpath(@__DIR__, "data", "disordered_1res.cif"), MMCIFFormat)
     r = struc_1res['A'][1]
     @test r isa DisorderedResidue
@@ -3713,6 +3718,41 @@ end
     @test r isa DisorderedResidue
     @test resname(defaultresidue(r)) == "HIE"
     @test r.default == "HIE"
+
+    # PDB atom names are stored space-padded, e.g. " H3 " and " OXT"
+    struc_1SSU = read(testfilepath("PDB", "1SSU.pdb"), PDBFormat)[1]
+    natoms = length(collectatoms(struc_1SSU, proteinselector))
+    renamedisulfides!(struc_1SSU)
+    specializeresnames!(struc_1SSU)
+    residues_1SSU = collectresidues(struc_1SSU)
+    @test resname(first(residues_1SSU)) == "NASP"
+    @test resname(last(residues_1SSU)) == "CMET"
+    @test count(r -> resname(r) == "CYX", residues_1SSU) == 8
+    @test length(collectatoms(struc_1SSU, proteinselector)) == natoms
+
+    # A terminal histidine is specialized in both respects
+    ch = Chain("A")
+    r = Residue("HIS", 1, ' ', false, ch)
+    for (i, name) in enumerate(("HE2", "H3"))
+        r.atoms[name] = Atom(i, name, ' ', [Float64(i), 0.0, 0.0], 1.0, 0.0, "H", "  ", r)
+        push!(r.atom_list, name)
+    end
+    ch.residues["1"] = r
+    push!(ch.res_list, "1")
+    specializeresnames!(ch)
+    @test resname(r) == "NHIE"
+    @test proteinselector(r)
+
+    # Residues with no entry in `residuedata` are left alone
+    ch = Chain("A")
+    r = Residue("LIG", 1, ' ', true, ch)
+    r.atoms["OXT"] = Atom(1, "OXT", ' ', [0.0, 0.0, 0.0], 1.0, 0.0, "O", "  ", r)
+    push!(r.atom_list, "OXT")
+    ch.residues["1"] = r
+    push!(ch.res_list, "1")
+    specializeresnames!(ch)
+    @test resname(r) == "LIG"
+    @test !proteinselector(r)
 end
 
 @testset "Disulfide bonds" begin
@@ -3740,6 +3780,7 @@ end
     resnames_A = resname.(collectresidues(struc_1EN2["A"]))
     @test count(==("CYX"), resnames_A) == 16
     @test count(==("CYS"), resnames_A) == 0
+    @test all(proteinselector, filter(r -> resname(r) == "CYX", collectresidues(struc_1EN2)))
 
     # 1AKE has two free cysteines
     struc_1AKE = read(testfilepath("PDB", "1AKE.pdb"), PDBFormat)
