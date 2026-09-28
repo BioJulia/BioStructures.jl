@@ -3803,6 +3803,42 @@ end
     @test_throws "disulfide pairing is ambiguous" renamedisulfides!(ch)
 end
 
+@testset "Modified amino acids" begin
+    io = IOBuffer("""
+        ATOM      1  N   ALA A   1      11.104   6.134  -6.504  1.00  0.00           N
+        ATOM      2  CA  ALA A   1      11.639   6.071  -5.147  1.00  0.00           C
+        ATOM      3  N   THR A   2      12.104   7.134  -6.504  1.00  0.00           N
+        ATOM      4  CA  THR A   2      12.639   7.071  -5.147  1.00  0.00           C
+        HETATM    5  N   TPO A   3      13.104   8.134  -6.504  1.00  0.00           N
+        HETATM    6  CA  TPO A   3      13.639   8.071  -5.147  1.00  0.00           C
+        HETATM    7  N   XXX A   4      14.104   9.134  -6.504  1.00  0.00           N
+        """)
+    ala, thr, tpo, xxx = collectresidues(read(io, PDBFormat))
+    @test proteinselector(ala)
+    @test proteinselector(thr)
+    @test proteinselector(tpo)
+    @test !proteinselector(xxx) # Not all HETATM are matched with proteinselectors
+    @test ishetero(tpo) && !standardselector(tpo)
+    @test polarresselector(tpo) && polarresselector(thr) && !polarresselector(ala)
+    # TPO and THR share the same three letter code, but have different mass
+    @test ishetero(tpo) != ishetero(thr)
+    @test BioStructures.aminoaciddata(tpo).three_letter_code == BioStructures.aminoaciddata(thr).three_letter_code
+    @test BioStructures.aminoaciddata(tpo).mass !== BioStructures.aminoaciddata(thr).mass
+
+    # Every modified residue points at a standard parent, in lowercase
+    modified = ["TPO", "SEP", "PTR", "MSE", "HYP", "CSO", "ALY", "MLY", "M3L", "SEC",
+                "SMC", "YCM", "CSD", "OCS", "MHO", "OMT", "FME", "TYS", "CGU", "PCA",
+                "MEN", "IAS", "HIC", "KCX", "MLZ", "LYZ"]
+    for name in modified
+        d = BioStructures.amino_acid_data[name]
+        parent = BioStructures.amino_acid_data[d.three_letter_code]
+        @test d.three_letter_code == parent.three_letter_code
+        @test d.one_letter_code == lowercase(parent.one_letter_code)
+        @test name in BioStructures.proteinresnames
+    end
+end
+
+
 # Delete temporary file and temporary directory
 rm(temp_filename, force=true)
 rm(temp_dir, recursive=true, force=true)
