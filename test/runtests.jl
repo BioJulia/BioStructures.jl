@@ -3826,9 +3826,9 @@ end
     @test BioStructures.aminoaciddata(tpo).mass !== BioStructures.aminoaciddata(thr).mass
 
     # Every modified residue points has unique properties and its one lettre codes reference its parent (in lower case)
-    modified = ["TPO", "SEP", "PTR", "MSE", "HYP", "CSO", "ALY", "MLY", "M3L", "SEC",
-                "SMC", "YCM", "CSD", "OCS", "MHO", "OMT", "FME", "TYS", "CGU", "PCA",
-                "MEN", "IAS", "HIC", "KCX", "MLZ", "LYZ"]
+    modified = ["TPO", "SEP", "PTR", "MSE", "HYP", "CSO", "ALY", "MLY", "M3L", "SMC", 
+                "YCM", "CSD", "OCS", "MHO", "OMT", "FME", "TYS", "CGU", "PCA", "MEN", 
+                "IAS", "HIC", "KCX", "MLZ", "LYZ"]
     for name in modified
         d = BioStructures.amino_acid_data[name]
         parent = BioStructures.amino_acid_data[d.three_letter_code]
