@@ -96,6 +96,7 @@ const amino_acid_data = Dict{String, AminoAcidResidue}(
     "TRP" => AminoAcidResidue("Tryptophan",    "TRP", "W", "Aromatic",   false, true,  186.079313, 186.2099,  0, false),
     "TYR" => AminoAcidResidue("Tyrosine",      "TYR", "Y", "Aromatic",   true,  false, 163.063320, 163.1733,  0, false),
     "VAL" => AminoAcidResidue("Valine",        "VAL", "V", "Aliphatic",  false, true,   99.068414,  99.1311,  0, false),
+    "SEC" => AminoAcidResidue("Selenocysteine","SEC", "U", "Sulfuric",   false, false, 150.953635, 150.0379, -1, false),
     # Alternate protonation states for CHARMM and AMBER
     "ASPP" => AminoAcidResidue("Aspartic acid (protonated)", "ASP", "D", "Acidic", true,  false, 115.026943, 115.0874, 0, false),
     "GLUP" => AminoAcidResidue("Glutamic acid (protonated)", "GLU", "E", "Acidic", true,  false, 129.042593, 129.1140, 0, false),
@@ -107,15 +108,42 @@ const amino_acid_data = Dict{String, AminoAcidResidue}(
     "HIP"  => AminoAcidResidue("Histidine (doubly protonated)", "HIS", "H", "Aromatic",   true,  false, 137.058912, 137.1393,  1, false), 
     # Disulfide-bonded cysteine, which lacks the thiol hydrogen of CYS
     "CYX"  => AminoAcidResidue("Cysteine (disulfide-bonded)", "CYS", "C", "Sulfuric", false, false, 102.001360, 102.1350, 0, false),
+    # Modified amino acids, the lowercase one letter code marks the residue as modified as references the parent.
+    "TPO"  => AminoAcidResidue("Phosphothreonine",          "TPO", "t", "Hydroxylic", true,  false, 181.014009, 181.0838, -2, false),
+    "SEP"  => AminoAcidResidue("Phosphoserine",             "SEP", "s", "Hydroxylic", true,  false, 166.998359, 167.0572, -2, false),
+    "PTR"  => AminoAcidResidue("Phosphotyrosine",           "PTR", "y", "Aromatic",   true,  false, 243.029659, 243.1532, -2, false),
+    "MSE"  => AminoAcidResidue("Selenomethionine",          "MSE", "m", "Sulfuric",   false, false, 178.984935, 178.0911,  0, false),
+    "HYP"  => AminoAcidResidue("Hydroxyproline",            "HYP", "p", "Cyclic",     true,  false, 113.047678, 113.1146,  0, false),
+    "CSO"  => AminoAcidResidue("S-hydroxycysteine",         "CSO", "c", "Sulfuric",   true,  false, 119.004099, 119.1423,  0, false),
+    "ALY"  => AminoAcidResidue("N6-acetyllysine",           "ALY", "k", "Basic",      true,  false, 170.105528, 170.2090,  0, false),
+    "MLY"  => AminoAcidResidue("N-dimethyllysine",          "MLY", "k", "Basic",      true,  false, 156.126263, 156.2254,  1, false),
+    "M3L"  => AminoAcidResidue("N-trimethyllysine",         "M3L", "k", "Basic",      true,  false, 170.141913, 170.2520,  1, false),
+    "SMC"  => AminoAcidResidue("S-methylcysteine",          "SMC", "c", "Sulfuric",   false, false, 117.024835, 117.1695,  0, false),
+    "YCM"  => AminoAcidResidue("S-carbamidomethylcysteine", "YCM", "c", "Sulfuric",   true,  false, 160.030649, 160.1942,  0, false),
+    "CSD"  => AminoAcidResidue("Cysteine sulfinic acid",    "CSD", "c", "Sulfuric",   true,  false, 134.999014, 135.1417, -1, false),
+    "OCS"  => AminoAcidResidue("Cysteic acid",              "OCS", "c", "Sulfuric",   true,  false, 150.993929, 151.1411, -1, false),
+    "MHO"  => AminoAcidResidue("Methionine sulfoxide",      "MHO", "m", "Sulfuric",   true,  false, 147.035400, 147.1955,  0, false),
+    "OMT"  => AminoAcidResidue("Methionine sulfone",        "OMT", "m", "Sulfuric",   true,  false, 163.030314, 163.1949,  0, false),
+    "FME"  => AminoAcidResidue("N-formylmethionine",        "FME", "m", "Sulfuric",   false, false, 159.035400, 159.2062,  0, false),
+    "TYS"  => AminoAcidResidue("Sulfotyrosine",             "TYS", "y", "Aromatic",   true,  false, 243.020143, 243.2365, -1, false),
+    "CGU"  => AminoAcidResidue("Gamma-carboxyglutamic acid","CGU", "e", "Acidic",     true,  false, 173.032422, 173.1235, -2, false),
+    "PCA"  => AminoAcidResidue("Pyroglutamic acid",         "PCA", "q", "Amide",      true,  false, 111.032028, 111.0987,  0, false),
+    "MEN"  => AminoAcidResidue("N-methylasparagine",        "MEN", "n", "Amide",      true,  false, 128.058578, 128.1292,  0, false),
+    "IAS"  => AminoAcidResidue("Isoaspartic acid",          "IAS", "d", "Acidic",     true,  false, 115.026943, 115.0874, -1, false),
+    "HIC"  => AminoAcidResidue("4-Methylhistidine",         "HIC", "h", "Aromatic",   true,  false, 151.074562, 151.1659,  0, false),
+    "KCX"  => AminoAcidResidue("N6-carboxylysine",          "KCX", "k", "Basic",      true,  false, 172.084792, 172.1818, -1, false),
+    "MLZ"  => AminoAcidResidue("N-methyllysine",            "MLZ", "k", "Basic",      true,  false, 142.110613, 142.1989,  1, false),
+    "LYZ"  => AminoAcidResidue("5-hydroxylysine",           "LYZ", "k", "Basic",      true,  false, 144.089878, 144.1717,  1, false),
 )
 
 """
 `Set` of residue names found in proteins and peptides.
 
 As well as the standard names, this contains the alternate protonation states,
-the disulfide-bonded cysteine names assigned by [`renamedisulfides!`](@ref), and
-the N- and C-terminal names assigned by [`specializeresnames!`](@ref), e.g.
-`NALA` and `CALA`.
+the disulfide-bonded cysteine names assigned by [`renamedisulfides!`](@ref), the
+N- and C-terminal names assigned by [`specializeresnames!`](@ref), e.g. `NALA`
+and `CALA`, and the names of common modified amino acids such as `TPO` and
+`SEP`.
 """
 const proteinresnames = let base = Set(keys(amino_acid_data))
     terminal = [rname for rname in keys(residuedata) if
@@ -265,8 +293,10 @@ or peptide based on the residue name, i.e. whether the residue name is in
 `proteinresnames`.
 
 The names assigned by [`specializeresnames!`](@ref) and
-[`renamedisulfides!`](@ref), such as `NALA` and `CYX`, are selected along with
-the standard names.
+[`renamedisulfides!`](@ref), such as `NALA` and `CYX`, and the names of
+modified amino acids are selected along with the standard names.
+Note that modified amino acids read from HETATM records are still hetero
+residues, so [`standardselector`](@ref) does not select them.
 """
 function proteinselector(el::Union{AbstractResidue, AbstractAtom})
     return resnameselector(el, proteinresnames)
