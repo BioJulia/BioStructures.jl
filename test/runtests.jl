@@ -3825,7 +3825,8 @@ end
     @test BioStructures.aminoaciddata(tpo).three_letter_code !== BioStructures.aminoaciddata(thr).three_letter_code
     @test BioStructures.aminoaciddata(tpo).mass !== BioStructures.aminoaciddata(thr).mass
 
-    # Every modified residue points has unique properties and its one lettre codes reference its parent (in lower case)
+    # Every modified residue has unique properties and its one letter code references
+    #   its parent (in lower case)
     modified = ["TPO", "SEP", "PTR", "MSE", "HYP", "CSO", "ALY", "MLY", "M3L", "SMC", 
                 "YCM", "CSD", "OCS", "MHO", "OMT", "FME", "TYS", "CGU", "PCA", "MEN", 
                 "IAS", "HIC", "KCX", "MLZ", "LYZ"]
@@ -3837,7 +3838,6 @@ end
         @test name in BioStructures.proteinresnames
     end
 end
-
 
 # Delete temporary file and temporary directory
 rm(temp_filename, force=true)
