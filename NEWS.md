@@ -1,5 +1,9 @@
 # BioStructures.jl release notes
 
+## v4.9.0 - Oct 2026
+
+* Add modified amino acids to `amino_acid_data`.
+
 ## v4.8.1 - Aug 2026
 
 * `proteinselector`, and the amino acid property selectors built on it, recognize the residue names assigned by `specializeresnames!` and `renamedisulfides!`, such as `NALA` and `CYX`.
