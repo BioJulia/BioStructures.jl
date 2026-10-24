@@ -7,9 +7,13 @@ export
     downloadentirepdb,
     updatelocalpdb,
     downloadallobsoletepdb,
-    retrievepdb
+    retrievepdb,
+    alphafoldentry,
+    downloadalphafold,
+    retrievealphafold
 
 const pdb_download_prefix = "https://files.wwpdb.org/pub/pdb"
+const alphafold_api_prefix = "https://alphafold.ebi.ac.uk/api/prediction"
 
 """
     pdbentrylist()
@@ -410,6 +414,157 @@ function retrievepdb(pdbid::AbstractString;
         pdbpath = joinpath(dir, "$(pdbid_upper)_ba$ba_number.$(pdbextension[format])")
     end
     read(pdbpath, format; structure_name=structure_name, kwargs...)
+end
+
+# The AlphaFold DB file server rejects requests whose User-Agent begins with
+# "curl/", which is the Downloads.jl default
+alphafold_headers() = ["User-Agent" => "BioStructures.jl/$(pkgversion(@__MODULE__))"]
+
+"""
+    alphafoldentry(id::AbstractString)
+
+Obtain the metadata for a predicted structure in the AlphaFold Protein Structure
+Database (AlphaFold DB).
+
+`id` is a UniProt accession, e.g. `"P04637"`, optionally with an isoform
+suffix, e.g. `"P04637-2"`, or an AlphaFold DB entry ID, e.g. `"AF-P04637-F1"`.
+Returns a dictionary with fields that include `"entryId"`, `"latestVersion"`,
+`"uniprotSequence"`, `"globalMetricValue"` (the mean pLDDT), `"pdbUrl"` and
+`"cifUrl"`; see https://alphafold.ebi.ac.uk/api-docs for the full list.
+Throws a `RequestError` if AlphaFold DB has no entry for `id`.
+Requires an internet connection.
+"""
+function alphafoldentry(id::AbstractString)
+    if !occursin(r"^[a-zA-Z0-9-]+$", id)
+        throw(ArgumentError("Not a valid UniProt accession or AlphaFold DB ID: \"$id\""))
+    end
+    io = IOBuffer()
+    Downloads.download("$alphafold_api_prefix/$id", io; headers=alphafold_headers())
+    entries = JSON.parse(String(take!(io)))
+    # A query for a canonical accession also returns entries for its isoforms
+    entryid = uppercase(startswith(uppercase(id), "AF-") ? id : "AF-$id-F1")
+    i = findfirst(entry -> entry["entryId"] == entryid, entries)
+    if i === nothing
+        error("AlphaFold DB returned no entry with ID $entryid; returned IDs: ",
+              join((entry["entryId"] for entry in entries), ", "))
+    end
+    return entries[i]
+end
+
+"""
+    downloadalphafold(id::AbstractString; <keyword arguments>)
+    downloadalphafold(ids::AbstractArray{<:AbstractString, 1}; <keyword arguments>)
+    downloadalphafold(f::Function, args...; <keyword arguments>)
+
+Download the latest version of a predicted structure from the AlphaFold Protein
+Structure Database (AlphaFold DB).
+
+When given an `AbstractString`, a UniProt accession or AlphaFold DB entry ID as
+described for [`alphafoldentry`](@ref), downloads the model file and returns the
+path to the file.
+The file keeps its AlphaFold DB name, e.g. `"AF-P04637-F1-model_v6.pdb"`, which
+records the model version.
+AlphaFold DB serves only the latest version of each model.
+When given an `Array{<:AbstractString, 1}`, downloads the model files in the
+array and returns an array of the paths to the files; IDs with no AlphaFold DB
+entry are skipped with a warning.
+When given a function as the first argument, downloads the file(s) to a
+temporary directory, runs the function with the downloaded filepath(s) as an
+argument, then removes the file(s).
+Requires an internet connection.
+
+# Arguments
+- `dir::AbstractString=pwd()`: the directory to which the file is downloaded;
+    defaults to the current working directory.
+- `format::Type=PDBFormat`: the format of the file; options are PDBFormat and
+    MMCIFFormat.
+- `overwrite::Bool=false`: if set `true`, overwrites the file if it exists in
+    `dir`; by default skips downloading the file if it exists.
+"""
+function downloadalphafold(id::AbstractString;
+                dir::AbstractString=pwd(),
+                format::Type{<:Union{PDBFormat, MMCIFFormat}}=PDBFormat,
+                overwrite::Bool=false)
+    entry = alphafoldentry(id)
+    url = entry[format == PDBFormat ? "pdbUrl" : "cifUrl"]
+    if !isdir(dir)
+        @info "Creating directory: $dir"
+        mkpath(dir)
+    end
+    path = joinpath(dir, split(url, "/")[end])
+    if isfile(path) && !overwrite
+        @info "File exists: $(entry["entryId"])"
+    else
+        @info "Downloading file from AlphaFold DB: $(entry["entryId"])"
+        # Download to a temporary file so that an interrupted download leaves nothing at `path`
+        temppath = tempname(dir)
+        try
+            Downloads.download(url, temppath; headers=alphafold_headers())
+            mv(temppath, path; force=true)
+        finally
+            rm(temppath, force=true)
+        end
+    end
+    return path
+end
+
+function downloadalphafold(ids::AbstractArray{<:AbstractString, 1}; kwargs...)
+    paths = String[]
+    missinglist = String[]
+    for id in ids
+        try
+            push!(paths, downloadalphafold(id; kwargs...))
+        catch err
+            if err isa RequestError && err.response.status == 404
+                push!(missinglist, id)
+            else
+                rethrow()
+            end
+        end
+    end
+    if !isempty(missinglist)
+        @warn "$(length(missinglist)) ID(s) have no AlphaFold DB entry: $missinglist"
+    end
+    return paths
+end
+
+function downloadalphafold(f::Function, args...; kwargs...)
+    mktempdir() do dir
+        f(downloadalphafold(args...; dir, kwargs...))
+    end
+end
+
+"""
+    retrievealphafold(id::AbstractString; <keyword arguments>)
+
+Download and read the latest version of a predicted structure from the AlphaFold
+Protein Structure Database (AlphaFold DB), returning a `MolecularStructure`.
+
+`id` is a UniProt accession or AlphaFold DB entry ID as described for
+[`alphafoldentry`](@ref).
+The per-residue confidence score (pLDDT) is stored as the temperature factor
+of each atom, see [`tempfactor`](@ref).
+Requires an internet connection.
+
+# Arguments
+- `dir::AbstractString=pwd()`: the directory to which the file is downloaded;
+    defaults to the current working directory.
+- `format::Type=MMCIFFormat`: the format of the file; options are PDBFormat and
+    MMCIFFormat.
+- `overwrite::Bool=false`: if set `true`, overwrites the file if it exists in
+    `dir`; by default skips downloading the file if it exists.
+- `structure_name::AbstractString`: the name given to the returned
+    `MolecularStructure`; defaults to the file name, e.g.
+    `"AF-P04637-F1-model_v6.cif"`.
+- other keyword arguments, e.g. `run_dssp`, are passed to `read`.
+"""
+function retrievealphafold(id::AbstractString;
+            dir::AbstractString=pwd(),
+            format::Type{<:Union{PDBFormat, MMCIFFormat}}=MMCIFFormat,
+            overwrite::Bool=false,
+            kwargs...)
+    path = downloadalphafold(id; dir, format, overwrite)
+    read(path, format; kwargs...)
 end
 
 const FMT_SPECIMEN_PATH = joinpath(dirname(dirname(@__FILE__)), "BioFmtSpecimens")
