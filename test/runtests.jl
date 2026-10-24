@@ -114,7 +114,64 @@ end
 
 Aqua.test_all(BioStructures; ambiguities=(recursive=false))
 
-# This is the only test set that requires an internet connection
+# These are the only test sets that require an internet connection
+@testset "AlphaFold DB interface" begin
+    entry = alphafoldentry("Q7TQA6")
+    @test entry["entryId"] == "AF-Q7TQA6-F1"
+    @test entry["uniprotAccession"] == "Q7TQA6"
+    v = entry["latestVersion"]
+    # A query for a canonical accession also returns its isoforms
+    @test alphafoldentry("P04637")["entryId"] == "AF-P04637-F1"
+    @test alphafoldentry("P04637-2")["entryId"] == "AF-P04637-2-F1"
+    @test alphafoldentry("af-q7tqa6-f1")["entryId"] == "AF-Q7TQA6-F1"
+    # Invalid ID format
+    @test_throws ArgumentError alphafoldentry("Q7TQA6/31-308")
+    # Valid accession format but no AlphaFold DB entry
+    @test_throws RequestError alphafoldentry("A0A000Z999")
+    # Invalid file format
+    @test_throws TypeError downloadalphafold("Q7TQA6", dir=temp_dir, format=PDBXMLFormat)
+
+    path = downloadalphafold("Q7TQA6", dir=temp_dir)
+    @test path == joinpath(temp_dir, "AF-Q7TQA6-F1-model_v$v.pdb")
+    @test isfile(path) && filesize(path) > 0
+    path = downloadalphafold("Q7TQA6", dir=temp_dir, format=MMCIFFormat)
+    @test path == joinpath(temp_dir, "AF-Q7TQA6-F1-model_v$v.cif")
+    @test isfile(path) && filesize(path) > 0
+    # An existing file is not downloaded again unless overwrite is set
+    write(path, "placeholder")
+    downloadalphafold("Q7TQA6", dir=temp_dir, format=MMCIFFormat)
+    @test read(path, String) == "placeholder"
+    downloadalphafold("Q7TQA6", dir=temp_dir, format=MMCIFFormat, overwrite=true)
+    @test filesize(path) > length("placeholder")
+
+    # Download multiple files, skipping IDs with no entry
+    paths = @test_logs (:warn, r"A0A000Z999") match_mode=:any downloadalphafold(
+                ["Q7TQA6", "A0A000Z999", "P69905"], dir=temp_dir)
+    @test paths == [joinpath(temp_dir, "AF-Q7TQA6-F1-model_v$v.pdb"),
+                    joinpath(temp_dir, "AF-P69905-F1-model_v$(alphafoldentry("P69905")["latestVersion"]).pdb")]
+    # Errors other than a missing entry are not skipped
+    @test_throws ArgumentError downloadalphafold(["Q7TQA6", "Q7TQA6/31-308"], dir=temp_dir)
+
+    # Test function as first argument to downloadalphafold
+    tmppath = Ref("")
+    @test downloadalphafold("Q7TQA6") do fp
+        tmppath[] = fp
+        s = read(fp, PDBFormat)
+        return countresidues(s, standardselector)
+    end == 331
+    @test !isfile(tmppath[])
+    @test downloadalphafold(fps -> length(fps), ["Q7TQA6", "P69905"]) == 2
+
+    # Test retrievealphafold
+    struc = retrievealphafold("Q7TQA6", dir=temp_dir)
+    @test structurename(struc) == "AF-Q7TQA6-F1-model_v$v.cif"
+    @test countresidues(struc, standardselector) == 331
+    @test all(a -> 0 <= tempfactor(a) <= 100, collectatoms(struc))
+    struc = retrievealphafold("Q7TQA6", dir=temp_dir, format=PDBFormat, structure_name="New name")
+    @test structurename(struc) == "New name"
+    @test countresidues(struc, standardselector) == 331
+end
+
 @testset "PDB interface" begin
     @test length(pdbentrylist()) > 100000
 

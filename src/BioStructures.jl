@@ -14,6 +14,7 @@ using BioSymbols
 using CodecZlib
 using Downloads
 using Format
+import JSON
 using PrecompileTools
 using RecipesBase
 

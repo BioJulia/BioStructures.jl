@@ -683,6 +683,29 @@ end
 Note that some PDB entries, e.g. large viral assemblies, are not available as PDB format files.
 In this case download the mmCIF file instead.
 
+## Downloading AlphaFold models
+
+Predicted structures from the [AlphaFold Protein Structure Database](https://alphafold.ebi.ac.uk) (AlphaFold DB) are identified by UniProt accession.
+To download the latest version of a model:
+
+```julia
+downloadalphafold("P04637", dir="path/to/model/directory")
+```
+
+The file keeps its AlphaFold DB name, e.g. `AF-P04637-F1-model_v6.pdb`, which records the model version.
+[`downloadalphafold`](@ref) accepts the same `format` argument (PDBFormat or MMCIFFormat), lists of IDs and function arguments as [`downloadpdb`](@ref).
+When given a list, IDs with no AlphaFold DB entry are skipped with a warning.
+
+To download and read a model in one step:
+
+```julia-repl
+julia> struc = retrievealphafold("P04637")
+MolecularStructure AF-P04637-F1-model_v6.cif with 1 models, 1 chains (A), 393 residues, 3060 atoms
+```
+
+The per-residue confidence score (pLDDT) is stored as the temperature factor of each atom and can be accessed with [`tempfactor`](@ref).
+[`alphafoldentry`](@ref) returns the AlphaFold DB metadata for an entry, such as the model version, the UniProt sequence and the mean pLDDT.
+
 ## Reading PDB files
 
 To parse an existing PDB file into a Structure-Model-Chain-Residue-Atom framework:
