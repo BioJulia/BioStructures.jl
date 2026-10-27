@@ -1,5 +1,9 @@
 # BioStructures.jl release notes
 
+## v4.10.0 - Oct 2026
+
+* Add `alphafoldentry`, `downloadalphafold` and `retrievealphafold` to download models from the AlphaFold Protein Structure Database.
+
 ## v4.9.0 - Oct 2026
 
 * Add modified amino acids to `amino_acid_data`.
