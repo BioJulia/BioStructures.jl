@@ -4199,3 +4199,8 @@ Other packages in the Julia ecosystem that deal with structural bioinformatics o
 - [MMTF.jl](https://github.com/BioJulia/MMTF.jl) - read and write MMTF files. BioStructures.jl builds on top of MMTF.jl.
 - [ProteinEnsembles.jl](https://github.com/jgreener64/ProteinEnsembles.jl) - model ensembles of protein structures.
 - [Molly.jl](https://github.com/jgreener64/Molly.jl) - molecular dynamics in Julia.
+- [MolSimToolkit.jl](https://github.com/m3g/MolSimToolkit.jl) - molecular dynamics analysis.
+- [TMscore.jl](https://github.com/MurrellGroup/TMscore.jl) - bindings to the TMscore library.
+- [DihedralParametrization.jl](https://github.com/JuliaStructBio/DihedralParametrization.jl) - represent proteins with dihedral angles.
+- [BiochemicalAlgorithms.jl](https://github.com/hildebrandtlab/BiochemicalAlgorithms.jl) - a redesign of BALL in Julia.
+- [JuliaBioinformaticsJLLs](https://github.com/diegozea/JuliaBioinformaticsJLLs) - list of binaries like Foldseek and HHsuite.
